@@ -20,5 +20,17 @@ Authors@R: c(
 Description: A general algorithm for estimating Sparse Multiple Index Models for high-dimensional nonparametric forecasting.
 License: GPL (>= 3)
 Encoding: UTF-8
+Imports:
+    dplyr, 
+    generics,
+    gratia,
+    magrittr, 
+    Matrix,
+    mgcv, 
+    ROI,
+    tibble,
+    tidyr,
+    tsibble,
+    vctrs
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.3

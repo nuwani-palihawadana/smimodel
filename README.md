@@ -9,7 +9,7 @@
 The goal of smimodel is to provide functions to estimate nonparametric
 multiple index models (which are an extension of nonparametric additive
 models) for time series forecasting. The estimation algorithm
-simultaneously perform variable selection (hence “sparse”) enabling
+simultaneously performs variable selection (hence “sparse”) enabling
 parsimonious forecasting models in a high-dimensional context.
 
 ## Installation

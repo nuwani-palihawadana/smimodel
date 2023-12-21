@@ -1,0 +1,24 @@
+Package: smimodel
+Title: Sparse Multiple Index (SMI) Models for High-dimensional Nonparametric Forecasting
+Version: 0.0.0.9000
+Authors@R: c(
+    person(given = "Nuwani",
+           family = "Palihawadana",
+           role = c("aut", "cre"),
+           email = "Nuwani.KodikaraPalihawadana@monash.edu",
+           comment = c(ORCID = "0009-0008-6395-7797")),
+    person(given = "Rob", 
+           family = "Hyndman", 
+           role = "aut", 
+           email = "Rob.Hyndman@monash.edu", 
+           comment = c(ORCID = "0000-0002-2140-5352")),
+    person(given = "Xiaoqian", 
+           family = "Wang", 
+           role = "aut", 
+           email = "Xiaoqian.Wang@monash.edu")
+  )
+Description: A general algorithm for estimating Sparse Multiple Index Models for high-dimensional nonparametric forecasting.
+License: GPL (>= 3)
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.2.3

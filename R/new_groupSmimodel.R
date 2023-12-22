@@ -72,6 +72,7 @@ new_groupSmimodel <- function(data, yvar, index.vars, index.ind, index.coefs,
   models <- models %>%
     dplyr::rename(key = ...1) %>%
     dplyr::rename(fit = ...2)
+  class(models) <- c("groupSmimodel", "tbl_df", "tbl", "data.frame")
   return(models)
 }
 utils::globalVariables(c("...1", "...2", "num_key", "dummy_key"))

@@ -73,5 +73,6 @@ update_groupSmimodel <- function(object, data, neighbour = 0, lambda0 = 1, lambd
   models <- models %>%
     dplyr::rename(key = ...1) %>%
     dplyr::rename(fit = ...2)
+  class(models) <- c("groupSmimodel", "tbl_df", "tbl", "data.frame")
   return(models)
 }

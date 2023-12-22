@@ -16,6 +16,17 @@
 #' @param ... Other arguments not currently used.
 #'
 #' @export
+
+object = smimodel 
+data = sim_train1
+lambda0 = 1
+lambda2 = 1 
+M = 10
+max.iter = 50
+tol = 0.001
+TimeLimit = Inf
+verbose = FALSE
+
 update_smimodel <- function(object, data, lambda0 = 1, lambda2 = 1, 
                             M = 10, max.iter = 50, tol = 0.001, 
                             TimeLimit = Inf, verbose = FALSE, ...){
@@ -47,10 +58,73 @@ update_smimodel <- function(object, data, lambda0 = 1, lambda2 = 1,
                               tol = tol, TimeLimit = TimeLimit, verbose = verbose)
   # Checking models with higher number of indices
   alpha_current <- best_alpha1$best_alpha
-  MSE_current <- best_alpha1$min_loss
+  loss_current <- best_alpha1$min_loss
   index_current <- best_alpha1$index.ind
   ind_pos_current <- best_alpha1$ind_pos
   X_new_current <- best_alpha1$X_new
+################## Changing step 3 #############################################
+  j <- length(ind_pos_current)+1
+  num_pred <- length(object$vars_index)
+  while(j <= num_pred){
+    # Calculating indices
+    ind <- vector(length = length(ind_pos_current), mode = "list")
+    ind_names <- character(length = length(ind_pos_current))
+    for(i in 1:length(ind)){
+      ind[[i]] <- as.numeric(X_new_current[, ind_pos_current[[i]]] %*% 
+                               as.matrix(alpha_current[ind_pos_current[[i]]], ncol = 1))
+      ind_names[i] <- paste0("index", i)
+    }
+    names(ind) <- ind_names
+    dat <- as_tibble(ind)
+    dat_names <- colnames(dat)
+    # Nonlinear function update 
+    # Constructing the formula
+    pre.formula <- lapply(dat_names, function(var) paste0("s(", var, ',bs="cr")')) %>%
+      paste(collapse = "+") %>% 
+      paste(object$var_y, "~", .)
+    if (!is.null(object$vars_linear)) {
+      pre.formula <- lapply(object$vars_linear, function(var) paste0(var)) %>%
+        paste(collapse = "+") %>% 
+        paste(pre.formula, "+", .)
+    }
+    # Model fitting
+    dat <- dplyr::bind_cols(data, dat)
+    fun1 <- mgcv::gam(as.formula(pre.formula), data = dat, method = "REML")
+    Yhat <- as.matrix(fun1$fitted.values, ncol = 1, nrow = length(fun1$fitted.values))
+    # Residuals (R) matrix
+    R <- as.matrix(data[ , object$var_y] - Yhat)
+    # Initialising new index to be added to the current model
+    index_list <- split(alpha_current, index_current)
+    if(length(index_list) == 1){
+      index_mat <- as.matrix(bind_rows(index_list)) 
+    }else{
+      index_mat <- t(as.matrix(bind_rows(index_list)))
+    }
+    drop_pred_ind <- which(colSums(index_mat) == 0)
+    drop_pred_name <- object$vars_index[drop_pred_ind]
+    X_init <- as.matrix(data[, drop_pred_name])
+    index.ind <- rep(1, length(drop_pred_name))
+    coefs_init <- init_alpha(Y = R, X = X_init, index.ind = index.ind,
+                             init.type = "reg")$alpha_init
+    new_ind <- numeric(length = num_pred)
+    new_ind[drop_pred_ind] <- coefs_init
+    alpha <- c(alpha_current, new_ind)
+    ### You are here!
+    
+    # Optimising the new model
+    best_alpha2 <- inner_update(x = fun1, data = data, yvar = object$var_y, 
+                                index.vars = object$vars_index, 
+                                linear.vars = object$vars_linear, 
+                                num_ind = j, dgz = dgz, 
+                                alpha_old = alpha, lambda0 = lambda0, 
+                                lambda2 = lambda2, M = M, max.iter = max.iter,
+                                tol = tol, TimeLimit = TimeLimit, verbose = verbose)
+  }
+  
+  
+  
+  
+################################################################################
   j <- num_ind + 1
   num_pred <- length(object$vars_index)
   Y_data <- as.matrix(data[ , object$var_y], ncol = 1, nrow = NROW(data))
@@ -127,19 +201,19 @@ update_smimodel <- function(object, data, lambda0 = 1, lambda2 = 1,
                                 alpha_old = alpha, lambda0 = lambda0, 
                                 lambda2 = lambda2, M = M, max.iter = max.iter, 
                                 tol = tol, TimeLimit = TimeLimit, verbose = verbose)
-    if(best_alpha2$min_loss >= MSE_current){
-      print("MSE of the model is higher/equal to the previous model; reverting to the previous best model.")
+    if(best_alpha2$min_loss >= loss_current){
+      print("The loss of the model is higher/equal to the previous model; reverting to the previous best model.")
       break
     }else if(length(best_alpha2$ind_pos) < j){
       alpha_current <- best_alpha2$best_alpha
-      MSE_current <- best_alpha2$min_loss
+      loss_current <- best_alpha2$min_loss
       index_current <- best_alpha2$index.ind
       ind_pos_current <- best_alpha2$ind_pos
       X_new_current <- best_alpha2$X_new
       break
     }else{
       alpha_current <- best_alpha2$best_alpha
-      MSE_current <- best_alpha2$min_loss
+      loss_current <- best_alpha2$min_loss
       index_current <- best_alpha2$index.ind
       ind_pos_current <- best_alpha2$ind_pos
       X_new_current <- best_alpha2$X_new

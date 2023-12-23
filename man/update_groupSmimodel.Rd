@@ -20,7 +20,7 @@ update_groupSmimodel(
 )
 }
 \arguments{
-\item{object}{A \code{groupSmimodel} object}
+\item{object}{A \code{groupSmimodel} object.}
 
 \item{data}{Training data set on which models will be trained. Must be a
 data set of class \code{tsibble}.(Make sure there are no additional

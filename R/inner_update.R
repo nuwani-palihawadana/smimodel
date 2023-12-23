@@ -4,7 +4,7 @@
 #' integer programming. (Used within `update_smimodel()`; users are not expected
 #' to directly call this function.)
 #'
-#' @param x Fitted `gam`
+#' @param x Fitted `gam`.
 #' @param data Training data set on which models will be trained. Should be a
 #'   `tibble`.
 #' @param yvar Name of the response variable as a character string.
@@ -68,8 +68,8 @@ inner_update <- function(x, data, yvar, index.vars, linear.vars,
                               lambda2 = lambda2, M = M, TimeLimit = TimeLimit,
                               verbose = verbose)
     ##### TO DO: You must remove this if condition! ############################
-    if(is.null(alpha_new)){
-      print("TimeLimit exceeded; intial estimates are chosen!")
+    if(all(alpha_new == 0)){
+      print("A null model is produced; reverting to the previous model!")
       break
     }else{
       # Checking for all zero indices
@@ -158,13 +158,13 @@ inner_update <- function(x, data, yvar, index.vars, linear.vars,
         best_alpha <- alpha_new
       }
       if (all(eps >= 0) & all(eps < tol)) { 
-        print("Tolerance reached!")
+        print("Tolerance for loss reached!")
         break
       }else if(increase_count >= 2){
-        print("Alternative termination condition 1 reached!")
+        print("Loss increased for 3 consecutive iterations!")
         break
       }else if(similar_count >= 3){
-        print("Alternative termination condition 2 reached!")
+        print("Same loss appeared for 3 consecutive iterations!")
         break
       }
       maxIt <- maxIt + 1

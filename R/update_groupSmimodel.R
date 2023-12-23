@@ -2,7 +2,7 @@
 #'
 #' Optimises and updates a given `groupSmimodel`.
 #'
-#' @param object A `groupSmimodel` object
+#' @param object A `groupSmimodel` object.
 #' @param data Training data set on which models will be trained. Must be a
 #'   data set of class `tsibble`.(Make sure there are no additional
 #'   date/time/date-time/yearmonth/POSIXct/POSIXt variables except for the

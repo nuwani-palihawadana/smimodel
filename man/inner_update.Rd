@@ -23,7 +23,7 @@ inner_update(
 )
 }
 \arguments{
-\item{x}{Fitted \code{gam}}
+\item{x}{Fitted \code{gam}.}
 
 \item{data}{Training data set on which models will be trained. Should be a
 \code{tibble}.}

@@ -13,6 +13,7 @@ update_groupSmimodel(
   M = 10,
   max.iter = 50,
   tol = 0.001,
+  tolCoefs = 0.001,
   TimeLimit = Inf,
   verbose = FALSE,
   ...
@@ -44,6 +45,8 @@ key of interest are grouped together for model fitting. The default is \code{0}
 coefficients for a given model.}
 
 \item{tol}{Tolerance for loss.}
+
+\item{tolCoefs}{Tolerance for coefficients.}
 
 \item{TimeLimit}{A limit for the total time (in seconds) expended in a single
 MIP iteration.}

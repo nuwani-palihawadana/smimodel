@@ -10,25 +10,18 @@
 #' @param max.iter Maximum number of MIP iterations performed to update index
 #'   coefficients for a given model.
 #' @param tol Tolerance for loss.
+#' @param tolCoefs Tolerance for coefficients. 
 #' @param TimeLimit A limit for the total time (in seconds) expended in a single
 #'   MIP iteration.
 #' @param verbose The option to print detailed solver output.
 #' @param ... Other arguments not currently used.
+#' 
+#' @importFrom dplyr bind_rows
 #'
 #' @export
-
-object = smimodel 
-data = sim_train1
-lambda0 = 1
-lambda2 = 1 
-M = 10
-max.iter = 50
-tol = 0.001
-TimeLimit = Inf
-verbose = FALSE
-
 update_smimodel <- function(object, data, lambda0 = 1, lambda2 = 1, 
-                            M = 10, max.iter = 50, tol = 0.001, 
+                            M = 10, max.iter = 50, 
+                            tol = 0.001, tolCoefs = 0.001,
                             TimeLimit = Inf, verbose = FALSE, ...){
   if (!tibble::is_tibble(data)) stop("data is not a tibble.")
   data <- data %>%
@@ -62,7 +55,6 @@ update_smimodel <- function(object, data, lambda0 = 1, lambda2 = 1,
   index_current <- best_alpha1$index.ind
   ind_pos_current <- best_alpha1$ind_pos
   X_new_current <- best_alpha1$X_new
-################## Changing step 3 #############################################
   j <- length(ind_pos_current)+1
   num_pred <- length(object$vars_index)
   while(j <= num_pred){
@@ -109,59 +101,25 @@ update_smimodel <- function(object, data, lambda0 = 1, lambda2 = 1,
     new_ind <- numeric(length = num_pred)
     new_ind[drop_pred_ind] <- coefs_init
     alpha <- c(alpha_current, new_ind)
-    ### You are here!
-    
-    # Optimising the new model
-    best_alpha2 <- inner_update(x = fun1, data = data, yvar = object$var_y, 
-                                index.vars = object$vars_index, 
-                                linear.vars = object$vars_linear, 
-                                num_ind = j, dgz = dgz, 
-                                alpha_old = alpha, lambda0 = lambda0, 
-                                lambda2 = lambda2, M = M, max.iter = max.iter,
-                                tol = tol, TimeLimit = TimeLimit, verbose = verbose)
-  }
-  
-  
-  
-  
-################################################################################
-  j <- num_ind + 1
-  num_pred <- length(object$vars_index)
-  Y_data <- as.matrix(data[ , object$var_y], ncol = 1, nrow = NROW(data))
-  X_index <- as.matrix(data[ , object$vars_index])
-  while(j <= num_pred){
-    split_info <- split_index(num_pred = num_pred, num_ind = j)
-    ind_pos <- split_info$index_positions
-    index <- split_info$index
-    # Initialising index coefficients
-    alpha_start <- init_alpha(Y = Y_data, X = X_index, index.ind = index, 
-                              init.type = "penalisedReg", 
-                              lambda0 = lambda0, lambda2 = lambda2, M = M)$alpha_init
-    # Checking for all zero indices
-    rm_ind <- numeric(1)
+    X_index <- data[ , object$vars_index]
+    # Adjusting X (matrix of predictors) to fit number of indices
+    X_new <- as.matrix(do.call(cbind, replicate(j, X_index, simplify = FALSE)))
+    index <- vector(mode = "list", length = j)
     for(i in 1:j){
-      ind_alpha = alpha_start[ind_pos[[i]]]
-      ind_zero = ifelse(ind_alpha == 0, TRUE, FALSE)
-      if(all(ind_zero)){
-        rm_ind <- i
-        warning(paste0('Initialising ', paste0(j), '-index model: All coefficients of index', paste0(i), 
-                       ' are zero. Reverting to the previous best model.')) 
-        break
-      }
+      index[[i]] <- rep(i, num_pred)
     }
-    if(rm_ind != 0){
-      break
-    }
+    index <- unlist(index)
+    ind_pos <- split(1:length(index), index)
     # Calculating indices
     ind <- vector(length = length(ind_pos), mode = "list")
     ind_names <- character(length = length(ind_pos))
     for(i in 1:length(ind)){
-      ind[[i]] <- as.numeric(X_index[, ind_pos[[i]]] %*% 
-                               as.matrix(alpha_start[ind_pos[[i]]], ncol = 1))
+      ind[[i]] <- as.numeric(X_new[, ind_pos[[i]]] %*% 
+                               as.matrix(alpha[ind_pos[[i]]], ncol = 1))
       ind_names[i] <- paste0("index", i)
     }
     names(ind) <- ind_names
-    dat <- tibble::as_tibble(ind)
+    dat <- as_tibble(ind)
     dat_names <- colnames(dat)
     # Nonlinear function update 
     # Constructing the formula
@@ -175,50 +133,62 @@ update_smimodel <- function(object, data, lambda0 = 1, lambda2 = 1,
     }
     # Model fitting
     dat <- dplyr::bind_cols(data, dat)
-    fun1 <- mgcv::gam(as.formula(pre.formula), data = dat, method = "REML")
+    gam2 <- mgcv::gam(as.formula(pre.formula), data = dat, method = "REML")
     # Derivatives of the fitted smooths
     dgz <- vector(length = length(dat_names), mode = "list")
     dgz_names <- character(length = length(dat_names))
     for (i in seq_along(dat_names)) {
-      temp <- gratia::derivatives(fun1, type = "central", data = dat, 
-                          term = paste0("s(", paste0(dat_names[i]), ")"))
+      temp <- gratia::derivatives(gam2, type = "central", data = dat, 
+                                  term = paste0("s(", paste0(dat_names[i]), ")"))
       dgz[[i]] <- temp$derivative
       dgz_names[i] <- paste0("d", i)
     }
     names(dgz) <- dgz_names
     dgz <- as.matrix(as_tibble(dgz))
-    # Constructing new initial values to have all predictors in each index
-    new_init <- allpred_index(num_pred = num_pred, num_ind = j, ind_pos = ind_pos, 
-                             alpha = alpha_start)
-    index <- new_init$index
-    ind_pos <- new_init$index_positions
-    alpha <- new_init$alpha_init_new
-    # Optimising the model
-    best_alpha2 <- inner_update(x = fun1, data = data, yvar = object$var_y, 
+    # Optimising the new model
+    best_alpha2 <- inner_update(x = gam2, data = data, yvar = object$var_y, 
                                 index.vars = object$vars_index, 
                                 linear.vars = object$vars_linear, 
                                 num_ind = j, dgz = dgz, 
                                 alpha_old = alpha, lambda0 = lambda0, 
-                                lambda2 = lambda2, M = M, max.iter = max.iter, 
+                                lambda2 = lambda2, M = M, max.iter = max.iter,
                                 tol = tol, TimeLimit = TimeLimit, verbose = verbose)
-    if(best_alpha2$min_loss >= loss_current){
-      print("The loss of the model is higher/equal to the previous model; reverting to the previous best model.")
-      break
-    }else if(length(best_alpha2$ind_pos) < j){
-      alpha_current <- best_alpha2$best_alpha
-      loss_current <- best_alpha2$min_loss
-      index_current <- best_alpha2$index.ind
-      ind_pos_current <- best_alpha2$ind_pos
-      X_new_current <- best_alpha2$X_new
-      break
+    # Termination/continuation checks
+    if((length(ind_pos_current) == length(best_alpha2$ind_pos))){
+      comparison <- abs(alpha_current - best_alpha2$best_alpha) <= tolCoefs
+      if(all(comparison)){
+        if(best_alpha2$min_loss >= loss_current){
+          break
+        }else{
+          alpha_current <- best_alpha2$best_alpha
+          loss_current <- best_alpha2$min_loss
+          index_current <- best_alpha2$index.ind
+          ind_pos_current <- best_alpha2$ind_pos
+          X_new_current <- best_alpha2$X_new
+          break
+        }
+      }
+      if(best_alpha2$min_loss >= loss_current){
+        break
+      }else{
+        alpha_current <- best_alpha2$best_alpha
+        loss_current <- best_alpha2$min_loss
+        index_current <- best_alpha2$index.ind
+        ind_pos_current <- best_alpha2$ind_pos
+        X_new_current <- best_alpha2$X_new
+      }
     }else{
-      alpha_current <- best_alpha2$best_alpha
-      loss_current <- best_alpha2$min_loss
-      index_current <- best_alpha2$index.ind
-      ind_pos_current <- best_alpha2$ind_pos
-      X_new_current <- best_alpha2$X_new
+      if(best_alpha2$min_loss >= loss_current){
+        break
+      }else{
+        alpha_current <- best_alpha2$best_alpha
+        loss_current <- best_alpha2$min_loss
+        index_current <- best_alpha2$index.ind
+        ind_pos_current <- best_alpha2$ind_pos
+        X_new_current <- best_alpha2$X_new
+      }
     }
-    j = j + 1
+    j <- length(ind_pos_current)+1
   }
   # Calculating indices
   ind <- vector(length = length(ind_pos_current), mode = "list")

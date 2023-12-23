@@ -12,6 +12,7 @@ update_smimodel(
   M = 10,
   max.iter = 50,
   tol = 0.001,
+  tolCoefs = 0.001,
   TimeLimit = Inf,
   verbose = FALSE,
   ...
@@ -32,6 +33,8 @@ update_smimodel(
 coefficients for a given model.}
 
 \item{tol}{Tolerance for loss.}
+
+\item{tolCoefs}{Tolerance for coefficients.}
 
 \item{TimeLimit}{A limit for the total time (in seconds) expended in a single
 MIP iteration.}

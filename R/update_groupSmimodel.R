@@ -20,6 +20,7 @@
 #' @param max.iter Maximum number of MIP iterations performed to update index
 #'   coefficients for a given model.
 #' @param tol Tolerance for loss.
+#' @param tolCoefs Tolerance for coefficients. 
 #' @param TimeLimit A limit for the total time (in seconds) expended in a single
 #'   MIP iteration.
 #' @param verbose The option to print detailed solver output.
@@ -27,8 +28,8 @@
 #'
 #' @export
 update_groupSmimodel <- function(object, data, neighbour = 0, lambda0 = 1, lambda2 = 1, 
-                                 M = 10, max.iter = 50, tol = 0.001, TimeLimit = Inf,
-                                 verbose = FALSE, ...){
+                                 M = 10, max.iter = 50, tol = 0.001, tolCoefs = 0.001,
+                                 TimeLimit = Inf, verbose = FALSE, ...){
   if (!tsibble::is_tsibble(data)) stop("data is not a tsibble.")
   data1 <- data
   data_index <- index(data1)
@@ -59,10 +60,11 @@ update_groupSmimodel <- function(object, data, neighbour = 0, lambda0 = 1, lambd
       tibble::as_tibble() %>%
       dplyr::arrange({{data_index}})
     update_temp <- update_smimodel(object = object$fit[[i]], 
-                          data = df_cat, 
-                          lambda0 = lambda0, lambda2 = lambda2, 
-                          M = M, max.iter = max.iter, tol = tol, 
-                          TimeLimit = TimeLimit, verbose = verbose)
+                                   data = df_cat, 
+                                   lambda0 = lambda0, lambda2 = lambda2, 
+                                   M = M, max.iter = max.iter, 
+                                   tol = tol, tolCoefs = tolCoefs,
+                                   TimeLimit = TimeLimit, verbose = verbose)
     smimodels_list[[i]] <- update_temp
   }
   data_list <- list(object$key, smimodels_list)

@@ -12,8 +12,8 @@
 #' @export
 LossFunction <- function(Y, Yhat, alpha, lambda0, lambda2){
   sqdError <- sum((Y - Yhat)^2)
-  L0Penalty <- lambda0*length(which(alpha != 0))
-  nonzeroAlpha <- alpha[which(alpha != 0)]
+  L0Penalty <- lambda0*sum(alpha != 0)
+  nonzeroAlpha <- alpha[alpha != 0]
   L2Penalty <- lambda2*sum(nonzeroAlpha^2)
   return((sqdError + L0Penalty + L2Penalty))
 }

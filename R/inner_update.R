@@ -39,17 +39,16 @@ inner_update <- function(x, data, yvar, index.vars, linear.vars,
   for(i in 1:num_ind){
     index[[i]] <- rep(i, num_pred)
   }
-  index <- unlist(index)
-  ind_pos <- split(1:length(index), index)
-  Yhat <- as.matrix(x$fitted.values, ncol = 1, nrow = length(x$fitted.values))
+  best_index <- unlist(index)
+  best_ind_pos <- split(1:length(index), index)
+  Yhat <- as.matrix(x$fitted.values, ncol = 1)
   # Residuals (R) matrix
   R <- as.matrix(data.Y - Yhat)
   # Loss
-  l2 <- LossFunction(Y = as.matrix(data.Y), Yhat = Yhat, 
-                     alpha = alpha_old, 
-                     lambda0 = lambda0, lambda2 = lambda2)
+  best_l2 <- LossFunction(Y = as.matrix(data.Y), Yhat = Yhat, 
+                          alpha = alpha_old, 
+                          lambda0 = lambda0, lambda2 = lambda2)
   # Initial minimum loss and best index coefficient estimates
-  min_l2 <- l2
   best_alpha <- alpha_old
   # Setting up a counter for increases in loss (If the loss increases for 
   # 3 consecutive iterations, the algorithm will terminate.)
@@ -58,7 +57,7 @@ inner_update <- function(x, data, yvar, index.vars, linear.vars,
   # appears for 3 times, the algorithm will terminate.)
   similar_count <- 1
   # Adjusting X (matrix of predictors) to fit number of indices
-  X_new <- do.call(cbind, replicate(num_ind, X_index, simplify = FALSE))
+  best_X_new <- do.call(cbind, replicate(num_ind, X_index, simplify = FALSE))
   # Iteratively update index coefficients
   maxIt <- 1
   while(maxIt <= max.iter){
@@ -76,13 +75,11 @@ inner_update <- function(x, data, yvar, index.vars, linear.vars,
       ind_rm_id <- numeric()
       ind_rm_pos <- numeric()
       for(i in 1:num_ind){
-        ind_alpha = alpha_new[ind_pos[[i]]]
-        ind_zero = ifelse(ind_alpha == 0, TRUE, FALSE)
-        if(all(ind_zero)){
+        if(all(alpha_new[ind_pos[[i]]] == 0)){
           ind_rm_id <- c(ind_rm_id, i)
           ind_rm_pos <- c(ind_rm_pos, ind_pos[[i]])
-          warning(paste0('Iteration ', paste0(maxIt), ': All coefficients of index', paste0(i), 
-                         ' are zero. Removing index', paste0(i), ' from subsequent iterations.')) 
+          warning(paste0('Iteration ', maxIt, ': All coefficients of index', i,
+                         ' are zero. Removing index', i, ' from subsequent iterations.')) 
         }
       }
       if(length(ind_rm_id) != 0){
@@ -98,18 +95,15 @@ inner_update <- function(x, data, yvar, index.vars, linear.vars,
       }
       # Calculating indices
       ind <- vector(length = length(ind_pos), mode = "list")
-      ind_names <- character(length = length(ind_pos))
       for(i in 1:length(ind)){
         ind[[i]] <- as.numeric(X_new[, ind_pos[[i]]] %*% 
                                  as.matrix(alpha_new[ind_pos[[i]]], ncol = 1))
-        ind_names[i] <- paste0("index", i)
       }
-      names(ind) <- ind_names
+      dat_names <- names(ind) <- paste0("index", 1:length(ind))
       dat <- as_tibble(ind)
-      dat_names <- colnames(dat)
       # Nonlinear function update 
       # Constructing the formula
-      pre.formula <- lapply(dat_names, function(var) paste0("s(", var, ',bs="cr")')) %>%
+      pre.formula <- lapply(dat_names, function(var) paste0("s(", var, ', bs="cr")')) %>%
         paste(collapse = "+") %>% 
         paste(yvar, "~", .)
       if (!is.null(linear.vars)) {
@@ -120,18 +114,15 @@ inner_update <- function(x, data, yvar, index.vars, linear.vars,
       # Model fitting
       dat <- dplyr::bind_cols(data, dat)
       fun1 <- mgcv::gam(as.formula(pre.formula), data = dat, method = "REML")
-      Yhat <- as.matrix(fun1$fitted.values, ncol = 1, 
-                        nrow = length(fun1$fitted.values))
+      Yhat <- as.matrix(fun1$fitted.values, ncol = 1)
       # Derivatives of the fitted smooths
       dgz <- vector(length = length(dat_names), mode = "list")
-      dgz_names <- character(length = length(dat_names))
       for (i in seq_along(dat_names)) {
         temp <- gratia::derivatives(fun1, type = "central", data = dat, 
                             term = paste0("s(", paste0(dat_names[i]), ")"))
         dgz[[i]] <- temp$derivative
-        dgz_names[i] <- paste0("d", i)
       }
-      names(dgz) <- dgz_names
+      names(dgz) <- paste0("d", seq_along(dat_names))
       dgz <- as.matrix(as_tibble(dgz))
       # Residuals (R) matrix
       R <- as.matrix(data.Y - Yhat)
@@ -142,22 +133,23 @@ inner_update <- function(x, data, yvar, index.vars, linear.vars,
       eps <- (l2 - l2_new)/l2
       alpha_old <- alpha_new
       l2 <- l2_new
-      if(all(eps < 0)){
-        increase_count = increase_count + 1
+      if(eps < 0){
+        increase_count <- increase_count + 1
       }else{
-        increase_count = 0
+        increase_count <- 0
       }
-      if(l2_new == min_l2){
-        similar_count = similar_count + 1
+      if(l2_new == best_l2){
+        similar_count <- similar_count + 1
       }else{
-        similar_count = 1
+        similar_count <- 1
       }
       # Update minimum loss and best estimates
-      if(l2_new < min_l2){
-        min_l2 <- l2_new
+      if(l2_new < best_l2){
+        best_l2 <- l2_new
         best_alpha <- alpha_new
       }
-      if (all(eps >= 0) & all(eps < tol)) { 
+      # XQ: It's very strange that the update process stopped when 
+      if ((eps >= 0) & (eps < tol)) { 
         print("Tolerance for loss reached!")
         break
       }else if(increase_count >= 2){
@@ -173,7 +165,7 @@ inner_update <- function(x, data, yvar, index.vars, linear.vars,
       }
     }
   }
-  output <- list("best_alpha" = best_alpha, "min_loss" = min_l2, 
-                 "index.ind" = index, "ind_pos" = ind_pos, "X_new" = X_new)
+  output <- list("best_alpha" = best_alpha, "min_loss" = best_l2, 
+                 "index.ind" = best_index, "ind_pos" = best_ind_pos, "X_new" = best_X_new)
   return(output)
 }

@@ -16,18 +16,22 @@ allpred_index <- function(num_pred, num_ind, ind_pos, alpha){
   init_list <- vector(mode = "list", length = num_ind)
   index <- vector(mode = "list", length = num_ind)
   for(i in 1:num_ind){
-    if(length(alpha) == (num_ind*num_pred)){
-      init_list[[i]] <- alpha[ind_pos[[i]]]
-    }else{
-      init_list[[i]] <- numeric(length = num_pred)
-      init_list[[i]][ind_pos[[i]]] <- alpha[ind_pos[[i]]]
-    }
+    # XQ: Error?
+    # if(length(alpha) == (num_ind*num_pred)){
+    #   init_list[[i]] <- alpha[ind_pos[[i]]]
+    # }else{
+    #   init_list[[i]] <- numeric(length = num_pred)
+    #   init_list[[i]][ind_pos[[i]]] <- alpha[ind_pos[[i]]]
+    # }
+    init_list[[i]] <- numeric(length = num_pred)
+    init_list[[i]][ind_pos[[i]]] <- alpha[ind_pos[[i]]]
     index[[i]] <- rep(i, num_pred)
   }
   alpha_init <- unlist(init_list)
-  index <- unlist(index) 
+  index <- unlist(index)
   ind_pos <- split(1:length(index), index)
-  output <- list("alpha_init_new" = alpha_init, "index" = index, 
+  output <- list("alpha_init_new" = alpha_init,
+                 "index" = index,
                  "index_positions" = ind_pos)
   return(output)
 }

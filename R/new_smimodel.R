@@ -23,35 +23,29 @@ new_smimodel <- function(data, yvar, index.vars, index.ind = NULL,
     drop_na()
   X_index <- as.matrix(data[ , index.vars])
   if(!is.null(index.ind) & !is.null(index.coefs)){
-    d <- length(index.ind)
     # Index positions
-    ind_pos <- split(1:d, index.ind)
+    ind_pos <- split(seq_along(index.ind), index.ind)
     # Index coefficients
     alpha <- unlist(tapply(index.coefs, index.ind, normalise_alpha))
   }else{
     # Initialise the model with an Additive Model
     index.ind <- seq_along(index.vars)
-    d <- length(index.ind)
     # Index positions
-    ind_pos <- split(1:d, index.ind)
+    ind_pos <- split(seq_along(index.ind), index.ind)
     # Index coefficients
-    index.coefs <- rep(1, length(index.vars))
-    alpha <- unlist(tapply(index.coefs, index.ind, normalise_alpha))
+    alpha <- index.coefs <- rep(1, length(index.vars))
   }
   # Calculating indices
   ind <- vector(length = length(ind_pos), mode = "list")
-  ind_names <- character(length = length(ind_pos))
   for(i in 1:length(ind)){
-    ind[[i]] <- as.numeric(X_index[, ind_pos[[i]]] %*% as.matrix(alpha[ind_pos[[i]]], 
-                                                                 ncol = 1))
-    ind_names[i] <- paste0("index", i)
+    ind[[i]] <- as.numeric(X_index[, ind_pos[[i]]] %*% 
+                             as.matrix(alpha[ind_pos[[i]]], ncol = 1))
   }
-  names(ind) <- ind_names
+  dat_names <- names(ind) <- paste0("index", 1:length(ind))
   dat <- tibble::as_tibble(ind)
-  dat_names <- colnames(dat)
   # Fitting a `gam`
   # Constructing the formula
-  pre.formula <- lapply(dat_names, function(var) paste0("s(", var, ',bs="cr")')) %>%
+  pre.formula <- lapply(dat_names, function(var) paste0("s(", var, ', bs="cr")')) %>%
     paste(collapse = "+") %>% 
     paste(yvar, "~", .)
   if (!is.null(linear.vars)) {

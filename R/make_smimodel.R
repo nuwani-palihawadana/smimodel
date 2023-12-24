@@ -21,14 +21,12 @@ make_smimodel <- function(x, yvar, index.vars, index.ind, index.data,
                           index.names, alpha, linear.vars = NULL){
   # Derivatives of the fitted smooths
   dgz <- vector(length = length(index.names), mode = "list")
-  dgz_names <- character(length = length(index.names))
   for (i in seq_along(index.names)) {
     temp <- gratia::derivatives(x, type = "central", data = index.data, 
                         term = paste0("s(", paste0(index.names[i]), ")"))
     dgz[[i]] <- temp$derivative
-    dgz_names[i] <- paste0("d", i)
   }
-  names(dgz) <- dgz_names
+  names(dgz) <- paste0("d", seq_along(index.names))
   # Constructing a new index coefficient vector to have all predictors in each index
   ind_pos <- split(1:length(index.ind), index.ind)
   new_index_info <- allpred_index(num_pred = length(index.vars), 

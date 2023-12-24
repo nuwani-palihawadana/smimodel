@@ -24,16 +24,17 @@ update_alpha <- function(Y, X, num_pred, num_ind, index.ind, dgz, alpha_old,
                          verbose = FALSE){
   dgz <- as.matrix(dgz[, index.ind])
   V <- X * dgz
-  VtV = t(V) %*% V
-  VtR = t(V) %*% Y
+  VtV <- t(V) %*% V
+  VtR <- t(V) %*% Y
+  VtR_t <- t(VtR)
+  VtV_alpha_old_t <- t(VtV %*% alpha_old)
   Q <- as.matrix(2 * Matrix::bdiag(VtV + lambda2*diag(num_pred*num_ind), 
                                    diag(0, num_pred*num_ind)))
-  VtV_alpha_old_t = t(t(V) %*% V %*% alpha_old)
-  VtR_t = t(VtR)
-  L <- t(as.matrix(c((-2*VtV_alpha_old_t - 2*VtR_t), rep(lambda0, num_ind*num_pred)), 
+  L <- t(as.matrix(c((-2*VtV_alpha_old_t - 2*VtR_t),
+                     rep(lambda0, num_ind*num_pred)), 
                    ncol = 2*num_ind*num_pred, nrow = 1))
   # Objective function
-  obj = ROI::Q_objective(Q = Q, L = L)
+  obj <- ROI::Q_objective(Q = Q, L = L)
   # Constraints
   C1 <- Matrix::bdiag(replicate(num_ind, diag(num_pred), simplify = FALSE))
   C2 <- Matrix::bdiag(replicate(num_ind, diag(-M, num_pred), simplify = FALSE))
@@ -42,35 +43,35 @@ update_alpha <- function(Y, X, num_pred, num_ind, index.ind, dgz, alpha_old,
   C4 <- Matrix::bdiag(replicate(num_ind, diag(-M, num_pred), simplify = FALSE))
   cons2 <- as.matrix(cbind(C3, C4))
   if(num_ind > 1){
-    C5 <- do.call(cbind,replicate(num_ind,diag(0, num_pred),simplify=FALSE))
-    C6 <- do.call(cbind,replicate(num_ind,diag(num_pred),simplify=FALSE))
+    C5 <- do.call(cbind, replicate(num_ind, diag(0, num_pred), simplify = FALSE))
+    C6 <- do.call(cbind, replicate(num_ind, diag(num_pred), simplify = FALSE))
     cons3 <- as.matrix(cbind(C5, C6))
-    cons = ROI::L_constraint(
+    cons <- ROI::L_constraint(
       L = rbind(cons1, cons2, cons3),
       dir = c(rep("<=", (2*num_ind*num_pred)), rep("<=", num_pred)),
       rhs = c(rep(0, (2*num_ind*num_pred)), rep(1, num_pred))
     )
   }else{
-    cons = ROI::L_constraint(
+    cons <- ROI::L_constraint(
       L = rbind(cons1, cons2),
       dir = rep("<=", (2*num_ind*num_pred)),
       rhs = rep(0, (2*num_ind*num_pred))
     )
   }
   # Optimization problem
-  init <- ROI::OP(obj, cons, types = c(rep("C", num_ind*num_pred), rep("B", num_ind*num_pred)), 
-             bounds = ROI::V_bound(li = 1:(num_ind*num_pred), lb = rep(- M, num_ind*num_pred),
-                              ui = 1:(num_ind*num_pred), ub = rep(M, num_ind*num_pred),
-                              nobj = 2*num_ind*num_pred), # lower default bound is 0
-             maximum = FALSE)
+  init <- ROI::OP(obj, cons, types = c(rep("C", num_ind*num_pred), rep("B", num_ind*num_pred)),
+                  bounds = ROI::V_bound(li = 1:(num_ind*num_pred), lb = rep(-M, num_ind*num_pred),
+                                        ui = 1:(num_ind*num_pred), ub = rep(M, num_ind*num_pred),
+                                        nobj = 2*num_ind*num_pred), # lower default bound is 0
+                  maximum = FALSE)
   # Solving
   sol <- ROI::ROI_solve(init, solver = "gurobi", TimeLimit = TimeLimit, verbose = verbose)
   # Binary variables check
-    coefs <- sol$solution[1:(num_ind*num_pred)]
-    indicators <- sol$solution[((num_ind*num_pred)+1):(num_ind*num_pred*2)]
-    zero_pos <- which(indicators < 1e-5)
-    coefs[zero_pos] <- 0
-    # Index coefficients
-    alpha <- unlist(tapply(coefs, index.ind, normalise_alpha))
+  coefs <- sol$solution[1:(num_ind*num_pred)]
+  indicators <- sol$solution[((num_ind*num_pred)+1):(num_ind*num_pred*2)]
+  zero_pos <- which(indicators < 1e-5)
+  coefs[zero_pos] <- 0
+  # Index coefficients
+  alpha <- unlist(tapply(coefs, index.ind, normalise_alpha))
   return(alpha)
 }

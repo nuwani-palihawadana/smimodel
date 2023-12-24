@@ -39,25 +39,26 @@ inner_update <- function(x, data, yvar, index.vars, linear.vars,
   for(i in 1:num_ind){
     index[[i]] <- rep(i, num_pred)
   }
-  best_index <- index <- unlist(index)
-  best_ind_pos <- ind_pos <- split(1:length(index), index)
+  index <- unlist(index)
+  ind_pos <- split(1:length(index), index)
   Yhat <- as.matrix(x$fitted.values, ncol = 1)
   # Residuals (R) matrix
   R <- as.matrix(data.Y - Yhat)
   # Loss
-  best_l2 <- LossFunction(Y = as.matrix(data.Y), Yhat = Yhat, 
-                          alpha = alpha_old, 
-                          lambda0 = lambda0, lambda2 = lambda2)
-  # Initial minimum loss and best index coefficient estimates
-  best_alpha <- alpha_old
+  l2 <- LossFunction(Y = as.matrix(data.Y), Yhat = Yhat, 
+                     alpha = alpha_old, 
+                     lambda0 = lambda0, lambda2 = lambda2)
   # Setting up a counter for increases in loss (If the loss increases for 
   # 3 consecutive iterations, the algorithm will terminate.)
   increase_count <- 0
-  # Setting up a counter for same results repeating (If the same loss values 
-  # appears for 3 times, the algorithm will terminate.)
-  similar_count <- 1
   # Adjusting X (matrix of predictors) to fit number of indices
-  best_X_new <- X_new <- do.call(cbind, replicate(num_ind, X_index, simplify = FALSE))
+  X_new <- do.call(cbind, replicate(num_ind, X_index, simplify = FALSE))
+  # Initial minimum loss and best index coefficient estimates
+  best_l2 <- l2
+  best_alpha <- alpha_old
+  best_index <- index
+  best_ind_pos <- ind_pos
+  best_X_new <- X_new
   # Iteratively update index coefficients
   maxIt <- 1
   while(maxIt <= max.iter){
@@ -119,7 +120,7 @@ inner_update <- function(x, data, yvar, index.vars, linear.vars,
       dgz <- vector(length = length(dat_names), mode = "list")
       for (i in seq_along(dat_names)) {
         temp <- gratia::derivatives(fun1, type = "central", data = dat, 
-                            term = paste0("s(", paste0(dat_names[i]), ")"))
+                            term = paste0("s(", dat_names[i], ")"))
         dgz[[i]] <- temp$derivative
       }
       names(dgz) <- paste0("d", seq_along(dat_names))
@@ -131,18 +132,9 @@ inner_update <- function(x, data, yvar, index.vars, linear.vars,
                              alpha = alpha_new, 
                              lambda0 = lambda0, lambda2 = lambda2)
       eps <- (l2 - l2_new)/l2
+      # Update loss and estimates
       alpha_old <- alpha_new
       l2 <- l2_new
-      if(eps < 0){
-        increase_count <- increase_count + 1
-      }else{
-        increase_count <- 0
-      }
-      if(l2_new == best_l2){
-        similar_count <- similar_count + 1
-      }else{
-        similar_count <- 1
-      }
       # Update minimum loss and best estimates
       if(l2_new < best_l2){
         best_l2 <- l2_new
@@ -151,14 +143,17 @@ inner_update <- function(x, data, yvar, index.vars, linear.vars,
         best_ind_pos <- ind_pos
         best_X_new <- X_new
       }
-      if ((eps >= 0) & (eps < tol)) { 
+      # Check tolerance conditions
+      if(eps <= 0){
+        increase_count <- increase_count + 1
+      }else{
+        increase_count <- 0
+      }
+      if ((eps > 0) & (eps < tol)) { 
         print("Tolerance for loss reached!")
         break
-      }else if(increase_count >= 2){
+      }else if(increase_count >= 3){
         print("Loss increased for 3 consecutive iterations!")
-        break
-      }else if(similar_count >= 3){
-        print("Same loss appeared for 3 consecutive iterations!")
         break
       }
       maxIt <- maxIt + 1

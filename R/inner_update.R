@@ -39,8 +39,8 @@ inner_update <- function(x, data, yvar, index.vars, linear.vars,
   for(i in 1:num_ind){
     index[[i]] <- rep(i, num_pred)
   }
-  best_index <- unlist(index)
-  best_ind_pos <- split(1:length(index), index)
+  best_index <- index <- unlist(index)
+  best_ind_pos <- ind_pos <- split(1:length(index), index)
   Yhat <- as.matrix(x$fitted.values, ncol = 1)
   # Residuals (R) matrix
   R <- as.matrix(data.Y - Yhat)
@@ -57,7 +57,7 @@ inner_update <- function(x, data, yvar, index.vars, linear.vars,
   # appears for 3 times, the algorithm will terminate.)
   similar_count <- 1
   # Adjusting X (matrix of predictors) to fit number of indices
-  best_X_new <- do.call(cbind, replicate(num_ind, X_index, simplify = FALSE))
+  best_X_new <- X_new <- do.call(cbind, replicate(num_ind, X_index, simplify = FALSE))
   # Iteratively update index coefficients
   maxIt <- 1
   while(maxIt <= max.iter){
@@ -83,9 +83,9 @@ inner_update <- function(x, data, yvar, index.vars, linear.vars,
         }
       }
       if(length(ind_rm_id) != 0){
-        X_new = as.matrix(X_new[ , -ind_rm_pos])
-        alpha_new = alpha_new[-ind_rm_pos]
-        num_ind  = num_ind - length(ind_rm_id)
+        X_new <- as.matrix(X_new[ , -ind_rm_pos])
+        alpha_new <- alpha_new[-ind_rm_pos]
+        num_ind  <- num_ind - length(ind_rm_id)
         index <- vector(mode = "list", length = num_ind)
         for(i in 1:num_ind){
           index[[i]] <- rep(i, num_pred)
@@ -147,8 +147,10 @@ inner_update <- function(x, data, yvar, index.vars, linear.vars,
       if(l2_new < best_l2){
         best_l2 <- l2_new
         best_alpha <- alpha_new
+        best_index <- index
+        best_ind_pos <- ind_pos
+        best_X_new <- X_new
       }
-      # XQ: It's very strange that the update process stopped when 
       if ((eps >= 0) & (eps < tol)) { 
         print("Tolerance for loss reached!")
         break

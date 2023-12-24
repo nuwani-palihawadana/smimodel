@@ -7,7 +7,7 @@
 #' @export
 normalise_alpha <- function (alpha) {
   anorm <- norm(matrix(alpha, ncol = 1))
-  if (!(is.na(anorm) || all(alpha == 0))) 
+  if (!(is.na(anorm) | all(alpha == 0))) 
     alpha <- alpha/anorm
   return(alpha)
 }

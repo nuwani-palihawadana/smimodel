@@ -48,7 +48,7 @@ new_smimodel <- function(data, yvar, index.vars, index.ind = NULL,
   pre.formula <- lapply(dat_names, function(var) paste0("s(", var, ', bs="cr")')) %>%
     paste(collapse = "+") %>% 
     paste(yvar, "~", .)
-  if (!is.null(linear.vars)) {
+  if (!is.null(linear.vars)){
     pre.formula <- lapply(linear.vars, function(var) paste0(var)) %>%
       paste(collapse = "+") %>% 
       paste(pre.formula, "+", .)

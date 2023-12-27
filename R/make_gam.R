@@ -33,7 +33,7 @@ make_gam <- function(x, data){
   pre.formula <- lapply(names(list_index), function(var) paste0("s(", var, ',bs="cr")')) %>%
     paste(collapse = "+") %>% 
     paste(yvar, "~", .)
-  if (!is.null(x$vars_linear)) {
+  if (!is.null(x$vars_linear)){
     pre.formula <- lapply(x$vars_linear, function(var) paste0(var)) %>%
       paste(collapse = "+") %>% 
       paste(pre.formula, "+", .)

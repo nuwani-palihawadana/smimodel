@@ -68,7 +68,10 @@ inner_update <- function(x, data, yvar, index.vars, linear.vars,
                               lambda2 = lambda2, M = M, TimeLimit = TimeLimit,
                               verbose = verbose)
     if(all(alpha_new == 0)){
-      print("A null model is produced; reverting to the previous model!")
+      best_l2 <- NULL
+      best_alpha <- alpha_new
+      best_X_new <- NULL
+      print("Null indices are produced!")
       break
     }else{
       # Checking for all zero indices
@@ -106,7 +109,7 @@ inner_update <- function(x, data, yvar, index.vars, linear.vars,
       pre.formula <- lapply(dat_names, function(var) paste0("s(", var, ', bs="cr")')) %>%
         paste(collapse = "+") %>% 
         paste(yvar, "~", .)
-      if (!is.null(linear.vars)) {
+      if (!is.null(linear.vars)){
         pre.formula <- lapply(linear.vars, function(var) paste0(var)) %>%
           paste(collapse = "+") %>% 
           paste(pre.formula, "+", .)

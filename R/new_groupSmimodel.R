@@ -29,8 +29,9 @@
 #' @importFrom vctrs vec_as_names
 #'
 #' @export
-new_groupSmimodel <- function(data, yvar, index.vars, index.ind, index.coefs, 
-                              neighbour = 0, linear.vars = NULL){
+new_groupSmimodel <- function(data, yvar, index.vars, index.ind = NULL, 
+                              index.coefs = NULL, neighbour = 0, 
+                              linear.vars = NULL){
   stopifnot(tsibble::is_tsibble(data))
   data1 <- data
   data_index <- index(data1)

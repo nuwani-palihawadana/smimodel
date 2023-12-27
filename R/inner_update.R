@@ -67,7 +67,6 @@ inner_update <- function(x, data, yvar, index.vars, linear.vars,
                               alpha_old = alpha_old, lambda0 = lambda0, 
                               lambda2 = lambda2, M = M, TimeLimit = TimeLimit,
                               verbose = verbose)
-    ##### TO DO: You must remove this if condition! ############################
     if(all(alpha_new == 0)){
       print("A null model is produced; reverting to the previous model!")
       break

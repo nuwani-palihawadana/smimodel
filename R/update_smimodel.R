@@ -24,22 +24,19 @@ update_smimodel <- function(object, data, lambda0 = 1, lambda2 = 1,
                             tol = 0.001, tolCoefs = 0.001,
                             TimeLimit = Inf, verbose = FALSE, ...){
   if (!tibble::is_tibble(data)) stop("data is not a tibble.")
-  data <- data %>%
-    drop_na()
+  data <- data %>% drop_na()
   gam1 <- make_gam(x = object, data = data)
   # Preparing inputs to `inside_update()`
   list_index <- object[1:(length(object)-3)]
   num_ind <- length(list_index)
   alpha <- vector(mode = "list", length = num_ind)
   dgz <- vector(mode = "list", length = num_ind)
-  dgz_names <- character(length = num_ind)
   for(i in 1:num_ind){
     alpha[[i]] <- list_index[[i]]$coefficients
     dgz[[i]] <- list_index[[i]]$derivatives
-    dgz_names[i] <- paste0("d", i)
   }
   alpha <- unlist(alpha)
-  names(dgz) <- dgz_names
+  names(dgz) <- paste0("d", 1:num_ind)
   dgz <- as.matrix(tibble::as_tibble(dgz))
   # Optimising the model
   best_alpha1 <- inner_update(x = gam1, data = data, yvar = object$var_y,
@@ -79,15 +76,12 @@ update_smimodel <- function(object, data, lambda0 = 1, lambda2 = 1,
     while(j <= num_pred){
       # Calculating indices
       ind <- vector(length = length(ind_pos_current), mode = "list")
-      ind_names <- character(length = length(ind_pos_current))
       for(i in 1:length(ind)){
         ind[[i]] <- as.numeric(X_new_current[, ind_pos_current[[i]]] %*% 
                                  as.matrix(alpha_current[ind_pos_current[[i]]], ncol = 1))
-        ind_names[i] <- paste0("index", i)
       }
-      names(ind) <- ind_names
+      dat_names <- names(ind) <- paste0("index", 1:length(ind))
       dat <- as_tibble(ind)
-      dat_names <- colnames(dat)
       # Nonlinear function update 
       # Constructing the formula
       pre.formula <- lapply(dat_names, function(var) paste0("s(", var, ',bs="cr")')) %>%
@@ -131,15 +125,12 @@ update_smimodel <- function(object, data, lambda0 = 1, lambda2 = 1,
       ind_pos <- split(1:length(index), index)
       # Calculating indices
       ind <- vector(length = length(ind_pos), mode = "list")
-      ind_names <- character(length = length(ind_pos))
       for(i in 1:length(ind)){
         ind[[i]] <- as.numeric(X_new[, ind_pos[[i]]] %*% 
                                  as.matrix(alpha[ind_pos[[i]]], ncol = 1))
-        ind_names[i] <- paste0("index", i)
       }
-      names(ind) <- ind_names
+      dat_names <- names(ind) <- paste0("index", 1:length(ind))
       dat <- as_tibble(ind)
-      dat_names <- colnames(dat)
       # Nonlinear function update 
       # Constructing the formula
       pre.formula <- lapply(dat_names, function(var) paste0("s(", var, ',bs="cr")')) %>%
@@ -155,14 +146,12 @@ update_smimodel <- function(object, data, lambda0 = 1, lambda2 = 1,
       gam2 <- mgcv::gam(as.formula(pre.formula), data = dat, method = "REML")
       # Derivatives of the fitted smooths
       dgz <- vector(length = length(dat_names), mode = "list")
-      dgz_names <- character(length = length(dat_names))
       for (i in seq_along(dat_names)) {
         temp <- gratia::derivatives(gam2, type = "central", data = dat, 
                                     term = paste0("s(", paste0(dat_names[i]), ")"))
         dgz[[i]] <- temp$derivative
-        dgz_names[i] <- paste0("d", i)
       }
-      names(dgz) <- dgz_names
+      names(dgz) <- paste0("d", seq_along(dat_names))
       dgz <- as.matrix(as_tibble(dgz))
       # Optimising the new model
       best_alpha2 <- inner_update(x = gam2, data = data, yvar = object$var_y, 
@@ -211,15 +200,12 @@ update_smimodel <- function(object, data, lambda0 = 1, lambda2 = 1,
     }
     # Calculating indices
     ind <- vector(length = length(ind_pos_current), mode = "list")
-    ind_names <- character(length = length(ind_pos_current))
     for(i in 1:length(ind)){
       ind[[i]] <- as.numeric(X_new_current[, ind_pos_current[[i]]] %*% 
                                as.matrix(alpha_current[ind_pos_current[[i]]], ncol = 1))
-      ind_names[i] <- paste0("index", i)
     }
-    names(ind) <- ind_names
+    dat_names <- names(ind) <- paste0("index", 1:length(ind))
     dat <- tibble::as_tibble(ind)
-    dat_names <- colnames(dat)
     ## Nonlinear function update 
     # Constructing the formula
     pre.formula <- lapply(dat_names, function(var) paste0("s(", var, ',bs="cr")')) %>%

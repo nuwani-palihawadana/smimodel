@@ -26,7 +26,7 @@ update_smimodel <- function(object, data, lambda0 = 1, lambda2 = 1,
   if (!tibble::is_tibble(data)) stop("data is not a tibble.")
   data <- data %>% drop_na()
   gam1 <- make_gam(x = object, data = data)
-  # Preparing inputs to `inside_update()`
+  # Preparing inputs to `inner_update()`
   list_index <- object[1:(length(object)-3)]
   num_ind <- length(list_index)
   alpha <- vector(mode = "list", length = num_ind)

@@ -8,8 +8,8 @@ new_groupSmimodel(
   data,
   yvar,
   index.vars,
-  index.ind,
-  index.coefs,
+  index.ind = NULL,
+  index.coefs = NULL,
   neighbour = 0,
   linear.vars = NULL
 )

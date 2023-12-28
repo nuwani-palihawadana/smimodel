@@ -19,15 +19,6 @@
 #' @export
 make_smimodel <- function(x, yvar, index.vars, index.ind, index.data,
                           index.names, alpha, linear.vars = NULL){
-  # Derivatives of the fitted smooths
-  dgz <- vector(length = length(index.names), mode = "list")
-  for (i in seq_along(index.names)) {
-    temp <- gratia::derivatives(x, type = "central",
-                                data = index.data,
-                                term = paste0("s(", index.names[i], ")"))
-    dgz[[i]] <- temp$derivative
-  }
-  names(dgz) <- paste0("d", seq_along(index.names))
   # Constructing a new index coefficient vector to have all predictors in each index
   ind_pos <- split(1:length(index.ind), index.ind)
   new_index_info <- allpred_index(num_pred = length(index.vars), 
@@ -37,9 +28,25 @@ make_smimodel <- function(x, yvar, index.vars, index.ind, index.data,
   new_alpha <- split(new_index_info$alpha_init_new, new_index_info$index)
   # Constructing the class `smimodel`
   smimodel <- vector(mode = "list", length = (length(new_alpha)+3))
-  for(i in 1:length(new_alpha)){
-    smimodel[[i]] <- list("coefficients" = new_alpha[[i]],
-                          "derivatives" = dgz[[i]])
+  if(!is.null(index.data)){
+    # Derivatives of the fitted smooths
+    dgz <- vector(length = length(index.names), mode = "list")
+    for (i in seq_along(index.names)) {
+      temp <- gratia::derivatives(x, type = "central",
+                                  data = index.data,
+                                  term = paste0("s(", index.names[i], ")"))
+      dgz[[i]] <- temp$derivative
+    }
+    names(dgz) <- paste0("d", seq_along(index.names))
+    for(i in 1:length(new_alpha)){
+      smimodel[[i]] <- list("coefficients" = new_alpha[[i]],
+                            "derivatives" = dgz[[i]])
+    }
+  }else if(is.null(index.data)){
+    for(i in 1:length(new_alpha)){
+      smimodel[[i]] <- list("coefficients" = new_alpha[[i]],
+                            "derivatives" = NULL)
+    }
   }
   smimodel[[(length(new_alpha)+1)]] <- yvar
   smimodel[[(length(new_alpha)+2)]] <- index.vars

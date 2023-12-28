@@ -58,16 +58,16 @@ update_smimodel <- function(object, data, lambda0 = 1, lambda2 = 1,
       pre.formula <- lapply(object$vars_linear, function(var) paste0(var)) %>%
         paste(collapse = "+") %>% 
         paste(object$var_y, "~", .)
-      fun1_final <- mgcv::gam(as.formula(pre.formula), data = data, method = "REML")
     }else{
       pre.formula <- paste(object$var_y, "~", 1)
-      fun1_final <- mgcv::gam(as.formula(pre.formula), data = data, method = "REML")
     }
+    fun1_final <- mgcv::gam(as.formula(pre.formula), data = data, method = "REML")
+    index.names <- paste0("index", 1:length(ind_pos_current))
     print("Final model fitted!")
     final_smimodel <- make_smimodel(x = fun1_final, yvar = object$var_y, 
                                     index.vars = object$vars_index, 
                                     index.ind = index_current, 
-                                    index.data = NULL, index.names = NULL,
+                                    index.data = NULL, index.names = index.names,
                                     alpha = alpha_current, 
                                     linear.vars = object$vars_linear)
   }else{

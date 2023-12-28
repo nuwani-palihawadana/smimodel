@@ -20,27 +20,44 @@ make_gam <- function(x, data){
     drop_na()
   X_index <- as.matrix(data[ , x$vars_index])
   list_index <- x[1:(length(x)-3)]
-  # Calculating indices
-  ind <- vector(mode = "list", length = (length(x)-3))
-  for(i in 1:length(ind)){
-    ind[[i]] <- as.numeric(X_index %*% as.matrix(list_index[[i]]$coefficients, ncol = 1))
+  alpha <- vector(mode = "list", length = length(list_index))
+  for(i in 1:length(list_index)){
+    alpha[[i]] <- list_index[[i]]$coefficients
   }
-  names(ind) <- names(list_index)
-  dat <- tibble::as_tibble(ind)
-  # Fitting a `gam`
-  # Constructing the formula
-  yvar <- x$var_y
-  pre.formula <- lapply(names(list_index), function(var) paste0("s(", var, ',bs="cr")')) %>%
-    paste(collapse = "+") %>% 
-    paste(yvar, "~", .)
-  if (!is.null(x$vars_linear)){
-    pre.formula <- lapply(x$vars_linear, function(var) paste0(var)) %>%
+  alpha <- unlist(alpha)
+  if(all(alpha == 0)){
+    # Constructing the formula and model fitting
+    if (!is.null(x$vars_linear)){
+      pre.formula <- lapply(object$vars_linear, function(var) paste0(var)) %>%
+        paste(collapse = "+") %>% 
+        paste(x$var_y, "~", .)
+    }else{
+      pre.formula <- paste(x$var_y, "~", 1)
+    }
+    fun1_final <- mgcv::gam(as.formula(pre.formula), data = data, method = "REML")
+  }else{
+    # Calculating indices
+    ind <- vector(mode = "list", length = length(list_index))
+    for(i in 1:length(ind)){
+      ind[[i]] <- as.numeric(X_index %*% as.matrix(list_index[[i]]$coefficients, ncol = 1))
+    }
+    names(ind) <- names(list_index)
+    dat <- tibble::as_tibble(ind)
+    # Fitting a `gam`
+    # Constructing the formula
+    yvar <- x$var_y
+    pre.formula <- lapply(names(list_index), function(var) paste0("s(", var, ',bs="cr")')) %>%
       paste(collapse = "+") %>% 
-      paste(pre.formula, "+", .)
+      paste(yvar, "~", .)
+    if (!is.null(x$vars_linear)){
+      pre.formula <- lapply(x$vars_linear, function(var) paste0(var)) %>%
+        paste(collapse = "+") %>% 
+        paste(pre.formula, "+", .)
+    }
+    # Model fitting
+    dat_new <- dplyr::bind_cols(data, dat)
+    fun1 <- mgcv::gam(as.formula(pre.formula), data = dat_new, method = "REML")
   }
-  # Model fitting
-  dat_new <- dplyr::bind_cols(data, dat)
-  fun1 <- mgcv::gam(as.formula(pre.formula), data = dat_new, method = "REML")
   return(fun1)
 }
 utils::globalVariables(c("."))

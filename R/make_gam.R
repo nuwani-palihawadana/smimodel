@@ -28,7 +28,7 @@ make_gam <- function(x, data){
   if(all(alpha == 0)){
     # Constructing the formula and model fitting
     if (!is.null(x$vars_linear)){
-      pre.formula <- lapply(object$vars_linear, function(var) paste0(var)) %>%
+      pre.formula <- lapply(x$vars_linear, function(var) paste0(var)) %>%
         paste(collapse = "+") %>% 
         paste(x$var_y, "~", .)
     }else{

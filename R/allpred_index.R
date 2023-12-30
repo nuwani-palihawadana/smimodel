@@ -29,10 +29,10 @@ allpred_index <- function(num_pred, num_ind, ind_pos, alpha){
     # init_list[[i]] <- numeric(length = num_pred)
     # init_list[[i]][ind_pos[[i]]] <- alpha[ind_pos[[i]]]
     if(length(alpha) == (num_ind*num_pred)){
-      init_list[[i]] <- alpha[ind_pos[[i]]]
+      init_list[[i]] <- alpha[startsWith(names(alpha), paste0(i))]
     }else{
       init_list[[i]] <- numeric(length = num_pred)
-      init_list[[i]][ind_pos[[i]]] <- alpha[ind_pos[[i]]]
+      init_list[[i]][ind_pos[[i]]] <- alpha[startsWith(names(alpha), paste0(i))]
     }
     index[[i]] <- rep(i, num_pred)
   }

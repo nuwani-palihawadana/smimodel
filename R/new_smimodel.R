@@ -39,7 +39,7 @@ new_smimodel <- function(data, yvar, index.vars, index.ind = NULL,
   ind <- vector(length = length(ind_pos), mode = "list")
   for(i in 1:length(ind)){
     ind[[i]] <- as.numeric(X_index[, ind_pos[[i]]] %*% 
-                             as.matrix(alpha[ind_pos[[i]]], ncol = 1))
+                             as.matrix(alpha[startsWith(names(alpha), paste0(i))], ncol = 1))
   }
   dat_names <- names(ind) <- paste0("index", 1:length(ind))
   dat <- tibble::as_tibble(ind)

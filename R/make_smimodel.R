@@ -21,6 +21,7 @@ make_smimodel <- function(x, yvar, index.vars, index.ind, index.data,
                           index.names, alpha, linear.vars = NULL){
   # Constructing a new index coefficient vector to have all predictors in each index
   ind_pos <- split(1:length(index.ind), index.ind)
+  names(alpha) <- NULL
   alpha <- unlist(tapply(alpha, index.ind, normalise_alpha))
   new_index_info <- allpred_index(num_pred = length(index.vars), 
                                   num_ind = length(ind_pos), 

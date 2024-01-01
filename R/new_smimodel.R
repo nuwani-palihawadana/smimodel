@@ -34,6 +34,7 @@ new_smimodel <- function(data, yvar, index.vars, index.ind = NULL,
     ind_pos <- split(seq_along(index.ind), index.ind)
     # Index coefficients
     alpha <- index.coefs <- rep(1, length(index.vars))
+    alpha <- unlist(tapply(alpha, index.ind, normalise_alpha))
   }
   # Calculating indices
   ind <- vector(length = length(ind_pos), mode = "list")

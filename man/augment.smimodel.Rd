@@ -4,13 +4,10 @@
 \alias{augment.smimodel}
 \title{Augment function for class \code{smimodel}}
 \usage{
-\method{augment}{smimodel}(x, data, ...)
+\method{augment}{smimodel}(x, ...)
 }
 \arguments{
 \item{x}{A \code{smimodel} object.}
-
-\item{data}{Training data set on which models will be trained. Should be a
-\code{tibble}.}
 
 \item{...}{Other arguments not currently used.}
 }

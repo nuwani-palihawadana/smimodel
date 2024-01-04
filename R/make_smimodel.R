@@ -29,7 +29,7 @@ make_smimodel <- function(x, yvar, index.vars, index.ind, index.data,
                                   alpha = alpha)
   new_alpha <- split(new_index_info$alpha_init_new, new_index_info$index)
   # Constructing the class `smimodel`
-  smimodel <- vector(mode = "list", length = (length(new_alpha)+3))
+  smimodel <- vector(mode = "list", length = (length(new_alpha)+4))
   if(!is.null(index.data)){
     # Derivatives of the fitted smooths
     dgz <- vector(length = length(index.names), mode = "list")
@@ -55,7 +55,8 @@ make_smimodel <- function(x, yvar, index.vars, index.ind, index.data,
   if(!is.null(linear.vars)){
     smimodel[[(length(new_alpha)+3)]] <- linear.vars
   }
-  names(smimodel) <- c(index.names, "var_y", "vars_index", "vars_linear")
+  smimodel[[(length(new_alpha)+4)]] <- x
+  names(smimodel) <- c(index.names, "var_y", "vars_index", "vars_linear", "gam")
   class(smimodel) <- c("smimodel", "list")
   return(smimodel)
 }

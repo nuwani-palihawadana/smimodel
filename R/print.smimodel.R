@@ -12,7 +12,7 @@
 print.smimodel <- function(x, ...) {
   cat("Fitted smimodel:\n")
   cat("Estimated index coefficients:\n")
-  list_index <- x[1:(length(x)-3)]
+  list_index <- x[1:(length(x)-4)]
   for(i in 1:length(list_index)){
     cat("index", i, "\n")
     print(x[[i]]$coefficients)

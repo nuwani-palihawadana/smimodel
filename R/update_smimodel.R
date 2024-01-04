@@ -25,9 +25,8 @@ update_smimodel <- function(object, data, lambda0 = 1, lambda2 = 1,
                             TimeLimit = Inf, verbose = FALSE, ...){
   if (!tibble::is_tibble(data)) stop("data is not a tibble.")
   data <- data %>% drop_na()
-  gam1 <- make_gam(x = object, data = data)
   # Preparing inputs to `inner_update()`
-  list_index <- object[1:(length(object)-3)]
+  list_index <- object[1:(length(object)-4)]
   num_ind <- length(list_index)
   alpha <- vector(mode = "list", length = num_ind)
   dgz <- vector(mode = "list", length = num_ind)
@@ -39,7 +38,7 @@ update_smimodel <- function(object, data, lambda0 = 1, lambda2 = 1,
   names(dgz) <- paste0("d", 1:num_ind)
   dgz <- as.matrix(tibble::as_tibble(dgz))
   # Optimising the model
-  best_alpha1 <- inner_update(x = gam1, data = data, yvar = object$var_y,
+  best_alpha1 <- inner_update(x = object$gam, data = data, yvar = object$var_y,
                               index.vars = object$vars_index, 
                               linear.vars = object$vars_linear, 
                               num_ind = num_ind, dgz = dgz, 

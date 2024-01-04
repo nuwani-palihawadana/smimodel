@@ -4,23 +4,13 @@
 \alias{predict.smimodel}
 \title{Obtaining forecasts on a test set from a fitted \code{smimodel}}
 \usage{
-\method{predict}{smimodel}(
-  object,
-  newdata,
-  data,
-  recursive = FALSE,
-  recursive_colRange = NULL,
-  ...
-)
+\method{predict}{smimodel}(object, newdata, recursive = FALSE, recursive_colRange = NULL, ...)
 }
 \arguments{
 \item{object}{A \code{smimodel} object.}
 
 \item{newdata}{The set of new data on for which the forecasts are required
 (i.e. test set; should be a \code{tibble}).}
-
-\item{data}{Training data set on which models will be trained. Should be a
-\code{tibble}.}
 
 \item{recursive}{Whether to obtain recursive forecasts or not (default -
 FALSE).}

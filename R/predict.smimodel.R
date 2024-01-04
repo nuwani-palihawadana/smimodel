@@ -5,8 +5,6 @@
 #' @param object A `smimodel` object.
 #' @param newdata The set of new data on for which the forecasts are required
 #'   (i.e. test set; should be a `tibble`).
-#' @param data Training data set on which models will be trained. Should be a
-#'   `tibble`.
 #' @param recursive Whether to obtain recursive forecasts or not (default -
 #'   FALSE).
 #' @param recursive_colRange If `recursive = TRUE`, The range of column numbers
@@ -16,13 +14,11 @@
 #' @method predict smimodel
 #'
 #' @export
-predict.smimodel <- function(object, newdata, data,
-                             recursive = FALSE, recursive_colRange = NULL, ...) {
+predict.smimodel <- function(object, newdata, recursive = FALSE, 
+                             recursive_colRange = NULL, ...) {
   if (!is_tibble(newdata)) stop("newdata is not a tibble.")
-  if (!is_tibble(data)) stop("data is not a tibble.")
-  fitted_gam <- make_gam(x = object, data = data)
   predict_fn <- mgcv::predict.gam
-  list_index <- object[1:(length(object)-3)]
+  list_index <- object[1:(length(object)-4)]
   alpha <- vector(mode = "list", length = length(list_index))
   for(i in 1:length(list_index)){
     alpha[[i]] <- list_index[[i]]$coefficients
@@ -34,7 +30,7 @@ predict.smimodel <- function(object, newdata, data,
       #pb <- lazybar::lazyProgressBar(NROW(newdata) - 1)
       for(m in 1:(NROW(newdata) - 1)){
         data_temp = newdata[m, ]
-        pred <- predict_fn(fitted_gam, data_temp, type = "response")
+        pred <- predict_fn(object$gam, data_temp, type = "response")
         predictions[[m]] <- pred
         x_seq = seq((m+1), (m+((max(recursive_colRange) - min(recursive_colRange)) + 1)))
         y_seq = recursive_colRange
@@ -46,12 +42,12 @@ predict.smimodel <- function(object, newdata, data,
         #pb$tick()$print()
       }
       data_temp = newdata[NROW(newdata), ]
-      predictions[[NROW(newdata)]] = predict_fn(fitted_gam, data_temp, type = "response")
+      predictions[[NROW(newdata)]] = predict_fn(object$gam, data_temp, type = "response")
       pred <- unlist(predictions)
       pred_F <- newdata %>% 
         dplyr::mutate(.predict = pred) 
     }else if(recursive == FALSE){
-      pred <- predict_fn(fitted_gam, newdata, type = "response")
+      pred <- predict_fn(object$gam, newdata, type = "response")
       pred_F <- newdata %>% 
         dplyr::mutate(.predict = pred)
     }
@@ -71,7 +67,7 @@ predict.smimodel <- function(object, newdata, data,
         names(ind) <- names(list_index)
         dat <- tibble::as_tibble(ind)
         data_list[[m]] <- dplyr::bind_cols(data_temp, dat)
-        pred <- predict_fn(fitted_gam, data_list[[m]], type = "response")
+        pred <- predict_fn(object$gam, data_list[[m]], type = "response")
         predictions[[m]] <- pred
         x_seq = seq((m+1), (m+((max(recursive_colRange) - min(recursive_colRange)) + 1)))
         y_seq = recursive_colRange
@@ -92,7 +88,7 @@ predict.smimodel <- function(object, newdata, data,
       names(ind) <- names(list_index)
       dat <- tibble::as_tibble(ind)
       data_list[[NROW(newdata)]] <- dplyr::bind_cols(data_temp, dat)
-      predictions[[NROW(newdata)]] = predict_fn(fitted_gam, data_list[[NROW(newdata)]], type = "response")
+      predictions[[NROW(newdata)]] = predict_fn(object$gam, data_list[[NROW(newdata)]], type = "response")
       newdata1 <- dplyr::bind_rows(data_list)
       pred <- unlist(predictions)
       pred_F <- newdata1 %>% 
@@ -107,7 +103,7 @@ predict.smimodel <- function(object, newdata, data,
       names(ind) <- names(list_index)
       dat <- tibble::as_tibble(ind)
       data_list <- dplyr::bind_cols(newdata, dat)
-      pred <- predict_fn(fitted_gam, data_list, type = "response")
+      pred <- predict_fn(object$gam, data_list, type = "response")
       pred_F <- data_list %>% 
         dplyr::mutate(.predict = pred)
     }

@@ -37,7 +37,6 @@ augment.groupSmimodel <- function(x, data, neighbour = 0, ...) {
     dplyr::mutate(
       num_key = as.numeric(factor(as.character({{ key11 }}), levels = key_unique))
     )
-  gam <- vector(mode = "list", length = NROW(x))
   model.resid <- vector(mode = "list", length = NROW(x))
   model.fitted <- vector(mode = "list", length = NROW(x))
   time_variable <- vector(mode = "list", length = NROW(x))
@@ -51,9 +50,8 @@ augment.groupSmimodel <- function(x, data, neighbour = 0, ...) {
                       (abs(num_key - ref$key_num[i] - NROW(ref)) <= neighbour)) %>%
       tibble::as_tibble() %>%
       dplyr::arrange({{data_index}})
-    gam[[i]] <- make_gam(x = x$fit[[i]], data = df_cat)
-    model.resid[[i]] <- gam[[i]]$residuals
-    model.fitted[[i]] <- gam[[i]]$fitted.values
+    model.resid[[i]] <- x$fit[[i]]$gam$residuals
+    model.fitted[[i]] <- x$fit[[i]]$gam$fitted.values
     time_variable[[i]] <- df_cat[, data_index][[1]]
     old_group[[i]] <- df_cat[, key11][[1]]
     new_group[[i]] <- rep(x[[1]][i], nrow(df_cat))

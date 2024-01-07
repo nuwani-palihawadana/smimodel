@@ -38,7 +38,7 @@ alt_update_smimodel <- function(object, data, lambda0 = 1, lambda2 = 1,
   names(dgz) <- paste0("d", 1:num_ind)
   dgz <- as.matrix(tibble::as_tibble(dgz))
   # Optimising the model
-  best_alpha1 <- inner_update(x = object$gam, data = data, yvar = object$var_y,
+  best_alpha1 <- alt_inner_update(x = object$gam, data = data, yvar = object$var_y,
                               index.vars = object$vars_index, 
                               linear.vars = object$vars_linear, 
                               num_ind = num_ind, dgz = dgz, 
@@ -171,7 +171,7 @@ alt_update_smimodel <- function(object, data, lambda0 = 1, lambda2 = 1,
           ind_pos_current <- best_alpha2$ind_pos
           X_new_current <- best_alpha2$X_new
         }
-        j <- j + 1
+        j <- length(ind_pos_current)+1
       }
     }
     # Calculating indices

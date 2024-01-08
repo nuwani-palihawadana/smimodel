@@ -8,34 +8,69 @@
 #' @param yvar Name of the response variable as a character string.
 #' @param index.vars A character vector of names of the predictor variables for
 #'   which indices should be estimated.
-#' @param index.ind An integer vector that assigns group index for each
-#'   predictor in `index.vars`. (The default is `NULL`. If `NULL`, the model
-#'   will be initialised with an Additive Model.)
-#' @param index.coefs A numeric vector of index coefficients (default: NULL).
+#' @param initialise The model structure with which the estimation process
+#'   should be initialised. The default is "additive", where the initial model
+#'   will be a nonparametric additive model. The other options are "linear" -
+#'   linear regression model (i.e. a special case single-index model, where the
+#'   initial values of the index coefficients are obtained through a linear
+#'   regression), and "other" - user specifies the initial model structure (i.e.
+#'   the number of indices and the placement of index variables among indices)
+#'   and the initial index coefficients through `index.ind` and `index.coefs`
+#'   arguments.
+#' @param index.ind If `initialise = "other"`: an integer vector that assigns
+#'   group index for each predictor in `index.vars`.
+#' @param index.coefs If `initialise = "other"`: a numeric vector of index
+#'   coefficients.
 #' @param linear.vars A character vector of names of the predictor variables
 #'   that should be included linearly into the model.
 #'
 #' @export
-new_smimodel <- function(data, yvar, index.vars, index.ind = NULL, 
-                         index.coefs = NULL, linear.vars = NULL){
+new_smimodel <- function(data, yvar, index.vars, initialise = "additive", 
+                         index.ind = NULL, index.coefs = NULL, 
+                         linear.vars = NULL){
   stopifnot(tibble::is_tibble(data))
   data <- data %>%
     drop_na()
+  Y_data <- as.matrix(data[ , yvar])
   X_index <- as.matrix(data[ , index.vars])
-  if(!is.null(index.ind) & !is.null(index.coefs)){
-    # Index positions
-    ind_pos <- split(seq_along(index.ind), index.ind)
-    # Index coefficients
-    alpha <- unlist(tapply(index.coefs, index.ind, normalise_alpha))
-  }else{
-    # Initialise the model with an Additive Model
+  if(initialise == "additive"){
+    # Initialise the model with a nonparametric additive model
     index.ind <- seq_along(index.vars)
     # Index positions
     ind_pos <- split(seq_along(index.ind), index.ind)
     # Index coefficients
     alpha <- index.coefs <- rep(1, length(index.vars))
     alpha <- unlist(tapply(alpha, index.ind, normalise_alpha))
+  }else if(initialise == "linear"){
+    # Initialise the model with a linear model
+    index.ind <- rep(1, length(index.vars))
+    ind_pos <- split(seq_along(index.ind), index.ind)
+    # Index coefficients
+    alpha <- index.coefs <- init_alpha(Y = Y_data, X = X_index, 
+                                       index.ind = index.ind,
+                                       init.type = "reg")$alpha_init
+    alpha <- unlist(tapply(alpha, index.ind, normalise_alpha))
+  }else if(initialise == "other"){
+    if (is.null(index.ind) | is.null(index.coefs)) stop("index.ind and/or index.coefs are/is not provided.")
+    # Index positions
+    ind_pos <- split(seq_along(index.ind), index.ind)
+    # Index coefficients
+    alpha <- unlist(tapply(index.coefs, index.ind, normalise_alpha))
   }
+  # if(!is.null(index.ind) & !is.null(index.coefs)){
+  #   # Index positions
+  #   ind_pos <- split(seq_along(index.ind), index.ind)
+  #   # Index coefficients
+  #   alpha <- unlist(tapply(index.coefs, index.ind, normalise_alpha))
+  # }else{
+  #   # Initialise the model with an Additive Model
+  #   index.ind <- seq_along(index.vars)
+  #   # Index positions
+  #   ind_pos <- split(seq_along(index.ind), index.ind)
+  #   # Index coefficients
+  #   alpha <- index.coefs <- rep(1, length(index.vars))
+  #   alpha <- unlist(tapply(alpha, index.ind, normalise_alpha))
+  # }
   # Calculating indices
   ind <- vector(length = length(ind_pos), mode = "list")
   for(i in 1:length(ind)){

@@ -57,20 +57,6 @@ new_smimodel <- function(data, yvar, index.vars, initialise = "additive",
     # Index coefficients
     alpha <- unlist(tapply(index.coefs, index.ind, normalise_alpha))
   }
-  # if(!is.null(index.ind) & !is.null(index.coefs)){
-  #   # Index positions
-  #   ind_pos <- split(seq_along(index.ind), index.ind)
-  #   # Index coefficients
-  #   alpha <- unlist(tapply(index.coefs, index.ind, normalise_alpha))
-  # }else{
-  #   # Initialise the model with an Additive Model
-  #   index.ind <- seq_along(index.vars)
-  #   # Index positions
-  #   ind_pos <- split(seq_along(index.ind), index.ind)
-  #   # Index coefficients
-  #   alpha <- index.coefs <- rep(1, length(index.vars))
-  #   alpha <- unlist(tapply(alpha, index.ind, normalise_alpha))
-  # }
   # Calculating indices
   ind <- vector(length = length(ind_pos), mode = "list")
   for(i in 1:length(ind)){

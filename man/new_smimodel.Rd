@@ -31,7 +31,7 @@ initial values of the index coefficients are obtained through a linear
 regression), and "other" - user specifies the initial model structure (i.e.
 the number of indices and the placement of index variables among indices)
 and the initial index coefficients through \code{index.ind} and \code{index.coefs}
-arguments.}
+arguments respectively.}
 
 \item{index.ind}{If \code{initialise = "other"}: an integer vector that assigns
 group index for each predictor in \code{index.vars}.}

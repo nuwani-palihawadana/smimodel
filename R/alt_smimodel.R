@@ -17,7 +17,7 @@
 #'   regression), and "other" - user specifies the initial model structure (i.e.
 #'   the number of indices and the placement of index variables among indices)
 #'   and the initial index coefficients through `index.ind` and `index.coefs`
-#'   arguments.
+#'   arguments respectively. 
 #' @param index.ind An integer vector that assigns group index for each
 #'   predictor in `index.vars`. (The default is `NULL`. If `NULL`, the model
 #'   will be initialised with an Additive Model.)

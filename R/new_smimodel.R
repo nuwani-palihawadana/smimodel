@@ -16,7 +16,7 @@
 #'   regression), and "other" - user specifies the initial model structure (i.e.
 #'   the number of indices and the placement of index variables among indices)
 #'   and the initial index coefficients through `index.ind` and `index.coefs`
-#'   arguments.
+#'   arguments respectively. 
 #' @param index.ind If `initialise = "other"`: an integer vector that assigns
 #'   group index for each predictor in `index.vars`.
 #' @param index.coefs If `initialise = "other"`: a numeric vector of index

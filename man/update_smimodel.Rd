@@ -21,7 +21,8 @@ update_smimodel(
 \arguments{
 \item{object}{A \code{smimodel} object.}
 
-\item{data}{Training data set on which models will be trained. Should be a \code{tibble}.}
+\item{data}{Training data set on which models will be trained. Should be a
+\code{tibble}.}
 
 \item{lambda0}{Penalty parameter for L0 penalty.}
 

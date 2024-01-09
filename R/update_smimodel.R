@@ -1,21 +1,22 @@
-#' Updating a `smimodel` 
-#' 
-#' Optimises and updates a given `smimodel`. 
-#' 
+#' Updating a `smimodel`
+#'
+#' Optimises and updates a given `smimodel`.
+#'
 #' @param object A `smimodel` object.
-#' @param data Training data set on which models will be trained. Should be a `tibble`. 
+#' @param data Training data set on which models will be trained. Should be a
+#'   `tibble`.
 #' @param lambda0 Penalty parameter for L0 penalty.
 #' @param lambda2 Penalty parameter for L2 penalty.
 #' @param M Big-M value used in MIP.
 #' @param max.iter Maximum number of MIP iterations performed to update index
 #'   coefficients for a given model.
 #' @param tol Tolerance for loss.
-#' @param tolCoefs Tolerance for coefficients. 
+#' @param tolCoefs Tolerance for coefficients.
 #' @param TimeLimit A limit for the total time (in seconds) expended in a single
 #'   MIP iteration.
 #' @param verbose The option to print detailed solver output.
 #' @param ... Other arguments not currently used.
-#' 
+#'
 #' @importFrom dplyr bind_rows
 #'
 #' @export

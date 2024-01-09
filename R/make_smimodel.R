@@ -31,13 +31,21 @@ make_smimodel <- function(x, yvar, index.vars, index.ind, index.data,
   # Constructing the class `smimodel`
   smimodel <- vector(mode = "list", length = (length(new_alpha)+4))
   if(!is.null(index.data)){
-    # Derivatives of the fitted smooths
-    dgz <- vector(length = length(index.names), mode = "list")
-    for (i in seq_along(index.names)) {
-      temp <- gratia::derivatives(x, type = "central",
-                                  data = index.data,
-                                  term = paste0("s(", index.names[i], ")"))
-      dgz[[i]] <- temp$derivative
+    if(length(x$smooth) == 0){
+      # Derivatives of the fitted smooths
+      dgz <- vector(length = length(index.names), mode = "list")
+      for (i in seq_along(index.names)) {
+        dgz[[i]] <- rep(1, NROW(index.data))
+      }
+    }else{
+      # Derivatives of the fitted smooths
+      dgz <- vector(length = length(index.names), mode = "list")
+      for (i in seq_along(index.names)) {
+        temp <- gratia::derivatives(x, type = "central",
+                                    data = index.data,
+                                    term = paste0("s(", index.names[i], ")"))
+        dgz[[i]] <- temp$derivative
+      }
     }
     names(dgz) <- paste0("d", seq_along(index.names))
     for(i in 1:length(new_alpha)){

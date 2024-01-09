@@ -33,51 +33,93 @@ new_smimodel <- function(data, yvar, index.vars, initialise = "additive",
     drop_na()
   Y_data <- as.matrix(data[ , yvar])
   X_index <- as.matrix(data[ , index.vars])
-  if(initialise == "additive"){
-    # Initialise the model with a nonparametric additive model
-    index.ind <- seq_along(index.vars)
-    # Index positions
-    ind_pos <- split(seq_along(index.ind), index.ind)
-    # Index coefficients
-    alpha <- index.coefs <- rep(1, length(index.vars))
-    alpha <- unlist(tapply(alpha, index.ind, normalise_alpha))
-  }else if(initialise == "linear"){
+  if(initialise == "linear"){
     # Initialise the model with a linear model
     index.ind <- rep(1, length(index.vars))
     ind_pos <- split(seq_along(index.ind), index.ind)
-    # Index coefficients
-    alpha <- index.coefs <- init_alpha(Y = Y_data, X = X_index, 
-                                       index.ind = index.ind,
-                                       init.type = "reg")$alpha_init
-    alpha <- unlist(tapply(alpha, index.ind, normalise_alpha))
-  }else if(initialise == "other"){
-    if (is.null(index.ind) | is.null(index.coefs)) stop("index.ind and/or index.coefs are/is not provided.")
-    # Index positions
-    ind_pos <- split(seq_along(index.ind), index.ind)
-    # Index coefficients
-    alpha <- unlist(tapply(index.coefs, index.ind, normalise_alpha))
-  }
-  # Calculating indices
-  ind <- vector(length = length(ind_pos), mode = "list")
-  for(i in 1:length(ind)){
-    ind[[i]] <- as.numeric(X_index[, ind_pos[[i]]] %*% 
-                             as.matrix(alpha[startsWith(names(alpha), paste0(i))], ncol = 1))
-  }
-  dat_names <- names(ind) <- paste0("index", 1:length(ind))
-  dat <- tibble::as_tibble(ind)
-  # Fitting a `gam`
-  # Constructing the formula
-  pre.formula <- lapply(dat_names, function(var) paste0("s(", var, ', bs="cr")')) %>%
-    paste(collapse = "+") %>% 
-    paste(yvar, "~", .)
-  if (!is.null(linear.vars)){
-    pre.formula <- lapply(linear.vars, function(var) paste0(var)) %>%
+    pre.formula <- lapply(index.vars, function(var) paste0(var)) %>%
       paste(collapse = "+") %>% 
-      paste(pre.formula, "+", .)
+      paste(yvar, "~", .)
+    if (!is.null(linear.vars)){
+      pre.formula <- lapply(linear.vars, function(var) paste0(var)) %>%
+        paste(collapse = "+") %>% 
+        paste(pre.formula, "+", .)
+    }
+    pre.formula <- paste(pre.formula, "-", 1)
+    fun1 <- mgcv::gam(as.formula(pre.formula), data = data, method = "REML")
+    # Index coefficients
+    alpha <- index.coefs <- fun1$coefficients[1:length(index.vars)]
+    alpha <- unlist(tapply(alpha, index.ind, normalise_alpha))
+    # Calculating indices
+    ind <- vector(length = length(ind_pos), mode = "list")
+    for(i in 1:length(ind)){
+      ind[[i]] <- as.numeric(X_index[, ind_pos[[i]]] %*% 
+                               as.matrix(alpha[startsWith(names(alpha), paste0(i))], ncol = 1))
+    }
+    dat_names <- names(ind) <- paste0("index", 1:length(ind))
+    dat <- tibble::as_tibble(ind)
+    dat_new <- dplyr::bind_cols(data, dat)
+  }else{
+    if(initialise == "additive"){
+      # Initialise the model with a nonparametric additive model
+      index.ind <- seq_along(index.vars)
+      # Index positions
+      ind_pos <- split(seq_along(index.ind), index.ind)
+      # Index coefficients
+      alpha <- index.coefs <- rep(1, length(index.vars))
+      alpha <- unlist(tapply(alpha, index.ind, normalise_alpha))
+    }else if(initialise == "other"){
+      if (is.null(index.ind) | is.null(index.coefs)) stop("index.ind and/or index.coefs are/is not provided.")
+      # Index positions
+      ind_pos <- split(seq_along(index.ind), index.ind)
+      # Index coefficients
+      alpha <- unlist(tapply(index.coefs, index.ind, normalise_alpha))
+    }
+    # Calculating indices
+    ind <- vector(length = length(ind_pos), mode = "list")
+    for(i in 1:length(ind)){
+      ind[[i]] <- as.numeric(X_index[, ind_pos[[i]]] %*% 
+                               as.matrix(alpha[startsWith(names(alpha), paste0(i))], ncol = 1))
+    }
+    dat_names <- names(ind) <- paste0("index", 1:length(ind))
+    dat <- tibble::as_tibble(ind)
+    # Constructing the formula
+    pre.formula <- lapply(dat_names, function(var) paste0("s(", var, ', bs="cr")')) %>%
+      paste(collapse = "+") %>% 
+      paste(yvar, "~", .)
+    if (!is.null(linear.vars)){
+      pre.formula <- lapply(linear.vars, function(var) paste0(var)) %>%
+        paste(collapse = "+") %>% 
+        paste(pre.formula, "+", .)
+    }
+    # Model fitting
+    dat_new <- dplyr::bind_cols(data, dat)
+    fun1 <- mgcv::gam(as.formula(pre.formula), data = dat_new, method = "REML")
   }
-  # Model fitting
-  dat_new <- dplyr::bind_cols(data, dat)
-  fun1 <- mgcv::gam(as.formula(pre.formula), data = dat_new, method = "REML")
+  # if(initialise == "additive"){
+  #   # Initialise the model with a nonparametric additive model
+  #   index.ind <- seq_along(index.vars)
+  #   # Index positions
+  #   ind_pos <- split(seq_along(index.ind), index.ind)
+  #   # Index coefficients
+  #   alpha <- index.coefs <- rep(1, length(index.vars))
+  #   alpha <- unlist(tapply(alpha, index.ind, normalise_alpha))
+  # }else if(initialise == "linear"){
+  #   # Initialise the model with a linear model
+  #   index.ind <- rep(1, length(index.vars))
+  #   ind_pos <- split(seq_along(index.ind), index.ind)
+  #   # Index coefficients
+  #   alpha <- index.coefs <- init_alpha(Y = Y_data, X = X_index, 
+  #                                      index.ind = index.ind,
+  #                                      init.type = "reg")$alpha_init
+  #   alpha <- unlist(tapply(alpha, index.ind, normalise_alpha))
+  # }else if(initialise == "other"){
+  #   if (is.null(index.ind) | is.null(index.coefs)) stop("index.ind and/or index.coefs are/is not provided.")
+  #   # Index positions
+  #   ind_pos <- split(seq_along(index.ind), index.ind)
+  #   # Index coefficients
+  #   alpha <- unlist(tapply(index.coefs, index.ind, normalise_alpha))
+  # }
   smimodel <- make_smimodel(x = fun1, yvar = yvar, index.vars = index.vars, 
                             index.ind = index.ind, index.data = dat_new,
                             index.names = dat_names, alpha = alpha,

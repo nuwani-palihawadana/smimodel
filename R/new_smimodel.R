@@ -13,12 +13,12 @@
 #'   will be a nonparametric additive model. The other options are "linear" -
 #'   linear regression model (i.e. a special case single-index model, where the
 #'   initial values of the index coefficients are obtained through a linear
-#'   regression), and "userInput" - user specifies the initial model structure (i.e.
-#'   the number of indices and the placement of index variables among indices)
-#'   and the initial index coefficients through `index.ind` and `index.coefs`
-#'   arguments respectively. 
-#' @param index.ind If `initialise = "userInput"`: an integer vector that assigns
-#'   group index for each predictor in `index.vars`.
+#'   regression), and "userInput" - user specifies the initial model structure
+#'   (i.e. the number of indices and the placement of index variables among
+#'   indices) and the initial index coefficients through `index.ind` and
+#'   `index.coefs` arguments respectively.
+#' @param index.ind If `initialise = "userInput"`: an integer vector that
+#'   assigns group index for each predictor in `index.vars`.
 #' @param index.coefs If `initialise = "userInput"`: a numeric vector of index
 #'   coefficients.
 #' @param linear.vars A character vector of names of the predictor variables

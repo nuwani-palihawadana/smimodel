@@ -1,6 +1,6 @@
 #' Sparse Multiple Index (SMI) models
 #'
-#' Fits a nonparametric multiple index model to data with simultaneous variable
+#' Fits a nonparametric multiple index model to the data, with simultaneous variable
 #' selection (hence "sparse").
 #'
 #' @param data Training data set on which models will be trained. Should be a

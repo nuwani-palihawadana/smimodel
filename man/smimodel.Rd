@@ -69,6 +69,6 @@ MIP iteration.}
 \item{verbose}{The option to print detailed solver output.}
 }
 \description{
-Fits a nonparametric multiple index model to data with simultaneous variable
+Fits a nonparametric multiple index model to the data, with simultaneous variable
 selection (hence "sparse").
 }

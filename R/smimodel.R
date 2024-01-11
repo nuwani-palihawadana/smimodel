@@ -17,10 +17,10 @@
 #'   the number of indices and the placement of index variables among indices)
 #'   and the initial index coefficients through `index.ind` and `index.coefs`
 #'   arguments respectively. 
-#' @param index.ind An integer vector that assigns group index for each
-#'   predictor in `index.vars`. (The default is `NULL`. If `NULL`, the model
-#'   will be initialised with an Additive Model.)
-#' @param index.coefs A numeric vector of index coefficients (default: NULL).
+#' @param index.ind If `initialise = "userInput"`: an integer vector that assigns
+#'   group index for each predictor in `index.vars`.
+#' @param index.coefs If `initialise = "userInput"`: a numeric vector of index
+#'   coefficients.
 #' @param linear.vars A character vector of names of the predictor variables
 #'   that should be included linearly into the model.
 #' @param lambda0 Penalty parameter for L0 penalty.

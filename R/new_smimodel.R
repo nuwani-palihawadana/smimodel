@@ -17,9 +17,9 @@
 #'   the number of indices and the placement of index variables among indices)
 #'   and the initial index coefficients through `index.ind` and `index.coefs`
 #'   arguments respectively. 
-#' @param index.ind If `initialise = "other"`: an integer vector that assigns
+#' @param index.ind If `initialise = "userInput"`: an integer vector that assigns
 #'   group index for each predictor in `index.vars`.
-#' @param index.coefs If `initialise = "other"`: a numeric vector of index
+#' @param index.coefs If `initialise = "userInput"`: a numeric vector of index
 #'   coefficients.
 #' @param linear.vars A character vector of names of the predictor variables
 #'   that should be included linearly into the model.
@@ -30,6 +30,7 @@ new_smimodel <- function(data, yvar, index.vars,
                          index.ind = NULL, index.coefs = NULL, 
                          linear.vars = NULL){
   stopifnot(tibble::is_tibble(data))
+  initialise <- match.arg(initialise)
   data <- data %>%
     drop_na()
   Y_data <- as.matrix(data[ , yvar])

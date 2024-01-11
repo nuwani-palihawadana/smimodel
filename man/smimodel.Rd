@@ -41,11 +41,11 @@ the number of indices and the placement of index variables among indices)
 and the initial index coefficients through \code{index.ind} and \code{index.coefs}
 arguments respectively.}
 
-\item{index.ind}{An integer vector that assigns group index for each
-predictor in \code{index.vars}. (The default is \code{NULL}. If \code{NULL}, the model
-will be initialised with an Additive Model.)}
+\item{index.ind}{If \code{initialise = "userInput"}: an integer vector that assigns
+group index for each predictor in \code{index.vars}.}
 
-\item{index.coefs}{A numeric vector of index coefficients (default: NULL).}
+\item{index.coefs}{If \code{initialise = "userInput"}: a numeric vector of index
+coefficients.}
 
 \item{linear.vars}{A character vector of names of the predictor variables
 that should be included linearly into the model.}

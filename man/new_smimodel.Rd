@@ -33,10 +33,10 @@ the number of indices and the placement of index variables among indices)
 and the initial index coefficients through \code{index.ind} and \code{index.coefs}
 arguments respectively.}
 
-\item{index.ind}{If \code{initialise = "other"}: an integer vector that assigns
+\item{index.ind}{If \code{initialise = "userInput"}: an integer vector that assigns
 group index for each predictor in \code{index.vars}.}
 
-\item{index.coefs}{If \code{initialise = "other"}: a numeric vector of index
+\item{index.coefs}{If \code{initialise = "userInput"}: a numeric vector of index
 coefficients.}
 
 \item{linear.vars}{A character vector of names of the predictor variables

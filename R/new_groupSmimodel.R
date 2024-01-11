@@ -12,9 +12,19 @@
 #' @param yvar Name of the response variable as a character string.
 #' @param index.vars A character vector of names of the predictor variables for
 #'   which indices should be estimated.
-#' @param index.ind An integer vector that assigns group index for each
-#'   predictor in `index.vars`.
-#' @param index.coefs A numeric vector of index coefficients.
+#' @param initialise The model structure with which the estimation process
+#'   should be initialised. The default is "additive", where the initial model
+#'   will be a nonparametric additive model. The other options are "linear" -
+#'   linear regression model (i.e. a special case single-index model, where the
+#'   initial values of the index coefficients are obtained through a linear
+#'   regression), and "userInput" - user specifies the initial model structure
+#'   (i.e. the number of indices and the placement of index variables among
+#'   indices) and the initial index coefficients through `index.ind` and
+#'   `index.coefs` arguments respectively.
+#' @param index.ind If `initialise = "userInput"`: an integer vector that
+#'   assigns group index for each predictor in `index.vars`.
+#' @param index.coefs If `initialise = "userInput"`: a numeric vector of index
+#'   coefficients.
 #' @param neighbour If multiple models are fitted: Number of neighbours of each
 #'   key (i.e. grouping variable) to be considered in model fitting to handle
 #'   smoothing over the key. Should be an integer. If `neighbour = x`, `x`
@@ -29,10 +39,12 @@
 #' @importFrom vctrs vec_as_names
 #'
 #' @export
-new_groupSmimodel <- function(data, yvar, index.vars, index.ind = NULL, 
-                              index.coefs = NULL, neighbour = 0, 
-                              linear.vars = NULL){
+new_groupSmimodel <- function(data, yvar, index.vars, 
+                              initialise = c("additive", "linear", "userInput"), 
+                              index.ind = NULL, index.coefs = NULL, 
+                              neighbour = 0, linear.vars = NULL){
   stopifnot(tsibble::is_tsibble(data))
+  initialise <- match.arg(initialise)
   data1 <- data
   data_index <- index(data1)
   data_key <- key(data1)
@@ -61,6 +73,7 @@ new_groupSmimodel <- function(data, yvar, index.vars, index.ind = NULL,
     smimodels_list[[i]] <- new_smimodel(data = df_cat, 
                                         yvar = yvar,
                                         index.vars = index.vars, 
+                                        initialise = initialise,
                                         index.ind = index.ind,
                                         index.coefs = index.coefs, 
                                         linear.vars = linear.vars)

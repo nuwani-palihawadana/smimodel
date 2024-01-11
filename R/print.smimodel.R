@@ -27,4 +27,7 @@ print.smimodel <- function(x, ...) {
   cat("Linear variables:\n")
   print(x$vars_linear)
   cat("\n")
+  cat("Fitted gam:")
+  print(x$gam)
+  cat("\n")
 }

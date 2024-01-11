@@ -9,7 +9,7 @@ alt_smimodel(
   data,
   yvar,
   index.vars,
-  initialise = "additive",
+  initialise = c("additive", "linear", "userInput"),
   index.ind = NULL,
   index.coefs = NULL,
   linear.vars = NULL,
@@ -37,7 +37,7 @@ should be initialised. The default is "additive", where the initial model
 will be a nonparametric additive model. The other options are "linear" -
 linear regression model (i.e. a special case single-index model, where the
 initial values of the index coefficients are obtained through a linear
-regression), and "other" - user specifies the initial model structure (i.e.
+regression), and "userInput" - user specifies the initial model structure (i.e.
 the number of indices and the placement of index variables among indices)
 and the initial index coefficients through \code{index.ind} and \code{index.coefs}
 arguments respectively.}

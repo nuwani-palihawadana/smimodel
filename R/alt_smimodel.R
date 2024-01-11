@@ -14,7 +14,7 @@
 #'   will be a nonparametric additive model. The other options are "linear" -
 #'   linear regression model (i.e. a special case single-index model, where the
 #'   initial values of the index coefficients are obtained through a linear
-#'   regression), and "other" - user specifies the initial model structure (i.e.
+#'   regression), and "userInput" - user specifies the initial model structure (i.e.
 #'   the number of indices and the placement of index variables among indices)
 #'   and the initial index coefficients through `index.ind` and `index.coefs`
 #'   arguments respectively. 
@@ -36,11 +36,13 @@
 #' @param verbose The option to print detailed solver output.
 #'
 #' @export
-alt_smimodel <- function(data, yvar, index.vars, initialise = "additive", 
+alt_smimodel <- function(data, yvar, index.vars, 
+                         initialise = c("additive", "linear", "userInput"),
                          index.ind = NULL, index.coefs = NULL, 
                          linear.vars = NULL, lambda0 = 1, lambda2 = 1, 
                          M = 10, max.iter = 50, tol = 0.001, tolCoefs = 0.001,
                          TimeLimit = Inf, verbose = FALSE){
+  initialise <- match.arg(initialise)
   # Constructing the initial `smimodel`
   init_smimodel <- new_smimodel(data = data, yvar = yvar, 
                                 index.vars = index.vars, 

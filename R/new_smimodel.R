@@ -13,7 +13,7 @@
 #'   will be a nonparametric additive model. The other options are "linear" -
 #'   linear regression model (i.e. a special case single-index model, where the
 #'   initial values of the index coefficients are obtained through a linear
-#'   regression), and "other" - user specifies the initial model structure (i.e.
+#'   regression), and "userInput" - user specifies the initial model structure (i.e.
 #'   the number of indices and the placement of index variables among indices)
 #'   and the initial index coefficients through `index.ind` and `index.coefs`
 #'   arguments respectively. 
@@ -25,7 +25,8 @@
 #'   that should be included linearly into the model.
 #'
 #' @export
-new_smimodel <- function(data, yvar, index.vars, initialise = "additive", 
+new_smimodel <- function(data, yvar, index.vars, 
+                         initialise = c("additive", "linear", "userInput"), 
                          index.ind = NULL, index.coefs = NULL, 
                          linear.vars = NULL){
   stopifnot(tibble::is_tibble(data))
@@ -68,7 +69,7 @@ new_smimodel <- function(data, yvar, index.vars, initialise = "additive",
       # Index coefficients
       alpha <- index.coefs <- rep(1, length(index.vars))
       alpha <- unlist(tapply(alpha, index.ind, normalise_alpha))
-    }else if(initialise == "other"){
+    }else if(initialise == "userInput"){
       if (is.null(index.ind) | is.null(index.coefs)) stop("index.ind and/or index.coefs are/is not provided.")
       # Index positions
       ind_pos <- split(seq_along(index.ind), index.ind)

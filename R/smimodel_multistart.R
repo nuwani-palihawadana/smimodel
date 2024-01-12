@@ -34,6 +34,8 @@
 #'   MIP iteration.
 #' @param verbose The option to print detailed solver output.
 #'
+#' @importFrom stats runif
+#'
 #' @export
 smimodel_multistart <- function(data, yvar, index.vars, 
                                 initialise = c("additive", "linear", "multiple", "userInput"),
@@ -52,6 +54,7 @@ smimodel_multistart <- function(data, yvar, index.vars,
     smimodels_optimised <- vector(mode = "list", length = 4)
     smimodels_loss <- vector(mode = "list", length = 4)
     # Starting point 1: Linear model (Single-index)
+    print("Multiple starting points: 1")
     smimodels_initial[[1]] <- new_smimodel(data = data, yvar = yvar, 
                                            index.vars = index.vars, 
                                            initialise = "linear", 
@@ -81,8 +84,11 @@ smimodel_multistart <- function(data, yvar, index.vars,
                                         lambda0 = lambda0, lambda2 = lambda2)
     # Other starting points
     for(j in 2:4){
+      print(paste0("Multiple starting points: ", j))
       set.seed(123)
-      indexInd <- sample(1:numInds[j], num_pred, replace = TRUE)
+      temp <- runif(numInds[j], min = 0.01, max = 0.99)
+      prob <- temp/norm(matrix(temp, ncol = 1))
+      indexInd <- sample(1:numInds[j], num_pred, replace = TRUE, prob = prob)
       indexCoefs <- runif(num_pred)
       smimodels_initial[[j]] <- new_smimodel(data = data, yvar = yvar, 
                                              index.vars = index.vars, 

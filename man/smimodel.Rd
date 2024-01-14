@@ -8,7 +8,7 @@ smimodel(
   data,
   yvar,
   index.vars,
-  initialise = c("additive", "linear", "userInput"),
+  initialise = c("additive", "linear", "multiple", "userInput"),
   index.ind = NULL,
   index.coefs = NULL,
   linear.vars = NULL,
@@ -36,9 +36,13 @@ should be initialised. The default is "additive", where the initial model
 will be a nonparametric additive model. The other options are "linear" -
 linear regression model (i.e. a special case single-index model, where the
 initial values of the index coefficients are obtained through a linear
-regression), and "userInput" - user specifies the initial model structure
-(i.e. the number of indices and the placement of index variables among
-indices) and the initial index coefficients through \code{index.ind} and
+regression), "multiple" - multiple models are fitted starting with
+different initial models (single-index (linear), 2-index, 3-index and
+5-index models, where the predictor assignment to indices and initial index
+coefficients are generated randomly), and the final optimal model with
+lowest loss is returned, and "userInput" - user specifies the initial model
+structure (i.e. the number of indices and the placement of index variables
+among indices) and the initial index coefficients through \code{index.ind} and
 \code{index.coefs} arguments respectively.}
 
 \item{index.ind}{If \code{initialise = "userInput"}: an integer vector that

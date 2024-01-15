@@ -19,7 +19,7 @@
 #' @export
 augment.groupSmimodel <- function(x, data, neighbour = 0, ...) {
   if (!tsibble::is_tsibble(data)) stop("data is not a tsibble.")
-  yvar <- x$fit[[1]]$var_y
+  yvar <- x$fit[[1]]$best$var_y
   data1 <- data
   data_index <- index(data1)
   data_key <- key(data1)
@@ -50,8 +50,8 @@ augment.groupSmimodel <- function(x, data, neighbour = 0, ...) {
                       (abs(num_key - ref$key_num[i] - NROW(ref)) <= neighbour)) %>%
       tibble::as_tibble() %>%
       dplyr::arrange({{data_index}})
-    model.resid[[i]] <- x$fit[[i]]$gam$residuals
-    model.fitted[[i]] <- x$fit[[i]]$gam$fitted.values
+    model.resid[[i]] <- x$fit[[i]]$best$gam$residuals
+    model.fitted[[i]] <- x$fit[[i]]$best$gam$fitted.values
     time_variable[[i]] <- df_cat[, data_index][[1]]
     old_group[[i]] <- df_cat[, key11][[1]]
     new_group[[i]] <- rep(x[[1]][i], nrow(df_cat))

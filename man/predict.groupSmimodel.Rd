@@ -4,31 +4,13 @@
 \alias{predict.groupSmimodel}
 \title{Obtaining forecasts on a test set from a fitted \code{groupSmimodel}}
 \usage{
-\method{predict}{groupSmimodel}(
-  object,
-  newdata,
-  data,
-  neighbour = 0,
-  recursive = FALSE,
-  recursive_colRange = NULL,
-  ...
-)
+\method{predict}{groupSmimodel}(object, newdata, recursive = FALSE, recursive_colRange = NULL, ...)
 }
 \arguments{
 \item{object}{A \code{groupSmimodel} object.}
 
 \item{newdata}{The set of new data on for which the forecasts are required
 (i.e. test set; should be a \code{tsibble}).}
-
-\item{data}{Training data set on which models will be trained. Must be a data
-set of class \code{tsibble}.}
-
-\item{neighbour}{If multiple models are fitted: Number of neighbours of each
-key (i.e. grouping variable) to be considered in model fitting to handle
-smoothing over the key. Should be an integer. If \code{neighbour = x}, \code{x}
-number of keys before the key of interest and \code{x} number of keys after the
-key of interest are grouped together for model fitting. The default is \code{0}
-(i.e. no neighbours are considered for model fitting).}
 
 \item{recursive}{Whether to obtain recursive forecasts or not (default -
 FALSE).}

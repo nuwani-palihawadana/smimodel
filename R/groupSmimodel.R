@@ -16,9 +16,13 @@
 #'   will be a nonparametric additive model. The other options are "linear" -
 #'   linear regression model (i.e. a special case single-index model, where the
 #'   initial values of the index coefficients are obtained through a linear
-#'   regression), and "userInput" - user specifies the initial model structure
-#'   (i.e. the number of indices and the placement of index variables among
-#'   indices) and the initial index coefficients through `index.ind` and
+#'   regression), "multiple" - multiple models are fitted starting with
+#'   different initial models (single-index (linear), 2-index, 3-index and
+#'   5-index models, where the predictor assignment to indices and initial index
+#'   coefficients are generated randomly), and the final optimal model with
+#'   lowest loss is returned, and "userInput" - user specifies the initial model
+#'   structure (i.e. the number of indices and the placement of index variables
+#'   among indices) and the initial index coefficients through `index.ind` and
 #'   `index.coefs` arguments respectively.
 #' @param index.ind If `initialise = "userInput"`: an integer vector that
 #'   assigns group index for each predictor in `index.vars`.
@@ -49,28 +53,59 @@
 #'
 #' @export
 groupSmimodel <- function(data, yvar, index.vars, 
-                          initialise = c("additive", "linear", "userInput"),
+                          initialise = c("additive", "linear", "multiple", "userInput"),
                           index.ind = NULL, index.coefs = NULL, 
                           neighbour = 0, linear.vars = NULL, 
                           lambda0 = 1, lambda2 = 1, 
                           M = 10, max.iter = 50, tol = 0.001, tolCoefs = 0.001,
                           TimeLimit = Inf, verbose = FALSE){
+  stopifnot(tsibble::is_tsibble(data))
   initialise <- match.arg(initialise)
-  # Constructing the initial `groupSmimodel`
-  init_groupSmimodel <- new_groupSmimodel(data = data, yvar = yvar, 
-                                          index.vars = index.vars, 
-                                          initialise = initialise, 
-                                          index.ind = index.ind, 
-                                          index.coefs = index.coefs,
-                                          neighbour = 0,
-                                          linear.vars = linear.vars)
-  # Optimising the initial `groupSmimodel`
-  opt_groupSmimodel <- update_groupSmimodel(object = init_groupSmimodel, 
-                                            data = data, neighbour = neighbour, 
-                                            lambda0 = lambda0, lambda2 = lambda2, 
-                                            M = M, max.iter = max.iter, 
-                                            tol = tol, tolCoefs = tolCoefs,
-                                            TimeLimit = TimeLimit, verbose = verbose)
-  output <- list("initial" = init_groupSmimodel, "best" = opt_groupSmimodel)
-  return(output)
+  data1 <- data
+  data_index <- index(data1)
+  data_key <- key(data1)
+  if (length(key(data1)) == 0) {
+    data1 <- data1 %>%
+      dplyr::mutate(dummy_key = rep(1, NROW(data1))) %>%
+      tsibble::as_tsibble(index = data_index, key = dummy_key)
+    data_key <- key(data1)
+  }
+  key11 <- key(data1)[[1]]
+  key_unique <- unique(as.character(sort(dplyr::pull((data1[, {{ key11 }}])[, 1]))))
+  key_num <- seq_along(key_unique)
+  ref <- data.frame(key_unique, key_num)
+  data1 <- data1 %>%
+    dplyr::mutate(
+      num_key = as.numeric(factor(as.character({{ key11 }}), levels = key_unique))
+    )
+  smimodels_list <- vector(mode = "list", length = NROW(ref))
+  for (i in seq_along(ref$key_num)){
+    print(paste0('model ', paste0(i)))
+    df_cat <- data1 %>%
+      dplyr::filter((abs(num_key - ref$key_num[i]) <= neighbour) |
+                      (abs(num_key - ref$key_num[i] + NROW(ref)) <= neighbour) |
+                      (abs(num_key - ref$key_num[i] - NROW(ref)) <= neighbour)) %>%
+      tibble::as_tibble() %>%
+      dplyr::arrange({{data_index}})
+    smimodels_list[[i]] <- smimodel(data = df_cat, yvar = yvar, 
+                                    index.vars = index.vars, 
+                                    initialise = initialise, 
+                                    index.ind = index.ind, 
+                                    index.coefs = index.coefs,
+                                    linear.vars = linear.vars,
+                                    lambda0 = lambda0, lambda2 = lambda2, 
+                                    M = M, max.iter = max.iter, 
+                                    tol = tol, tolCoefs = tolCoefs,
+                                    TimeLimit = TimeLimit, verbose = verbose)
+  }
+  data_list <- list(key_unique, smimodels_list)
+  models <- tibble::as_tibble(
+    x = data_list, .rows = length(data_list[[1]]),
+    .name_repair = ~ vctrs::vec_as_names(..., repair = "universal", quiet = TRUE)
+  )
+  models <- models %>%
+    dplyr::rename(key = ...1) %>%
+    dplyr::rename(fit = ...2)
+  class(models) <- c("groupSmimodel", "tbl_df", "tbl", "data.frame")
+  return(models)
 }

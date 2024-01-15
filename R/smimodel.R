@@ -47,6 +47,7 @@ smimodel <- function(data, yvar, index.vars,
                                 lambda0 = 1, lambda2 = 1, 
                                 M = 10, max.iter = 50, tol = 0.001, tolCoefs = 0.001,
                                 TimeLimit = Inf, verbose = FALSE){
+  stopifnot(tibble::is_tibble(data))
   initialise <- match.arg(initialise)
   if(initialise == "multiple"){
     Y_data <- as.matrix(data[ , yvar])

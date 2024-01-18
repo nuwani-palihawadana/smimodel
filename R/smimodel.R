@@ -14,13 +14,16 @@
 #'   linear regression model (i.e. a special case single-index model, where the
 #'   initial values of the index coefficients are obtained through a linear
 #'   regression), "multiple" - multiple models are fitted starting with
-#'   different initial models (single-index (linear), 2-index, 3-index and
-#'   5-index models, where the predictor assignment to indices and initial index
-#'   coefficients are generated randomly), and the final optimal model with
-#'   lowest loss is returned, and "userInput" - user specifies the initial model
-#'   structure (i.e. the number of indices and the placement of index variables
-#'   among indices) and the initial index coefficients through `index.ind` and
-#'   `index.coefs` arguments respectively.
+#'   different initial models (default `num_ind` (number of indices) = 5; five
+#'   random instances of the model (i.e. the predictor assignment to indices and
+#'   initial index coefficients are generated randomly) are considered), and the
+#'   final optimal model with the lowest loss is returned (user can change the
+#'   number of indices considered using `num_ind` argument), and "userInput" -
+#'   user specifies the initial model structure (i.e. the number of indices and
+#'   the placement of index variables among indices) and the initial index
+#'   coefficients through `index.ind` and `index.coefs` arguments respectively.
+#' @param num_ind If `initialise = "multiple"`: an integer that specifies the
+#'   number of indices to be used in the models.
 #' @param index.ind If `initialise = "userInput"`: an integer vector that
 #'   assigns group index for each predictor in `index.vars`.
 #' @param index.coefs If `initialise = "userInput"`: a numeric vector of index
@@ -39,61 +42,31 @@
 #' @param verbose The option to print detailed solver output.
 #'
 #' @importFrom stats runif
+#' @importFrom gtools permutations
 #'
 #' @export
 smimodel <- function(data, yvar, index.vars, 
-                                initialise = c("additive", "linear", "multiple", "userInput"),
-                                index.ind = NULL, index.coefs = NULL, linear.vars = NULL, 
-                                lambda0 = 1, lambda2 = 1, 
-                                M = 10, max.iter = 50, tol = 0.001, tolCoefs = 0.001,
-                                TimeLimit = Inf, verbose = FALSE){
+                     initialise = c("additive", "linear", "multiple", "userInput"),
+                     num_ind = 5, index.ind = NULL, 
+                     index.coefs = NULL, linear.vars = NULL, 
+                     lambda0 = 1, lambda2 = 1, 
+                     M = 10, max.iter = 50, tol = 0.001, tolCoefs = 0.001,
+                     TimeLimit = Inf, verbose = FALSE){
   stopifnot(tibble::is_tibble(data))
   initialise <- match.arg(initialise)
   if(initialise == "multiple"){
     Y_data <- as.matrix(data[ , yvar])
     num_pred <- length(index.vars)
-    # Different number of indices to be considered (The single-index model 
-    # (i.e. numInds = 1) is initialised using the linear model.)
-    numInds <- c(1, 2, 3, 5)
-    smimodels_initial <- vector(mode = "list", length = 4)
-    smimodels_optimised <- vector(mode = "list", length = 4)
-    smimodels_loss <- vector(mode = "list", length = 4)
-    # Starting point 1: Linear model (Single-index)
-    print("Multiple starting points: 1")
-    smimodels_initial[[1]] <- new_smimodel(data = data, yvar = yvar, 
-                                           index.vars = index.vars, 
-                                           initialise = "linear", 
-                                           index.ind = index.ind, 
-                                           index.coefs = index.coefs, 
-                                           linear.vars = linear.vars)
-    smimodels_optimised[[1]] <- update_smimodel(object = smimodels_initial[[1]], 
-                                                data = data, 
-                                                lambda0 = lambda0, 
-                                                lambda2 = lambda2, 
-                                                M = M, max.iter = max.iter, 
-                                                tol = tol, tolCoefs = tolCoefs,
-                                                TimeLimit = TimeLimit, 
-                                                verbose = verbose)
-    # Preparing alpha - index coefficients vector
-    list_index <- smimodels_optimised[[1]][1:(length(smimodels_optimised[[1]])-4)]
-    num_ind <- length(list_index)
-    alpha <- vector(mode = "list", length = num_ind)
-    for(i in 1:num_ind){
-      alpha[[i]] <- list_index[[i]]$coefficients
-    }
-    alpha <- unlist(alpha)
-    # Calculating loss
-    smimodels_loss[[1]] <- LossFunction(Y = Y_data, 
-                                        Yhat = smimodels_optimised[[1]]$gam$fitted.values, 
-                                        alpha = alpha, 
-                                        lambda0 = lambda0, lambda2 = lambda2)
-    # Other starting points
-    for(j in 2:4){
+    smimodels_initial <- vector(mode = "list", length = 5)
+    smimodels_optimised <- vector(mode = "list", length = 5)
+    smimodels_loss <- vector(mode = "list", length = 5)
+    # Multiple starting points
+    permutes <- permutations(num_ind, num_ind)
+    for(j in 1:5){
       print(paste0("Multiple starting points: ", j))
-      set.seed(123)
-      temp <- runif(numInds[j], min = 0.01, max = 0.99)
-      prob <- temp/norm(matrix(temp, ncol = 1))
-      indexInd <- sample(1:numInds[j], num_pred, replace = TRUE, prob = prob)
+      permute_ind <- sample(1:dim(permutes)[1], 1)
+      rest <- sample(1:num_ind, (num_pred - num_ind), replace = TRUE)
+      indexInd <- c(permutes[permute_ind, ], rest)
       indexCoefs <- runif(num_pred)
       smimodels_initial[[j]] <- new_smimodel(data = data, yvar = yvar, 
                                              index.vars = index.vars, 
@@ -111,9 +84,9 @@ smimodel <- function(data, yvar, index.vars,
                                                   verbose = verbose)
       # Preparing alpha - index coefficients vector
       list_index <- smimodels_optimised[[j]][1:(length(smimodels_optimised[[j]])-4)]
-      num_ind <- length(list_index)
-      alpha <- vector(mode = "list", length = num_ind)
-      for(k in 1:num_ind){
+      numInd <- length(list_index)
+      alpha <- vector(mode = "list", length = numInd)
+      for(k in 1:numInd){
         alpha[[k]] <- list_index[[k]]$coefficients
       }
       alpha <- unlist(alpha)

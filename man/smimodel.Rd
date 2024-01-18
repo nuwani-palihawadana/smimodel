@@ -9,6 +9,7 @@ smimodel(
   yvar,
   index.vars,
   initialise = c("additive", "linear", "multiple", "userInput"),
+  num_ind = 5,
   index.ind = NULL,
   index.coefs = NULL,
   linear.vars = NULL,
@@ -37,13 +38,17 @@ will be a nonparametric additive model. The other options are "linear" -
 linear regression model (i.e. a special case single-index model, where the
 initial values of the index coefficients are obtained through a linear
 regression), "multiple" - multiple models are fitted starting with
-different initial models (single-index (linear), 2-index, 3-index and
-5-index models, where the predictor assignment to indices and initial index
-coefficients are generated randomly), and the final optimal model with
-lowest loss is returned, and "userInput" - user specifies the initial model
-structure (i.e. the number of indices and the placement of index variables
-among indices) and the initial index coefficients through \code{index.ind} and
-\code{index.coefs} arguments respectively.}
+different initial models (default \code{num_ind} (number of indices) = 5; five
+random instances of the model (i.e. the predictor assignment to indices and
+initial index coefficients are generated randomly) are considered), and the
+final optimal model with the lowest loss is returned (user can change the
+number of indices considered using \code{num_ind} argument), and "userInput" -
+user specifies the initial model structure (i.e. the number of indices and
+the placement of index variables among indices) and the initial index
+coefficients through \code{index.ind} and \code{index.coefs} arguments respectively.}
+
+\item{num_ind}{If \code{initialise = "multiple"}: an integer that specifies the
+number of indices to be used in the models.}
 
 \item{index.ind}{If \code{initialise = "userInput"}: an integer vector that
 assigns group index for each predictor in \code{index.vars}.}

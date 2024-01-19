@@ -76,6 +76,25 @@ new_smimodel <- function(data, yvar, index.vars,
       ind_pos <- split(seq_along(index.ind), index.ind)
       # Index coefficients
       alpha <- unlist(tapply(index.coefs, index.ind, normalise_alpha))
+      # Checking for all zero indices
+      ind_rm_id <- numeric()
+      ind_rm_pos <- numeric()
+      num_ind <- length(ind_pos)
+      for(j in 1:num_ind){
+        if(all(alpha[ind_pos[[j]]] == 0)){
+          ind_rm_id <- c(ind_rm_id, j)
+          ind_rm_pos <- c(ind_rm_pos, ind_pos[[j]])
+          warning(paste0('Initial model: ', ': All coefficients of index', j,
+                         ' are zero. Removing index', j, ' from subsequent iterations.')) 
+        }
+      }
+      if(length(ind_rm_id) != 0){
+        X_index <- as.matrix(X_index[ , -ind_rm_pos])
+        alpha <- alpha[-ind_rm_pos]
+        num_ind  <- num_ind - length(ind_rm_id)
+        index.ind <- index.ind[-ind_rm_pos]
+        ind_pos <- split(1:length(index.ind), index.ind)
+      }
     }
     # Calculating indices
     ind <- vector(length = length(ind_pos), mode = "list")

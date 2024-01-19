@@ -46,13 +46,7 @@ update_smimodel <- function(object, data, lambda0 = 1, lambda2 = 1,
                               alpha_old = alpha, lambda0 = lambda0, 
                               lambda2 = lambda2, M = M, max.iter = max.iter, 
                               tol = tol, TimeLimit = TimeLimit, verbose = verbose)
-  # Checking models with higher number of indices
-  alpha_current <- best_alpha1$best_alpha
-  loss_current <- best_alpha1$min_loss
-  index_current <- best_alpha1$index.ind
-  ind_pos_current <- best_alpha1$ind_pos
-  X_new_current <- best_alpha1$X_new
-  if(all(alpha_current == 0)){
+  if(all(best_alpha1$best_alpha == 0)){
     # Constructing the formula and model fitting
     if (!is.null(object$vars_linear)){
       pre.formula <- lapply(object$vars_linear, function(var) paste0(var)) %>%
@@ -62,15 +56,21 @@ update_smimodel <- function(object, data, lambda0 = 1, lambda2 = 1,
       pre.formula <- paste(object$var_y, "~", 1)
     }
     fun1_final <- mgcv::gam(as.formula(pre.formula), data = data, method = "REML")
-    index.names <- paste0("index", 1:length(ind_pos_current))
+    index.names <- paste0("index", 1:length(best_alpha1$ind_pos))
     print("Final model fitted!")
     final_smimodel <- make_smimodel(x = fun1_final, yvar = object$var_y, 
                                     index.vars = object$vars_index, 
-                                    index.ind = index_current, 
+                                    index.ind = best_alpha1$index.ind, 
                                     index.data = NULL, index.names = index.names,
-                                    alpha = alpha_current, 
+                                    alpha = best_alpha1$best_alpha, 
                                     linear.vars = object$vars_linear)
   }else{
+    # Checking models with higher number of indices
+    alpha_current <- best_alpha1$best_alpha
+    loss_current <- best_alpha1$min_loss
+    index_current <- best_alpha1$index.ind
+    ind_pos_current <- best_alpha1$ind_pos
+    X_new_current <- best_alpha1$X_new
     j <- length(ind_pos_current)+1
     num_pred <- length(object$vars_index)
     while(j <= num_pred){
@@ -162,10 +162,49 @@ update_smimodel <- function(object, data, lambda0 = 1, lambda2 = 1,
                                     alpha_old = alpha, lambda0 = lambda0, 
                                     lambda2 = lambda2, M = M, max.iter = max.iter,
                                     tol = tol, TimeLimit = TimeLimit, verbose = verbose)
-        # Termination/continuation checks
-        if((length(ind_pos_current) == length(best_alpha2$ind_pos))){
-          comparison <- abs(alpha_current - best_alpha2$best_alpha) <= tolCoefs
-          if(all(comparison)){
+        if(all(best_alpha2$best_alpha == 0)){
+          # Constructing the formula and model fitting
+          if (!is.null(object$vars_linear)){
+            pre.formula <- lapply(object$vars_linear, function(var) paste0(var)) %>%
+              paste(collapse = "+") %>% 
+              paste(object$var_y, "~", .)
+          }else{
+            pre.formula <- paste(object$var_y, "~", 1)
+          }
+          fun_null <- mgcv::gam(as.formula(pre.formula), data = data, method = "REML")
+          Y <- as.matrix(data[ , object$var_y])
+          Yhat <- as.matrix(fun_null$fitted.values, 
+                            ncol = 1, nrow = length(fun_null$fitted.values))
+          loss_null <- LossFunction(Y = Y, Yhat = Yhat, alpha = best_alpha2$best_alpha,
+                                    lambda0 = lambda0, lambda2 = lambda2)
+          if(loss_null >= loss_current){
+            break
+          }else{
+            index.names <- paste0("index", 1:length(best_alpha2$ind_pos))
+            print("Final model fitted!")
+            final_smimodel <- make_smimodel(x = fun1_final, yvar = object$var_y, 
+                                            index.vars = object$vars_index, 
+                                            index.ind = best_alpha1$index.ind, 
+                                            index.data = NULL, index.names = index.names,
+                                            alpha = best_alpha1$best_alpha, 
+                                            linear.vars = object$vars_linear)
+          }
+        }else{
+          # Termination/continuation checks
+          if((length(ind_pos_current) == length(best_alpha2$ind_pos))){
+            comparison <- abs(alpha_current - best_alpha2$best_alpha) <= tolCoefs
+            if(all(comparison)){
+              if(best_alpha2$min_loss >= loss_current){
+                break
+              }else{
+                alpha_current <- best_alpha2$best_alpha
+                loss_current <- best_alpha2$min_loss
+                index_current <- best_alpha2$index.ind
+                ind_pos_current <- best_alpha2$ind_pos
+                X_new_current <- best_alpha2$X_new
+                break
+              }
+            }
             if(best_alpha2$min_loss >= loss_current){
               break
             }else{
@@ -174,30 +213,20 @@ update_smimodel <- function(object, data, lambda0 = 1, lambda2 = 1,
               index_current <- best_alpha2$index.ind
               ind_pos_current <- best_alpha2$ind_pos
               X_new_current <- best_alpha2$X_new
+            }
+          }else{
+            if(best_alpha2$min_loss >= loss_current){
               break
+            }else{
+              alpha_current <- best_alpha2$best_alpha
+              loss_current <- best_alpha2$min_loss
+              index_current <- best_alpha2$index.ind
+              ind_pos_current <- best_alpha2$ind_pos
+              X_new_current <- best_alpha2$X_new
             }
           }
-          if(best_alpha2$min_loss >= loss_current){
-            break
-          }else{
-            alpha_current <- best_alpha2$best_alpha
-            loss_current <- best_alpha2$min_loss
-            index_current <- best_alpha2$index.ind
-            ind_pos_current <- best_alpha2$ind_pos
-            X_new_current <- best_alpha2$X_new
-          }
-        }else{
-          if(best_alpha2$min_loss >= loss_current){
-            break
-          }else{
-            alpha_current <- best_alpha2$best_alpha
-            loss_current <- best_alpha2$min_loss
-            index_current <- best_alpha2$index.ind
-            ind_pos_current <- best_alpha2$ind_pos
-            X_new_current <- best_alpha2$X_new
-          }
+          j <- length(ind_pos_current)+1
         }
-        j <- length(ind_pos_current)+1
       }
     }
     # Calculating indices

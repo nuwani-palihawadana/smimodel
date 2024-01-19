@@ -85,7 +85,8 @@ new_smimodel <- function(data, yvar, index.vars,
           ind_rm_id <- c(ind_rm_id, j)
           ind_rm_pos <- c(ind_rm_pos, ind_pos[[j]])
           warning(paste0('Initial model: ', ': All coefficients of index', j,
-                         ' are zero. Removing index', j, ' from subsequent iterations.')) 
+                         ' are zero. Removing index', j, 
+                         ' . The variables in the removed index will be considered in subsequent model searches.')) 
         }
       }
       if(length(ind_rm_id) != 0){

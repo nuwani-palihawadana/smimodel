@@ -23,13 +23,14 @@
 #' @param tol Tolerance for loss.
 #' @param TimeLimit A limit for the total time (in seconds) expended in a single
 #'   MIP iteration.
+#' @param MIPGap Relative MIP optimality gap.
 #' @param verbose The option to print detailed solver output.
 #'
 #' @export
 inner_update <- function(x, data, yvar, index.vars, linear.vars, 
                          num_ind, dgz, alpha_old, lambda0 = 1, lambda2 = 1, 
                          M = 10, max.iter = 50, tol = 0.001, TimeLimit = Inf,
-                         verbose = FALSE){
+                         MIPGap = 1e-4, verbose = FALSE){
   data <- data %>%
     drop_na()
   data.Y <- as.matrix(data[ , yvar])
@@ -66,7 +67,7 @@ inner_update <- function(x, data, yvar, index.vars, linear.vars,
                               num_ind = num_ind, index.ind = index, dgz = dgz, 
                               alpha_old = alpha_old, lambda0 = lambda0, 
                               lambda2 = lambda2, M = M, TimeLimit = TimeLimit,
-                              verbose = verbose)
+                              MIPGap = MIPGap, verbose = verbose)
     if(all(alpha_new == 0)){
       best_l2 <- NULL
       best_alpha <- alpha_new

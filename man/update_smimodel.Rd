@@ -14,6 +14,7 @@ update_smimodel(
   tol = 0.001,
   tolCoefs = 0.001,
   TimeLimit = Inf,
+  MIPGap = 1e-04,
   verbose = FALSE,
   ...
 )
@@ -39,6 +40,8 @@ coefficients for a given model.}
 
 \item{TimeLimit}{A limit for the total time (in seconds) expended in a single
 MIP iteration.}
+
+\item{MIPGap}{Relative MIP optimality gap.}
 
 \item{verbose}{The option to print detailed solver output.}
 

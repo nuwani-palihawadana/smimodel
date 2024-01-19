@@ -16,6 +16,7 @@ update_alpha(
   lambda2 = 1,
   M = 10,
   TimeLimit = Inf,
+  MIPGap = 1e-04,
   verbose = FALSE
 )
 }
@@ -44,6 +45,8 @@ iteration.}
 
 \item{TimeLimit}{A limit for the total time (in seconds) expended in a single
 MIP iteration.}
+
+\item{MIPGap}{Relative MIP optimality gap.}
 
 \item{verbose}{The option to print detailed solver output.}
 }

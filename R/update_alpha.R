@@ -16,12 +16,13 @@
 #' @param M Big-M value used in MIP.
 #' @param TimeLimit A limit for the total time (in seconds) expended in a single
 #'   MIP iteration.
+#' @param MIPGap Relative MIP optimality gap.
 #' @param verbose The option to print detailed solver output.
 #'
 #' @export
 update_alpha <- function(Y, X, num_pred, num_ind, index.ind, dgz, alpha_old, 
                          lambda0 = 1, lambda2 = 1, M = 10, TimeLimit = Inf,
-                         verbose = FALSE){
+                         MIPGap = 1e-4, verbose = FALSE){
   dgz <- as.matrix(dgz[, index.ind])
   V <- X * dgz
   VtV <- t(V) %*% V
@@ -65,7 +66,8 @@ update_alpha <- function(Y, X, num_pred, num_ind, index.ind, dgz, alpha_old,
                                         nobj = 2*num_ind*num_pred), # lower default bound is 0
                   maximum = FALSE)
   # Solving
-  sol <- ROI::ROI_solve(init, solver = "gurobi", TimeLimit = TimeLimit, verbose = verbose)
+  sol <- ROI::ROI_solve(init, solver = "gurobi", TimeLimit = TimeLimit, 
+                        MIPGap = MIPGap, verbose = verbose)
   # Binary variables check
   coefs <- sol$solution[1:(num_ind*num_pred)]
   indicators <- sol$solution[((num_ind*num_pred)+1):(num_ind*num_pred*2)]

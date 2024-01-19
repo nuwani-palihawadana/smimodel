@@ -39,6 +39,7 @@
 #' @param tolCoefs Tolerance for coefficients.
 #' @param TimeLimit A limit for the total time (in seconds) expended in a single
 #'   MIP iteration.
+#' @param MIPGap Relative MIP optimality gap.
 #' @param verbose The option to print detailed solver output.
 #'
 #' @importFrom stats runif
@@ -51,7 +52,7 @@ smimodel <- function(data, yvar, index.vars,
                      index.coefs = NULL, linear.vars = NULL, 
                      lambda0 = 1, lambda2 = 1, 
                      M = 10, max.iter = 50, tol = 0.001, tolCoefs = 0.001,
-                     TimeLimit = Inf, verbose = FALSE){
+                     TimeLimit = Inf, MIPGap = 1e-4, verbose = FALSE){
   stopifnot(tibble::is_tibble(data))
   initialise <- match.arg(initialise)
   if(initialise == "multiple"){
@@ -81,6 +82,7 @@ smimodel <- function(data, yvar, index.vars,
                                                   M = M, max.iter = max.iter, 
                                                   tol = tol, tolCoefs = tolCoefs,
                                                   TimeLimit = TimeLimit, 
+                                                  MIPGap = MIPGap,
                                                   verbose = verbose)
       # Preparing alpha - index coefficients vector
       list_index <- smimodels_optimised[[j]][1:(length(smimodels_optimised[[j]])-4)]
@@ -112,7 +114,8 @@ smimodel <- function(data, yvar, index.vars,
                                     lambda0 = lambda0, lambda2 = lambda2, 
                                     M = M, max.iter = max.iter, 
                                     tol = tol, tolCoefs = tolCoefs,
-                                    TimeLimit = TimeLimit, verbose = verbose)
+                                    TimeLimit = TimeLimit, 
+                                    MIPGap = MIPGap, verbose = verbose)
   }
   output <- list("initial" = init_smimodel, "best" = opt_smimodel)
   return(output)

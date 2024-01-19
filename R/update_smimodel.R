@@ -14,6 +14,7 @@
 #' @param tolCoefs Tolerance for coefficients.
 #' @param TimeLimit A limit for the total time (in seconds) expended in a single
 #'   MIP iteration.
+#' @param MIPGap Relative MIP optimality gap.
 #' @param verbose The option to print detailed solver output.
 #' @param ... Other arguments not currently used.
 #'
@@ -23,7 +24,8 @@
 update_smimodel <- function(object, data, lambda0 = 1, lambda2 = 1, 
                             M = 10, max.iter = 50, 
                             tol = 0.001, tolCoefs = 0.001,
-                            TimeLimit = Inf, verbose = FALSE, ...){
+                            TimeLimit = Inf, MIPGap = 1e-4, 
+                            verbose = FALSE, ...){
   if (!tibble::is_tibble(data)) stop("data is not a tibble.")
   data <- data %>% drop_na()
   # Preparing inputs to `inner_update()`
@@ -45,7 +47,8 @@ update_smimodel <- function(object, data, lambda0 = 1, lambda2 = 1,
                               num_ind = num_ind, dgz = dgz, 
                               alpha_old = alpha, lambda0 = lambda0, 
                               lambda2 = lambda2, M = M, max.iter = max.iter, 
-                              tol = tol, TimeLimit = TimeLimit, verbose = verbose)
+                              tol = tol, TimeLimit = TimeLimit, 
+                              MIPGap = MIPGap, verbose = verbose)
   if(all(best_alpha1$best_alpha == 0)){
     # Constructing the formula and model fitting
     if (!is.null(object$vars_linear)){
@@ -161,7 +164,8 @@ update_smimodel <- function(object, data, lambda0 = 1, lambda2 = 1,
                                     num_ind = j, dgz = dgz, 
                                     alpha_old = alpha, lambda0 = lambda0, 
                                     lambda2 = lambda2, M = M, max.iter = max.iter,
-                                    tol = tol, TimeLimit = TimeLimit, verbose = verbose)
+                                    tol = tol, TimeLimit = TimeLimit, 
+                                    MIPGap = MIPGap, verbose = verbose)
         if(all(best_alpha2$best_alpha == 0)){
           # Constructing the formula and model fitting
           if (!is.null(object$vars_linear)){

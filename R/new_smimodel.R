@@ -72,30 +72,48 @@ new_smimodel <- function(data, yvar, index.vars,
       alpha <- unlist(tapply(alpha, index.ind, normalise_alpha))
     }else if(initialise == "userInput"){
       if (is.null(index.ind) | is.null(index.coefs)) stop("index.ind and/or index.coefs are/is not provided.")
+      # Number of (index) predictors
+      num_pred <- length(index.vars)
       # Index positions
       ind_pos <- split(seq_along(index.ind), index.ind)
+      # Number of indices
+      num_ind <- length(ind_pos)
       # Index coefficients
       alpha <- unlist(tapply(index.coefs, index.ind, normalise_alpha))
+      # Constructing a new index coefficient vector to have all predictors in each index
+      newIndex <- allpred_index(num_pred = num_pred,
+                                num_ind = num_ind,
+                                ind_pos = ind_pos,
+                                alpha = alpha)
+      alpha <- newIndex$alpha_init_new
+      index.ind <- newIndex$index
+      ind_pos <- newIndex$index_positions
+      # Adjusting X (matrix of predictors) to fit number of indices
+      X_index <- do.call(cbind, replicate(num_ind, X_index, simplify = FALSE))
       # Checking for all zero indices
       ind_rm_id <- numeric()
       ind_rm_pos <- numeric()
-      num_ind <- length(ind_pos)
-      for(j in 1:num_ind){
-        if(all(alpha[ind_pos[[j]]] == 0)){
-          ind_rm_id <- c(ind_rm_id, j)
-          ind_rm_pos <- c(ind_rm_pos, ind_pos[[j]])
-          warning(paste0('Initial model: ', ': All coefficients of index', j,
-                         ' are zero. Removing index', j, 
-                         ' . The variables in the removed index will be considered in subsequent model searches.')) 
+      for(i in 1:num_ind){
+        if(all(alpha[ind_pos[[i]]] == 0)){
+          ind_rm_id <- c(ind_rm_id, i)
+          ind_rm_pos <- c(ind_rm_pos, ind_pos[[i]])
+          warning(paste0('Initial model', ': All coefficients of index', i,
+                         ' are zero. Removing index', i, 
+                         '. However, the variables in the removed index are considered in subsequent model searches.')) 
         }
       }
       if(length(ind_rm_id) != 0){
         X_index <- as.matrix(X_index[ , -ind_rm_pos])
         alpha <- alpha[-ind_rm_pos]
         num_ind  <- num_ind - length(ind_rm_id)
-        index.ind <- index.ind[-ind_rm_pos]
+        index.ind <- vector(mode = "list", length = num_ind)
+        for(i in 1:num_ind){
+          index.ind[[i]] <- rep(i, num_pred)
+        }
+        index.ind <- unlist(index.ind)
         ind_pos <- split(1:length(index.ind), index.ind)
       }
+      alpha <- unlist(tapply(alpha, index.ind, normalise_alpha))
     }
     # Calculating indices
     ind <- vector(length = length(ind_pos), mode = "list")

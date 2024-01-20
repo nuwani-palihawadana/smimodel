@@ -66,7 +66,7 @@ smimodel <- function(data, yvar, index.vars,
     smimodels_optimised <- vector(mode = "list", length = 5)
     smimodels_loss <- vector(mode = "list", length = 5)
     # Multiple starting points
-    permutes <- permutations(num_ind, num_ind)
+    permutes <- gtools::permutations(num_ind, num_ind)
     set.seed(seed)
     for(j in 1:num_models){
       print(paste0("Multiple starting points: ", j))

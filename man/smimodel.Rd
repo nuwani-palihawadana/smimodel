@@ -10,6 +10,8 @@ smimodel(
   index.vars,
   initialise = c("additive", "linear", "multiple", "userInput"),
   num_ind = 5,
+  num_models = 5,
+  seed = 123,
   index.ind = NULL,
   index.coefs = NULL,
   linear.vars = NULL,
@@ -50,6 +52,12 @@ coefficients through \code{index.ind} and \code{index.coefs} arguments respectiv
 
 \item{num_ind}{If \code{initialise = "multiple"}: an integer that specifies the
 number of indices to be used in the models.}
+
+\item{num_models}{If \code{initialise = "multiple"}: an integer that specifies the
+number of starting points to be checked.}
+
+\item{seed}{If \code{initialise = "multiple"}: the seed to be set when generating
+random starting points.}
 
 \item{index.ind}{If \code{initialise = "userInput"}: an integer vector that
 assigns group index for each predictor in \code{index.vars}.}

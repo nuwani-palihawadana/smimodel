@@ -24,6 +24,10 @@
 #'   coefficients through `index.ind` and `index.coefs` arguments respectively.
 #' @param num_ind If `initialise = "multiple"`: an integer that specifies the
 #'   number of indices to be used in the models.
+#' @param num_models If `initialise = "multiple"`: an integer that specifies the
+#'   number of starting points to be checked.
+#' @param seed If `initialise = "multiple"`: the seed to be set when generating
+#'   random starting points.
 #' @param index.ind If `initialise = "userInput"`: an integer vector that
 #'   assigns group index for each predictor in `index.vars`.
 #' @param index.coefs If `initialise = "userInput"`: a numeric vector of index
@@ -48,7 +52,7 @@
 #' @export
 smimodel <- function(data, yvar, index.vars, 
                      initialise = c("additive", "linear", "multiple", "userInput"),
-                     num_ind = 5, index.ind = NULL, 
+                     num_ind = 5, num_models = 5, seed = 123, index.ind = NULL, 
                      index.coefs = NULL, linear.vars = NULL, 
                      lambda0 = 1, lambda2 = 1, 
                      M = 10, max.iter = 50, tol = 0.001, tolCoefs = 0.001,
@@ -63,7 +67,8 @@ smimodel <- function(data, yvar, index.vars,
     smimodels_loss <- vector(mode = "list", length = 5)
     # Multiple starting points
     permutes <- permutations(num_ind, num_ind)
-    for(j in 1:5){
+    set.seed(seed)
+    for(j in 1:num_models){
       print(paste0("Multiple starting points: ", j))
       permute_ind <- sample(1:dim(permutes)[1], 1)
       rest <- sample(1:num_ind, (num_pred - num_ind), replace = TRUE)

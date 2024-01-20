@@ -28,11 +28,16 @@ allpred_index <- function(num_pred, num_ind, ind_pos, alpha){
     # "final_smimodel" in "update_smimodel()").
     # init_list[[i]] <- numeric(length = num_pred)
     # init_list[[i]][ind_pos[[i]]] <- alpha[ind_pos[[i]]]
+    if(length(ind_pos[[i]]) == 1){
+      temp <- i
+    }else{
+      temp <- unlist(lapply(1:length(ind_pos[[i]]), function(x) paste0(i, x))) 
+    }
     if(length(alpha) == (num_ind*num_pred)){
-      init_list[[i]] <- alpha[startsWith(names(alpha), paste0(i))]
+      init_list[[i]] <- alpha[match(temp, names(alpha))]
     }else{
       init_list[[i]] <- numeric(length = num_pred)
-      init_list[[i]][ind_pos[[i]]] <- alpha[startsWith(names(alpha), paste0(i))]
+      init_list[[i]][ind_pos[[i]]] <- alpha[match(temp, names(alpha))]
     }
     index[[i]] <- rep(i, num_pred)
   }

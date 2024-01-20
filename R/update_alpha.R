@@ -25,7 +25,9 @@ update_alpha <- function(Y, X, num_pred, num_ind, index.ind, dgz, alpha_old,
                          MIPGap = 1e-4, verbose = FALSE){
   dgz <- as.matrix(dgz[, index.ind])
   V <- X * dgz
-  VtV <- t(V) %*% V
+  print("Time (in seconds) taken for the calculation of VtV:")
+  time <- system.time(VtV <- t(V) %*% V)
+  print(time)
   VtR <- t(V) %*% Y
   VtR_t <- t(VtR)
   VtV_alpha_old_t <- t(VtV %*% alpha_old)
@@ -35,7 +37,9 @@ update_alpha <- function(Y, X, num_pred, num_ind, index.ind, dgz, alpha_old,
                      rep(lambda0, num_ind*num_pred)), 
                    ncol = 2*num_ind*num_pred, nrow = 1))
   # Objective function
-  obj <- ROI::Q_objective(Q = Q, L = L)
+  print("Time (in seconds) taken for the construction of the quadratic objective function:")
+  time <- system.time(obj <- ROI::Q_objective(Q = Q, L = L))
+  print(time)
   # Constraints
   C1 <- Matrix::bdiag(replicate(num_ind, diag(num_pred), simplify = FALSE))
   C2 <- Matrix::bdiag(replicate(num_ind, diag(-M, num_pred), simplify = FALSE))
@@ -66,8 +70,10 @@ update_alpha <- function(Y, X, num_pred, num_ind, index.ind, dgz, alpha_old,
                                         nobj = 2*num_ind*num_pred), # lower default bound is 0
                   maximum = FALSE)
   # Solving
-  sol <- ROI::ROI_solve(init, solver = "gurobi", TimeLimit = TimeLimit, 
-                        MIPGap = MIPGap, verbose = verbose)
+  print("Time (in seconds) taken for solving the MIP:")
+  time <- system.time(sol <- ROI::ROI_solve(init, solver = "gurobi", TimeLimit = TimeLimit, 
+                        MIPGap = MIPGap, verbose = verbose))
+  print(time)
   # Binary variables check
   coefs <- sol$solution[1:(num_ind*num_pred)]
   indicators <- sol$solution[((num_ind*num_pred)+1):(num_ind*num_pred*2)]

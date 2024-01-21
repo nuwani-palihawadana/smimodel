@@ -113,6 +113,7 @@ new_smimodel <- function(data, yvar, index.vars,
         index.ind <- unlist(index.ind)
         ind_pos <- split(1:length(index.ind), index.ind)
       }
+      names(alpha) <- NULL
       alpha <- unlist(tapply(alpha, index.ind, normalise_alpha))
     }
     # Calculating indices

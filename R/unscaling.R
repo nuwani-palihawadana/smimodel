@@ -1,0 +1,26 @@
+#' Unscale a fitted `smimodel`
+#'
+#' Transforms back the index coefficients to suit original-scale index variables
+#' if the same were standardised when estimating the `smimodel` (happens in
+#' `initialise = "ppr"` in `smimodel()`). Users are not expected to directly use
+#' this function; usually called within `smimodel()`.
+#'
+#' @param object A `smimodel` object.
+#' @param scaledInfo The list returned from a call of the function `scaling()`.
+#'   (Relates to the argument `data` in the corresponding call of `smimodel()`.)
+#'
+#' @export
+unscaling <- function(object, scaledInfo){
+  scaledInfo <- scaledInfo$scaled_info
+  list_index <- object[1:(length(object)-4)]
+  for(b in 1:length(list_index)){
+    temp_ind <- rep(b, length(object$vars_index))
+    temp_coef <- list_index[[b]]$coefficients/scaledInfo$scaled_scales
+    names(temp_coef) <- NULL
+    coef_norm <- unlist(tapply(temp_coef, temp_ind, normalise_alpha))
+    object[[b]]$coefficients <- coef_norm
+    temp_intercept <- ((list_index[[b]]$coefficients*scaledInfo$scaled_means*(-1))/scaledInfo$scaled_scales)
+    object[[b]]$intercept <- sum(temp_intercept)
+  }
+  return(object)
+}

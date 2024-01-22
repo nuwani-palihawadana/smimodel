@@ -12,21 +12,26 @@
 #' @param index.vars A character vector of names of the predictor variables for
 #'   which indices should be estimated.
 #' @param initialise The model structure with which the estimation process
-#'   should be initialised. The default is "additive", where the initial model
-#'   will be a nonparametric additive model. The other options are "linear" -
-#'   linear regression model (i.e. a special case single-index model, where the
-#'   initial values of the index coefficients are obtained through a linear
-#'   regression), "multiple" - multiple models are fitted starting with
-#'   different initial models (default `num_ind` (number of indices) = 5; five
-#'   random instances of the model (i.e. the predictor assignment to indices and
-#'   initial index coefficients are generated randomly) are considered), and the
-#'   final optimal model with the lowest loss is returned (user can change the
-#'   number of indices considered using `num_ind` argument), and "userInput" -
-#'   user specifies the initial model structure (i.e. the number of indices and
-#'   the placement of index variables among indices) and the initial index
+#'   should be initialised. The default is "ppr", where the initial model is
+#'   derived from projection pursuit regression. The other options are
+#'   "additive" - nonparametric additive model, "linear" - linear regression
+#'   model (i.e. a special case single-index model, where the initial values of
+#'   the index coefficients are obtained through a linear regression),
+#'   "multiple" - multiple models are fitted starting with different initial
+#'   models (default `num_ind` (number of indices) = 5; five random instances of
+#'   the model (i.e. the predictor assignment to indices and initial index
+#'   coefficients are generated randomly) are considered), and the final optimal
+#'   model with the lowest loss is returned (user can change the number of
+#'   indices considered using `num_ind` argument), and "userInput" - user
+#'   specifies the initial model structure (i.e. the number of indices and the
+#'   placement of index variables among indices) and the initial index
 #'   coefficients through `index.ind` and `index.coefs` arguments respectively.
-#' @param num_ind If `initialise = "multiple"`: an integer that specifies the
-#'   number of indices to be used in the models.
+#' @param num_ind If `initialise = "ppr" or "multiple"`: an integer that
+#'   specifies the number of indices to be used in the model(s).
+#' @param num_models If `initialise = "multiple"`: an integer that specifies the
+#'   number of starting points to be checked.
+#' @param seed If `initialise = "multiple"`: the seed to be set when generating
+#'   random starting points.
 #' @param index.ind If `initialise = "userInput"`: an integer vector that
 #'   assigns group index for each predictor in `index.vars`.
 #' @param index.coefs If `initialise = "userInput"`: a numeric vector of index
@@ -48,6 +53,7 @@
 #' @param tolCoefs Tolerance for coefficients.
 #' @param TimeLimit A limit for the total time (in seconds) expended in a single
 #'   MIP iteration.
+#' @param MIPGap Relative MIP optimality gap.
 #' @param verbose The option to print detailed solver output.
 #'
 #' @importFrom dplyr arrange filter mutate rename
@@ -56,12 +62,13 @@
 #'
 #' @export
 groupSmimodel <- function(data, yvar, index.vars, 
-                          initialise = c("additive", "linear", "multiple", "userInput"),
-                          num_ind = 5, index.ind = NULL, index.coefs = NULL, 
+                          initialise = c("ppr", "additive", "linear", "multiple", "userInput"),
+                          num_ind = 5, num_models = 5, seed = 123, 
+                          index.ind = NULL, index.coefs = NULL, 
                           neighbour = 0, linear.vars = NULL, 
                           lambda0 = 1, lambda2 = 1, 
                           M = 10, max.iter = 50, tol = 0.001, tolCoefs = 0.001,
-                          TimeLimit = Inf, verbose = FALSE){
+                          TimeLimit = Inf, MIPGap = 1e-4, verbose = FALSE){
   stopifnot(tsibble::is_tsibble(data))
   initialise <- match.arg(initialise)
   data1 <- data
@@ -93,14 +100,16 @@ groupSmimodel <- function(data, yvar, index.vars,
     smimodels_list[[i]] <- smimodel(data = df_cat, yvar = yvar, 
                                     index.vars = index.vars, 
                                     initialise = initialise, 
-                                    num_ind = num_ind,
+                                    num_ind = num_ind, num_models = num_models, 
+                                    seed = seed,
                                     index.ind = index.ind, 
                                     index.coefs = index.coefs,
                                     linear.vars = linear.vars,
                                     lambda0 = lambda0, lambda2 = lambda2, 
                                     M = M, max.iter = max.iter, 
                                     tol = tol, tolCoefs = tolCoefs,
-                                    TimeLimit = TimeLimit, verbose = verbose)
+                                    TimeLimit = TimeLimit, MIPGap = MIPGap,
+                                    verbose = verbose)
   }
   data_list <- list(key_unique, smimodels_list)
   models <- tibble::as_tibble(

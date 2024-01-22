@@ -1,4 +1,4 @@
-#' Sparse Multiple Index (SMI) models
+#' Sparse Multiple Index (SMI) models - with PPR as a starting point
 #'
 #' Fits a nonparametric multiple index model to the data, with simultaneous
 #' variable selection (hence "sparse").
@@ -9,21 +9,22 @@
 #' @param index.vars A character vector of names of the predictor variables for
 #'   which indices should be estimated.
 #' @param initialise The model structure with which the estimation process
-#'   should be initialised. The default is "additive", where the initial model
-#'   will be a nonparametric additive model. The other options are "linear" -
-#'   linear regression model (i.e. a special case single-index model, where the
-#'   initial values of the index coefficients are obtained through a linear
-#'   regression), "multiple" - multiple models are fitted starting with
-#'   different initial models (default `num_ind` (number of indices) = 5; five
-#'   random instances of the model (i.e. the predictor assignment to indices and
-#'   initial index coefficients are generated randomly) are considered), and the
-#'   final optimal model with the lowest loss is returned (user can change the
-#'   number of indices considered using `num_ind` argument), and "userInput" -
-#'   user specifies the initial model structure (i.e. the number of indices and
-#'   the placement of index variables among indices) and the initial index
+#'   should be initialised. The default is "ppr", where the initial model is
+#'   derived from projection pursuit regression. The other options are
+#'   "additive" - nonparametric additive model, "linear" - linear regression
+#'   model (i.e. a special case single-index model, where the initial values of
+#'   the index coefficients are obtained through a linear regression),
+#'   "multiple" - multiple models are fitted starting with different initial
+#'   models (default `num_ind` (number of indices) = 5; five random instances of
+#'   the model (i.e. the predictor assignment to indices and initial index
+#'   coefficients are generated randomly) are considered), and the final optimal
+#'   model with the lowest loss is returned (user can change the number of
+#'   indices considered using `num_ind` argument), and "userInput" - user
+#'   specifies the initial model structure (i.e. the number of indices and the
+#'   placement of index variables among indices) and the initial index
 #'   coefficients through `index.ind` and `index.coefs` arguments respectively.
-#' @param num_ind If `initialise = "multiple"`: an integer that specifies the
-#'   number of indices to be used in the models.
+#' @param num_ind If `initialise = "ppr" or "multiple"`: an integer that
+#'   specifies the number of indices to be used in the model(s).
 #' @param num_models If `initialise = "multiple"`: an integer that specifies the
 #'   number of starting points to be checked.
 #' @param seed If `initialise = "multiple"`: the seed to be set when generating
@@ -46,20 +47,63 @@
 #' @param MIPGap Relative MIP optimality gap.
 #' @param verbose The option to print detailed solver output.
 #'
-#' @importFrom stats runif
+#' @importFrom stats runif ppr
 #' @importFrom gtools permutations
 #'
 #' @export
 smimodel <- function(data, yvar, index.vars, 
-                     initialise = c("additive", "linear", "multiple", "userInput"),
-                     num_ind = 5, num_models = 5, seed = 123, index.ind = NULL, 
-                     index.coefs = NULL, linear.vars = NULL, 
-                     lambda0 = 1, lambda2 = 1, 
-                     M = 10, max.iter = 50, tol = 0.001, tolCoefs = 0.001,
-                     TimeLimit = Inf, MIPGap = 1e-4, verbose = FALSE){
+                             initialise = c("ppr", "additive", "linear", "multiple", "userInput"),
+                             num_ind = 5, num_models = 5, seed = 123, index.ind = NULL, 
+                             index.coefs = NULL, linear.vars = NULL, 
+                             lambda0 = 1, lambda2 = 1, 
+                             M = 10, max.iter = 50, tol = 0.001, tolCoefs = 0.001,
+                             TimeLimit = Inf, MIPGap = 1e-4, verbose = FALSE){
   stopifnot(tibble::is_tibble(data))
   initialise <- match.arg(initialise)
-  if(initialise == "multiple"){
+  if(initialise == "ppr"){
+    scaled <- scaling(data = data, index.vars = index.vars)
+    scaledInfo <- scaled$scaled_info
+    data <- scaled$scaled_data
+    pre.formula <- lapply(index.vars, function(var) paste0(var)) %>%
+      paste(collapse = "+") %>% 
+      paste(yvar, "~", .)
+    # Fitting PPR
+    ppr_fit <- stats::ppr(as.formula(pre.formula), data = data, 
+                          nterms = num_ind)
+    # Sparsifying indices
+    ppr_coefs <- ppr_fit$alpha
+    threshold <- max(ppr_fit$alpha)*0.1
+    zero_ind <- which(abs(ppr_fit$alpha) < threshold)
+    ppr_coefs[zero_ind] <- 0 
+    for(i in 1:NROW(ppr_coefs)){
+      maxCoef <- which.max(abs(ppr_coefs[i, ]))
+      ppr_coefs[i, ][-maxCoef] <- 0 
+    }
+    index.ind <- vector(mode = "list", length = NCOL(ppr_coefs))
+    index.coefs <- vector(mode = "list", length = NCOL(ppr_coefs))
+    for(a in 1:NCOL(ppr_coefs)){
+      index.ind[[a]] <- rep(a, NROW(ppr_coefs))
+      index.coefs[[a]] <- ppr_coefs[ , a]
+    }
+    index.ind <- unlist(index.ind)
+    index.coefs <- unlist(index.coefs)
+    names(index.coefs) <- NULL
+    # Constructing the initial `smimodel`
+    init_smimodel <- new_smimodel(data = data, yvar = yvar, 
+                                  index.vars = index.vars, 
+                                  initialise = "userInput",  
+                                  index.ind = index.ind, 
+                                  index.coefs = index.coefs, 
+                                  linear.vars = linear.vars)
+    # Optimising the initial `smimodel`
+    opt_smimodel_temp <- update_smimodel(object = init_smimodel, data = data, 
+                                    lambda0 = lambda0, lambda2 = lambda2, 
+                                    M = M, max.iter = max.iter, 
+                                    tol = tol, tolCoefs = tolCoefs,
+                                    TimeLimit = TimeLimit, 
+                                    MIPGap = MIPGap, verbose = verbose)
+    opt_smimodel <- unscaling(object = opt_smimodel_temp, scaledInfo = scaled)
+  }else if(initialise == "multiple"){
     Y_data <- as.matrix(data[ , yvar])
     num_pred <- length(index.vars)
     smimodels_initial <- vector(mode = "list", length = 5)

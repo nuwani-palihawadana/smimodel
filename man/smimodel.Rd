@@ -2,13 +2,13 @@
 % Please edit documentation in R/smimodel.R
 \name{smimodel}
 \alias{smimodel}
-\title{Sparse Multiple Index (SMI) models}
+\title{Sparse Multiple Index (SMI) models - with PPR as a starting point}
 \usage{
 smimodel(
   data,
   yvar,
   index.vars,
-  initialise = c("additive", "linear", "multiple", "userInput"),
+  initialise = c("ppr", "additive", "linear", "multiple", "userInput"),
   num_ind = 5,
   num_models = 5,
   seed = 123,
@@ -36,22 +36,23 @@ smimodel(
 which indices should be estimated.}
 
 \item{initialise}{The model structure with which the estimation process
-should be initialised. The default is "additive", where the initial model
-will be a nonparametric additive model. The other options are "linear" -
-linear regression model (i.e. a special case single-index model, where the
-initial values of the index coefficients are obtained through a linear
-regression), "multiple" - multiple models are fitted starting with
-different initial models (default \code{num_ind} (number of indices) = 5; five
-random instances of the model (i.e. the predictor assignment to indices and
-initial index coefficients are generated randomly) are considered), and the
-final optimal model with the lowest loss is returned (user can change the
-number of indices considered using \code{num_ind} argument), and "userInput" -
-user specifies the initial model structure (i.e. the number of indices and
-the placement of index variables among indices) and the initial index
+should be initialised. The default is "ppr", where the initial model is
+derived from projection pursuit regression. The other options are
+"additive" - nonparametric additive model, "linear" - linear regression
+model (i.e. a special case single-index model, where the initial values of
+the index coefficients are obtained through a linear regression),
+"multiple" - multiple models are fitted starting with different initial
+models (default \code{num_ind} (number of indices) = 5; five random instances of
+the model (i.e. the predictor assignment to indices and initial index
+coefficients are generated randomly) are considered), and the final optimal
+model with the lowest loss is returned (user can change the number of
+indices considered using \code{num_ind} argument), and "userInput" - user
+specifies the initial model structure (i.e. the number of indices and the
+placement of index variables among indices) and the initial index
 coefficients through \code{index.ind} and \code{index.coefs} arguments respectively.}
 
-\item{num_ind}{If \code{initialise = "multiple"}: an integer that specifies the
-number of indices to be used in the models.}
+\item{num_ind}{If \verb{initialise = "ppr" or "multiple"}: an integer that
+specifies the number of indices to be used in the model(s).}
 
 \item{num_models}{If \code{initialise = "multiple"}: an integer that specifies the
 number of starting points to be checked.}

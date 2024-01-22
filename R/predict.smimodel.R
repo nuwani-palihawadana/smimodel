@@ -59,24 +59,30 @@ predict.smimodel <- function(object, newdata, recursive = FALSE,
       for(m in 1:(NROW(newdata) - 1)){
         data_temp = newdata[m, ]
         X_test <- as.matrix(newdata[m, object$vars_index])
-        if("intercept" %in% names(list_index[[1]])){
-          X_test <- X_test %>%
-            tibble::as_tibble() %>%
-            dplyr::mutate(intercept = 1)
-          # Calculating indices
-          ind <- vector(mode = "list", length = length(list_index))
-          for(i in 1:length(list_index)){
-            ind[[i]] <- as.numeric(as.matrix(X_test[ , object$vars_index]) %*% 
-                                     as.matrix(list_index[[i]]$coefficients, ncol = 1)) +
-              as.numeric(as.matrix(X_test[, "intercept"]) %*% 
-                           as.matrix(list_index[[i]]$intercept, ncol = 1))
-          }
-        }else{
-          # Calculating indices
-          ind <- vector(mode = "list", length = length(list_index))
-          for(i in 1:length(list_index)){
-            ind[[i]] <- as.numeric(X_test %*% as.matrix(list_index[[i]]$coefficients, ncol = 1))
-          } 
+        # if("intercept" %in% names(list_index[[1]])){
+        #   X_test <- X_test %>%
+        #     tibble::as_tibble() %>%
+        #     dplyr::mutate(intercept = 1)
+        #   # Calculating indices
+        #   ind <- vector(mode = "list", length = length(list_index))
+        #   for(i in 1:length(list_index)){
+        #     ind[[i]] <- as.numeric(as.matrix(X_test[ , object$vars_index]) %*%
+        #                              as.matrix(list_index[[i]]$coefficients, ncol = 1)) +
+        #       as.numeric(as.matrix(X_test[, "intercept"]) %*%
+        #                    as.matrix(list_index[[i]]$intercept, ncol = 1))
+        #   }
+        # }else{
+        #   # Calculating indices
+        #   ind <- vector(mode = "list", length = length(list_index))
+        #   for(i in 1:length(list_index)){
+        #     ind[[i]] <- as.numeric(X_test %*% as.matrix(list_index[[i]]$coefficients, ncol = 1))
+        #   }
+        # }
+        
+        # Calculating indices
+        ind <- vector(mode = "list", length = length(list_index))
+        for(i in 1:length(list_index)){
+          ind[[i]] <- as.numeric(X_test %*% as.matrix(list_index[[i]]$coefficients, ncol = 1))
         }
         names(ind) <- names(list_index)
         dat <- tibble::as_tibble(ind)
@@ -94,24 +100,30 @@ predict.smimodel <- function(object, newdata, recursive = FALSE,
       }
       data_temp = newdata[NROW(newdata), ]
       X_test <- as.matrix(newdata[NROW(newdata), object$vars_index])
-      if("intercept" %in% names(list_index[[1]])){
-        X_test <- X_test %>%
-          tibble::as_tibble() %>%
-          dplyr::mutate(intercept = 1)
-        # Calculating indices
-        ind <- vector(mode = "list", length = length(list_index))
-        for(i in 1:length(list_index)){
-          ind[[i]] <- as.numeric(as.matrix(X_test[ , object$vars_index]) %*% 
-                                   as.matrix(list_index[[i]]$coefficients, ncol = 1)) +
-            as.numeric(as.matrix(X_test[, "intercept"]) %*% 
-                         as.matrix(list_index[[i]]$intercept, ncol = 1))
-        }
-      }else{
-        # Calculating indices
-        ind <- vector(mode = "list", length = length(list_index))
-        for(i in 1:length(list_index)){
-          ind[[i]] <- as.numeric(X_test %*% as.matrix(list_index[[i]]$coefficients, ncol = 1))
-        } 
+      # if("intercept" %in% names(list_index[[1]])){
+      #   X_test <- X_test %>%
+      #     tibble::as_tibble() %>%
+      #     dplyr::mutate(intercept = 1)
+      #   # Calculating indices
+      #   ind <- vector(mode = "list", length = length(list_index))
+      #   for(i in 1:length(list_index)){
+      #     ind[[i]] <- as.numeric(as.matrix(X_test[ , object$vars_index]) %*%
+      #                              as.matrix(list_index[[i]]$coefficients, ncol = 1)) +
+      #       as.numeric(as.matrix(X_test[, "intercept"]) %*%
+      #                    as.matrix(list_index[[i]]$intercept, ncol = 1))
+      #   }
+      # }else{
+      #   # Calculating indices
+      #   ind <- vector(mode = "list", length = length(list_index))
+      #   for(i in 1:length(list_index)){
+      #     ind[[i]] <- as.numeric(X_test %*% as.matrix(list_index[[i]]$coefficients, ncol = 1))
+      #   }
+      # }
+      
+      # Calculating indices
+      ind <- vector(mode = "list", length = length(list_index))
+      for(i in 1:length(list_index)){
+        ind[[i]] <- as.numeric(X_test %*% as.matrix(list_index[[i]]$coefficients, ncol = 1))
       }
       names(ind) <- names(list_index)
       dat <- tibble::as_tibble(ind)
@@ -123,24 +135,30 @@ predict.smimodel <- function(object, newdata, recursive = FALSE,
         dplyr::mutate(.predict = pred) 
     }else if(recursive == FALSE){
       X_test <- as.matrix(newdata[ , object$vars_index])
-      if("intercept" %in% names(list_index[[1]])){
-        X_test <- X_test %>%
-          tibble::as_tibble() %>%
-          dplyr::mutate(intercept = 1)
-        # Calculating indices
-        ind <- vector(mode = "list", length = length(list_index))
-        for(i in 1:length(list_index)){
-          ind[[i]] <- as.numeric(as.matrix(X_test[ , object$vars_index]) %*% 
-                                   as.matrix(list_index[[i]]$coefficients, ncol = 1)) +
-            as.numeric(as.matrix(X_test[, "intercept"]) %*% 
-                         as.matrix(list_index[[i]]$intercept, ncol = 1))
-        }
-      }else{
-        # Calculating indices
-        ind <- vector(mode = "list", length = length(list_index))
-        for(i in 1:length(list_index)){
-          ind[[i]] <- as.numeric(X_test %*% as.matrix(list_index[[i]]$coefficients, ncol = 1))
-        } 
+      # if("intercept" %in% names(list_index[[1]])){
+      #   X_test <- X_test %>%
+      #     tibble::as_tibble() %>%
+      #     dplyr::mutate(intercept = 1)
+      #   # Calculating indices
+      #   ind <- vector(mode = "list", length = length(list_index))
+      #   for(i in 1:length(list_index)){
+      #     ind[[i]] <- as.numeric(as.matrix(X_test[ , object$vars_index]) %*%
+      #                              as.matrix(list_index[[i]]$coefficients, ncol = 1)) +
+      #       as.numeric(as.matrix(X_test[, "intercept"]) %*%
+      #                    as.matrix(list_index[[i]]$intercept, ncol = 1))
+      #   }
+      # }else{
+      #   # Calculating indices
+      #   ind <- vector(mode = "list", length = length(list_index))
+      #   for(i in 1:length(list_index)){
+      #     ind[[i]] <- as.numeric(X_test %*% as.matrix(list_index[[i]]$coefficients, ncol = 1))
+      #   }
+      # }
+      
+      # Calculating indices
+      ind <- vector(mode = "list", length = length(list_index))
+      for(i in 1:length(list_index)){
+        ind[[i]] <- as.numeric(X_test %*% as.matrix(list_index[[i]]$coefficients, ncol = 1))
       }
       names(ind) <- names(list_index)
       dat <- tibble::as_tibble(ind)

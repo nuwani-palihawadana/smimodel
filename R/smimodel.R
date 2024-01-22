@@ -73,10 +73,10 @@ smimodel <- function(data, yvar, index.vars,
     # Sparsifying indices
     ppr_coefs <- ppr_fit$alpha
     threshold <- max(ppr_fit$alpha)*0.1
-    zero_ind <- which(abs(ppr_fit$alpha) < threshold)
+    zero_ind <- which(ppr_fit$alpha < threshold)
     ppr_coefs[zero_ind] <- 0 
     for(i in 1:NROW(ppr_coefs)){
-      maxCoef <- which.max(abs(ppr_coefs[i, ]))
+      maxCoef <- which.max(ppr_coefs[i, ])
       ppr_coefs[i, ][-maxCoef] <- 0 
     }
     index.ind <- vector(mode = "list", length = NCOL(ppr_coefs))

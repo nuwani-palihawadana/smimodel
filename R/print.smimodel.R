@@ -17,11 +17,11 @@ print.smimodel <- function(x, ...) {
     cat("index", i, "\n")
     print(x[[i]]$coefficients)
     cat("\n")
-    if("intercept" %in% names(x[[i]])){
-      cat("intercept\n")
-      print(x[[i]]$intercept)
-      cat("\n")
-    }
+    # if("intercept" %in% names(x[[i]])){
+    #   cat("intercept\n")
+    #   print(x[[i]]$intercept)
+    #   cat("\n")
+    # }
   }
   cat("Response variable:\n")
   print(x$var_y)

@@ -14,13 +14,10 @@ unscaling <- function(object, scaledInfo){
   scaledInfo <- scaledInfo$scaled_info
   list_index <- object[1:(length(object)-4)]
   for(b in 1:length(list_index)){
-    temp_ind <- rep(b, length(object$vars_index))
-    temp_coef <- list_index[[b]]$coefficients/scaledInfo$scaled_scales
-    names(temp_coef) <- NULL
-    coef_norm <- unlist(tapply(temp_coef, temp_ind, normalise_alpha))
-    object[[b]]$coefficients <- coef_norm
-    temp_intercept <- ((list_index[[b]]$coefficients*scaledInfo$scaled_means*(-1))/scaledInfo$scaled_scales)
-    object[[b]]$intercept <- sum(temp_intercept)
+    temp_coef <- list_index[[b]]$coefficients/scaledInfo
+    object[[b]]$coefficients <- temp_coef
+    # temp_intercept <- ((list_index[[b]]$coefficients*scaledInfo$scaled_means*(-1))/scaledInfo$scaled_scales)
+    # object[[b]]$intercept <- sum(temp_intercept)
   }
   return(object)
 }

@@ -7,15 +7,19 @@
 #' @param index.vars A character vector of names of the predictor variables for
 #'   which indices should be estimated.
 #'   
-#' @importFrom dplyr mutate_at
+#' @importFrom dplyr mutate_at select
+#' @importFrom stats sd
 #'   
 #' @export
 scaling <- function(data, index.vars){
-  scaleData <- scale(data[ , index.vars])
-  scaleInfo <- list("scaled_means" = attributes(scaleData)$`scaled:center`,
-                    "scaled_scales" = attributes(scaleData)$`scaled:scale`)
+  scaleData <- scale(data[ , index.vars], center = FALSE, 
+                     scale = apply(data[ , index.vars], 2, sd, na.rm = TRUE))
+  scaleInfo <- attributes(scaleData)$`scaled:scale`
   data <- data %>%
-    dplyr::mutate_at(index.vars, ~(scale(.) %>% as.vector))
+    dplyr::select(-{{index.vars}})
+  data <- dplyr::bind_cols(data, scaleData)
+  # data <- data %>%
+  #   dplyr::mutate_at(index.vars, ~(scale(., center = FALSE, scale = apply(., 2, sd, na.rm = TRUE)) %>% as.vector))
   output <- list("scaled_data" = data, "scaled_info" = scaleInfo)
   return(output)
 }

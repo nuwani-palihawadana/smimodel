@@ -25,20 +25,28 @@ update_alpha <- function(Y, X, num_pred, num_ind, index.ind, dgz, alpha_old,
                          MIPGap = 1e-4, verbose = FALSE){
   dgz <- as.matrix(dgz[, index.ind])
   V <- X * dgz
+  Vt <- t(V)
   #print("Time (in seconds) taken for the calculation of VtV:")
-  time <- system.time(VtV <- t(V) %*% V)
+  #time <- system.time(VtV <- t(V) %*% V)
+  VtV <- Vt %*% V
   #print(time)
-  VtR <- t(V) %*% Y
+  VtR <- Vt %*% Y
   VtR_t <- t(VtR)
   VtV_alpha_old_t <- t(VtV %*% alpha_old)
-  Q <- as.matrix(2 * Matrix::bdiag(VtV + lambda2*diag(num_pred*num_ind), 
+  # Q <- (2 * Matrix::bdiag(VtV + lambda2*diag(num_pred*num_ind), 
+  #                                  diag(0, num_pred*num_ind)))
+  
+  # Converting the sparse matrix to a normal matrix in R because `ROI::Q_objective()`
+  # does not accept sparse matrices.
+  Q <- as.matrix(2 * Matrix::bdiag(VtV + lambda2*diag(num_pred*num_ind),
                                    diag(0, num_pred*num_ind)))
   L <- t(as.matrix(c((-2*VtV_alpha_old_t - 2*VtR_t),
                      rep(lambda0, num_ind*num_pred)), 
                    ncol = 2*num_ind*num_pred, nrow = 1))
   # Objective function
   #print("Time (in seconds) taken for the construction of the quadratic objective function:")
-  time <- system.time(obj <- ROI::Q_objective(Q = Q, L = L))
+  #time <- system.time(obj <- ROI::Q_objective(Q = Q, L = L))
+  obj <- ROI::Q_objective(Q = Q, L = L)
   #print(time)
   # Constraints
   C1 <- Matrix::bdiag(replicate(num_ind, diag(num_pred), simplify = FALSE))
@@ -71,8 +79,10 @@ update_alpha <- function(Y, X, num_pred, num_ind, index.ind, dgz, alpha_old,
                   maximum = FALSE)
   # Solving
   #print("Time (in seconds) taken for solving the MIP:")
-  time <- system.time(sol <- ROI::ROI_solve(init, solver = "gurobi", TimeLimit = TimeLimit, 
-                        MIPGap = MIPGap, verbose = verbose))
+  #time <- system.time(sol <- ROI::ROI_solve(init, solver = "gurobi", TimeLimit = TimeLimit, 
+                        #MIPGap = MIPGap, verbose = verbose))
+  sol <- ROI::ROI_solve(init, solver = "gurobi", TimeLimit = TimeLimit, 
+                                            MIPGap = MIPGap, verbose = verbose)
   #print(time)
   # Binary variables check
   coefs <- sol$solution[1:(num_ind*num_pred)]

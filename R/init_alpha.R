@@ -20,8 +20,9 @@
 init_alpha <- function(Y, X, index.ind, init.type = "penalisedReg", 
                        lambda0 = 1, lambda2 = 1, M = 10){
   p = NCOL(X)
-  XtX = t(X) %*% X
-  XtY = t(X) %*% Y
+  Xt = t(X)
+  XtX = Xt %*% X
+  XtY = Xt %*% Y
   if(init.type == "reg"){
     Q <- 2 * XtX
     L <- t(as.matrix(-2 * t(XtY), nrow = 1, ncol = p))
@@ -37,7 +38,9 @@ init_alpha <- function(Y, X, index.ind, init.type = "penalisedReg",
     alpha_raw <- sol$solution[1:p]
     alpha_0 <- unlist(tapply(sol$solution[1:p], index.ind, normalise_alpha))
   }else if(init.type == "penalisedReg"){
-    Q <- as.matrix(2 * Matrix::bdiag(XtX + (lambda2*diag(p)), diag(0, p)))
+    Q <- as.matrix(2 * Matrix::bdiag(XtX + (lambda2*diag(p)), diag(0, p))) 
+    # Converting the sparse matrix to a normal matrix in R because `ROI::Q_objective()`
+    # does not accept sparse matrices.
     L <- t(as.matrix(c(-2 * t(XtY), rep(lambda0, p)), nrow = 1, ncol = 2*p))
     # Objective function
     obj = ROI::Q_objective(Q = Q, L = L)

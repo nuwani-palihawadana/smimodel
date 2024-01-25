@@ -55,9 +55,18 @@ new_smimodel <- function(data, yvar, index.vars,
     # Calculating indices
     ind <- vector(length = length(ind_pos), mode = "list")
     for(i in 1:length(ind)){
+      if(length(ind_pos[[i]]) == 1){
+        temp <- i
+      }else{
+        temp <- unlist(lapply(1:length(ind_pos[[i]]), function(x) paste0(i, x))) 
+      }
       ind[[i]] <- as.numeric(X_index[, ind_pos[[i]]] %*% 
-                               as.matrix(alpha[startsWith(names(alpha), paste0(i))], ncol = 1))
+                               as.matrix(alpha[match(temp, names(alpha))], ncol = 1))
     }
+    # for(i in 1:length(ind)){
+    #   ind[[i]] <- as.numeric(X_index[, ind_pos[[i]]] %*% 
+    #                            as.matrix(alpha[startsWith(names(alpha), paste0(i))], ncol = 1))
+    # }
     dat_names <- names(ind) <- paste0("index", 1:length(ind))
     dat <- tibble::as_tibble(ind)
     dat_new <- dplyr::bind_cols(data, dat)

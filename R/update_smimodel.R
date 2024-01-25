@@ -29,17 +29,22 @@ update_smimodel <- function(object, data, lambda0 = 1, lambda2 = 1,
   if (!tibble::is_tibble(data)) stop("data is not a tibble.")
   data <- data %>% drop_na()
   # Preparing inputs to `inner_update()`
-  list_index <- object[1:(length(object)-4)]
-  num_ind <- length(list_index)
+  #list_index <- object[1:(length(object)-4)]
+  list_index <- object$alpha[ , 2:NCOL(object$alpha)]
+  #num_ind <- length(list_index)
+  num_ind <- NCOL(list_index)
   alpha <- vector(mode = "list", length = num_ind)
-  dgz <- vector(mode = "list", length = num_ind)
+  #dgz <- vector(mode = "list", length = num_ind)
+  # for(i in 1:num_ind){
+  #   alpha[[i]] <- list_index[[i]]$coefficients
+  #   dgz[[i]] <- list_index[[i]]$derivatives
+  # }
   for(i in 1:num_ind){
-    alpha[[i]] <- list_index[[i]]$coefficients
-    dgz[[i]] <- list_index[[i]]$derivatives
+    alpha[[i]] <- list_index[ , i]
   }
   alpha <- unlist(alpha)
-  names(dgz) <- paste0("d", 1:num_ind)
-  dgz <- as.matrix(tibble::as_tibble(dgz))
+  #names(dgz) <- paste0("d", 1:num_ind)
+  dgz <- as.matrix(object$derivatives)
   # Optimising the model
   best_alpha1 <- inner_update(x = object$gam, data = data, yvar = object$var_y,
                               index.vars = object$vars_index, 

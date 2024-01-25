@@ -106,9 +106,9 @@ smimodel <- function(data, yvar, index.vars,
   }else if(initialise == "multiple"){
     Y_data <- as.matrix(data[ , yvar])
     num_pred <- length(index.vars)
-    smimodels_initial <- vector(mode = "list", length = 5)
-    smimodels_optimised <- vector(mode = "list", length = 5)
-    smimodels_loss <- vector(mode = "list", length = 5)
+    smimodels_initial <- vector(mode = "list", length = num_models)
+    smimodels_optimised <- vector(mode = "list", length = num_models)
+    smimodels_loss <- vector(mode = "list", length = num_models)
     # Multiple starting points
     permutes <- gtools::permutations(num_ind, num_ind)
     set.seed(seed)

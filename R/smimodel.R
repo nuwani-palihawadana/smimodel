@@ -1,4 +1,4 @@
-#' Sparse Multiple Index (SMI) models - with PPR as a starting point
+#' Sparse Multiple Index (SMI) models
 #'
 #' Fits a nonparametric multiple index model to the data, with simultaneous
 #' variable selection (hence "sparse").
@@ -52,12 +52,12 @@
 #'
 #' @export
 smimodel <- function(data, yvar, index.vars, 
-                             initialise = c("ppr", "additive", "linear", "multiple", "userInput"),
-                             num_ind = 5, num_models = 5, seed = 123, index.ind = NULL, 
-                             index.coefs = NULL, linear.vars = NULL, 
-                             lambda0 = 1, lambda2 = 1, 
-                             M = 10, max.iter = 50, tol = 0.001, tolCoefs = 0.001,
-                             TimeLimit = Inf, MIPGap = 1e-4, verbose = FALSE){
+                     initialise = c("ppr", "additive", "linear", "multiple", "userInput"),
+                     num_ind = 5, num_models = 5, seed = 123, index.ind = NULL, 
+                     index.coefs = NULL, linear.vars = NULL, 
+                     lambda0 = 1, lambda2 = 1, 
+                     M = 10, max.iter = 50, tol = 0.001, tolCoefs = 0.001,
+                     TimeLimit = Inf, MIPGap = 1e-4, verbose = FALSE){
   stopifnot(tibble::is_tibble(data))
   initialise <- match.arg(initialise)
   if(initialise == "ppr"){

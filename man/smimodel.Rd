@@ -2,7 +2,7 @@
 % Please edit documentation in R/smimodel.R
 \name{smimodel}
 \alias{smimodel}
-\title{Sparse Multiple Index (SMI) models - with PPR as a starting point}
+\title{Sparse Multiple Index (SMI) models}
 \usage{
 smimodel(
   data,

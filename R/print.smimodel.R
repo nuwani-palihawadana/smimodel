@@ -11,18 +11,9 @@
 #' @export
 print.smimodel <- function(x, ...) {
   cat("Fitted smimodel:\n")
-  cat("Estimated index coefficients:\n")
-  list_index <- x[1:(length(x)-4)]
-  for(i in 1:length(list_index)){
-    cat("index", i, "\n")
-    print(x[[i]]$coefficients)
-    cat("\n")
-    # if("intercept" %in% names(x[[i]])){
-    #   cat("intercept\n")
-    #   print(x[[i]]$intercept)
-    #   cat("\n")
-    # }
-  }
+  cat("Index coefficients:\n")
+  print(x$alpha)
+  cat("\n")
   cat("Response variable:\n")
   print(x$var_y)
   cat("\n")

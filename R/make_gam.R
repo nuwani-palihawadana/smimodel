@@ -19,10 +19,10 @@ make_gam <- function(x, data){
   data <- data %>%
     drop_na()
   X_index <- as.matrix(data[ , x$vars_index])
-  list_index <- x[1:(length(x)-3)]
+  list_index <- x$alpha[ , 2:NCOL(x$alpha)]
   alpha <- vector(mode = "list", length = length(list_index))
   for(i in 1:length(list_index)){
-    alpha[[i]] <- list_index[[i]]$coefficients
+    alpha[[i]] <- list_index[ , i]
   }
   alpha <- unlist(alpha)
   if(all(alpha == 0)){
@@ -39,7 +39,7 @@ make_gam <- function(x, data){
     # Calculating indices
     ind <- vector(mode = "list", length = length(list_index))
     for(i in 1:length(ind)){
-      ind[[i]] <- as.numeric(X_index %*% as.matrix(list_index[[i]]$coefficients, ncol = 1))
+      ind[[i]] <- as.numeric(X_index %*% as.matrix(list_index[ , i], ncol = 1))
     }
     names(ind) <- names(list_index)
     dat <- tibble::as_tibble(ind)

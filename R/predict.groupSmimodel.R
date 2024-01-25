@@ -39,10 +39,12 @@ predict.groupSmimodel <- function(object, newdata, recursive = FALSE,
       data_temp = newdata[m, ]
       key22 = data_temp[ , {{ key11 }}][[1]]
       key22_pos = which(object$key == key22)
-      list_index <- object$fit[[key22_pos]]$best[1:(length(object$fit[[key22_pos]]$best)-4)]
+      #list_index <- object$fit[[key22_pos]]$best[1:(length(object$fit[[key22_pos]]$best)-4)]
+      list_index <- object$fit[[key22_pos]]$best$alpha[ , 2:NCOL(object$fit[[key22_pos]]$best$alpha)]
       alpha <- vector(mode = "list", length = length(list_index))
       for(b in 1:length(list_index)){
-        alpha[[b]] <- list_index[[b]]$coefficients
+        #alpha[[b]] <- list_index[[b]]$coefficients
+        alpha[[b]] <- list_index[ , b]
       }
       alpha <- unlist(alpha)
       if(all(alpha == 0)){
@@ -52,7 +54,7 @@ predict.groupSmimodel <- function(object, newdata, recursive = FALSE,
         # Calculating indices
         ind <- vector(mode = "list", length = length(list_index))
         for(i in 1:length(list_index)){
-          ind[[i]] <- as.numeric(X_test %*% as.matrix(list_index[[i]]$coefficients, ncol = 1))
+          ind[[i]] <- as.numeric(X_test %*% as.matrix(list_index[ , i], ncol = 1))
         }
         names(ind) <- names(list_index)
         dat <- tibble::as_tibble(ind)
@@ -72,10 +74,12 @@ predict.groupSmimodel <- function(object, newdata, recursive = FALSE,
     data_temp = newdata[NROW(newdata), ]
     key22 = data_temp[ , {{ key11 }}][[1]]
     key22_pos = which(object$key == key22)
-    list_index <- object$fit[[key22_pos]]$best[1:(length(object$fit[[key22_pos]]$best)-4)]
+    #list_index <- object$fit[[key22_pos]]$best[1:(length(object$fit[[key22_pos]]$best)-4)]
+    list_index <- object$fit[[key22_pos]]$best$alpha[ , 2:NCOL(object$fit[[key22_pos]]$best$alpha)]
     alpha <- vector(mode = "list", length = length(list_index))
     for(w in 1:length(list_index)){
-      alpha[[w]] <- list_index[[w]]$coefficients
+      #alpha[[w]] <- list_index[[w]]$coefficients
+      alpha[[w]] <- list_index[ , w]
     }
     alpha <- unlist(alpha)
     if(all(alpha == 0)){
@@ -85,7 +89,7 @@ predict.groupSmimodel <- function(object, newdata, recursive = FALSE,
       # Calculating indices
       ind <- vector(mode = "list", length = length(list_index))
       for(a in 1:length(list_index)){
-        ind[[a]] <- as.numeric(X_test %*% as.matrix(list_index[[a]]$coefficients, ncol = 1))
+        ind[[a]] <- as.numeric(X_test %*% as.matrix(list_index[ , a], ncol = 1))
       }
       names(ind) <- names(list_index)
       dat <- tibble::as_tibble(ind)
@@ -103,10 +107,12 @@ predict.groupSmimodel <- function(object, newdata, recursive = FALSE,
     data_list <- vector(mode = "list", length = NROW(object))
     for (i in 1:NROW(object)) {
       newdata_cat <- newdata[newdata[{{ key11 }}] == object$key[i], ]
-      list_index <- object$fit[[i]]$best[1:(length(object$fit[[i]]$best)-4)]
+      #list_index <- object$fit[[i]]$best[1:(length(object$fit[[i]]$best)-4)]
+      list_index <- object$fit[[i]]$best$alpha[ , 2:NCOL(object$fit[[i]]$best$alpha)]
       alpha <- vector(mode = "list", length = length(list_index))
       for(z in 1:length(list_index)){
-        alpha[[z]] <- list_index[[z]]$coefficients
+        #alpha[[z]] <- list_index[[z]]$coefficients
+        alpha[[z]] <- list_index[ , z]
       }
       alpha <- unlist(alpha)
       if(all(alpha == 0)){
@@ -116,7 +122,7 @@ predict.groupSmimodel <- function(object, newdata, recursive = FALSE,
         # Calculating indices
         ind <- vector(mode = "list", length = length(list_index))
         for(k in 1:length(ind)){
-          ind[[k]] <- as.numeric(X_test %*% as.matrix(list_index[[k]]$coefficients, ncol = 1))
+          ind[[k]] <- as.numeric(X_test %*% as.matrix(list_index[ , k], ncol = 1))
         }
         names(ind) <- names(list_index)
         dat <- tibble::as_tibble(ind)

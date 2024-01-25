@@ -18,10 +18,12 @@ predict.smimodel <- function(object, newdata, recursive = FALSE,
                              recursive_colRange = NULL, ...) {
   if (!is_tibble(newdata)) stop("newdata is not a tibble.")
   predict_fn <- mgcv::predict.gam
-  list_index <- object[1:(length(object)-4)]
+  list_index <- object$alpha[ , 2:NCOL(object$alpha)]
+  #list_index <- object[1:(length(object)-4)]
   alpha <- vector(mode = "list", length = length(list_index))
   for(i in 1:length(list_index)){
-    alpha[[i]] <- list_index[[i]]$coefficients
+    #alpha[[i]] <- list_index[[i]]$coefficients
+    alpha[[i]] <- list_index[ , i]
   }
   alpha <- unlist(alpha)
   if(all(alpha == 0)){
@@ -82,7 +84,7 @@ predict.smimodel <- function(object, newdata, recursive = FALSE,
         # Calculating indices
         ind <- vector(mode = "list", length = length(list_index))
         for(i in 1:length(list_index)){
-          ind[[i]] <- as.numeric(X_test %*% as.matrix(list_index[[i]]$coefficients, ncol = 1))
+          ind[[i]] <- as.numeric(X_test %*% as.matrix(list_index[ , i], ncol = 1))
         }
         names(ind) <- names(list_index)
         dat <- tibble::as_tibble(ind)
@@ -123,7 +125,7 @@ predict.smimodel <- function(object, newdata, recursive = FALSE,
       # Calculating indices
       ind <- vector(mode = "list", length = length(list_index))
       for(i in 1:length(list_index)){
-        ind[[i]] <- as.numeric(X_test %*% as.matrix(list_index[[i]]$coefficients, ncol = 1))
+        ind[[i]] <- as.numeric(X_test %*% as.matrix(list_index[ , i], ncol = 1))
       }
       names(ind) <- names(list_index)
       dat <- tibble::as_tibble(ind)
@@ -158,7 +160,7 @@ predict.smimodel <- function(object, newdata, recursive = FALSE,
       # Calculating indices
       ind <- vector(mode = "list", length = length(list_index))
       for(i in 1:length(list_index)){
-        ind[[i]] <- as.numeric(X_test %*% as.matrix(list_index[[i]]$coefficients, ncol = 1))
+        ind[[i]] <- as.numeric(X_test %*% as.matrix(list_index[ , i], ncol = 1))
       }
       names(ind) <- names(list_index)
       dat <- tibble::as_tibble(ind)

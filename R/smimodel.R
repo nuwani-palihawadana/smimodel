@@ -134,11 +134,13 @@ smimodel <- function(data, yvar, index.vars,
                                                   MIPGap = MIPGap,
                                                   verbose = verbose)
       # Preparing alpha - index coefficients vector
-      list_index <- smimodels_optimised[[j]][1:(length(smimodels_optimised[[j]])-4)]
+      list_index <- smimodels_optimised[[j]]$alpha[ , 2:NCOL(smimodels_optimised[[j]]$alpha)]
+      #list_index <- smimodels_optimised[[j]][1:(length(smimodels_optimised[[j]])-4)]
       numInd <- length(list_index)
       alpha <- vector(mode = "list", length = numInd)
       for(k in 1:numInd){
-        alpha[[k]] <- list_index[[k]]$coefficients
+        alpha[[k]] <- list_index[ , k]
+        #alpha[[k]] <- list_index[[k]]$coefficients
       }
       alpha <- unlist(alpha)
       # Calculating loss

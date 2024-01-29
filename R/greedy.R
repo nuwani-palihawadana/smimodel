@@ -7,6 +7,8 @@
 #' @param data Training data set on which models will be trained. Should be a
 #'   `tibble`.
 #' @param yvar Name of the response variable as a character string.
+#' @param family A description of the error distribution and link function to be
+#'   used in the model (see \code{\link{glm}} and \code{\link{family}}).
 #' @param index.vars A character vector of names of the predictor variables for
 #'   which indices should be estimated.
 #' @param initialise The model structure with which the estimation process
@@ -62,10 +64,12 @@
 #' @importFrom future plan
 #' @importFrom furrr future_map
 #' @importFrom purrr map
+#' @importFrom stats gaussian
 #'
 #' @export
-greedy <- function(data, yvar, index.vars, 
-                   initialise = c("ppr", "additive", "linear", "multiple", "userInput"),
+greedy <- function(data, yvar, family = gaussian(), index.vars, 
+                   initialise = c("ppr", "additive", "linear", 
+                                  "multiple", "userInput"),
                    num_ind = 5, num_models = 5, seed = 123, index.ind = NULL, 
                    index.coefs = NULL, linear.vars = NULL, 
                    lambda0_seq, lambda2_seq, lambda0_start_seq, 
@@ -93,6 +97,7 @@ greedy <- function(data, yvar, index.vars,
   # Model fitting for each combination of lambdas
   MSE_list <- seq(1, NROW(lambda_comb), by = 1) %>%
     map_f(~ smimodel_tune(data = data, yvar = yvar, 
+                          family = family,
                           index.vars = index.vars, 
                           initialise = initialise, 
                           num_ind = num_ind, num_models = num_models, 
@@ -127,6 +132,7 @@ greedy <- function(data, yvar, index.vars,
     lambda_comb <- lambda_comb_new1[lambda_exist2 == FALSE, ]
     MSE_list <- seq(1, NROW(lambda_comb), by = 1) %>%
       map_f(~ smimodel_tune(data = data, yvar = yvar, 
+                            family = family,
                             index.vars = index.vars, 
                             initialise = initialise, 
                             num_ind = num_ind, num_models = num_models, 
@@ -149,6 +155,7 @@ greedy <- function(data, yvar, index.vars,
   }
   # Final smimodel
   final_smimodel_list <- smimodel(data = data, yvar = yvar, 
+                                  family = family,
                                   index.vars = index.vars, 
                                   initialise = initialise, 
                                   num_ind = num_ind, num_models = num_models, 

@@ -6,6 +6,8 @@
 #' @param data Training data set on which models will be trained. Should be a
 #'   `tibble`.
 #' @param yvar Name of the response variable as a character string.
+#' @param family A description of the error distribution and link function to be
+#'   used in the model (see \code{\link{glm}} and \code{\link{family}}).
 #' @param index.vars A character vector of names of the predictor variables for
 #'   which indices should be estimated.
 #' @param initialise The model structure with which the estimation process
@@ -53,8 +55,9 @@
 #' @importFrom gtools permutations
 #'
 #' @export
-smimodel <- function(data, yvar, index.vars, 
-                     initialise = c("ppr", "additive", "linear", "multiple", "userInput"),
+smimodel <- function(data, yvar, family = gaussian(), index.vars, 
+                     initialise = c("ppr", "additive", "linear", 
+                                    "multiple", "userInput"),
                      num_ind = 5, num_models = 5, seed = 123, index.ind = NULL, 
                      index.coefs = NULL, linear.vars = NULL, 
                      lambda0 = 1, lambda2 = 1, 
@@ -93,6 +96,7 @@ smimodel <- function(data, yvar, index.vars,
     names(index.coefs) <- NULL
     # Constructing the initial `smimodel`
     init_smimodel <- new_smimodel(data = data, yvar = yvar, 
+                                  family = family,
                                   index.vars = index.vars, 
                                   initialise = "userInput",  
                                   index.ind = index.ind, 
@@ -123,6 +127,7 @@ smimodel <- function(data, yvar, index.vars,
       indexInd <- c(permutes[permute_ind, ], rest)
       indexCoefs <- runif(num_pred)
       smimodels_initial[[j]] <- new_smimodel(data = data, yvar = yvar, 
+                                             family = family,
                                              index.vars = index.vars, 
                                              initialise = "userInput", 
                                              index.ind = indexInd, 
@@ -160,6 +165,7 @@ smimodel <- function(data, yvar, index.vars,
   }else{
     # Constructing the initial `smimodel`
     init_smimodel <- new_smimodel(data = data, yvar = yvar, 
+                                  family = family,
                                   index.vars = index.vars, 
                                   initialise = initialise, 
                                   index.ind = index.ind, 

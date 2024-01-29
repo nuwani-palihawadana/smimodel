@@ -9,6 +9,8 @@
 #'   `index` of the `tsibble`). If multiple models are fitted, the grouping
 #'   variable should be the key of the `tsibble`.
 #' @param yvar Name of the response variable as a character string.
+#' @param family A description of the error distribution and link function to be
+#'   used in the model (see \code{\link{glm}} and \code{\link{family}}).
 #' @param index.vars A character vector of names of the predictor variables for
 #'   which indices should be estimated.
 #' @param initialise The model structure with which the estimation process
@@ -63,8 +65,9 @@
 #' @importFrom vctrs vec_as_names
 #'
 #' @export
-groupSmimodel <- function(data, yvar, index.vars, 
-                          initialise = c("ppr", "additive", "linear", "multiple", "userInput"),
+groupSmimodel <- function(data, yvar, family = gaussian(), index.vars, 
+                          initialise = c("ppr", "additive", "linear", 
+                                         "multiple", "userInput"),
                           num_ind = 5, num_models = 5, seed = 123, 
                           index.ind = NULL, index.coefs = NULL, 
                           neighbour = 0, linear.vars = NULL, 
@@ -101,6 +104,7 @@ groupSmimodel <- function(data, yvar, index.vars,
       tibble::as_tibble() %>%
       dplyr::arrange({{data_index}})
     smimodels_list[[i]] <- smimodel(data = df_cat, yvar = yvar, 
+                                    family = family,
                                     index.vars = index.vars, 
                                     initialise = initialise, 
                                     num_ind = num_ind, num_models = num_models, 

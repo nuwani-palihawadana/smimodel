@@ -34,7 +34,9 @@ make_gam <- function(x, data){
     }else{
       pre.formula <- paste(x$var_y, "~", 1)
     }
-    fun1_final <- mgcv::gam(as.formula(pre.formula), data = data, method = "REML")
+    fun1_final <- mgcv::gam(as.formula(pre.formula), data = data, 
+                            family = x$gam$family$family,
+                            method = "REML")
   }else{
     # Calculating indices
     ind <- vector(mode = "list", length = length(list_index))
@@ -56,7 +58,8 @@ make_gam <- function(x, data){
     }
     # Model fitting
     dat_new <- dplyr::bind_cols(data, dat)
-    fun1 <- mgcv::gam(as.formula(pre.formula), data = dat_new, method = "REML")
+    fun1 <- mgcv::gam(as.formula(pre.formula), data = dat_new, 
+                      family = x$gam$family$family, method = "REML")
   }
   return(fun1)
 }

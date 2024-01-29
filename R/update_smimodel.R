@@ -49,6 +49,7 @@ update_smimodel <- function(object, data, lambda0 = 1, lambda2 = 1,
   dgz <- as.matrix(object$derivatives)
   # Optimising the model
   best_alpha1 <- inner_update(x = object$gam, data = data, yvar = object$var_y,
+                              family = object$gam$family$family,
                               index.vars = object$vars_index, 
                               linear.vars = object$vars_linear, 
                               num_ind = num_ind, dgz = dgz, 
@@ -66,7 +67,8 @@ update_smimodel <- function(object, data, lambda0 = 1, lambda2 = 1,
     }else{
       pre.formula <- paste(object$var_y, "~", 1)
     }
-    fun1_final <- mgcv::gam(as.formula(pre.formula), data = data, method = "REML")
+    fun1_final <- mgcv::gam(as.formula(pre.formula), data = data, 
+                            family = object$gam$family$family, method = "REML")
     index.names <- paste0("index", 1:length(best_alpha1$ind_pos))
     print("Final model fitted!")
     final_smimodel <- make_smimodel(x = fun1_final, yvar = object$var_y, 
@@ -117,7 +119,8 @@ update_smimodel <- function(object, data, lambda0 = 1, lambda2 = 1,
         }
         # Model fitting
         dat <- dplyr::bind_cols(data, dat)
-        fun1 <- mgcv::gam(as.formula(pre.formula), data = dat, method = "REML")
+        fun1 <- mgcv::gam(as.formula(pre.formula), data = dat, 
+                          family = object$gam$family$family, method = "REML")
         Yhat <- as.matrix(fun1$fitted.values, ncol = 1, nrow = length(fun1$fitted.values))
         # Residuals (R) matrix
         R <- as.matrix(data[ , object$var_y] - Yhat)
@@ -155,7 +158,8 @@ update_smimodel <- function(object, data, lambda0 = 1, lambda2 = 1,
         }
         # Model fitting
         dat <- dplyr::bind_cols(data, dat)
-        gam2 <- mgcv::gam(as.formula(pre.formula), data = dat, method = "REML")
+        gam2 <- mgcv::gam(as.formula(pre.formula), data = dat, 
+                          family = object$gam$family$family, method = "REML")
         # Derivatives of the fitted smooths
         dgz <- vector(length = length(dat_names), mode = "list")
         for (i in seq_along(dat_names)) {
@@ -166,7 +170,8 @@ update_smimodel <- function(object, data, lambda0 = 1, lambda2 = 1,
         names(dgz) <- paste0("d", seq_along(dat_names))
         dgz <- as.matrix(as_tibble(dgz))
         # Optimising the new model
-        best_alpha2 <- inner_update(x = gam2, data = data, yvar = object$var_y, 
+        best_alpha2 <- inner_update(x = gam2, data = data, yvar = object$var_y,
+                                    family = object$gam$family$family,
                                     index.vars = object$vars_index, 
                                     linear.vars = object$vars_linear, 
                                     num_ind = j, dgz = dgz, 
@@ -184,7 +189,8 @@ update_smimodel <- function(object, data, lambda0 = 1, lambda2 = 1,
           }else{
             pre.formula <- paste(object$var_y, "~", 1)
           }
-          fun_null <- mgcv::gam(as.formula(pre.formula), data = data, method = "REML")
+          fun_null <- mgcv::gam(as.formula(pre.formula), data = data, 
+                                family = object$gam$family$family, method = "REML")
           Y <- as.matrix(data[ , object$var_y])
           Yhat <- as.matrix(fun_null$fitted.values, 
                             ncol = 1, nrow = length(fun_null$fitted.values))
@@ -262,7 +268,8 @@ update_smimodel <- function(object, data, lambda0 = 1, lambda2 = 1,
     }
     dat <- dplyr::bind_cols(data, dat)
     # Model fitting
-    fun1_final <- mgcv::gam(as.formula(pre.formula), data = dat, method = "REML")
+    fun1_final <- mgcv::gam(as.formula(pre.formula), data = dat, 
+                            family = object$gam$family$family, method = "REML")
     print("Final model fitted!")
     final_smimodel <- make_smimodel(x = fun1_final, yvar = object$var_y, 
                                     index.vars = object$vars_index, 

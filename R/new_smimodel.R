@@ -6,6 +6,8 @@
 #' @param data Training data set on which models will be trained. Should be a
 #'   `tibble`.
 #' @param yvar Name of the response variable as a character string.
+#' @param family A description of the error distribution and link function to be
+#'   used in the model (see \code{\link{glm}} and \code{\link{family}}).
 #' @param index.vars A character vector of names of the predictor variables for
 #'   which indices should be estimated.
 #' @param initialise The model structure with which the estimation process
@@ -25,7 +27,7 @@
 #'   that should be included linearly into the model.
 #'
 #' @export
-new_smimodel <- function(data, yvar, index.vars, 
+new_smimodel <- function(data, yvar, family = gaussian(), index.vars, 
                          initialise = c("additive", "linear", "userInput"), 
                          index.ind = NULL, index.coefs = NULL, 
                          linear.vars = NULL){
@@ -48,7 +50,8 @@ new_smimodel <- function(data, yvar, index.vars,
         paste(pre.formula, "+", .)
     }
     pre.formula <- paste(pre.formula, "-", 1)
-    fun1 <- mgcv::gam(as.formula(pre.formula), data = data, method = "REML")
+    fun1 <- mgcv::gam(as.formula(pre.formula), data = data, family = family,
+                      method = "REML")
     # Index coefficients
     alpha <- index.coefs <- fun1$coefficients[1:length(index.vars)]
     alpha <- unlist(tapply(alpha, index.ind, normalise_alpha))
@@ -149,7 +152,8 @@ new_smimodel <- function(data, yvar, index.vars,
     }
     # Model fitting
     dat_new <- dplyr::bind_cols(data, dat)
-    fun1 <- mgcv::gam(as.formula(pre.formula), data = dat_new, method = "REML")
+    fun1 <- mgcv::gam(as.formula(pre.formula), data = dat_new, family = family,
+                      method = "REML")
   }
   smimodel <- make_smimodel(x = fun1, yvar = yvar, index.vars = index.vars, 
                             index.ind = index.ind, index.data = dat_new,

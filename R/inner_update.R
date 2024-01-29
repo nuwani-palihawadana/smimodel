@@ -8,6 +8,8 @@
 #' @param data Training data set on which models will be trained. Should be a
 #'   `tibble`.
 #' @param yvar Name of the response variable as a character string.
+#' @param family A description of the error distribution and link function to be
+#'   used in the model (see \code{\link{glm}} and \code{\link{family}}).
 #' @param index.vars A character vector of names of the predictor variables for
 #'   which indices should be estimated.
 #' @param linear.vars A character vector of names of the predictor variables
@@ -29,9 +31,10 @@
 #' @param verbose The option to print detailed solver output.
 #'
 #' @export
-inner_update <- function(x, data, yvar, index.vars, linear.vars, 
-                         num_ind, dgz, alpha_old, lambda0 = 1, lambda2 = 1, 
-                         M = 10, max.iter = 50, tol = 0.001, TimeLimit = Inf,
+inner_update <- function(x, data, yvar, family = gaussian(), index.vars, 
+                         linear.vars, num_ind, dgz, alpha_old, 
+                         lambda0 = 1, lambda2 = 1, M = 10, max.iter = 50, 
+                         tol = 0.001, TimeLimit = Inf,
                          MIPGap = 1e-4, NonConvex = -1, verbose = FALSE){
   data <- data %>%
     drop_na()
@@ -120,7 +123,8 @@ inner_update <- function(x, data, yvar, index.vars, linear.vars,
       }
       # Model fitting
       dat <- dplyr::bind_cols(data, dat)
-      fun1 <- mgcv::gam(as.formula(pre.formula), data = dat, method = "REML")
+      fun1 <- mgcv::gam(as.formula(pre.formula), data = dat, family = family, 
+                        method = "REML")
       Yhat <- as.matrix(fun1$fitted.values, ncol = 1)
       # Derivatives of the fitted smooths
       dgz <- vector(length = length(dat_names), mode = "list")
@@ -169,6 +173,7 @@ inner_update <- function(x, data, yvar, index.vars, linear.vars,
     }
   }
   output <- list("best_alpha" = best_alpha, "min_loss" = best_l2, 
-                 "index.ind" = best_index, "ind_pos" = best_ind_pos, "X_new" = best_X_new)
+                 "index.ind" = best_index, "ind_pos" = best_ind_pos, 
+                 "X_new" = best_X_new)
   return(output)
 }

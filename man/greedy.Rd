@@ -7,6 +7,7 @@
 greedy(
   data,
   yvar,
+  family = gaussian(),
   index.vars,
   initialise = c("ppr", "additive", "linear", "multiple", "userInput"),
   num_ind = 5,
@@ -36,6 +37,9 @@ greedy(
 \code{tibble}.}
 
 \item{yvar}{Name of the response variable as a character string.}
+
+\item{family}{A description of the error distribution and link function to be
+used in the model (see \code{\link{glm}} and \code{\link{family}}).}
 
 \item{index.vars}{A character vector of names of the predictor variables for
 which indices should be estimated.}

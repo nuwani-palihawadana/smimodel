@@ -52,6 +52,8 @@
 #' @param TimeLimit A limit for the total time (in seconds) expended in a single
 #'   MIP iteration.
 #' @param MIPGap Relative MIP optimality gap.
+#' @param NonConvex The strategy for handling non-convex quadratic objectives or
+#'   non-convex quadratic constraints in Gurobi solver.
 #' @param verbose The option to print detailed solver output.
 #' @param parallel The option to use parallel processing in fitting `smimodel`s
 #'   for different penalty parameter combinations.
@@ -69,8 +71,8 @@ greedy <- function(data, yvar, index.vars,
                    lambda0_seq, lambda2_seq, lambda0_start_seq, 
                    lambda2_start_seq,
                    M = 10, max.iter = 50, tol = 0.001, tolCoefs = 0.001,
-                   TimeLimit = Inf, MIPGap = 1e-4, verbose = FALSE, 
-                   parallel = FALSE, workers = NULL){
+                   TimeLimit = Inf, MIPGap = 1e-4, NonConvex = -1, 
+                   verbose = FALSE, parallel = FALSE, workers = NULL){
   # Full grid
   grid1 <- expand.grid(lambda0_seq, lambda2_seq)
   # Data frame for storing all combinations searched
@@ -102,7 +104,7 @@ greedy <- function(data, yvar, index.vars,
                           M = M, max.iter = max.iter, 
                           tol = tol, tolCoefs = tolCoefs,
                           TimeLimit = TimeLimit, MIPGap = MIPGap,
-                          verbose = verbose))
+                          NonConvex = NonConvex, verbose = verbose))
   #if (parallel) future:::ClusterRegistry("stop")
   # Selecting best starting point
   min_lambda_pos <- which.min(unlist(MSE_list))
@@ -136,7 +138,7 @@ greedy <- function(data, yvar, index.vars,
                             M = M, max.iter = max.iter, 
                             tol = tol, tolCoefs = tolCoefs,
                             TimeLimit = TimeLimit, MIPGap = MIPGap,
-                            verbose = verbose))
+                            NonConvex = NonConvex, verbose = verbose))
     # Selecting best starting point
     min_lambda_pos <- which.min(unlist(MSE_list))
     min_MSE <- min(unlist(MSE_list))
@@ -159,7 +161,7 @@ greedy <- function(data, yvar, index.vars,
                                   M = M, max.iter = max.iter, 
                                   tol = tol, tolCoefs = tolCoefs,
                                   TimeLimit = TimeLimit, MIPGap = MIPGap,
-                                  verbose = verbose)
+                                  NonConvex = NonConvex, verbose = verbose)
   print("Final model fitted!")
   output <- list("initial" = final_smimodel_list$initial, 
                  "best" = final_smimodel_list$best,

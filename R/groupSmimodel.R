@@ -54,6 +54,8 @@
 #' @param TimeLimit A limit for the total time (in seconds) expended in a single
 #'   MIP iteration.
 #' @param MIPGap Relative MIP optimality gap.
+#' @param NonConvex The strategy for handling non-convex quadratic objectives or
+#'   non-convex quadratic constraints in Gurobi solver.
 #' @param verbose The option to print detailed solver output.
 #'
 #' @importFrom dplyr arrange filter mutate rename
@@ -68,7 +70,8 @@ groupSmimodel <- function(data, yvar, index.vars,
                           neighbour = 0, linear.vars = NULL, 
                           lambda0 = 1, lambda2 = 1, 
                           M = 10, max.iter = 50, tol = 0.001, tolCoefs = 0.001,
-                          TimeLimit = Inf, MIPGap = 1e-4, verbose = FALSE){
+                          TimeLimit = Inf, MIPGap = 1e-4, 
+                          NonConvex = -1, verbose = FALSE){
   stopifnot(tsibble::is_tsibble(data))
   initialise <- match.arg(initialise)
   data1 <- data
@@ -109,7 +112,7 @@ groupSmimodel <- function(data, yvar, index.vars,
                                     M = M, max.iter = max.iter, 
                                     tol = tol, tolCoefs = tolCoefs,
                                     TimeLimit = TimeLimit, MIPGap = MIPGap,
-                                    verbose = verbose)
+                                    NonConvex = NonConvex, verbose = verbose)
   }
   data_list <- list(key_unique, smimodels_list)
   models <- tibble::as_tibble(

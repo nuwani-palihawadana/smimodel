@@ -20,6 +20,7 @@ inner_update(
   tol = 0.001,
   TimeLimit = Inf,
   MIPGap = 1e-04,
+  NonConvex = -1,
   verbose = FALSE
 )
 }
@@ -58,6 +59,9 @@ coefficients for a given model.}
 MIP iteration.}
 
 \item{MIPGap}{Relative MIP optimality gap.}
+
+\item{NonConvex}{The strategy for handling non-convex quadratic objectives or
+non-convex quadratic constraints in Gurobi solver.}
 
 \item{verbose}{The option to print detailed solver output.}
 }

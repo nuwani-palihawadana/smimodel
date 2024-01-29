@@ -45,6 +45,8 @@
 #' @param TimeLimit A limit for the total time (in seconds) expended in a single
 #'   MIP iteration.
 #' @param MIPGap Relative MIP optimality gap.
+#' @param NonConvex The strategy for handling non-convex quadratic objectives or
+#'   non-convex quadratic constraints in Gurobi solver.
 #' @param verbose The option to print detailed solver output.
 #'
 #' @importFrom stats runif ppr
@@ -57,7 +59,8 @@ smimodel <- function(data, yvar, index.vars,
                      index.coefs = NULL, linear.vars = NULL, 
                      lambda0 = 1, lambda2 = 1, 
                      M = 10, max.iter = 50, tol = 0.001, tolCoefs = 0.001,
-                     TimeLimit = Inf, MIPGap = 1e-4, verbose = FALSE){
+                     TimeLimit = Inf, MIPGap = 1e-4, 
+                     NonConvex = -1, verbose = FALSE){
   stopifnot(tibble::is_tibble(data))
   initialise <- match.arg(initialise)
   if(initialise == "ppr"){
@@ -97,11 +100,12 @@ smimodel <- function(data, yvar, index.vars,
                                   linear.vars = linear.vars)
     # Optimising the initial `smimodel`
     opt_smimodel_temp <- update_smimodel(object = init_smimodel, data = data, 
-                                    lambda0 = lambda0, lambda2 = lambda2, 
-                                    M = M, max.iter = max.iter, 
-                                    tol = tol, tolCoefs = tolCoefs,
-                                    TimeLimit = TimeLimit, 
-                                    MIPGap = MIPGap, verbose = verbose)
+                                         lambda0 = lambda0, lambda2 = lambda2, 
+                                         M = M, max.iter = max.iter, 
+                                         tol = tol, tolCoefs = tolCoefs,
+                                         TimeLimit = TimeLimit, 
+                                         MIPGap = MIPGap, NonConvex = NonConvex,
+                                         verbose = verbose)
     opt_smimodel <- unscaling(object = opt_smimodel_temp, scaledInfo = scaled)
   }else if(initialise == "multiple"){
     Y_data <- as.matrix(data[ , yvar])
@@ -132,6 +136,7 @@ smimodel <- function(data, yvar, index.vars,
                                                   tol = tol, tolCoefs = tolCoefs,
                                                   TimeLimit = TimeLimit, 
                                                   MIPGap = MIPGap,
+                                                  NonConvex = NonConvex,
                                                   verbose = verbose)
       # Preparing alpha - index coefficients vector
       list_index <- smimodels_optimised[[j]]$alpha[ , 2:NCOL(smimodels_optimised[[j]]$alpha)]
@@ -166,7 +171,8 @@ smimodel <- function(data, yvar, index.vars,
                                     M = M, max.iter = max.iter, 
                                     tol = tol, tolCoefs = tolCoefs,
                                     TimeLimit = TimeLimit, 
-                                    MIPGap = MIPGap, verbose = verbose)
+                                    MIPGap = MIPGap, NonConvex = NonConvex,
+                                    verbose = verbose)
   }
   output <- list("initial" = init_smimodel, "best" = opt_smimodel)
   return(output)

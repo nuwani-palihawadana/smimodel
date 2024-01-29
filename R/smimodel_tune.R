@@ -47,6 +47,8 @@
 #' @param TimeLimit A limit for the total time (in seconds) expended in a single
 #'   MIP iteration.
 #' @param MIPGap Relative MIP optimality gap.
+#' @param NonConvex The strategy for handling non-convex quadratic objectives or
+#'   non-convex quadratic constraints in Gurobi solver.
 #' @param verbose The option to print detailed solver output.
 #' 
 #' @importFrom fabletools MSE
@@ -58,7 +60,8 @@ smimodel_tune <- function(data, yvar, index.vars,
                           index.coefs = NULL, linear.vars = NULL, 
                           lambda.comb = c(1, 1), 
                           M = 10, max.iter = 50, tol = 0.001, tolCoefs = 0.001,
-                          TimeLimit = Inf, MIPGap = 1e-4, verbose = FALSE){
+                          TimeLimit = Inf, MIPGap = 1e-4, 
+                          NonConvex = -1, verbose = FALSE){
   # Estimating smimodel
   smimodel <- smimodel(data = data, yvar = yvar, 
                        index.vars = index.vars, 
@@ -72,7 +75,7 @@ smimodel_tune <- function(data, yvar, index.vars,
                        M = M, max.iter = max.iter, 
                        tol = tol, tolCoefs = tolCoefs,
                        TimeLimit = TimeLimit, MIPGap = MIPGap,
-                       verbose = verbose)
+                       NonConvex = NonConvex, verbose = verbose)
   # In-sample MSE
   smimodel_mse <- fabletools::MSE(.resid = smimodel$best$gam$residuals)
   return(smimodel_mse)

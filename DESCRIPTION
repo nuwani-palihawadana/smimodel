@@ -33,6 +33,7 @@ Imports:
     gtools,
     magrittr, 
     Matrix,
+    methods,
     mgcv, 
     purrr,
     ROI,

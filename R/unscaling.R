@@ -12,10 +12,11 @@
 #' @export
 unscaling <- function(object, scaledInfo){
   scaledInfo <- scaledInfo$scaled_info
-  list_index <- object$alpha[ , 2:NCOL(object$alpha)]
-  for(b in 1:length(list_index)){
+  # list_index <- object$alpha[ , 2:NCOL(object$alpha)]
+  list_index <- object$alpha
+  for(b in 1:NCOL(list_index)){
     temp_coef <- list_index[ , b]/scaledInfo
-    object$alpha[ , (b+1)] <- temp_coef
+    object$alpha[ , b] <- temp_coef
     # temp_intercept <- ((list_index[[b]]$coefficients*scaledInfo$scaled_means*(-1))/scaledInfo$scaled_scales)
     # object[[b]]$intercept <- sum(temp_intercept)
   }

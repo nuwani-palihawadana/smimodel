@@ -32,7 +32,8 @@ update_smimodel <- function(object, data, lambda0 = 1, lambda2 = 1,
   data <- data %>% drop_na()
   # Preparing inputs to `inner_update()`
   #list_index <- object[1:(length(object)-4)]
-  list_index <- object$alpha[ , 2:NCOL(object$alpha)]
+  #list_index <- object$alpha[ , 2:NCOL(object$alpha)]
+  list_index <- object$alpha
   #num_ind <- length(list_index)
   num_ind <- NCOL(list_index)
   alpha <- vector(mode = "list", length = num_ind)
@@ -45,6 +46,7 @@ update_smimodel <- function(object, data, lambda0 = 1, lambda2 = 1,
     alpha[[i]] <- list_index[ , i]
   }
   alpha <- unlist(alpha)
+  names(alpha) <- NULL
   #names(dgz) <- paste0("d", 1:num_ind)
   dgz <- as.matrix(object$derivatives)
   # Optimising the model

@@ -40,23 +40,26 @@ predict.groupSmimodel <- function(object, newdata, recursive = FALSE,
       key22 = data_temp[ , {{ key11 }}][[1]]
       key22_pos = which(object$key == key22)
       #list_index <- object$fit[[key22_pos]]$best[1:(length(object$fit[[key22_pos]]$best)-4)]
-      list_index <- object$fit[[key22_pos]]$best$alpha[ , 2:NCOL(object$fit[[key22_pos]]$best$alpha)]
-      alpha <- vector(mode = "list", length = length(list_index))
-      for(b in 1:length(list_index)){
+      #list_index <- object$fit[[key22_pos]]$best$alpha[ , 2:NCOL(object$fit[[key22_pos]]$best$alpha)]
+      list_index <- object$fit[[key22_pos]]$best$alpha
+      numInd <- NCOL(list_index)
+      alpha <- vector(mode = "list", length = numInd)
+      for(b in 1:numInd){
         #alpha[[b]] <- list_index[[b]]$coefficients
         alpha[[b]] <- list_index[ , b]
       }
       alpha <- unlist(alpha)
+      names(alpha) <- NULL
       if(all(alpha == 0)){
         data_list[[m]] <- data_temp
       }else{
         X_test <- as.matrix(newdata[m, object$fit[[key22_pos]]$best$vars_index])
         # Calculating indices
-        ind <- vector(mode = "list", length = length(list_index))
-        for(i in 1:length(list_index)){
+        ind <- vector(mode = "list", length = numInd)
+        for(i in 1:numInd){
           ind[[i]] <- as.numeric(X_test %*% as.matrix(list_index[ , i], ncol = 1))
         }
-        names(ind) <- names(list_index)
+        names(ind) <- colnames(list_index)
         dat <- tibble::as_tibble(ind)
         data_list[[m]] <- dplyr::bind_cols(data_temp, dat)
       }
@@ -75,23 +78,26 @@ predict.groupSmimodel <- function(object, newdata, recursive = FALSE,
     key22 = data_temp[ , {{ key11 }}][[1]]
     key22_pos = which(object$key == key22)
     #list_index <- object$fit[[key22_pos]]$best[1:(length(object$fit[[key22_pos]]$best)-4)]
-    list_index <- object$fit[[key22_pos]]$best$alpha[ , 2:NCOL(object$fit[[key22_pos]]$best$alpha)]
-    alpha <- vector(mode = "list", length = length(list_index))
-    for(w in 1:length(list_index)){
+    #list_index <- object$fit[[key22_pos]]$best$alpha[ , 2:NCOL(object$fit[[key22_pos]]$best$alpha)]
+    list_index <- object$fit[[key22_pos]]$best$alpha
+    numInd <- NCOL(list_index)
+    alpha <- vector(mode = "list", length = numInd)
+    for(w in 1:numInd){
       #alpha[[w]] <- list_index[[w]]$coefficients
       alpha[[w]] <- list_index[ , w]
     }
     alpha <- unlist(alpha)
+    names(alpha) <- NULL
     if(all(alpha == 0)){
       data_list[[NROW(newdata)]] <- data_temp
     }else{
       X_test <- as.matrix(newdata[NROW(newdata), object$fit[[key22_pos]]$best$vars_index])
       # Calculating indices
-      ind <- vector(mode = "list", length = length(list_index))
-      for(a in 1:length(list_index)){
+      ind <- vector(mode = "list", length = numInd)
+      for(a in 1:numInd){
         ind[[a]] <- as.numeric(X_test %*% as.matrix(list_index[ , a], ncol = 1))
       }
-      names(ind) <- names(list_index)
+      names(ind) <- colnames(list_index)
       dat <- tibble::as_tibble(ind)
       data_list[[NROW(newdata)]] <- dplyr::bind_cols(data_temp, dat)
     }
@@ -108,23 +114,26 @@ predict.groupSmimodel <- function(object, newdata, recursive = FALSE,
     for (i in 1:NROW(object)) {
       newdata_cat <- newdata[newdata[{{ key11 }}] == object$key[i], ]
       #list_index <- object$fit[[i]]$best[1:(length(object$fit[[i]]$best)-4)]
-      list_index <- object$fit[[i]]$best$alpha[ , 2:NCOL(object$fit[[i]]$best$alpha)]
-      alpha <- vector(mode = "list", length = length(list_index))
-      for(z in 1:length(list_index)){
+      #list_index <- object$fit[[i]]$best$alpha[ , 2:NCOL(object$fit[[i]]$best$alpha)]
+      list_index <- object$fit[[i]]$best$alpha
+      numInd <- NCOL(list_index)
+      alpha <- vector(mode = "list", length = numInd)
+      for(z in 1:numInd){
         #alpha[[z]] <- list_index[[z]]$coefficients
         alpha[[z]] <- list_index[ , z]
       }
       alpha <- unlist(alpha)
+      names(alpha) <- NULL
       if(all(alpha == 0)){
         data_list[[i]] <- newdata_cat
       }else{
         X_test <- as.matrix(newdata_cat[ , object$fit[[i]]$best$vars_index])
         # Calculating indices
-        ind <- vector(mode = "list", length = length(list_index))
+        ind <- vector(mode = "list", length = numInd)
         for(k in 1:length(ind)){
           ind[[k]] <- as.numeric(X_test %*% as.matrix(list_index[ , k], ncol = 1))
         }
-        names(ind) <- names(list_index)
+        names(ind) <- colnames(list_index)
         dat <- tibble::as_tibble(ind)
         data_list[[i]] <- dplyr::bind_cols(newdata_cat, dat) 
       }

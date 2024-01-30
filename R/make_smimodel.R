@@ -15,6 +15,7 @@
 #'   that are included linearly in the model.
 #'
 #' @importFrom gratia derivatives
+#' @importFrom methods as
 #'
 #' @export
 make_smimodel <- function(x, yvar, index.vars, index.ind, index.data,
@@ -30,8 +31,10 @@ make_smimodel <- function(x, yvar, index.vars, index.ind, index.data,
                                   alpha = alpha)
   new_alpha <- split(new_index_info$alpha_init_new, new_index_info$index)
   names(new_alpha) <- index.names
-  var_names <- tibble::tibble(vars_index = index.vars)
-  alpha <- dplyr::bind_cols(var_names, dplyr::bind_cols(new_alpha))
+  # var_names <- tibble::tibble(vars_index = index.vars)
+  # alpha <- dplyr::bind_cols(var_names, dplyr::bind_cols(new_alpha))
+  alpha <- as(as.matrix(dplyr::bind_cols(new_alpha)), "sparseMatrix")
+  rownames(alpha) <- index.vars
   # # Constructing the class `smimodel`
   # smimodel <- vector(mode = "list", length = (length(new_alpha)+4))
   # generating derivatives, and structuring the output

@@ -18,14 +18,17 @@ predict.smimodel <- function(object, newdata, recursive = FALSE,
                              recursive_colRange = NULL, ...) {
   if (!is_tibble(newdata)) stop("newdata is not a tibble.")
   predict_fn <- mgcv::predict.gam
-  list_index <- object$alpha[ , 2:NCOL(object$alpha)]
+  list_index <- object$alpha
+  num_ind <- NCOL(list_index)
+  #list_index <- object$alpha[ , 2:NCOL(object$alpha)]
   #list_index <- object[1:(length(object)-4)]
-  alpha <- vector(mode = "list", length = length(list_index))
-  for(i in 1:length(list_index)){
+  alpha <- vector(mode = "list", length = num_ind)
+  for(i in 1:num_ind){
     #alpha[[i]] <- list_index[[i]]$coefficients
     alpha[[i]] <- list_index[ , i]
   }
   alpha <- unlist(alpha)
+  names(alpha) <- NULL
   if(all(alpha == 0)){
     if(recursive == TRUE){
       predictions =  vector(mode = "list", length = NROW(newdata))
@@ -82,11 +85,11 @@ predict.smimodel <- function(object, newdata, recursive = FALSE,
         # }
         
         # Calculating indices
-        ind <- vector(mode = "list", length = length(list_index))
-        for(i in 1:length(list_index)){
+        ind <- vector(mode = "list", length = num_ind)
+        for(i in 1:num_ind){
           ind[[i]] <- as.numeric(X_test %*% as.matrix(list_index[ , i], ncol = 1))
         }
-        names(ind) <- names(list_index)
+        names(ind) <- colnames(list_index)
         dat <- tibble::as_tibble(ind)
         data_list[[m]] <- dplyr::bind_cols(data_temp, dat)
         pred <- predict_fn(object$gam, data_list[[m]], type = "response")
@@ -123,11 +126,11 @@ predict.smimodel <- function(object, newdata, recursive = FALSE,
       # }
       
       # Calculating indices
-      ind <- vector(mode = "list", length = length(list_index))
-      for(i in 1:length(list_index)){
+      ind <- vector(mode = "list", length = num_ind)
+      for(i in 1:num_ind){
         ind[[i]] <- as.numeric(X_test %*% as.matrix(list_index[ , i], ncol = 1))
       }
-      names(ind) <- names(list_index)
+      names(ind) <- colnames(list_index)
       dat <- tibble::as_tibble(ind)
       data_list[[NROW(newdata)]] <- dplyr::bind_cols(data_temp, dat)
       predictions[[NROW(newdata)]] = predict_fn(object$gam, data_list[[NROW(newdata)]], type = "response")
@@ -158,11 +161,11 @@ predict.smimodel <- function(object, newdata, recursive = FALSE,
       # }
       
       # Calculating indices
-      ind <- vector(mode = "list", length = length(list_index))
-      for(i in 1:length(list_index)){
+      ind <- vector(mode = "list", length = num_ind)
+      for(i in 1:num_ind){
         ind[[i]] <- as.numeric(X_test %*% as.matrix(list_index[ , i], ncol = 1))
       }
-      names(ind) <- names(list_index)
+      names(ind) <- colnames(list_index)
       dat <- tibble::as_tibble(ind)
       data_list <- dplyr::bind_cols(newdata, dat)
       pred <- predict_fn(object$gam, data_list, type = "response")

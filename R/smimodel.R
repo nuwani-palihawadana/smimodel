@@ -144,15 +144,17 @@ smimodel <- function(data, yvar, family = gaussian(), index.vars,
                                                   NonConvex = NonConvex,
                                                   verbose = verbose)
       # Preparing alpha - index coefficients vector
-      list_index <- smimodels_optimised[[j]]$alpha[ , 2:NCOL(smimodels_optimised[[j]]$alpha)]
+      list_index <- smimodels_optimised[[j]]$alpha
+      #list_index <- smimodels_optimised[[j]]$alpha[ , 2:NCOL(smimodels_optimised[[j]]$alpha)]
       #list_index <- smimodels_optimised[[j]][1:(length(smimodels_optimised[[j]])-4)]
-      numInd <- length(list_index)
+      numInd <- NCOL(list_index)
       alpha <- vector(mode = "list", length = numInd)
       for(k in 1:numInd){
         alpha[[k]] <- list_index[ , k]
         #alpha[[k]] <- list_index[[k]]$coefficients
       }
       alpha <- unlist(alpha)
+      names(alpha) <- NULL
       # Calculating loss
       smimodels_loss[[j]] <- LossFunction(Y = Y_data, 
                                           Yhat = smimodels_optimised[[j]]$gam$fitted.values, 

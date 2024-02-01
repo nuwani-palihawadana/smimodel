@@ -77,6 +77,8 @@ inner_update <- function(x, data, yvar, family = gaussian(), index.vars,
     if(all(alpha_new == 0)){
       best_l2 <- NULL
       best_alpha <- alpha_new
+      best_index <- index
+      best_ind_pos <- ind_pos
       best_X_new <- NULL
       print("Null indices are produced!")
       break

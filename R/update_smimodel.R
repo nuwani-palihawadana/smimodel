@@ -202,13 +202,15 @@ update_smimodel <- function(object, data, lambda0 = 1, lambda2 = 1,
             break
           }else{
             index.names <- paste0("index", 1:length(best_alpha2$ind_pos))
+            alpha_current <- best_alpha2$best_alpha
             print("Final model fitted!")
-            final_smimodel <- make_smimodel(x = fun1_final, yvar = object$var_y, 
+            final_smimodel <- make_smimodel(x = fun_null, yvar = object$var_y, 
                                             index.vars = object$vars_index, 
-                                            index.ind = best_alpha1$index.ind, 
+                                            index.ind = best_alpha2$index.ind, 
                                             index.data = NULL, index.names = index.names,
-                                            alpha = best_alpha1$best_alpha, 
+                                            alpha = best_alpha2$best_alpha, 
                                             linear.vars = object$vars_linear)
+            break
           }
         }else{
           # Termination/continuation checks
@@ -250,35 +252,37 @@ update_smimodel <- function(object, data, lambda0 = 1, lambda2 = 1,
         }
       }
     }
-    # Calculating indices
-    ind <- vector(length = length(ind_pos_current), mode = "list")
-    for(i in 1:length(ind)){
-      ind[[i]] <- as.numeric(X_new_current[, ind_pos_current[[i]]] %*% 
-                               as.matrix(alpha_current[ind_pos_current[[i]]], ncol = 1))
-    }
-    dat_names <- names(ind) <- paste0("index", 1:length(ind))
-    dat <- tibble::as_tibble(ind)
-    ## Nonlinear function update 
-    # Constructing the formula
-    pre.formula <- lapply(dat_names, function(var) paste0("s(", var, ',bs="cr")')) %>%
-      paste(collapse = "+") %>% 
-      paste(object$var_y, "~", .)
-    if (!is.null(object$vars_linear)){
-      pre.formula <- lapply(object$vars_linear, function(var) paste0(var)) %>%
+    if(any(alpha_current != 0)){
+      # Calculating indices
+      ind <- vector(length = length(ind_pos_current), mode = "list")
+      for(i in 1:length(ind)){
+        ind[[i]] <- as.numeric(X_new_current[, ind_pos_current[[i]]] %*% 
+                                 as.matrix(alpha_current[ind_pos_current[[i]]], ncol = 1))
+      }
+      dat_names <- names(ind) <- paste0("index", 1:length(ind))
+      dat <- tibble::as_tibble(ind)
+      ## Nonlinear function update 
+      # Constructing the formula
+      pre.formula <- lapply(dat_names, function(var) paste0("s(", var, ',bs="cr")')) %>%
         paste(collapse = "+") %>% 
-        paste(pre.formula, "+", .)
+        paste(object$var_y, "~", .)
+      if (!is.null(object$vars_linear)){
+        pre.formula <- lapply(object$vars_linear, function(var) paste0(var)) %>%
+          paste(collapse = "+") %>% 
+          paste(pre.formula, "+", .)
+      }
+      dat <- dplyr::bind_cols(data, dat)
+      # Model fitting
+      fun1_final <- mgcv::gam(as.formula(pre.formula), data = dat, 
+                              family = object$gam$family$family, method = "REML")
+      print("Final model fitted!")
+      final_smimodel <- make_smimodel(x = fun1_final, yvar = object$var_y, 
+                                      index.vars = object$vars_index, 
+                                      index.ind = index_current, 
+                                      index.data = dat, index.names = dat_names,
+                                      alpha = alpha_current, 
+                                      linear.vars = object$vars_linear)
     }
-    dat <- dplyr::bind_cols(data, dat)
-    # Model fitting
-    fun1_final <- mgcv::gam(as.formula(pre.formula), data = dat, 
-                            family = object$gam$family$family, method = "REML")
-    print("Final model fitted!")
-    final_smimodel <- make_smimodel(x = fun1_final, yvar = object$var_y, 
-                                    index.vars = object$vars_index, 
-                                    index.ind = index_current, 
-                                    index.data = dat, index.names = dat_names,
-                                    alpha = alpha_current, 
-                                    linear.vars = object$vars_linear)
   }
   return(final_smimodel)
 }

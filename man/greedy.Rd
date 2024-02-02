@@ -18,6 +18,7 @@ greedy(
   linear.vars = NULL,
   lambda0_seq,
   lambda2_seq,
+  lambda_step,
   lambda0_start_seq,
   lambda2_start_seq,
   M = 10,
@@ -83,6 +84,9 @@ parameter for L0 penalty).}
 
 \item{lambda2_seq}{A numeric vector of candidate values for lambda2 (penalty
 parameter for L2 penalty).}
+
+\item{lambda_step}{Step size between two adjacent values in \code{lambda0_seq} and
+\code{lambda2_seq}.}
 
 \item{lambda0_start_seq}{A subset from \code{lambda0_seq} as candidate starting
 points for the greedy search.}

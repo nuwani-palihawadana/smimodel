@@ -42,6 +42,8 @@
 #'   parameter for L0 penalty).
 #' @param lambda2_seq A numeric vector of candidate values for lambda2 (penalty
 #'   parameter for L2 penalty).
+#' @param lambda_step Step size between two adjacent values in `lambda0_seq` and
+#'   `lambda2_seq`.
 #' @param lambda0_start_seq A subset from `lambda0_seq` as candidate starting
 #'   points for the greedy search.
 #' @param lambda2_start_seq A subset from `lambda2_seq` as candidate starting
@@ -72,8 +74,8 @@ greedy <- function(data, yvar, family = gaussian(), index.vars,
                                   "multiple", "userInput"),
                    num_ind = 5, num_models = 5, seed = 123, index.ind = NULL, 
                    index.coefs = NULL, linear.vars = NULL, 
-                   lambda0_seq, lambda2_seq, lambda0_start_seq, 
-                   lambda2_start_seq,
+                   lambda0_seq, lambda2_seq, lambda_step,
+                   lambda0_start_seq, lambda2_start_seq, 
                    M = 10, max.iter = 50, tol = 0.001, tolCoefs = 0.001,
                    TimeLimit = Inf, MIPGap = 1e-4, NonConvex = -1, 
                    verbose = FALSE, parallel = FALSE, workers = NULL){
@@ -123,35 +125,41 @@ greedy <- function(data, yvar, family = gaussian(), index.vars,
     current_MSE <- min_MSE
     current_lambdas <- min_lambdas 
     # Constructing new search space
-    lambda0_seq_new <- c((current_lambdas[1]-1), current_lambdas[1], (current_lambdas[1]+1))
-    lambda2_seq_new <- c((current_lambdas[2]-1), current_lambdas[2], (current_lambdas[2]+1))
+    lambda0_seq_new <- c((current_lambdas[1] - lambda_step), current_lambdas[1], 
+                         (current_lambdas[1] + lambda_step))
+    lambda2_seq_new <- c((current_lambdas[2] - lambda_step), current_lambdas[2], 
+                         (current_lambdas[2] + lambda_step))
     lambda_comb_new <- expand.grid(lambda0_seq_new, lambda2_seq_new)
     lambda_exist1 <- do.call(paste0, lambda_comb_new) %in% do.call(paste0, grid1)
     lambda_comb_new1 <- lambda_comb_new[lambda_exist1 == TRUE, ]
     lambda_exist2 <- do.call(paste0, lambda_comb_new1) %in% do.call(paste0, all_comb)
     lambda_comb <- lambda_comb_new1[lambda_exist2 == FALSE, ]
-    MSE_list <- seq(1, NROW(lambda_comb), by = 1) %>%
-      map_f(~ smimodel_tune(data = data, yvar = yvar, 
-                            family = family,
-                            index.vars = index.vars, 
-                            initialise = initialise, 
-                            num_ind = num_ind, num_models = num_models, 
-                            seed = seed,
-                            index.ind = index.ind, 
-                            index.coefs = index.coefs,
-                            linear.vars = linear.vars,
-                            lambda.comb = as.numeric(lambda_comb[., ]),
-                            M = M, max.iter = max.iter, 
-                            tol = tol, tolCoefs = tolCoefs,
-                            TimeLimit = TimeLimit, MIPGap = MIPGap,
-                            NonConvex = NonConvex, verbose = verbose))
-    # Selecting best starting point
-    min_lambda_pos <- which.min(unlist(MSE_list))
-    min_MSE <- min(unlist(MSE_list))
-    min_lambdas <- as.numeric(lambda_comb[min_lambda_pos, ])
-    print("Another round completed!")
-    # Updating searched combinations store
-    all_comb <- bind_rows(all_comb, lambda_comb)
+    if(NROW(lambda_comb) == 0){
+      break 
+    }else{
+      MSE_list <- seq(1, NROW(lambda_comb), by = 1) %>%
+        map_f(~ smimodel_tune(data = data, yvar = yvar, 
+                              family = family,
+                              index.vars = index.vars, 
+                              initialise = initialise, 
+                              num_ind = num_ind, num_models = num_models, 
+                              seed = seed,
+                              index.ind = index.ind, 
+                              index.coefs = index.coefs,
+                              linear.vars = linear.vars,
+                              lambda.comb = as.numeric(lambda_comb[., ]),
+                              M = M, max.iter = max.iter, 
+                              tol = tol, tolCoefs = tolCoefs,
+                              TimeLimit = TimeLimit, MIPGap = MIPGap,
+                              NonConvex = NonConvex, verbose = verbose))
+      # Selecting best starting point
+      min_lambda_pos <- which.min(unlist(MSE_list))
+      min_MSE <- min(unlist(MSE_list))
+      min_lambdas <- as.numeric(lambda_comb[min_lambda_pos, ])
+      print("Another round completed!")
+      # Updating searched combinations store
+      all_comb <- bind_rows(all_comb, lambda_comb)
+    }
   }
   # Final smimodel
   final_smimodel_list <- smimodel(data = data, yvar = yvar, 

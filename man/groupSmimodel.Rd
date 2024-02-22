@@ -16,6 +16,7 @@ groupSmimodel(
   index.ind = NULL,
   index.coefs = NULL,
   neighbour = 0,
+  s.vars = NULL,
   linear.vars = NULL,
   lambda0 = 1,
   lambda2 = 1,
@@ -81,6 +82,10 @@ smoothing over the key. Should be an integer. If \code{neighbour = x}, \code{x}
 number of keys before the key of interest and \code{x} number of keys after the
 key of interest are grouped together for model fitting. The default is \code{0}
 (i.e. no neighbours are considered for model fitting).}
+
+\item{s.vars}{A character vector of names of the predictor variables for
+which splines should be fitted individually (rather than considering as a
+part of an index considered in \code{index.vars}).}
 
 \item{linear.vars}{A character vector of names of the predictor variables
 that should be included linearly into the model.}

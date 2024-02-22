@@ -27,7 +27,18 @@ make_gam <- function(x, data){
   alpha <- unlist(alpha)
   if(all(alpha == 0)){
     # Constructing the formula and model fitting
-    if (!is.null(x$vars_linear)){
+    if (!is.null(x$vars_s) & !is.null(x$vars_linear)){
+      pre.formula <- lapply(x$vars_s, function(var) paste0("s(", var, ', bs="cr")')) %>%
+        paste(collapse = "+") %>% 
+        paste(x$var_y, "~", .)
+      pre.formula <- lapply(x$vars_linear, function(var) paste0(var)) %>%
+        paste(collapse = "+") %>% 
+        paste(pre.formula, "+", .)
+    }else if(!is.null(x$vars_s)){
+      pre.formula <- lapply(x$vars_s, function(var) paste0("s(", var, ', bs="cr")')) %>%
+        paste(collapse = "+") %>% 
+        paste(x$var_y, "~", .)
+    }else if(!is.null(x$vars_linear)){
       pre.formula <- lapply(x$vars_linear, function(var) paste0(var)) %>%
         paste(collapse = "+") %>% 
         paste(x$var_y, "~", .)
@@ -51,6 +62,11 @@ make_gam <- function(x, data){
     pre.formula <- lapply(names(list_index), function(var) paste0("s(", var, ',bs="cr")')) %>%
       paste(collapse = "+") %>% 
       paste(yvar, "~", .)
+    if (!is.null(x$vars_s)){
+      pre.formula <- lapply(x$vars_s, function(var) paste0("s(", var, ', bs="cr")')) %>%
+        paste(collapse = "+") %>% 
+        paste(pre.formula, "+", .)
+    }
     if (!is.null(x$vars_linear)){
       pre.formula <- lapply(x$vars_linear, function(var) paste0(var)) %>%
         paste(collapse = "+") %>% 

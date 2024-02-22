@@ -23,6 +23,9 @@
 #'   assigns group index for each predictor in `index.vars`.
 #' @param index.coefs If `initialise = "userInput"`: a numeric vector of index
 #'   coefficients.
+#' @param s.vars A character vector of names of the predictor variables for
+#'   which splines should be fitted individually (rather than considering as a
+#'   part of an index considered in `index.vars`).
 #' @param linear.vars A character vector of names of the predictor variables
 #'   that should be included linearly into the model.
 #'
@@ -30,7 +33,7 @@
 new_smimodel <- function(data, yvar, family = gaussian(), index.vars, 
                          initialise = c("additive", "linear", "userInput"), 
                          index.ind = NULL, index.coefs = NULL, 
-                         linear.vars = NULL){
+                         s.vars = NULL, linear.vars = NULL){
   stopifnot(tibble::is_tibble(data))
   initialise <- match.arg(initialise)
   data <- data %>%
@@ -44,6 +47,11 @@ new_smimodel <- function(data, yvar, family = gaussian(), index.vars,
     pre.formula <- lapply(index.vars, function(var) paste0(var)) %>%
       paste(collapse = "+") %>% 
       paste(yvar, "~", .)
+    if (!is.null(s.vars)){
+      pre.formula <- lapply(s.vars, function(var) paste0(var)) %>%
+        paste(collapse = "+") %>% 
+        paste(pre.formula, "+", .)
+    }
     if (!is.null(linear.vars)){
       pre.formula <- lapply(linear.vars, function(var) paste0(var)) %>%
         paste(collapse = "+") %>% 
@@ -145,6 +153,11 @@ new_smimodel <- function(data, yvar, family = gaussian(), index.vars,
     pre.formula <- lapply(dat_names, function(var) paste0("s(", var, ', bs="cr")')) %>%
       paste(collapse = "+") %>% 
       paste(yvar, "~", .)
+    if (!is.null(s.vars)){
+      pre.formula <- lapply(s.vars, function(var) paste0("s(", var, ', bs="cr")')) %>%
+        paste(collapse = "+") %>% 
+        paste(pre.formula, "+", .)
+    }
     if (!is.null(linear.vars)){
       pre.formula <- lapply(linear.vars, function(var) paste0(var)) %>%
         paste(collapse = "+") %>% 
@@ -158,6 +171,6 @@ new_smimodel <- function(data, yvar, family = gaussian(), index.vars,
   smimodel <- make_smimodel(x = fun1, yvar = yvar, index.vars = index.vars, 
                             index.ind = index.ind, index.data = dat_new,
                             index.names = dat_names, alpha = alpha,
-                            linear.vars = linear.vars)
+                            s.vars = s.vars, linear.vars = linear.vars)
   return(smimodel)
 }

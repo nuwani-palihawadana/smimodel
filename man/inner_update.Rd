@@ -10,6 +10,7 @@ inner_update(
   yvar,
   family = gaussian(),
   index.vars,
+  s.vars,
   linear.vars,
   num_ind,
   dgz,
@@ -38,6 +39,10 @@ used in the model (see \code{\link{glm}} and \code{\link{family}}).}
 
 \item{index.vars}{A character vector of names of the predictor variables for
 which indices should be estimated.}
+
+\item{s.vars}{A character vector of names of the predictor variables for
+which splines should be fitted individually (rather than considering as a
+part of an index considered in \code{index.vars}).}
 
 \item{linear.vars}{A character vector of names of the predictor variables
 that should be included linearly into the model.}

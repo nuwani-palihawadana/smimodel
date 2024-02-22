@@ -53,6 +53,7 @@ update_smimodel <- function(object, data, lambda0 = 1, lambda2 = 1,
   best_alpha1 <- inner_update(x = object$gam, data = data, yvar = object$var_y,
                               family = object$gam$family$family,
                               index.vars = object$vars_index, 
+                              s.vars = object$vars_s,
                               linear.vars = object$vars_linear, 
                               num_ind = num_ind, dgz = dgz, 
                               alpha_old = alpha, lambda0 = lambda0, 
@@ -62,7 +63,18 @@ update_smimodel <- function(object, data, lambda0 = 1, lambda2 = 1,
                               verbose = verbose)
   if(all(best_alpha1$best_alpha == 0)){
     # Constructing the formula and model fitting
-    if (!is.null(object$vars_linear)){
+    if (!is.null(object$vars_s) & !is.null(object$vars_linear)){
+      pre.formula <- lapply(object$vars_s, function(var) paste0("s(", var, ', bs="cr")')) %>%
+        paste(collapse = "+") %>% 
+        paste(object$var_y, "~", .)
+      pre.formula <- lapply(object$vars_linear, function(var) paste0(var)) %>%
+        paste(collapse = "+") %>% 
+        paste(pre.formula, "+", .)
+    }else if(!is.null(object$vars_s)){
+      pre.formula <- lapply(object$vars_s, function(var) paste0("s(", var, ', bs="cr")')) %>%
+        paste(collapse = "+") %>% 
+        paste(object$var_y, "~", .)
+    }else if(!is.null(object$vars_linear)){
       pre.formula <- lapply(object$vars_linear, function(var) paste0(var)) %>%
         paste(collapse = "+") %>% 
         paste(object$var_y, "~", .)
@@ -78,6 +90,7 @@ update_smimodel <- function(object, data, lambda0 = 1, lambda2 = 1,
                                     index.ind = best_alpha1$index.ind, 
                                     index.data = NULL, index.names = index.names,
                                     alpha = best_alpha1$best_alpha, 
+                                    s.vars = object$vars_s,
                                     linear.vars = object$vars_linear)
   }else{
     # Checking models with higher number of indices
@@ -114,6 +127,11 @@ update_smimodel <- function(object, data, lambda0 = 1, lambda2 = 1,
         pre.formula <- lapply(dat_names, function(var) paste0("s(", var, ',bs="cr")')) %>%
           paste(collapse = "+") %>% 
           paste(object$var_y, "~", .)
+        if (!is.null(object$vars_s)){
+          pre.formula <- lapply(object$vars_s, function(var) paste0("s(", var, ',bs="cr")')) %>%
+            paste(collapse = "+") %>% 
+            paste(pre.formula, "+", .)
+        }
         if (!is.null(object$vars_linear)){
           pre.formula <- lapply(object$vars_linear, function(var) paste0(var)) %>%
             paste(collapse = "+") %>% 
@@ -153,6 +171,11 @@ update_smimodel <- function(object, data, lambda0 = 1, lambda2 = 1,
         pre.formula <- lapply(dat_names, function(var) paste0("s(", var, ',bs="cr")')) %>%
           paste(collapse = "+") %>% 
           paste(object$var_y, "~", .)
+        if (!is.null(object$vars_s)){
+          pre.formula <- lapply(object$vars_s, function(var) paste0("s(", var, ',bs="cr")')) %>%
+            paste(collapse = "+") %>% 
+            paste(pre.formula, "+", .)
+        }
         if (!is.null(object$vars_linear)){
           pre.formula <- lapply(object$vars_linear, function(var) paste0(var)) %>%
             paste(collapse = "+") %>% 
@@ -175,6 +198,7 @@ update_smimodel <- function(object, data, lambda0 = 1, lambda2 = 1,
         best_alpha2 <- inner_update(x = gam2, data = data, yvar = object$var_y,
                                     family = object$gam$family$family,
                                     index.vars = object$vars_index, 
+                                    s.vars = object$vars_s,
                                     linear.vars = object$vars_linear, 
                                     num_ind = j, dgz = dgz, 
                                     alpha_old = alpha, lambda0 = lambda0, 
@@ -184,7 +208,18 @@ update_smimodel <- function(object, data, lambda0 = 1, lambda2 = 1,
                                     verbose = verbose)
         if(all(best_alpha2$best_alpha == 0)){
           # Constructing the formula and model fitting
-          if (!is.null(object$vars_linear)){
+          if (!is.null(object$vars_s) & !is.null(object$vars_linear)){
+            pre.formula <- lapply(object$vars_s, function(var) paste0("s(", var, ', bs="cr")')) %>%
+              paste(collapse = "+") %>% 
+              paste(object$var_y, "~", .)
+            pre.formula <- lapply(object$vars_linear, function(var) paste0(var)) %>%
+              paste(collapse = "+") %>% 
+              paste(pre.formula, "+", .)
+          }else if(!is.null(object$vars_s)){
+            pre.formula <- lapply(object$vars_s, function(var) paste0("s(", var, ', bs="cr")')) %>%
+              paste(collapse = "+") %>% 
+              paste(object$var_y, "~", .)
+          }else if(!is.null(object$vars_linear)){
             pre.formula <- lapply(object$vars_linear, function(var) paste0(var)) %>%
               paste(collapse = "+") %>% 
               paste(object$var_y, "~", .)
@@ -209,6 +244,7 @@ update_smimodel <- function(object, data, lambda0 = 1, lambda2 = 1,
                                             index.ind = best_alpha2$index.ind, 
                                             index.data = NULL, index.names = index.names,
                                             alpha = best_alpha2$best_alpha, 
+                                            s.vars = object$vars_s,
                                             linear.vars = object$vars_linear)
             break
           }
@@ -266,6 +302,11 @@ update_smimodel <- function(object, data, lambda0 = 1, lambda2 = 1,
       pre.formula <- lapply(dat_names, function(var) paste0("s(", var, ',bs="cr")')) %>%
         paste(collapse = "+") %>% 
         paste(object$var_y, "~", .)
+      if (!is.null(object$vars_s)){
+        pre.formula <- lapply(object$vars_s, function(var) paste0("s(", var, ',bs="cr")')) %>%
+          paste(collapse = "+") %>% 
+          paste(pre.formula, "+", .)
+      }
       if (!is.null(object$vars_linear)){
         pre.formula <- lapply(object$vars_linear, function(var) paste0(var)) %>%
           paste(collapse = "+") %>% 
@@ -281,6 +322,7 @@ update_smimodel <- function(object, data, lambda0 = 1, lambda2 = 1,
                                       index.ind = index_current, 
                                       index.data = dat, index.names = dat_names,
                                       alpha = alpha_current, 
+                                      s.vars = object$vars_s,
                                       linear.vars = object$vars_linear)
     }
   }

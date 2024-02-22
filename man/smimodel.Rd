@@ -15,6 +15,7 @@ smimodel(
   seed = 123,
   index.ind = NULL,
   index.coefs = NULL,
+  s.vars = NULL,
   linear.vars = NULL,
   lambda0 = 1,
   lambda2 = 1,
@@ -70,6 +71,10 @@ assigns group index for each predictor in \code{index.vars}.}
 
 \item{index.coefs}{If \code{initialise = "userInput"}: a numeric vector of index
 coefficients.}
+
+\item{s.vars}{A character vector of names of the predictor variables for
+which splines should be fitted individually (rather than considering as a
+part of an index considered in \code{index.vars}).}
 
 \item{linear.vars}{A character vector of names of the predictor variables
 that should be included linearly into the model.}

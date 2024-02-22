@@ -37,6 +37,9 @@
 #'   assigns group index for each predictor in `index.vars`.
 #' @param index.coefs If `initialise = "userInput"`: a numeric vector of index
 #'   coefficients.
+#' @param s.vars A character vector of names of the predictor variables for
+#'   which splines should be fitted individually (rather than considering as a
+#'   part of an index considered in `index.vars`).
 #' @param linear.vars A character vector of names of the predictor variables
 #'   that should be included linearly into the model.
 #' @param lambda.comb A numeric vector (of length two) indicating the values for
@@ -61,7 +64,7 @@ smimodel_tune <- function(data, yvar, family = gaussian(), index.vars,
                                          "multiple", "userInput"),
                           num_ind = 5, num_models = 5, seed = 123, 
                           index.ind = NULL, index.coefs = NULL, 
-                          linear.vars = NULL, lambda.comb = c(1, 1), 
+                          s.vars = NULL, linear.vars = NULL, lambda.comb = c(1, 1), 
                           M = 10, max.iter = 50, tol = 0.001, tolCoefs = 0.001,
                           TimeLimit = Inf, MIPGap = 1e-4, 
                           NonConvex = -1, verbose = FALSE){
@@ -74,6 +77,7 @@ smimodel_tune <- function(data, yvar, family = gaussian(), index.vars,
                        seed = seed,
                        index.ind = index.ind, 
                        index.coefs = index.coefs,
+                       s.vars = s.vars,
                        linear.vars = linear.vars,
                        lambda0 = lambda.comb[[1]], lambda2 = lambda.comb[[2]], 
                        M = M, max.iter = max.iter, 

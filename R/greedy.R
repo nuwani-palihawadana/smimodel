@@ -36,6 +36,9 @@
 #'   assigns group index for each predictor in `index.vars`.
 #' @param index.coefs If `initialise = "userInput"`: a numeric vector of index
 #'   coefficients.
+#' @param s.vars A character vector of names of the predictor variables for
+#'   which splines should be fitted individually (rather than considering as a
+#'   part of an index considered in `index.vars`).
 #' @param linear.vars A character vector of names of the predictor variables
 #'   that should be included linearly into the model.
 #' @param lambda0_seq A numeric vector of candidate values for lambda0 (penalty
@@ -73,7 +76,7 @@ greedy <- function(data, yvar, family = gaussian(), index.vars,
                    initialise = c("ppr", "additive", "linear", 
                                   "multiple", "userInput"),
                    num_ind = 5, num_models = 5, seed = 123, index.ind = NULL, 
-                   index.coefs = NULL, linear.vars = NULL, 
+                   index.coefs = NULL, s.vars = NULL, linear.vars = NULL, 
                    lambda0_seq, lambda2_seq, lambda_step,
                    lambda0_start_seq, lambda2_start_seq, 
                    M = 10, max.iter = 50, tol = 0.001, tolCoefs = 0.001,
@@ -106,6 +109,7 @@ greedy <- function(data, yvar, family = gaussian(), index.vars,
                           seed = seed,
                           index.ind = index.ind, 
                           index.coefs = index.coefs,
+                          s.vars = s.vars,
                           linear.vars = linear.vars,
                           lambda.comb = as.numeric(lambda_comb[., ]),
                           M = M, max.iter = max.iter, 
@@ -146,6 +150,7 @@ greedy <- function(data, yvar, family = gaussian(), index.vars,
                               seed = seed,
                               index.ind = index.ind, 
                               index.coefs = index.coefs,
+                              s.vars = s.vars,
                               linear.vars = linear.vars,
                               lambda.comb = as.numeric(lambda_comb[., ]),
                               M = M, max.iter = max.iter, 
@@ -170,6 +175,7 @@ greedy <- function(data, yvar, family = gaussian(), index.vars,
                                   seed = seed,
                                   index.ind = index.ind, 
                                   index.coefs = index.coefs,
+                                  s.vars = s.vars,
                                   linear.vars = linear.vars,
                                   lambda0 = current_lambdas[1], 
                                   lambda2 = current_lambdas[2],

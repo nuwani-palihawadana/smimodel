@@ -12,6 +12,9 @@
 #'   used in the model (see \code{\link{glm}} and \code{\link{family}}).
 #' @param index.vars A character vector of names of the predictor variables for
 #'   which indices should be estimated.
+#' @param s.vars A character vector of names of the predictor variables for
+#'   which splines should be fitted individually (rather than considering as a
+#'   part of an index considered in `index.vars`).
 #' @param linear.vars A character vector of names of the predictor variables
 #'   that should be included linearly into the model.
 #' @param num_ind Number of indices.
@@ -32,7 +35,7 @@
 #'
 #' @export
 inner_update <- function(x, data, yvar, family = gaussian(), index.vars, 
-                         linear.vars, num_ind, dgz, alpha_old, 
+                         s.vars, linear.vars, num_ind, dgz, alpha_old, 
                          lambda0 = 1, lambda2 = 1, M = 10, max.iter = 50, 
                          tol = 0.001, TimeLimit = Inf,
                          MIPGap = 1e-4, NonConvex = -1, verbose = FALSE){
@@ -118,6 +121,11 @@ inner_update <- function(x, data, yvar, family = gaussian(), index.vars,
       pre.formula <- lapply(dat_names, function(var) paste0("s(", var, ', bs="cr")')) %>%
         paste(collapse = "+") %>% 
         paste(yvar, "~", .)
+      if (!is.null(s.vars)){
+        pre.formula <- lapply(s.vars, function(var) paste0("s(", var, ', bs="cr")')) %>%
+          paste(collapse = "+") %>% 
+          paste(pre.formula, "+", .)
+      }
       if (!is.null(linear.vars)){
         pre.formula <- lapply(linear.vars, function(var) paste0(var)) %>%
           paste(collapse = "+") %>% 

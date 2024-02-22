@@ -12,6 +12,7 @@ make_smimodel(
   index.data,
   index.names,
   alpha,
+  s.vars = NULL,
   linear.vars = NULL
 )
 }
@@ -31,6 +32,10 @@ predictor in \code{index.vars}.}
 \item{index.names}{A character vector of names of the constructed indices.}
 
 \item{alpha}{A vector of index coefficients.}
+
+\item{s.vars}{A character vector of names of the predictor variables for
+which splines should be fitted individually (rather than considering as a
+part of an index considered in \code{index.vars}).}
 
 \item{linear.vars}{A character vector of names of the predictor variables
 that are included linearly in the model.}

@@ -11,6 +11,9 @@
 #' @param index.data A `tibble` including columns for the constructed indices.
 #' @param index.names A character vector of names of the constructed indices.
 #' @param alpha A vector of index coefficients.
+#' @param s.vars A character vector of names of the predictor variables for
+#'   which splines should be fitted individually (rather than considering as a
+#'   part of an index considered in `index.vars`).
 #' @param linear.vars A character vector of names of the predictor variables
 #'   that are included linearly in the model.
 #'
@@ -19,7 +22,7 @@
 #'
 #' @export
 make_smimodel <- function(x, yvar, index.vars, index.ind, index.data,
-                          index.names, alpha, linear.vars = NULL){
+                          index.names, alpha, s.vars = NULL, linear.vars = NULL){
   # Constructing a new index coefficient vector to have all predictors in each
   # index, and structuring output
   ind_pos <- split(1:length(index.ind), index.ind)
@@ -75,8 +78,8 @@ make_smimodel <- function(x, yvar, index.vars, index.ind, index.data,
   # }
   # smimodel[[(length(new_alpha)+4)]] <- x
   smimodel <- list("alpha" = alpha, "derivatives" = derivs, "var_y" = yvar, 
-                   "vars_index" = index.vars, "vars_linear" = linear.vars,
-                   "gam" = x)
+                   "vars_index" = index.vars, "vars_s" = s.vars,
+                   "vars_linear" = linear.vars, "gam" = x)
   # names(smimodel) <- c(index.names, "var_y", "vars_index", "vars_linear", "gam")
   class(smimodel) <- c("smimodel", "list")
   return(smimodel)

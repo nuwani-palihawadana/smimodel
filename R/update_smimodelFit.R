@@ -231,7 +231,7 @@ update_smimodelFit <- function(object, data, lambda0 = 1, lambda2 = 1,
           Y <- as.matrix(data[ , object$var_y])
           Yhat <- as.matrix(fun_null$fitted.values, 
                             ncol = 1, nrow = length(fun_null$fitted.values))
-          loss_null <- LossFunction(Y = Y, Yhat = Yhat, alpha = best_alpha2$best_alpha,
+          loss_null <- loss(Y = Y, Yhat = Yhat, alpha = best_alpha2$best_alpha,
                                     lambda0 = lambda0, lambda2 = lambda2)
           if(loss_null >= loss_current){
             break

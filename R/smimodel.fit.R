@@ -160,7 +160,7 @@ smimodel.fit <- function(data, yvar, family = gaussian(), index.vars,
       alpha <- unlist(alpha)
       names(alpha) <- NULL
       # Calculating loss
-      smimodels_loss[[j]] <- LossFunction(Y = Y_data, 
+      smimodels_loss[[j]] <- loss(Y = Y_data, 
                                           Yhat = smimodels_optimised[[j]]$gam$fitted.values, 
                                           alpha = alpha, 
                                           lambda0 = lambda0, lambda2 = lambda2)

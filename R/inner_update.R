@@ -54,7 +54,7 @@ inner_update <- function(x, data, yvar, family = gaussian(), index.vars,
   # Residuals (R) matrix
   R <- as.matrix(data.Y - Yhat)
   # Loss
-  l2 <- LossFunction(Y = as.matrix(data.Y), Yhat = Yhat, 
+  l2 <- loss(Y = as.matrix(data.Y), Yhat = Yhat, 
                      alpha = alpha_old, 
                      lambda0 = lambda0, lambda2 = lambda2)
   # Setting up a counter for increases in loss (If the loss increases for 
@@ -148,7 +148,7 @@ inner_update <- function(x, data, yvar, family = gaussian(), index.vars,
       # Residuals (R) matrix
       R <- as.matrix(data.Y - Yhat)
       # Loss
-      l2_new <- LossFunction(Y = as.matrix(data.Y), Yhat = Yhat, 
+      l2_new <- loss(Y = as.matrix(data.Y), Yhat = Yhat, 
                              alpha = alpha_new, 
                              lambda0 = lambda0, lambda2 = lambda2)
       eps <- (l2 - l2_new)/l2

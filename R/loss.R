@@ -10,7 +10,7 @@
 #' @param lambda2 Penalty parameter for L2 penalty.
 #'
 #' @export
-LossFunction <- function(Y, Yhat, alpha, lambda0, lambda2){
+loss <- function(Y, Yhat, alpha, lambda0, lambda2){
   sqdError <- sum((Y - Yhat)^2)
   L0Penalty <- lambda0*sum(alpha != 0)
   nonzeroAlpha <- alpha[alpha != 0]

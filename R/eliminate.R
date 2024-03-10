@@ -1,8 +1,8 @@
 #' Function to eliminate a specified variable and fit a nonparametric additive
 #' model with remaining variables
 #'
-#' This is an internal function of the package `smimodel`, and will be called
-#' from `backward`.
+#' This is an internal function of the package `smimodel`, and designed to be
+#' called from `backward()`.
 #'
 #' @param ind An integer corresponding to the position of the predictor variable
 #'   to be eliminated when fitting the model. (i.e. the function will combine

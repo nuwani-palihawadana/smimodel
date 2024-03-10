@@ -203,3 +203,4 @@ backward <- function(data, val.data, yvar, family = gaussian(),
   class(models) <- c("backward", "tbl_df", "tbl", "data.frame")
   return(models)
 }
+utils::globalVariables(c("...1", "...2"))

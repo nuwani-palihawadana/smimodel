@@ -38,6 +38,7 @@ Imports:
     purrr,
     ROI,
     tibble,
+    tidyselect,
     tidyr,
     tsibble,
     vctrs

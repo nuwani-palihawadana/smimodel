@@ -70,20 +70,20 @@ smimodel_tune <- function(data, yvar, family = gaussian(), index.vars,
                           NonConvex = -1, verbose = FALSE){
   # Estimating smimodel
   smimodel <- smimodel.fit(data = data, yvar = yvar, 
-                       family = family,
-                       index.vars = index.vars, 
-                       initialise = initialise, 
-                       num_ind = num_ind, num_models = num_models, 
-                       seed = seed,
-                       index.ind = index.ind, 
-                       index.coefs = index.coefs,
-                       s.vars = s.vars,
-                       linear.vars = linear.vars,
-                       lambda0 = lambda.comb[[1]], lambda2 = lambda.comb[[2]], 
-                       M = M, max.iter = max.iter, 
-                       tol = tol, tolCoefs = tolCoefs,
-                       TimeLimit = TimeLimit, MIPGap = MIPGap,
-                       NonConvex = NonConvex, verbose = verbose)
+                           family = family,
+                           index.vars = index.vars, 
+                           initialise = initialise, 
+                           num_ind = num_ind, num_models = num_models, 
+                           seed = seed,
+                           index.ind = index.ind, 
+                           index.coefs = index.coefs,
+                           s.vars = s.vars,
+                           linear.vars = linear.vars,
+                           lambda0 = lambda.comb[[1]], lambda2 = lambda.comb[[2]], 
+                           M = M, max.iter = max.iter, 
+                           tol = tol, tolCoefs = tolCoefs,
+                           TimeLimit = TimeLimit, MIPGap = MIPGap,
+                           NonConvex = NonConvex, verbose = verbose)
   # In-sample MSE
   smimodel_mse <- fabletools::MSE(.resid = smimodel$best$gam$residuals)
   return(smimodel_mse)

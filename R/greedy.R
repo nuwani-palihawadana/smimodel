@@ -1,8 +1,9 @@
 #' Greedy search for tuning penalty parameters
 #'
-#' Performs a greedy search over a given grid of penalty parameter combinations
-#' (lambda0, lambda2), and fits a SMI model with the best (lowest in-sample MSE)
-#' penalty parameter combination.
+#' Function to perform a greedy search over a given grid of penalty parameter
+#' combinations (lambda0, lambda2), and fits a single SMI model with the best
+#' (lowest in-sample MSE) penalty parameter combination. This is a helper
+#' function designed to be called from `greedy_smimodel()`.
 #'
 #' @param data Training data set on which models will be trained. Should be a
 #'   `tibble`.
@@ -72,16 +73,16 @@
 #' @importFrom stats gaussian
 #'
 #' @export
-greedy <- function(data, yvar, family = gaussian(), index.vars, 
-                   initialise = c("ppr", "additive", "linear", 
-                                  "multiple", "userInput"),
-                   num_ind = 5, num_models = 5, seed = 123, index.ind = NULL, 
-                   index.coefs = NULL, s.vars = NULL, linear.vars = NULL, 
-                   lambda0_seq, lambda2_seq, lambda_step,
-                   lambda0_start_seq, lambda2_start_seq, 
-                   M = 10, max.iter = 50, tol = 0.001, tolCoefs = 0.001,
-                   TimeLimit = Inf, MIPGap = 1e-4, NonConvex = -1, 
-                   verbose = FALSE, parallel = FALSE, workers = NULL){
+greedy.fit <- function(data, yvar, family = gaussian(), index.vars, 
+                       initialise = c("ppr", "additive", "linear", 
+                                      "multiple", "userInput"),
+                       num_ind = 5, num_models = 5, seed = 123, index.ind = NULL, 
+                       index.coefs = NULL, s.vars = NULL, linear.vars = NULL, 
+                       lambda0_seq, lambda2_seq, lambda_step,
+                       lambda0_start_seq, lambda2_start_seq, 
+                       M = 10, max.iter = 50, tol = 0.001, tolCoefs = 0.001,
+                       TimeLimit = Inf, MIPGap = 1e-4, NonConvex = -1, 
+                       verbose = FALSE, parallel = FALSE, workers = NULL){
   # Full grid
   grid1 <- expand.grid(lambda0_seq, lambda2_seq)
   # Data frame for storing all combinations searched

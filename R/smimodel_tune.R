@@ -1,6 +1,6 @@
 #' Sparse Multiple Index (SMI) model with a given penalty parameter combination
 #'
-#' Fits a nonparametric multiple index model to the data for a givcen
+#' Fits a nonparametric multiple index model to the data for a given
 #' combination of the penalty parameters (lambda0, lambda2), and returns the
 #' in-sample mean squared error (MSE). (Used within `greedy()`; users are not
 #' expected to use this function directly.)
@@ -69,7 +69,7 @@ smimodel_tune <- function(data, yvar, family = gaussian(), index.vars,
                           TimeLimit = Inf, MIPGap = 1e-4, 
                           NonConvex = -1, verbose = FALSE){
   # Estimating smimodel
-  smimodel <- smimodel(data = data, yvar = yvar, 
+  smimodel <- smimodel.fit(data = data, yvar = yvar, 
                        family = family,
                        index.vars = index.vars, 
                        initialise = initialise, 

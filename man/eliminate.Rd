@@ -49,6 +49,6 @@ that should be included linearly into the model (i.e. linear predictors).
 (default: NULL)}
 }
 \description{
-This is an internal function of the package \code{smimodel}, and will be called
-from \code{backward}.
+This is an internal function of the package \code{smimodel}, and designed to be
+called from \code{backward()}.
 }

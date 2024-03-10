@@ -2,16 +2,16 @@
 % Please edit documentation in R/make_gam.R
 \name{make_gam}
 \alias{make_gam}
-\title{Converting a \code{smimodel} object to a \code{gam} object}
+\title{Converting a \code{smimodelFit} object to a \code{gam} object}
 \usage{
 make_gam(x, data)
 }
 \arguments{
-\item{x}{A \code{smimodel} object.}
+\item{x}{A \code{smimodelFit} object.}
 
 \item{data}{Training data set on which models will be trained. Should be a
 \code{tibble}.}
 }
 \description{
-Converts a given object of class \code{smimodel} to an object of class \code{gam}.
+Converts a given object of class \code{smimodelFit} to an object of class \code{gam}.
 }

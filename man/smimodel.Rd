@@ -15,6 +15,7 @@ smimodel(
   seed = 123,
   index.ind = NULL,
   index.coefs = NULL,
+  neighbour = 0,
   s.vars = NULL,
   linear.vars = NULL,
   lambda0 = 1,
@@ -30,8 +31,11 @@ smimodel(
 )
 }
 \arguments{
-\item{data}{Training data set on which models will be trained. Should be a
-\code{tibble}.}
+\item{data}{Training data set on which models will be trained. Must be a data
+set of class \code{tsibble}.(Make sure there are no additional
+date/time/date-time/yearmonth/POSIXct/POSIXt variables except for the
+\code{index} of the \code{tsibble}). If multiple models are fitted, the grouping
+variable should be the key of the \code{tsibble}.}
 
 \item{yvar}{Name of the response variable as a character string.}
 
@@ -72,6 +76,13 @@ assigns group index for each predictor in \code{index.vars}.}
 \item{index.coefs}{If \code{initialise = "userInput"}: a numeric vector of index
 coefficients.}
 
+\item{neighbour}{If multiple models are fitted: Number of neighbours of each
+key (i.e. grouping variable) to be considered in model fitting to handle
+smoothing over the key. Should be an integer. If \code{neighbour = x}, \code{x}
+number of keys before the key of interest and \code{x} number of keys after the
+key of interest are grouped together for model fitting. The default is \code{0}
+(i.e. no neighbours are considered for model fitting).}
+
 \item{s.vars}{A character vector of names of the predictor variables for
 which splines should be fitted individually (rather than considering as a
 part of an index considered in \code{index.vars}).}
@@ -103,6 +114,7 @@ non-convex quadratic constraints in Gurobi solver.}
 \item{verbose}{The option to print detailed solver output.}
 }
 \description{
-Fits a nonparametric multiple index model to the data, with simultaneous
-variable selection (hence "sparse").
+Fits nonparametric multiple index model(s) to the data, with simultaneous
+variable selection (hence "sparse"). Possible to fit multiple SMI models
+based on a grouping variable.
 }

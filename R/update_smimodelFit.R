@@ -1,8 +1,8 @@
-#' Updating a `smimodel`
+#' Updating a `smimodelFit`
 #'
-#' Optimises and updates a given `smimodel`.
+#' Optimises and updates a given `smimodelFit`.
 #'
-#' @param object A `smimodel` object.
+#' @param object A `smimodelFit` object.
 #' @param data Training data set on which models will be trained. Should be a
 #'   `tibble`.
 #' @param lambda0 Penalty parameter for L0 penalty.
@@ -23,7 +23,7 @@
 #' @importFrom dplyr bind_rows
 #'
 #' @export
-update_smimodel <- function(object, data, lambda0 = 1, lambda2 = 1, 
+update_smimodelFit <- function(object, data, lambda0 = 1, lambda2 = 1, 
                             M = 10, max.iter = 50, 
                             tol = 0.001, tolCoefs = 0.001,
                             TimeLimit = Inf, MIPGap = 1e-4, 
@@ -85,7 +85,7 @@ update_smimodel <- function(object, data, lambda0 = 1, lambda2 = 1,
                             family = object$gam$family$family, method = "REML")
     index.names <- paste0("index", 1:length(best_alpha1$ind_pos))
     print("Final model fitted!")
-    final_smimodel <- make_smimodel(x = fun1_final, yvar = object$var_y, 
+    final_smimodel <- make_smimodelFit(x = fun1_final, yvar = object$var_y, 
                                     index.vars = object$vars_index, 
                                     index.ind = best_alpha1$index.ind, 
                                     index.data = NULL, index.names = index.names,
@@ -239,7 +239,7 @@ update_smimodel <- function(object, data, lambda0 = 1, lambda2 = 1,
             index.names <- paste0("index", 1:length(best_alpha2$ind_pos))
             alpha_current <- best_alpha2$best_alpha
             print("Final model fitted!")
-            final_smimodel <- make_smimodel(x = fun_null, yvar = object$var_y, 
+            final_smimodel <- make_smimodelFit(x = fun_null, yvar = object$var_y, 
                                             index.vars = object$vars_index, 
                                             index.ind = best_alpha2$index.ind, 
                                             index.data = NULL, index.names = index.names,
@@ -317,7 +317,7 @@ update_smimodel <- function(object, data, lambda0 = 1, lambda2 = 1,
       fun1_final <- mgcv::gam(as.formula(pre.formula), data = dat, 
                               family = object$gam$family$family, method = "REML")
       print("Final model fitted!")
-      final_smimodel <- make_smimodel(x = fun1_final, yvar = object$var_y, 
+      final_smimodel <- make_smimodelFit(x = fun1_final, yvar = object$var_y, 
                                       index.vars = object$vars_index, 
                                       index.ind = index_current, 
                                       index.data = dat, index.names = dat_names,

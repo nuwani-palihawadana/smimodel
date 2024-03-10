@@ -167,7 +167,7 @@ greedy <- function(data, yvar, family = gaussian(), index.vars,
     }
   }
   # Final smimodel
-  final_smimodel_list <- smimodel(data = data, yvar = yvar, 
+  final_smimodel_list <- smimodel.fit(data = data, yvar = yvar, 
                                   family = family,
                                   index.vars = index.vars, 
                                   initialise = initialise, 

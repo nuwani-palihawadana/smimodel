@@ -1,6 +1,6 @@
-#' Converting a fitted `gam` object to a `smimodel` object
+#' Converting a fitted `gam` object to a `smimodelFit` object
 #'
-#' Converts a given object of class `gam` to an object of class `smimodel`.
+#' Converts a given object of class `gam` to an object of class `smimodelFit`.
 #'
 #' @param x A fitted `gam` object.
 #' @param yvar Name of the response variable as a character string.
@@ -21,7 +21,7 @@
 #' @importFrom methods as
 #'
 #' @export
-make_smimodel <- function(x, yvar, index.vars, index.ind, index.data,
+make_smimodelFit <- function(x, yvar, index.vars, index.ind, index.data,
                           index.names, alpha, s.vars = NULL, linear.vars = NULL){
   # Constructing a new index coefficient vector to have all predictors in each
   # index, and structuring output
@@ -81,6 +81,6 @@ make_smimodel <- function(x, yvar, index.vars, index.ind, index.data,
                    "vars_index" = index.vars, "vars_s" = s.vars,
                    "vars_linear" = linear.vars, "gam" = x)
   # names(smimodel) <- c(index.names, "var_y", "vars_index", "vars_linear", "gam")
-  class(smimodel) <- c("smimodel", "list")
+  class(smimodel) <- c("smimodelFit", "list")
   return(smimodel)
 }

@@ -101,7 +101,7 @@ non-convex quadratic constraints in Gurobi solver.}
 \item{verbose}{The option to print detailed solver output.}
 }
 \description{
-Fits a nonparametric multiple index model to the data for a givcen
+Fits a nonparametric multiple index model to the data for a given
 combination of the penalty parameters (lambda0, lambda2), and returns the
 in-sample mean squared error (MSE). (Used within \code{greedy()}; users are not
 expected to use this function directly.)

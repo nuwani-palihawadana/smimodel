@@ -1,8 +1,8 @@
-#' Converting a `smimodel` object to a `gam` object
+#' Converting a `smimodelFit` object to a `gam` object
 #'
-#' Converts a given object of class `smimodel` to an object of class `gam`.
+#' Converts a given object of class `smimodelFit` to an object of class `gam`.
 #'
-#' @param x A `smimodel` object.
+#' @param x A `smimodelFit` object.
 #' @param data Training data set on which models will be trained. Should be a
 #'   `tibble`.
 #'

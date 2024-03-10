@@ -1,6 +1,6 @@
-#' Constructor function for the class `smimodel`
+#' Constructor function for the class `smimodelFit`
 #'
-#' Constructs an object of class `smimodel` using the information passed to
+#' Constructs an object of class `smimodelFit` using the information passed to
 #' arguments.
 #'
 #' @param data Training data set on which models will be trained. Should be a
@@ -30,7 +30,7 @@
 #'   that should be included linearly into the model.
 #'
 #' @export
-new_smimodel <- function(data, yvar, family = gaussian(), index.vars, 
+new_smimodelFit <- function(data, yvar, family = gaussian(), index.vars, 
                          initialise = c("additive", "linear", "userInput"), 
                          index.ind = NULL, index.coefs = NULL, 
                          s.vars = NULL, linear.vars = NULL){
@@ -168,7 +168,7 @@ new_smimodel <- function(data, yvar, family = gaussian(), index.vars,
     fun1 <- mgcv::gam(as.formula(pre.formula), data = dat_new, family = family,
                       method = "REML")
   }
-  smimodel <- make_smimodel(x = fun1, yvar = yvar, index.vars = index.vars, 
+  smimodel <- make_smimodelFit(x = fun1, yvar = yvar, index.vars = index.vars, 
                             index.ind = index.ind, index.data = dat_new,
                             index.names = dat_names, alpha = alpha,
                             s.vars = s.vars, linear.vars = linear.vars)

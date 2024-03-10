@@ -1,7 +1,7 @@
 #' Updating index coefficients and non-linear functions iteratively
 #'
 #' Iteratively updates index coefficients and non-linear functions using mixed
-#' integer programming. (Used within `update_smimodel()`; users are not expected
+#' integer programming. (Used within `update_smimodelFit()`; users are not expected
 #' to directly call this function.)
 #'
 #' @param x Fitted `gam`.

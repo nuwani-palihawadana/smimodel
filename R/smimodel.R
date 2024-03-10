@@ -1,10 +1,14 @@
 #' Sparse Multiple Index (SMI) models
 #'
-#' Fits a nonparametric multiple index model to the data, with simultaneous
-#' variable selection (hence "sparse").
+#' Fits nonparametric multiple index model(s) to the data, with simultaneous
+#' variable selection (hence "sparse"). Possible to fit multiple SMI models
+#' based on a grouping variable.
 #'
-#' @param data Training data set on which models will be trained. Should be a
-#'   `tibble`.
+#' @param data Training data set on which models will be trained. Must be a data
+#'   set of class `tsibble`.(Make sure there are no additional
+#'   date/time/date-time/yearmonth/POSIXct/POSIXt variables except for the
+#'   `index` of the `tsibble`). If multiple models are fitted, the grouping
+#'   variable should be the key of the `tsibble`.
 #' @param yvar Name of the response variable as a character string.
 #' @param family A description of the error distribution and link function to be
 #'   used in the model (see \code{\link{glm}} and \code{\link{family}}).
@@ -35,6 +39,12 @@
 #'   assigns group index for each predictor in `index.vars`.
 #' @param index.coefs If `initialise = "userInput"`: a numeric vector of index
 #'   coefficients.
+#' @param neighbour If multiple models are fitted: Number of neighbours of each
+#'   key (i.e. grouping variable) to be considered in model fitting to handle
+#'   smoothing over the key. Should be an integer. If `neighbour = x`, `x`
+#'   number of keys before the key of interest and `x` number of keys after the
+#'   key of interest are grouped together for model fitting. The default is `0`
+#'   (i.e. no neighbours are considered for model fitting).
 #' @param s.vars A character vector of names of the predictor variables for
 #'   which splines should be fitted individually (rather than considering as a
 #'   part of an index considered in `index.vars`).
@@ -54,138 +64,73 @@
 #'   non-convex quadratic constraints in Gurobi solver.
 #' @param verbose The option to print detailed solver output.
 #'
-#' @importFrom stats runif ppr
-#' @importFrom gtools permutations
+#' @importFrom dplyr arrange filter mutate rename
+#' @importFrom tsibble as_tsibble is_tsibble index key
+#' @importFrom vctrs vec_as_names
 #'
 #' @export
 smimodel <- function(data, yvar, family = gaussian(), index.vars, 
-                     initialise = c("ppr", "additive", "linear", 
-                                    "multiple", "userInput"),
-                     num_ind = 5, num_models = 5, seed = 123, index.ind = NULL, 
-                     index.coefs = NULL, s.vars = NULL, linear.vars = NULL, 
-                     lambda0 = 1, lambda2 = 1, 
-                     M = 10, max.iter = 50, tol = 0.001, tolCoefs = 0.001,
-                     TimeLimit = Inf, MIPGap = 1e-4, 
-                     NonConvex = -1, verbose = FALSE){
-  stopifnot(tibble::is_tibble(data))
+                          initialise = c("ppr", "additive", "linear", 
+                                         "multiple", "userInput"),
+                          num_ind = 5, num_models = 5, seed = 123, 
+                          index.ind = NULL, index.coefs = NULL, 
+                          neighbour = 0, s.vars = NULL, linear.vars = NULL, 
+                          lambda0 = 1, lambda2 = 1, 
+                          M = 10, max.iter = 50, tol = 0.001, tolCoefs = 0.001,
+                          TimeLimit = Inf, MIPGap = 1e-4, 
+                          NonConvex = -1, verbose = FALSE){
+  stopifnot(tsibble::is_tsibble(data))
   initialise <- match.arg(initialise)
-  if(initialise == "ppr"){
-    scaled <- scaling(data = data, index.vars = index.vars)
-    scaledInfo <- scaled$scaled_info
-    data <- scaled$scaled_data
-    pre.formula <- lapply(index.vars, function(var) paste0(var)) %>%
-      paste(collapse = "+") %>% 
-      paste(yvar, "~", .)
-    # Fitting PPR
-    ppr_fit <- stats::ppr(as.formula(pre.formula), data = data, 
-                          nterms = num_ind)
-    # Sparsifying indices
-    ppr_coefs <- ppr_fit$alpha
-    threshold <- max(ppr_fit$alpha)*0.1
-    zero_ind <- which(ppr_fit$alpha < threshold)
-    ppr_coefs[zero_ind] <- 0 
-    for(i in 1:NROW(ppr_coefs)){
-      maxCoef <- which.max(ppr_coefs[i, ])
-      ppr_coefs[i, ][-maxCoef] <- 0 
-    }
-    index.ind <- vector(mode = "list", length = NCOL(ppr_coefs))
-    index.coefs <- vector(mode = "list", length = NCOL(ppr_coefs))
-    for(a in 1:NCOL(ppr_coefs)){
-      index.ind[[a]] <- rep(a, NROW(ppr_coefs))
-      index.coefs[[a]] <- ppr_coefs[ , a]
-    }
-    index.ind <- unlist(index.ind)
-    index.coefs <- unlist(index.coefs)
-    names(index.coefs) <- NULL
-    # Constructing the initial `smimodel`
-    init_smimodel <- new_smimodel(data = data, yvar = yvar, 
-                                  family = family,
-                                  index.vars = index.vars, 
-                                  initialise = "userInput",  
-                                  index.ind = index.ind, 
-                                  index.coefs = index.coefs, 
-                                  s.vars = s.vars,
-                                  linear.vars = linear.vars)
-    # Optimising the initial `smimodel`
-    opt_smimodel_temp <- update_smimodel(object = init_smimodel, data = data, 
-                                         lambda0 = lambda0, lambda2 = lambda2, 
-                                         M = M, max.iter = max.iter, 
-                                         tol = tol, tolCoefs = tolCoefs,
-                                         TimeLimit = TimeLimit, 
-                                         MIPGap = MIPGap, NonConvex = NonConvex,
-                                         verbose = verbose)
-    opt_smimodel <- unscaling(object = opt_smimodel_temp, scaledInfo = scaled)
-  }else if(initialise == "multiple"){
-    Y_data <- as.matrix(data[ , yvar])
-    num_pred <- length(index.vars)
-    smimodels_initial <- vector(mode = "list", length = num_models)
-    smimodels_optimised <- vector(mode = "list", length = num_models)
-    smimodels_loss <- vector(mode = "list", length = num_models)
-    # Multiple starting points
-    permutes <- gtools::permutations(num_ind, num_ind)
-    set.seed(seed)
-    for(j in 1:num_models){
-      print(paste0("Multiple starting points: ", j))
-      permute_ind <- sample(1:dim(permutes)[1], 1)
-      rest <- sample(1:num_ind, (num_pred - num_ind), replace = TRUE)
-      indexInd <- c(permutes[permute_ind, ], rest)
-      indexCoefs <- runif(num_pred)
-      smimodels_initial[[j]] <- new_smimodel(data = data, yvar = yvar, 
-                                             family = family,
-                                             index.vars = index.vars, 
-                                             initialise = "userInput", 
-                                             index.ind = indexInd, 
-                                             index.coefs = indexCoefs, 
-                                             linear.vars = linear.vars)
-      smimodels_optimised[[j]] <- update_smimodel(object = smimodels_initial[[j]], 
-                                                  data = data, 
-                                                  lambda0 = lambda0, 
-                                                  lambda2 = lambda2, 
-                                                  M = M, max.iter = max.iter, 
-                                                  tol = tol, tolCoefs = tolCoefs,
-                                                  TimeLimit = TimeLimit, 
-                                                  MIPGap = MIPGap,
-                                                  NonConvex = NonConvex,
-                                                  verbose = verbose)
-      # Preparing alpha - index coefficients vector
-      list_index <- smimodels_optimised[[j]]$alpha
-      #list_index <- smimodels_optimised[[j]]$alpha[ , 2:NCOL(smimodels_optimised[[j]]$alpha)]
-      #list_index <- smimodels_optimised[[j]][1:(length(smimodels_optimised[[j]])-4)]
-      numInd <- NCOL(list_index)
-      alpha <- vector(mode = "list", length = numInd)
-      for(k in 1:numInd){
-        alpha[[k]] <- list_index[ , k]
-        #alpha[[k]] <- list_index[[k]]$coefficients
-      }
-      alpha <- unlist(alpha)
-      names(alpha) <- NULL
-      # Calculating loss
-      smimodels_loss[[j]] <- LossFunction(Y = Y_data, 
-                                          Yhat = smimodels_optimised[[j]]$gam$fitted.values, 
-                                          alpha = alpha, 
-                                          lambda0 = lambda0, lambda2 = lambda2)
-    }
-    min_loss <- which(unlist(smimodels_loss) == min(unlist(smimodels_loss)))
-    init_smimodel <- smimodels_initial[[min_loss]]
-    opt_smimodel <- smimodels_optimised[[min_loss]]
-  }else{
-    # Constructing the initial `smimodel`
-    init_smimodel <- new_smimodel(data = data, yvar = yvar, 
-                                  family = family,
-                                  index.vars = index.vars, 
-                                  initialise = initialise, 
-                                  index.ind = index.ind, 
-                                  index.coefs = index.coefs, 
-                                  linear.vars = linear.vars)
-    # Optimising the initial `smimodel`
-    opt_smimodel <- update_smimodel(object = init_smimodel, data = data, 
+  data1 <- data
+  data_index <- index(data1)
+  data_key <- key(data1)
+  if (length(key(data1)) == 0) {
+    data1 <- data1 %>%
+      dplyr::mutate(dummy_key = rep(1, NROW(data1))) %>%
+      tsibble::as_tsibble(index = data_index, key = dummy_key)
+    data_key <- key(data1)
+  }
+  key11 <- key(data1)[[1]]
+  key_unique <- unique(as.character(sort(dplyr::pull((data1[, {{ key11 }}])[, 1]))))
+  key_num <- seq_along(key_unique)
+  ref <- data.frame(key_unique, key_num)
+  data1 <- data1 %>%
+    dplyr::mutate(
+      num_key = as.numeric(factor(as.character({{ key11 }}), levels = key_unique))
+    )
+  smimodels_list <- vector(mode = "list", length = NROW(ref))
+  for (i in seq_along(ref$key_num)){
+    print(paste0('model ', paste0(i)))
+    df_cat <- data1 %>%
+      dplyr::filter((abs(num_key - ref$key_num[i]) <= neighbour) |
+                      (abs(num_key - ref$key_num[i] + NROW(ref)) <= neighbour) |
+                      (abs(num_key - ref$key_num[i] - NROW(ref)) <= neighbour)) %>%
+      tibble::as_tibble() %>%
+      dplyr::arrange({{data_index}})
+    smimodels_list[[i]] <- smimodel.fit(data = df_cat, yvar = yvar, 
+                                    family = family,
+                                    index.vars = index.vars, 
+                                    initialise = initialise, 
+                                    num_ind = num_ind, num_models = num_models, 
+                                    seed = seed,
+                                    index.ind = index.ind, 
+                                    index.coefs = index.coefs,
+                                    s.vars = s.vars,
+                                    linear.vars = linear.vars,
                                     lambda0 = lambda0, lambda2 = lambda2, 
                                     M = M, max.iter = max.iter, 
                                     tol = tol, tolCoefs = tolCoefs,
-                                    TimeLimit = TimeLimit, 
-                                    MIPGap = MIPGap, NonConvex = NonConvex,
-                                    verbose = verbose)
+                                    TimeLimit = TimeLimit, MIPGap = MIPGap,
+                                    NonConvex = NonConvex, verbose = verbose)
   }
-  output <- list("initial" = init_smimodel, "best" = opt_smimodel)
-  return(output)
+  data_list <- list(key_unique, smimodels_list)
+  models <- tibble::as_tibble(
+    x = data_list, .rows = length(data_list[[1]]),
+    .name_repair = ~ vctrs::vec_as_names(..., repair = "universal", quiet = TRUE)
+  )
+  models <- models %>%
+    dplyr::rename(key = ...1) %>%
+    dplyr::rename(fit = ...2)
+  class(models) <- c("smimodel", "tbl_df", "tbl", "data.frame")
+  return(models)
 }

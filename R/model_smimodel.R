@@ -10,6 +10,12 @@
 #'   `index` of the `tsibble`). If multiple models are fitted, the grouping
 #'   variable should be the key of the `tsibble`.
 #' @param yvar Name of the response variable as a character string.
+#' @param neighbour If multiple models are fitted: Number of neighbours of each
+#'   key (i.e. grouping variable) to be considered in model fitting to handle
+#'   smoothing over the key. Should be an integer. If `neighbour = x`, `x`
+#'   number of keys before the key of interest and `x` number of keys after the
+#'   key of interest are grouped together for model fitting. The default is `0`
+#'   (i.e. no neighbours are considered for model fitting).
 #' @param family A description of the error distribution and link function to be
 #'   used in the model (see \code{\link{glm}} and \code{\link{family}}).
 #' @param index.vars A character vector of names of the predictor variables for
@@ -39,12 +45,6 @@
 #'   assigns group index for each predictor in `index.vars`.
 #' @param index.coefs If `initialise = "userInput"`: a numeric vector of index
 #'   coefficients.
-#' @param neighbour If multiple models are fitted: Number of neighbours of each
-#'   key (i.e. grouping variable) to be considered in model fitting to handle
-#'   smoothing over the key. Should be an integer. If `neighbour = x`, `x`
-#'   number of keys before the key of interest and `x` number of keys after the
-#'   key of interest are grouped together for model fitting. The default is `0`
-#'   (i.e. no neighbours are considered for model fitting).
 #' @param s.vars A character vector of names of the predictor variables for
 #'   which splines should be fitted individually (rather than considering as a
 #'   part of an index considered in `index.vars`).
@@ -69,16 +69,17 @@
 #' @importFrom vctrs vec_as_names
 #'
 #' @export
-smimodel <- function(data, yvar, family = gaussian(), index.vars, 
-                          initialise = c("ppr", "additive", "linear", 
-                                         "multiple", "userInput"),
-                          num_ind = 5, num_models = 5, seed = 123, 
-                          index.ind = NULL, index.coefs = NULL, 
-                          neighbour = 0, s.vars = NULL, linear.vars = NULL, 
-                          lambda0 = 1, lambda2 = 1, 
-                          M = 10, max.iter = 50, tol = 0.001, tolCoefs = 0.001,
-                          TimeLimit = Inf, MIPGap = 1e-4, 
-                          NonConvex = -1, verbose = FALSE){
+model_smimodel <- function(data, yvar, neighbour = 0, family = gaussian(), 
+                           index.vars, 
+                           initialise = c("ppr", "additive", "linear", 
+                                          "multiple", "userInput"),
+                           num_ind = 5, num_models = 5, seed = 123, 
+                           index.ind = NULL, index.coefs = NULL, 
+                           s.vars = NULL, linear.vars = NULL, 
+                           lambda0 = 1, lambda2 = 1, 
+                           M = 10, max.iter = 50, tol = 0.001, tolCoefs = 0.001,
+                           TimeLimit = Inf, MIPGap = 1e-4, 
+                           NonConvex = -1, verbose = FALSE){
   stopifnot(tsibble::is_tsibble(data))
   initialise <- match.arg(initialise)
   data1 <- data
@@ -108,20 +109,20 @@ smimodel <- function(data, yvar, family = gaussian(), index.vars,
       tibble::as_tibble() %>%
       dplyr::arrange({{data_index}})
     smimodels_list[[i]] <- smimodel.fit(data = df_cat, yvar = yvar, 
-                                    family = family,
-                                    index.vars = index.vars, 
-                                    initialise = initialise, 
-                                    num_ind = num_ind, num_models = num_models, 
-                                    seed = seed,
-                                    index.ind = index.ind, 
-                                    index.coefs = index.coefs,
-                                    s.vars = s.vars,
-                                    linear.vars = linear.vars,
-                                    lambda0 = lambda0, lambda2 = lambda2, 
-                                    M = M, max.iter = max.iter, 
-                                    tol = tol, tolCoefs = tolCoefs,
-                                    TimeLimit = TimeLimit, MIPGap = MIPGap,
-                                    NonConvex = NonConvex, verbose = verbose)
+                                        family = family,
+                                        index.vars = index.vars, 
+                                        initialise = initialise, 
+                                        num_ind = num_ind, num_models = num_models, 
+                                        seed = seed,
+                                        index.ind = index.ind, 
+                                        index.coefs = index.coefs,
+                                        s.vars = s.vars,
+                                        linear.vars = linear.vars,
+                                        lambda0 = lambda0, lambda2 = lambda2, 
+                                        M = M, max.iter = max.iter, 
+                                        tol = tol, tolCoefs = tolCoefs,
+                                        TimeLimit = TimeLimit, MIPGap = MIPGap,
+                                        NonConvex = NonConvex, verbose = verbose)
   }
   data_list <- list(key_unique, smimodels_list)
   models <- tibble::as_tibble(

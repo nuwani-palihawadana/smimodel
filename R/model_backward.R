@@ -48,7 +48,7 @@
 #'   27(1), 134-141. \url{http://doi.org/10.1109/TPWRS.2011.2162082}
 #'
 #' @export
-backward <- function(data, val.data, yvar, family = gaussian(),
+model_backward <- function(data, val.data, yvar, family = gaussian(),
                      log.transformed = FALSE, neighbour = 0, 
                      s.vars = NULL, s.basedim = NULL, 
                      linear.vars = NULL,  tol = 0.001, 

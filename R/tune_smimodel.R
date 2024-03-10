@@ -2,7 +2,7 @@
 #'
 #' Fits a nonparametric multiple index model to the data for a given
 #' combination of the penalty parameters (lambda0, lambda2), and returns the
-#' in-sample mean squared error (MSE). (Used within `greedy()`; users are not
+#' in-sample mean squared error (MSE). (Used within `greedy.fit()`; users are not
 #' expected to use this function directly.)
 #'
 #' @param data Training data set on which models will be trained. Should be a
@@ -59,7 +59,7 @@
 #' @importFrom fabletools MSE
 #'
 #' @export
-smimodel_tune <- function(data, yvar, family = gaussian(), index.vars, 
+tune_smimodel <- function(data, yvar, family = gaussian(), index.vars, 
                           initialise = c("ppr", "additive", "linear", 
                                          "multiple", "userInput"),
                           num_ind = 5, num_models = 5, seed = 123, 

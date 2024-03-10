@@ -2,7 +2,7 @@
 #' model with remaining variables
 #'
 #' This is an internal function of the package `smimodel`, and designed to be
-#' called from `backward()`.
+#' called from `model_backward()`.
 #'
 #' @param ind An integer corresponding to the position of the predictor variable
 #'   to be eliminated when fitting the model. (i.e. the function will combine

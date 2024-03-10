@@ -2,7 +2,7 @@
 #'
 #' The default print method for a `smimodel` object.
 #'
-#' @param x A model object of class `smimodel` as produced by `smimodel()`
+#' @param x A model object of class `smimodel` as produced by `model_smimodel()`
 #'   function.
 #' @param ... Other arguments not currently used.
 #'
@@ -55,7 +55,7 @@ print.smimodelFit <- function(x, ...) {
 #'
 #' The default print method for a `backward` object.
 #'
-#' @param x A model object of class `backward` as produced by `backward()`
+#' @param x A model object of class `backward` as produced by `model_backward()`
 #'   function.
 #' @param ... Other arguments not currently used.
 #'

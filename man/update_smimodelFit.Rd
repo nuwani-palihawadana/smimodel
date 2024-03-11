@@ -24,7 +24,7 @@ update_smimodelFit(
 \item{object}{A \code{smimodelFit} object.}
 
 \item{data}{Training data set on which models will be trained. Should be a
-\code{tibble}.}
+\code{tsibble}.}
 
 \item{lambda0}{Penalty parameter for L0 penalty.}
 

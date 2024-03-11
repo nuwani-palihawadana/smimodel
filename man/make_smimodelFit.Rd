@@ -7,6 +7,7 @@
 make_smimodelFit(
   x,
   yvar,
+  neighbour,
   index.vars,
   index.ind,
   index.data,
@@ -20,6 +21,12 @@ make_smimodelFit(
 \item{x}{A fitted \code{gam} object.}
 
 \item{yvar}{Name of the response variable as a character string.}
+
+\item{neighbour}{If multiple models are fitted: Number of neighbours of each
+key (i.e. grouping variable) to be considered in model fitting to handle
+smoothing over the key. Should be an integer. If \code{neighbour = x}, \code{x}
+number of keys before the key of interest and \code{x} number of keys after the
+key of interest are grouped together for model fitting.}
 
 \item{index.vars}{A character vector of names of the predictor variables for
 which are estimated.}

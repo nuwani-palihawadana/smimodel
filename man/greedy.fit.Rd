@@ -7,6 +7,7 @@
 greedy.fit(
   data,
   yvar,
+  neighbour = 0,
   family = gaussian(),
   index.vars,
   initialise = c("ppr", "additive", "linear", "multiple", "userInput"),
@@ -39,6 +40,13 @@ greedy.fit(
 \code{tibble}.}
 
 \item{yvar}{Name of the response variable as a character string.}
+
+\item{neighbour}{If multiple models are fitted: Number of neighbours of each
+key (i.e. grouping variable) to be considered in model fitting to handle
+smoothing over the key. Should be an integer. If \code{neighbour = x}, \code{x}
+number of keys before the key of interest and \code{x} number of keys after the
+key of interest are grouped together for model fitting. The default is \code{0}
+(i.e. no neighbours are considered for model fitting).}
 
 \item{family}{A description of the error distribution and link function to be
 used in the model (see \code{\link{glm}} and \code{\link{family}}).}

@@ -37,10 +37,10 @@
 #' @param workers If `parallel = TRUE`, number of workers to use. (default:
 #'   NULL)
 #'
-#' @importFrom dplyr pull
+#' @importFrom dplyr pull 
 #' @importFrom fabletools MAPE
 #' @importFrom future multisession
-#' @importFrom stats predict var
+#' @importFrom stats predict var as.formula
 #' @importFrom tidyselect all_of
 #'
 #' @references Fan, S. & Hyndman, R.J. (2012). Short-Term Load Forecasting Based

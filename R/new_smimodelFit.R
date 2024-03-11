@@ -4,8 +4,14 @@
 #' arguments.
 #'
 #' @param data Training data set on which models will be trained. Should be a
-#'   `tibble`.
+#'   `tsibble`.
 #' @param yvar Name of the response variable as a character string.
+#' @param neighbour If multiple models are fitted: Number of neighbours of each
+#'   key (i.e. grouping variable) to be considered in model fitting to handle
+#'   smoothing over the key. Should be an integer. If `neighbour = x`, `x`
+#'   number of keys before the key of interest and `x` number of keys after the
+#'   key of interest are grouped together for model fitting. The default is `0`
+#'   (i.e. no neighbours are considered for model fitting).
 #' @param family A description of the error distribution and link function to be
 #'   used in the model (see \code{\link{glm}} and \code{\link{family}}).
 #' @param index.vars A character vector of names of the predictor variables for
@@ -30,11 +36,17 @@
 #'   that should be included linearly into the model.
 #'
 #' @export
-new_smimodelFit <- function(data, yvar, family = gaussian(), index.vars, 
-                         initialise = c("additive", "linear", "userInput"), 
-                         index.ind = NULL, index.coefs = NULL, 
-                         s.vars = NULL, linear.vars = NULL){
-  stopifnot(tibble::is_tibble(data))
+new_smimodelFit <- function(data, yvar, neighbour = 0, 
+                            family = gaussian(), index.vars, 
+                            initialise = c("additive", "linear", "userInput"), 
+                            index.ind = NULL, index.coefs = NULL, 
+                            s.vars = NULL, linear.vars = NULL){
+  stopifnot(tsibble::is_tsibble(data))
+  data_index <- index(data)
+  data_key <- key(data)[[1]]
+  # data1 <- data %>%
+  #   tibble::as_tibble() %>%
+  #   dplyr::arrange({{data_index}})
   initialise <- match.arg(initialise)
   data <- data %>%
     drop_na()
@@ -60,6 +72,13 @@ new_smimodelFit <- function(data, yvar, family = gaussian(), index.vars,
     pre.formula <- paste(pre.formula, "-", 1)
     fun1 <- mgcv::gam(as.formula(pre.formula), data = data, family = family,
                       method = "REML")
+    add <- data %>%
+      drop_na() %>%
+      select({{ data_index }}, {{ data_key }})
+    fun1$model <- bind_cols(add, fun1$model)
+    fun1$model <- as_tsibble(fun1$model,
+                             index = data_index,
+                             key = all_of(data_key))
     # Index coefficients
     alpha <- index.coefs <- fun1$coefficients[1:length(index.vars)]
     alpha <- unlist(tapply(alpha, index.ind, normalise_alpha))
@@ -74,10 +93,6 @@ new_smimodelFit <- function(data, yvar, family = gaussian(), index.vars,
       ind[[i]] <- as.numeric(X_index[, ind_pos[[i]]] %*% 
                                as.matrix(alpha[match(temp, names(alpha))], ncol = 1))
     }
-    # for(i in 1:length(ind)){
-    #   ind[[i]] <- as.numeric(X_index[, ind_pos[[i]]] %*% 
-    #                            as.matrix(alpha[startsWith(names(alpha), paste0(i))], ncol = 1))
-    # }
     dat_names <- names(ind) <- paste0("index", 1:length(ind))
     dat <- tibble::as_tibble(ind)
     dat_new <- dplyr::bind_cols(data, dat)
@@ -165,12 +180,23 @@ new_smimodelFit <- function(data, yvar, family = gaussian(), index.vars,
     }
     # Model fitting
     dat_new <- dplyr::bind_cols(data, dat)
+    dat_new <- dat_new %>%
+      tsibble::as_tsibble(index = {{data_index}}, key = {{data_key}})
     fun1 <- mgcv::gam(as.formula(pre.formula), data = dat_new, family = family,
                       method = "REML")
+    add <- dat_new %>%
+      drop_na() %>%
+      select({{ data_index }}, {{ data_key }})
+    fun1$model <- bind_cols(add, fun1$model)
+    fun1$model <- as_tsibble(fun1$model,
+                             index = data_index,
+                             key = all_of(data_key))
   }
-  smimodel <- make_smimodelFit(x = fun1, yvar = yvar, index.vars = index.vars, 
-                            index.ind = index.ind, index.data = dat_new,
-                            index.names = dat_names, alpha = alpha,
-                            s.vars = s.vars, linear.vars = linear.vars)
+  smimodel <- make_smimodelFit(x = fun1, yvar = yvar, 
+                               neighbour = neighbour,
+                               index.vars = index.vars, 
+                               index.ind = index.ind, index.data = dat_new,
+                               index.names = dat_names, alpha = alpha,
+                               s.vars = s.vars, linear.vars = linear.vars)
   return(smimodel)
 }

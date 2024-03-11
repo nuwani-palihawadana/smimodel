@@ -4,6 +4,11 @@
 #'
 #' @param x A fitted `gam` object.
 #' @param yvar Name of the response variable as a character string.
+#' @param neighbour If multiple models are fitted: Number of neighbours of each
+#'   key (i.e. grouping variable) to be considered in model fitting to handle
+#'   smoothing over the key. Should be an integer. If `neighbour = x`, `x`
+#'   number of keys before the key of interest and `x` number of keys after the
+#'   key of interest are grouped together for model fitting.
 #' @param index.vars A character vector of names of the predictor variables for
 #'   which are estimated.
 #' @param index.ind An integer vector that assigns group index for each
@@ -21,7 +26,7 @@
 #' @importFrom methods as
 #'
 #' @export
-make_smimodelFit <- function(x, yvar, index.vars, index.ind, index.data,
+make_smimodelFit <- function(x, yvar, neighbour, index.vars, index.ind, index.data,
                           index.names, alpha, s.vars = NULL, linear.vars = NULL){
   # Constructing a new index coefficient vector to have all predictors in each
   # index, and structuring output
@@ -34,12 +39,9 @@ make_smimodelFit <- function(x, yvar, index.vars, index.ind, index.data,
                                   alpha = alpha)
   new_alpha <- split(new_index_info$alpha_init_new, new_index_info$index)
   names(new_alpha) <- index.names
-  # var_names <- tibble::tibble(vars_index = index.vars)
-  # alpha <- dplyr::bind_cols(var_names, dplyr::bind_cols(new_alpha))
   alpha <- as(as.matrix(dplyr::bind_cols(new_alpha)), "sparseMatrix")
   rownames(alpha) <- index.vars
-  # # Constructing the class `smimodel`
-  # smimodel <- vector(mode = "list", length = (length(new_alpha)+4))
+  # Constructing the class `smimodelFit`
   # generating derivatives, and structuring the output
   if(!is.null(index.data)){
     if(length(x$smooth) == 0){
@@ -60,27 +62,13 @@ make_smimodelFit <- function(x, yvar, index.vars, index.ind, index.data,
     }
     names(dgz) <- paste0("d", seq_along(index.names))
     derivs <- dplyr::bind_cols(dgz)
-    # for(i in 1:length(new_alpha)){
-    #   smimodel[[i]] <- list("coefficients" = new_alpha[[i]],
-    #                         "derivatives" = dgz[[i]])
-    # }
   }else if(is.null(index.data)){
     derivs <- NULL
-    # for(i in 1:length(new_alpha)){
-    #   smimodel[[i]] <- list("coefficients" = new_alpha[[i]],
-    #                         "derivatives" = NULL)
-    # }
   }
-  # smimodel[[(length(new_alpha)+1)]] <- yvar
-  # smimodel[[(length(new_alpha)+2)]] <- index.vars
-  # if(!is.null(linear.vars)){
-  #   smimodel[[(length(new_alpha)+3)]] <- linear.vars
-  # }
-  # smimodel[[(length(new_alpha)+4)]] <- x
   smimodel <- list("alpha" = alpha, "derivatives" = derivs, "var_y" = yvar, 
                    "vars_index" = index.vars, "vars_s" = s.vars,
-                   "vars_linear" = linear.vars, "gam" = x)
-  # names(smimodel) <- c(index.names, "var_y", "vars_index", "vars_linear", "gam")
+                   "vars_linear" = linear.vars, 
+                   "neighbour" = neighbour, "gam" = x)
   class(smimodel) <- c("smimodelFit", "list")
   return(smimodel)
 }

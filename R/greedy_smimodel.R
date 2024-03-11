@@ -79,8 +79,8 @@
 #' @importFrom stats gaussian
 #'
 #' @export
-greedy_smimodel <- function(data, yvar, neighbour = 0, family = gaussian(), 
-                            index.vars, 
+greedy_smimodel <- function(data, yvar, neighbour = 0, 
+                            family = gaussian(), index.vars, 
                             initialise = c("ppr", "additive", "linear", 
                                            "multiple", "userInput"),
                             num_ind = 5, num_models = 5, seed = 123, 
@@ -117,10 +117,12 @@ greedy_smimodel <- function(data, yvar, neighbour = 0, family = gaussian(),
     df_cat <- data1 %>%
       dplyr::filter((abs(num_key - ref$key_num[i]) <= neighbour) |
                       (abs(num_key - ref$key_num[i] + NROW(ref)) <= neighbour) |
-                      (abs(num_key - ref$key_num[i] - NROW(ref)) <= neighbour)) %>%
-      tibble::as_tibble() %>%
-      dplyr::arrange({{data_index}})
+                      (abs(num_key - ref$key_num[i] - NROW(ref)) <= neighbour)) 
+    # %>%
+    #   tibble::as_tibble() %>%
+    #   dplyr::arrange({{data_index}})
     smimodels_list[[i]] <- greedy.fit(data = df_cat, yvar = yvar, 
+                                      neighbour = neighbour,
                                       family = family, index.vars = index.vars, 
                                       initialise = initialise,
                                       num_ind = num_ind, num_models = num_models,

@@ -8,6 +8,12 @@
 #' @param data Training data set on which models will be trained. Should be a
 #'   `tibble`.
 #' @param yvar Name of the response variable as a character string.
+#' @param neighbour If multiple models are fitted: Number of neighbours of each
+#'   key (i.e. grouping variable) to be considered in model fitting to handle
+#'   smoothing over the key. Should be an integer. If `neighbour = x`, `x`
+#'   number of keys before the key of interest and `x` number of keys after the
+#'   key of interest are grouped together for model fitting. The default is `0`
+#'   (i.e. no neighbours are considered for model fitting).
 #' @param family A description of the error distribution and link function to be
 #'   used in the model (see \code{\link{glm}} and \code{\link{family}}).
 #' @param index.vars A character vector of names of the predictor variables for
@@ -59,7 +65,8 @@
 #' @importFrom fabletools MSE
 #'
 #' @export
-tune_smimodel <- function(data, yvar, family = gaussian(), index.vars, 
+tune_smimodel <- function(data, yvar, neighbour = 0,
+                          family = gaussian(), index.vars, 
                           initialise = c("ppr", "additive", "linear", 
                                          "multiple", "userInput"),
                           num_ind = 5, num_models = 5, seed = 123, 
@@ -70,6 +77,7 @@ tune_smimodel <- function(data, yvar, family = gaussian(), index.vars,
                           NonConvex = -1, verbose = FALSE){
   # Estimating smimodel
   smimodel <- smimodel.fit(data = data, yvar = yvar, 
+                           neighbour = neighbour,
                            family = family,
                            index.vars = index.vars, 
                            initialise = initialise, 

@@ -19,13 +19,13 @@ predict.smimodel <- function(object, newdata, recursive = FALSE,
   if (!tsibble::is_tsibble(newdata)) stop("newdata is not a tsibble.")
   index_n <- index(newdata)
   key_n <- key(newdata)
-  key11 <- key(newdata)[[1]]
   if (length(key(newdata)) == 0) {
     newdata <- newdata %>%
       dplyr::mutate(dummy_key = rep(1, NROW(newdata))) %>%
       tsibble::as_tsibble(index = index_n, key = dummy_key)
     key_n <- key(newdata)
   }
+  key11 <- key(newdata)[[1]]
   predict_fn <- mgcv::predict.gam
   yvar <- object$fit[[1]]$var_y
   if(recursive == TRUE){

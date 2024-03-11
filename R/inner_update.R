@@ -6,7 +6,7 @@
 #'
 #' @param x Fitted `gam`.
 #' @param data Training data set on which models will be trained. Should be a
-#'   `tibble`.
+#'   `tsibble`.
 #' @param yvar Name of the response variable as a character string.
 #' @param family A description of the error distribution and link function to be
 #'   used in the model (see \code{\link{glm}} and \code{\link{family}}).
@@ -55,8 +55,8 @@ inner_update <- function(x, data, yvar, family = gaussian(), index.vars,
   R <- as.matrix(data.Y - Yhat)
   # Loss
   l2 <- loss(Y = as.matrix(data.Y), Yhat = Yhat, 
-                     alpha = alpha_old, 
-                     lambda0 = lambda0, lambda2 = lambda2)
+             alpha = alpha_old, 
+             lambda0 = lambda0, lambda2 = lambda2)
   # Setting up a counter for increases in loss (If the loss increases for 
   # 3 consecutive iterations, the algorithm will terminate.)
   increase_count <- 0

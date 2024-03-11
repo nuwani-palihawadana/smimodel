@@ -30,7 +30,7 @@ inner_update(
 \item{x}{Fitted \code{gam}.}
 
 \item{data}{Training data set on which models will be trained. Should be a
-\code{tibble}.}
+\code{tsibble}.}
 
 \item{yvar}{Name of the response variable as a character string.}
 

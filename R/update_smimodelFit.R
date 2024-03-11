@@ -4,7 +4,7 @@
 #'
 #' @param object A `smimodelFit` object.
 #' @param data Training data set on which models will be trained. Should be a
-#'   `tibble`.
+#'   `tsibble`.
 #' @param lambda0 Penalty parameter for L0 penalty.
 #' @param lambda2 Penalty parameter for L2 penalty.
 #' @param M Big-M value used in MIP.
@@ -20,7 +20,9 @@
 #' @param verbose The option to print detailed solver output.
 #' @param ... Other arguments not currently used.
 #'
-#' @importFrom dplyr bind_rows
+#' @importFrom dplyr bind_rows bind_cols
+#' @importFrom tibble as_tibble is_tibble
+#' @importFrom tidyr drop_na
 #'
 #' @export
 update_smimodelFit <- function(object, data, lambda0 = 1, lambda2 = 1, 
@@ -28,26 +30,19 @@ update_smimodelFit <- function(object, data, lambda0 = 1, lambda2 = 1,
                             tol = 0.001, tolCoefs = 0.001,
                             TimeLimit = Inf, MIPGap = 1e-4, 
                             NonConvex = -1, verbose = FALSE, ...){
-  if (!tibble::is_tibble(data)) stop("data is not a tibble.")
+  if (!tsibble::is_tsibble(data)) stop("data is not a tsibble.")
+  data_index <- index(data)
+  data_key <- key(data)[[1]]
   data <- data %>% drop_na()
   # Preparing inputs to `inner_update()`
-  #list_index <- object[1:(length(object)-4)]
-  #list_index <- object$alpha[ , 2:NCOL(object$alpha)]
   list_index <- object$alpha
-  #num_ind <- length(list_index)
   num_ind <- NCOL(list_index)
   alpha <- vector(mode = "list", length = num_ind)
-  #dgz <- vector(mode = "list", length = num_ind)
-  # for(i in 1:num_ind){
-  #   alpha[[i]] <- list_index[[i]]$coefficients
-  #   dgz[[i]] <- list_index[[i]]$derivatives
-  # }
   for(i in 1:num_ind){
     alpha[[i]] <- list_index[ , i]
   }
   alpha <- unlist(alpha)
   names(alpha) <- NULL
-  #names(dgz) <- paste0("d", 1:num_ind)
   dgz <- as.matrix(object$derivatives)
   # Optimising the model
   best_alpha1 <- inner_update(x = object$gam, data = data, yvar = object$var_y,
@@ -83,15 +78,23 @@ update_smimodelFit <- function(object, data, lambda0 = 1, lambda2 = 1,
     }
     fun1_final <- mgcv::gam(as.formula(pre.formula), data = data, 
                             family = object$gam$family$family, method = "REML")
+    add <- data %>%
+      drop_na() %>%
+      select({{ data_index }}, {{ data_key }})
+    fun1_final$model <- bind_cols(add, fun1_final$model)
+    fun1_final$model <- as_tsibble(fun1_final$model,
+                                   index = data_index,
+                                   key = all_of(data_key))
     index.names <- paste0("index", 1:length(best_alpha1$ind_pos))
     print("Final model fitted!")
     final_smimodel <- make_smimodelFit(x = fun1_final, yvar = object$var_y, 
-                                    index.vars = object$vars_index, 
-                                    index.ind = best_alpha1$index.ind, 
-                                    index.data = NULL, index.names = index.names,
-                                    alpha = best_alpha1$best_alpha, 
-                                    s.vars = object$vars_s,
-                                    linear.vars = object$vars_linear)
+                                       neighbour = object$neighbour,
+                                       index.vars = object$vars_index, 
+                                       index.ind = best_alpha1$index.ind, 
+                                       index.data = NULL, index.names = index.names,
+                                       alpha = best_alpha1$best_alpha, 
+                                       s.vars = object$vars_s,
+                                       linear.vars = object$vars_linear)
   }else{
     # Checking models with higher number of indices
     alpha_current <- best_alpha1$best_alpha
@@ -227,25 +230,36 @@ update_smimodelFit <- function(object, data, lambda0 = 1, lambda2 = 1,
             pre.formula <- paste(object$var_y, "~", 1)
           }
           fun_null <- mgcv::gam(as.formula(pre.formula), data = data, 
-                                family = object$gam$family$family, method = "REML")
+                                family = object$gam$family$family, 
+                                method = "REML")
+          add <- data %>%
+            drop_na() %>%
+            select({{ data_index }}, {{ data_key }})
+          fun_null$model <- bind_cols(add, fun_null$model)
+          fun_null$model <- as_tsibble(fun_null$model,
+                                       index = data_index,
+                                       key = all_of(data_key))
           Y <- as.matrix(data[ , object$var_y])
           Yhat <- as.matrix(fun_null$fitted.values, 
                             ncol = 1, nrow = length(fun_null$fitted.values))
           loss_null <- loss(Y = Y, Yhat = Yhat, alpha = best_alpha2$best_alpha,
-                                    lambda0 = lambda0, lambda2 = lambda2)
+                            lambda0 = lambda0, lambda2 = lambda2)
           if(loss_null >= loss_current){
             break
           }else{
             index.names <- paste0("index", 1:length(best_alpha2$ind_pos))
             alpha_current <- best_alpha2$best_alpha
             print("Final model fitted!")
-            final_smimodel <- make_smimodelFit(x = fun_null, yvar = object$var_y, 
-                                            index.vars = object$vars_index, 
-                                            index.ind = best_alpha2$index.ind, 
-                                            index.data = NULL, index.names = index.names,
-                                            alpha = best_alpha2$best_alpha, 
-                                            s.vars = object$vars_s,
-                                            linear.vars = object$vars_linear)
+            final_smimodel <- make_smimodelFit(x = fun_null, 
+                                               yvar = object$var_y, 
+                                               neighbour = object$neighbour,
+                                               index.vars = object$vars_index, 
+                                               index.ind = best_alpha2$index.ind, 
+                                               index.data = NULL, 
+                                               index.names = index.names,
+                                               alpha = best_alpha2$best_alpha, 
+                                               s.vars = object$vars_s,
+                                               linear.vars = object$vars_linear)
             break
           }
         }else{
@@ -316,14 +330,24 @@ update_smimodelFit <- function(object, data, lambda0 = 1, lambda2 = 1,
       # Model fitting
       fun1_final <- mgcv::gam(as.formula(pre.formula), data = dat, 
                               family = object$gam$family$family, method = "REML")
+      add <- data %>%
+        drop_na() %>%
+        select({{ data_index }}, {{ data_key }})
+      fun1_final$model <- bind_cols(add, fun1_final$model)
+      fun1_final$model <- as_tsibble(fun1_final$model,
+                                     index = data_index,
+                                     key = all_of(data_key))
       print("Final model fitted!")
-      final_smimodel <- make_smimodelFit(x = fun1_final, yvar = object$var_y, 
-                                      index.vars = object$vars_index, 
-                                      index.ind = index_current, 
-                                      index.data = dat, index.names = dat_names,
-                                      alpha = alpha_current, 
-                                      s.vars = object$vars_s,
-                                      linear.vars = object$vars_linear)
+      final_smimodel <- make_smimodelFit(x = fun1_final, 
+                                         yvar = object$var_y,
+                                         neighbour = object$neighbour,
+                                         index.vars = object$vars_index, 
+                                         index.ind = index_current, 
+                                         index.data = dat, 
+                                         index.names = dat_names,
+                                         alpha = alpha_current, 
+                                         s.vars = object$vars_s,
+                                         linear.vars = object$vars_linear)
     }
   }
   return(final_smimodel)

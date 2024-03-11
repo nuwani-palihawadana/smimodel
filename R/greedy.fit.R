@@ -102,7 +102,7 @@ greedy.fit <- function(data, yvar, family = gaussian(), index.vars,
   lambda_comb <- expand.grid(lambda0_start_seq, lambda2_start_seq)
   # Model fitting for each combination of lambdas
   MSE_list <- seq(1, NROW(lambda_comb), by = 1) %>%
-    map_f(~ smimodel_tune(data = data, yvar = yvar, 
+    map_f(~ tune_smimodel(data = data, yvar = yvar, 
                           family = family,
                           index.vars = index.vars, 
                           initialise = initialise, 
@@ -143,7 +143,7 @@ greedy.fit <- function(data, yvar, family = gaussian(), index.vars,
       break 
     }else{
       MSE_list <- seq(1, NROW(lambda_comb), by = 1) %>%
-        map_f(~ smimodel_tune(data = data, yvar = yvar, 
+        map_f(~ tune_smimodel(data = data, yvar = yvar, 
                               family = family,
                               index.vars = index.vars, 
                               initialise = initialise, 

@@ -1,7 +1,7 @@
-#' Projection Pursuit Regression (PPR) models
+#' Groupwise Additive Index Models (GAIM)
 #'
-#' A wrapper for `stats::ppr()` enabling multiple PPR models based on a grouping
-#' variable.
+#' A wrapper for `cgaim::cgaim()` enabling multiple GAIM models based on a
+#' grouping variable. Currently does not support Constrained GAIM (CGAIM)s.
 #'
 #' @param data Training data set on which models will be trained. Must be a data
 #'   set of class `tsibble`.(Make sure there are no additional
@@ -17,15 +17,21 @@
 #'   (i.e. no neighbours are considered for model fitting).
 #' @param index.vars A character vector of names of the predictor variables for
 #'   which indices should be estimated.
-#' @param num_ind An integer that specifies the number of indices to be used in
-#'   the model(s). (Corresponds to `nterms` in `stats::ppr()`.)
-#' @param ... Other arguments not currently used. (For more information on other
-#'   arguments that can be passed, refer `stats::ppr()`.)
+#' @param s.vars A character vector of names of the predictor variables for
+#'   which splines should be fitted individually (rather than considering as a
+#'   part of an index considered in `index.vars`).
+#' @param linear.vars A character vector of names of the predictor variables
+#'   that should be included linearly into the model.
+#' @param ... Other arguments not currently used. (Note that the arguments in
+#'   `cgaim::cgaim()` related to constrained GAIMs are currently not supported.
+#'   Furthermore, the argument `subset` is also not supported due to a bug in
+#'   `cgaim::cgaim()`.)
 #'
-#' @importFrom stats ppr model.frame
+#' @importFrom cgaim cgaim
 #'
 #' @export
-model_ppr <- function(data, yvar, neighbour = 0, index.vars, num_ind = 5, ...){
+model_gaim <- function(data, yvar, neighbour = 0, index.vars, s.vars = NULL, 
+                       linear.vars = NULL, ...){
   stopifnot(tsibble::is_tsibble(data))
   data1 <- data
   data_index <- index(data1)
@@ -46,39 +52,45 @@ model_ppr <- function(data, yvar, neighbour = 0, index.vars, num_ind = 5, ...){
     )
   # Constructing the formula
   pre.formula <- lapply(index.vars, function(var) paste0(var)) %>%
-    paste(collapse = "+") %>% 
-    paste(yvar, "~", .)
+    paste(collapse = ",") %>% 
+    paste0(")") %>%
+    paste0(yvar, " ~ g(", .)
+  if (!is.null(s.vars)){
+    pre.formula <- lapply(s.vars, function(var) paste0("s(", var, ")")) %>%
+      paste(collapse = "+") %>% 
+      paste(pre.formula, "+", .)
+  }
+  if (!is.null(linear.vars)){
+    pre.formula <- lapply(linear.vars, function(var) paste0(var)) %>%
+      paste(collapse = "+") %>% 
+      paste(pre.formula, "+", .)
+  }
   # Model fitting
-  ppr_list <- vector(mode = "list", length = NROW(ref))
+  gaim_list <- vector(mode = "list", length = NROW(ref))
   for (i in seq_along(ref$key_num)){
     print(paste0('model ', paste0(i)))
     df_cat <- data1 %>%
       dplyr::filter((abs(num_key - ref$key_num[i]) <= neighbour) |
                       (abs(num_key - ref$key_num[i] + NROW(ref)) <= neighbour) |
                       (abs(num_key - ref$key_num[i] - NROW(ref)) <= neighbour)) 
-    ppr_list[[i]] <- stats::ppr(formula = as.formula(pre.formula),
-                                data = df_cat, nterms = num_ind, ... = ...)
-    dot_args <- list(...)
-    if ("subset" %in% names(dot_args)){
-      modelFrame <- model.frame(formula = as.formula(pre.formula), 
-                                data = df_cat[dot_args$subset, ])
-      add <- df_cat[dot_args$subset, ] %>%
-        drop_na() %>%
-        select({{ data_index }}, {{ key11 }})
-    }else{
-      modelFrame <- model.frame(formula = as.formula(pre.formula), 
-                                data = df_cat)
-      add <- df_cat %>%
-        drop_na() %>%
-        select({{ data_index }}, {{ key11 }})
-    }
-    ppr_list[[i]]$model <- bind_cols(add, modelFrame)
-    ppr_list[[i]]$model <- as_tsibble(ppr_list[[i]]$model,
-                                      index = data_index,
-                                      key = all_of(key11))
+    gaim_list[[i]] <- cgaim::cgaim(formula = as.formula(pre.formula),
+                                   data = df_cat, ... = ...)
+    # # Constructing the formula to obtain model frame
+    # modelFrame.formula <- lapply(index.vars, function(var) paste0(var)) %>%
+    #   paste(collapse = "+") %>% 
+    #   paste(yvar, "~", .)
+    modelFrame <- model.frame(formula = as.formula(pre.formula), 
+                              data = df_cat)
+    add <- df_cat %>%
+      drop_na() %>%
+      select({{ data_index }}, {{ key11 }})
+    gaim_list[[i]]$model <- bind_cols(add, modelFrame)
+    gaim_list[[i]]$model <- as_tsibble(gaim_list[[i]]$model,
+                                       index = data_index,
+                                       key = all_of(key11))
   }
   # Structuring the output
-  data_list <- list(key_unique, ppr_list)
+  data_list <- list(key_unique, gaim_list)
   models <- tibble::as_tibble(
     x = data_list, .rows = length(data_list[[1]]),
     .name_repair = ~ vctrs::vec_as_names(..., repair = "universal", quiet = TRUE)
@@ -86,6 +98,10 @@ model_ppr <- function(data, yvar, neighbour = 0, index.vars, num_ind = 5, ...){
   models <- models %>%
     dplyr::rename(key = ...1) %>%
     dplyr::rename(fit = ...2)
-  class(models) <- c("pprFit", "tbl_df", "tbl", "data.frame")
+  class(models) <- c("gaimFit", "tbl_df", "tbl", "data.frame")
   return(models)
 }
+#' @export
+cgaim::g
+#' @export
+cgaim::s

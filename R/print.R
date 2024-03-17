@@ -66,3 +66,39 @@ print.backward <- function(x, ...) {
   cat("Fitted Model(s):\n")
   NextMethod()
 }
+
+
+
+#' Printing a `pprFit` object
+#'
+#' The default print method for a `pprFit` object.
+#'
+#' @param x A model object of class `pprFit` as produced by `model_ppr()`
+#'   function.
+#' @param ... Other arguments not currently used.
+#'
+#' @method print pprFit
+#'
+#' @export
+print.pprFit <- function(x, ...) {
+  cat("Fitted Model(s):\n")
+  NextMethod()
+}
+
+
+
+#' Printing a `gaimFit` object
+#'
+#' The default print method for a `gaimFit` object.
+#'
+#' @param x A model object of class `gaimFit` as produced by `model_gaim()`
+#'   function.
+#' @param ... Other arguments not currently used.
+#'
+#' @method print gaimFit
+#'
+#' @export
+print.gaimFit <- function(x, ...) {
+  cat("Fitted Model(s):\n")
+  NextMethod()
+}

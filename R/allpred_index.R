@@ -16,18 +16,6 @@ allpred_index <- function(num_pred, num_ind, ind_pos, alpha){
   init_list <- vector(mode = "list", length = num_ind)
   index <- vector(mode = "list", length = num_ind)
   for(i in 1:num_ind){
-    # XQ: Error?
-    # if(length(alpha) == (num_ind*num_pred)){
-    #   init_list[[i]] <- alpha[ind_pos[[i]]]
-    # }else{
-    #   init_list[[i]] <- numeric(length = num_pred)
-    #   init_list[[i]][ind_pos[[i]]] <- alpha[ind_pos[[i]]]
-    # }
-    # NP: This will give incorrect "alpha_init" (unnecessary zeros will be added) 
-    # when there are more than one index (especially when obtaining 
-    # "final_smimodel" in "update_smimodel()").
-    # init_list[[i]] <- numeric(length = num_pred)
-    # init_list[[i]][ind_pos[[i]]] <- alpha[ind_pos[[i]]]
     if(length(ind_pos[[i]]) == 1){
       temp <- i
     }else{

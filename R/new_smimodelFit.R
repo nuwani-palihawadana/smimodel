@@ -44,9 +44,6 @@ new_smimodelFit <- function(data, yvar, neighbour = 0,
   stopifnot(tsibble::is_tsibble(data))
   data_index <- index(data)
   data_key <- key(data)[[1]]
-  # data1 <- data %>%
-  #   tibble::as_tibble() %>%
-  #   dplyr::arrange({{data_index}})
   initialise <- match.arg(initialise)
   data <- data %>%
     drop_na()

@@ -18,8 +18,6 @@ scaling <- function(data, index.vars){
   data <- data %>%
     dplyr::select(-{{index.vars}})
   data <- dplyr::bind_cols(data, scaleData)
-  # data <- data %>%
-  #   dplyr::mutate_at(index.vars, ~(scale(., center = FALSE, scale = apply(., 2, sd, na.rm = TRUE)) %>% as.vector))
   output <- list("scaled_data" = data, "scaled_info" = scaleInfo)
   return(output)
 }

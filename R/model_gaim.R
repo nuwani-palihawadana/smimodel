@@ -75,10 +75,6 @@ model_gaim <- function(data, yvar, neighbour = 0, index.vars, s.vars = NULL,
                       (abs(num_key - ref$key_num[i] - NROW(ref)) <= neighbour)) 
     gaim_list[[i]] <- cgaim::cgaim(formula = as.formula(pre.formula),
                                    data = df_cat, ... = ...)
-    # # Constructing the formula to obtain model frame
-    # modelFrame.formula <- lapply(index.vars, function(var) paste0(var)) %>%
-    #   paste(collapse = "+") %>% 
-    #   paste(yvar, "~", .)
     modelFrame <- model.frame(formula = as.formula(pre.formula), 
                               data = df_cat)
     add <- df_cat %>%

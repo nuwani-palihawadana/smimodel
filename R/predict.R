@@ -27,7 +27,6 @@ predict.smimodel <- function(object, newdata, recursive = FALSE,
   }
   key11 <- key(newdata)[[1]]
   predict_fn <- mgcv::predict.gam
-  yvar <- object$fit[[1]]$var_y
   if(recursive == TRUE){
     newdata <- newdata %>%
       tibble::as_tibble() %>%
@@ -287,7 +286,6 @@ predict.backward <- function(object, newdata,
       as_tibble() %>%
       arrange({{index_n}})
     predictions =  vector(mode = "list", length = NROW(newdata))
-    #pb <- lazybar::lazyProgressBar(NROW(newdata) - 1)
     for(m in 1:(NROW(newdata) - 1)){
       data_temp = newdata[m, ]
       key22 = data_temp[ , {{ key11 }}][[1]]
@@ -301,7 +299,6 @@ predict.backward <- function(object, newdata,
           newdata[x_seq[l], y_seq[l]] = pred
         }
       }
-      #pb$tick()$print()
     }
     data_temp = newdata[NROW(newdata), ]
     key22 = data_temp[ , {{ key11 }}][[1]]
@@ -361,7 +358,6 @@ predict.pprFit <- function(object, newdata,
       as_tibble() %>%
       arrange({{index_n}})
     predictions =  vector(mode = "list", length = NROW(newdata))
-    #pb <- lazybar::lazyProgressBar(NROW(newdata) - 1)
     for(m in 1:(NROW(newdata) - 1)){
       data_temp = newdata[m, ]
       key22 = data_temp[ , {{ key11 }}][[1]]
@@ -375,7 +371,6 @@ predict.pprFit <- function(object, newdata,
           newdata[x_seq[l], y_seq[l]] = pred
         }
       }
-      #pb$tick()$print()
     }
     data_temp = newdata[NROW(newdata), ]
     key22 = data_temp[ , {{ key11 }}][[1]]
@@ -430,13 +425,11 @@ predict.gaimFit <- function(object, newdata,
     key_n <- key(newdata)
   }
   key11 <- key(newdata)[[1]]
-  #predict_fn <- cgaim::predict.cgaim
   if(recursive == TRUE){
     newdata <- newdata %>%
       as_tibble() %>%
       arrange({{index_n}})
     predictions =  vector(mode = "list", length = NROW(newdata))
-    #pb <- lazybar::lazyProgressBar(NROW(newdata) - 1)
     for(m in 1:(NROW(newdata) - 1)){
       data_temp = newdata[m, ]
       key22 = data_temp[ , {{ key11 }}][[1]]
@@ -450,7 +443,6 @@ predict.gaimFit <- function(object, newdata,
           newdata[x_seq[l], y_seq[l]] = pred
         }
       }
-      #pb$tick()$print()
     }
     data_temp = newdata[NROW(newdata), ]
     key22 = data_temp[ , {{ key11 }}][[1]]

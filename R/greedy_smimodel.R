@@ -118,9 +118,6 @@ greedy_smimodel <- function(data, yvar, neighbour = 0,
       dplyr::filter((abs(num_key - ref$key_num[i]) <= neighbour) |
                       (abs(num_key - ref$key_num[i] + NROW(ref)) <= neighbour) |
                       (abs(num_key - ref$key_num[i] - NROW(ref)) <= neighbour)) 
-    # %>%
-    #   tibble::as_tibble() %>%
-    #   dplyr::arrange({{data_index}})
     smimodels_list[[i]] <- greedy.fit(data = df_cat, yvar = yvar, 
                                       neighbour = neighbour,
                                       family = family, index.vars = index.vars, 

@@ -153,8 +153,7 @@ predict.smimodel <- function(object, newdata, recursive = FALSE,
 #' @param ... Other arguments not currently used.
 #'
 #' @method predict smimodelFit
-#'
-#' @export
+
 predict.smimodelFit <- function(object, newdata, recursive = FALSE, 
                                 recursive_colRange = NULL, ...) {
   if (!is_tibble(newdata)) stop("newdata is not a tibble.")

@@ -10,8 +10,7 @@
 #' @param ind_pos A list of which the length = `num_ind` that indicates which
 #'   predictors belong to which index.
 #' @param alpha A vector of index coefficients.
-#'
-#' @export
+
 allpred_index <- function(num_pred, num_ind, ind_pos, alpha){
   init_list <- vector(mode = "list", length = num_ind)
   index <- vector(mode = "list", length = num_ind)

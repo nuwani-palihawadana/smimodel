@@ -48,8 +48,7 @@ generics::augment
 #' @importFrom generics augment
 #'
 #' @method augment smimodelFit
-#'
-#' @export
+
 augment.smimodelFit <- function(x, ...) {
   smimodel.resid <- x$gam$residuals
   smimodel.fitted <- x$gam$fitted.values

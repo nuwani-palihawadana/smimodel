@@ -20,8 +20,7 @@
 #' @param NonConvex The strategy for handling non-convex quadratic objectives or
 #'   non-convex quadratic constraints in Gurobi solver.
 #' @param verbose The option to print detailed solver output.
-#'
-#' @export
+
 update_alpha <- function(Y, X, num_pred, num_ind, index.ind, dgz, alpha_old, 
                          lambda0 = 1, lambda2 = 1, M = 10, TimeLimit = Inf,
                          MIPGap = 1e-4, NonConvex = -1, verbose = FALSE){

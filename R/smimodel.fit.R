@@ -62,8 +62,7 @@
 #'
 #' @importFrom stats runif ppr
 #' @importFrom gtools permutations
-#'
-#' @export
+
 smimodel.fit <- function(data, yvar, neighbour = 0, 
                          family = gaussian(), index.vars, 
                          initialise = c("ppr", "additive", "linear", 

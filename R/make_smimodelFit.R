@@ -24,8 +24,7 @@
 #'
 #' @importFrom gratia derivatives
 #' @importFrom methods as
-#'
-#' @export
+
 make_smimodelFit <- function(x, yvar, neighbour, index.vars, index.ind, index.data,
                           index.names, alpha, s.vars = NULL, linear.vars = NULL){
   # Constructing a new index coefficient vector to have all predictors in each

@@ -34,8 +34,7 @@
 #'   part of an index considered in `index.vars`).
 #' @param linear.vars A character vector of names of the predictor variables
 #'   that should be included linearly into the model.
-#'
-#' @export
+
 new_smimodelFit <- function(data, yvar, neighbour = 0, 
                             family = gaussian(), index.vars, 
                             initialise = c("additive", "linear", "userInput"), 

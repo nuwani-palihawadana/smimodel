@@ -15,8 +15,7 @@
 #' 
 #' @importFrom Matrix bdiag
 #' @importFrom ROI Q_objective L_constraint OP V_bound ROI_solve 
-#'
-#' @export
+
 init_alpha <- function(Y, X, index.ind, init.type = "penalisedReg", 
                        lambda0 = 1, lambda2 = 1, M = 10){
   p = NCOL(X)

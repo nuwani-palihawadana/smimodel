@@ -8,8 +8,7 @@
 #' @param object A `smimodel` object.
 #' @param scaledInfo The list returned from a call of the function `scaling()`.
 #'   (Relates to the argument `data` in the corresponding call of `smimodel()`.)
-#'
-#' @export
+
 unscaling <- function(object, scaledInfo){
   scaledInfo <- scaledInfo$scaled_info
   list_index <- object$alpha

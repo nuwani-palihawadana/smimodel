@@ -9,8 +9,7 @@
 #'   
 #' @importFrom dplyr mutate_at select
 #' @importFrom stats sd
-#'   
-#' @export
+
 scaling <- function(data, index.vars){
   scaleData <- scale(data[ , index.vars], center = FALSE, 
                      scale = apply(data[ , index.vars], 2, sd, na.rm = TRUE))

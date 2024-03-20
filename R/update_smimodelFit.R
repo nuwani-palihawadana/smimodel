@@ -23,8 +23,7 @@
 #' @importFrom dplyr bind_rows bind_cols
 #' @importFrom tibble as_tibble is_tibble
 #' @importFrom tidyr drop_na
-#'
-#' @export
+
 update_smimodelFit <- function(object, data, lambda0 = 1, lambda2 = 1, 
                             M = 10, max.iter = 50, 
                             tol = 0.001, tolCoefs = 0.001,

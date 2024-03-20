@@ -63,8 +63,7 @@
 #' @param verbose The option to print detailed solver output.
 #' 
 #' @importFrom fabletools MSE
-#'
-#' @export
+
 tune_smimodel <- function(data, yvar, neighbour = 0,
                           family = gaussian(), index.vars, 
                           initialise = c("ppr", "additive", "linear", 

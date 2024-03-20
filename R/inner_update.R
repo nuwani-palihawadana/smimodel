@@ -32,8 +32,7 @@
 #' @param NonConvex The strategy for handling non-convex quadratic objectives or
 #'   non-convex quadratic constraints in Gurobi solver.
 #' @param verbose The option to print detailed solver output.
-#'
-#' @export
+
 inner_update <- function(x, data, yvar, family = gaussian(), index.vars, 
                          s.vars, linear.vars, num_ind, dgz, alpha_old, 
                          lambda0 = 1, lambda2 = 1, M = 10, max.iter = 50, 

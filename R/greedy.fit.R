@@ -77,8 +77,7 @@
 #' @importFrom furrr future_map
 #' @importFrom purrr map
 #' @importFrom stats gaussian
-#'
-#' @export
+
 greedy.fit <- function(data, yvar, neighbour = 0, 
                        family = gaussian(), index.vars, 
                        initialise = c("ppr", "additive", "linear", 

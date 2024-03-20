@@ -25,7 +25,7 @@
 #' @param linear.vars A character vector of names of the predictor variables
 #'   that should be included linearly into the model (i.e. linear predictors).
 #'   (default: NULL)
-#' 
+
 eliminate <- function(ind, train, val, yvar, family = gaussian(), 
                       log.transformed = FALSE, s.vars = NULL, s.basedim = NULL, 
                       linear.vars = NULL){

@@ -8,8 +8,7 @@
 #' @param alpha Vector of index coefficients.
 #' @param lambda0 Penalty parameter for L0 penalty.
 #' @param lambda2 Penalty parameter for L2 penalty.
-#'
-#' @export
+
 loss <- function(Y, Yhat, alpha, lambda0, lambda2){
   sqdError <- sum((Y - Yhat)^2)
   L0Penalty <- lambda0*sum(alpha != 0)

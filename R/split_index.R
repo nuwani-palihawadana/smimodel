@@ -4,8 +4,7 @@
 #'
 #' @param num_pred Number of predictors.
 #' @param num_ind Number of indices.
-#'
-#' @export
+
 split_index <- function(num_pred, num_ind){
   split_list <- numeric()
   rem_pred <- num_pred

@@ -9,6 +9,7 @@ model_gaim(
   yvar,
   neighbour = 0,
   index.vars,
+  index.ind,
   s.vars = NULL,
   linear.vars = NULL,
   ...
@@ -32,6 +33,9 @@ key of interest are grouped together for model fitting. The default is \code{0}
 
 \item{index.vars}{A character vector of names of the predictor variables for
 which indices should be estimated.}
+
+\item{index.ind}{An integer vector that assigns group index for each
+predictor in \code{index.vars}.}
 
 \item{s.vars}{A character vector of names of the predictor variables for
 which splines should be fitted individually (rather than considering as a

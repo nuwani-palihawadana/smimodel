@@ -17,6 +17,8 @@
 #'   (i.e. no neighbours are considered for model fitting).
 #' @param index.vars A character vector of names of the predictor variables for
 #'   which indices should be estimated.
+#' @param index.ind An integer vector that assigns group index for each
+#'   predictor in `index.vars`.
 #' @param s.vars A character vector of names of the predictor variables for
 #'   which splines should be fitted individually (rather than considering as a
 #'   part of an index considered in `index.vars`).
@@ -30,8 +32,8 @@
 #' @importFrom cgaim cgaim
 #'
 #' @export
-model_gaim <- function(data, yvar, neighbour = 0, index.vars, s.vars = NULL, 
-                       linear.vars = NULL, ...){
+model_gaim <- function(data, yvar, neighbour = 0, index.vars, index.ind, 
+                       s.vars = NULL, linear.vars = NULL, ...){
   stopifnot(tsibble::is_tsibble(data))
   data1 <- data
   data_index <- index(data1)
@@ -51,10 +53,19 @@ model_gaim <- function(data, yvar, neighbour = 0, index.vars, s.vars = NULL,
       num_key = as.numeric(factor(as.character({{ key11 }}), levels = key_unique))
     )
   # Constructing the formula
-  pre.formula <- lapply(index.vars, function(var) paste0(var)) %>%
+  ind_pos <- split(seq_along(index.ind), index.ind)
+  var_list <- index.vars[ind_pos[[1]]]
+  pre.formula <- lapply(var_list, function(var) paste0(var)) %>%
     paste(collapse = ",") %>% 
     paste0(")") %>%
     paste0(yvar, " ~ g(", .)
+  for(j in 2:length(ind_pos)){
+    var_list <- index.vars[ind_pos[[j]]]
+    pre.formula <- lapply(var_list, function(var) paste0(var)) %>%
+      paste(collapse = ",") %>% 
+      paste0(")") %>%
+      paste0(pre.formula, " + g(", .)
+  }
   if (!is.null(s.vars)){
     pre.formula <- lapply(s.vars, function(var) paste0("s(", var, ")")) %>%
       paste(collapse = "+") %>% 

@@ -8,6 +8,7 @@
 #' @return A `tibble`.
 #'
 #' @importFrom purrr set_names map
+#' @importFrom dplyr lag
 #'
 #' @examples
 #' # Adding lagged variables to an existing tibble

@@ -25,6 +25,7 @@ Depends:
     R (>= 2.10)
 Imports:
     cgaim,
+    distributional,
     dplyr, 
     fabletools,
     furrr,

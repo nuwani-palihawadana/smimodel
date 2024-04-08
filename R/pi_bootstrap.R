@@ -114,18 +114,29 @@ residBootstrap <- function(x, season.period = 1, m = 1, num.bootstrap = 1000){
 #' @importFrom stats na.omit
 #' 
 seasonBootstrap <- function(x, season.period = 1, m = 1){
-  # Arrange data in a matrix with one block per row
   n <- length(x)
+  # Block size
+  block.size <- season.period*m
+  # Number of (complete) blocks
   nblocks <- trunc(n/season.period/m)
-  comp <- season.period*nblocks*m
-  remain <- (n - comp)
-  xmat <- matrix(x[(remain + 1):n], ncol = m*season.period, 
-                 nrow = nblocks, byrow = TRUE)
-  # Permute rows
-  j <- sample(1:nblocks, nblocks, replace=FALSE)
-  # Return as vector
-  newx <- c(t(xmat[j, ]))
+  # Construct a simulated residual series through random re-sampling of blocks
+  newx <- as.vector(replicate(nblocks, randomBlock(series = x, block.size = block.size)))
   return(na.omit(newx))
+}
+
+
+
+#' Randomly sampling a block
+#'
+#' Samples a block of specified size from a given series starting form a random
+#' point in the series.
+#'
+#' @param series A series from which a block should be sampled.
+#' @param block.size Size of the block to be sampled.
+randomBlock <- function(series, block.size){
+  start_ind <- sample(seq(length(series) - block.size + 1), 1)
+  block <- series[start_ind:(start_ind + block.size -1)]
+  return(block)
 }
 
 

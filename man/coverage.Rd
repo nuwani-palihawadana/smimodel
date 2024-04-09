@@ -2,7 +2,7 @@
 % Please edit documentation in R/pi_bootstrap.R
 \name{coverage}
 \alias{coverage}
-\title{Coverage a calculated prediction interval}
+\title{Coverage of a calculated prediction interval}
 \usage{
 coverage(bounds, newdata, yvar)
 }

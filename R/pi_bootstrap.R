@@ -355,7 +355,7 @@ possibleFutures_benchmark <- function(object, newdata, bootstraps,
 
 
 
-#' Coverage a calculated prediction interval
+#' Coverage of a calculated prediction interval
 #' 
 #' Computes the actual coverage probability of a calculated prediction interval.
 #' 

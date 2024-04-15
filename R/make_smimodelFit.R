@@ -55,8 +55,8 @@ make_smimodelFit <- function(x, yvar, neighbour, index.vars, index.ind, index.da
       for (i in seq_along(index.names)) {
         temp <- gratia::derivatives(x, type = "central",
                                     data = index.data,
-                                    term = paste0("s(", index.names[i], ")"))
-        dgz[[i]] <- temp$derivative
+                                    select = paste0("s(", index.names[i], ")"))
+        dgz[[i]] <- temp$.derivative
       }
     }
     names(dgz) <- paste0("d", seq_along(index.names))

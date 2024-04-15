@@ -139,8 +139,8 @@ inner_update <- function(x, data, yvar, family = gaussian(), index.vars,
       dgz <- vector(length = length(dat_names), mode = "list")
       for (i in seq_along(dat_names)) {
         temp <- gratia::derivatives(fun1, type = "central", data = dat, 
-                            term = paste0("s(", dat_names[i], ")"))
-        dgz[[i]] <- temp$derivative
+                            select = paste0("s(", dat_names[i], ")"))
+        dgz[[i]] <- temp$.derivative
       }
       names(dgz) <- paste0("d", seq_along(dat_names))
       dgz <- as.matrix(as_tibble(dgz))

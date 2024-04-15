@@ -191,8 +191,8 @@ update_smimodelFit <- function(object, data, lambda0 = 1, lambda2 = 1,
         dgz <- vector(length = length(dat_names), mode = "list")
         for (i in seq_along(dat_names)) {
           temp <- gratia::derivatives(gam2, type = "central", data = dat, 
-                                      term = paste0("s(", paste0(dat_names[i]), ")"))
-          dgz[[i]] <- temp$derivative
+                                      select = paste0("s(", paste0(dat_names[i]), ")"))
+          dgz[[i]] <- temp$.derivative
         }
         names(dgz) <- paste0("d", seq_along(dat_names))
         dgz <- as.matrix(as_tibble(dgz))

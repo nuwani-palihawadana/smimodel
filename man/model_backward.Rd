@@ -66,10 +66,6 @@ Fits a nonparametric additive model, with simultaneous variable selection
 through a backward elimination procedure as proposed by Fan and Hyndman
 (2012).
 }
-\details{
-Fits a nonparametric multiple index model to the data, with simultaneous
-variable selection (hence "sparse").
-}
 \references{
 Fan, S. & Hyndman, R.J. (2012). Short-Term Load Forecasting Based
 on a Semi-Parametric Additive Model. \emph{IEEE Transactions on Power Systems},

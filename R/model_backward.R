@@ -4,9 +4,6 @@
 #' through a backward elimination procedure as proposed by Fan and Hyndman
 #' (2012).
 #'
-#' Fits a nonparametric multiple index model to the data, with simultaneous
-#' variable selection (hence "sparse").
-#'
 #' @param data The data set on which the model(s) will be trained. Must be a
 #'   data set of class `tsibble`.
 #' @param val.data Validation data set. (The data set on which the model

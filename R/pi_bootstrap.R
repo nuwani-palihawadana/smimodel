@@ -17,7 +17,7 @@
 #' @param recursive_colRange If `recursive = TRUE`, the range of column numbers
 #'   in `newdata` to be filled with forecasts.
 #'
-#' @importFrom distributional hilo dist_sample
+#' @importFrom stats quantile
 #' @importFrom tibble tibble
 #'
 #' @references Hyndman, R.J. & Fan, S. (2010). Density Forecasting for Long-Term
@@ -64,11 +64,14 @@ pi_bootstrap <- function(object, newdata, season.period = 1,
   }
   lower <- vector(mode = "list", length = NROW(possibleFutures_mat))
   upper <- vector(mode = "list", length = NROW(possibleFutures_mat))
+  lower_q <- (1 - (confidence/100))/2
+  upper_q <- lower_q + (confidence/100)
   for(j in 1:NROW(possibleFutures_mat)){
-    intervalsHilo <- distributional::hilo(distributional::dist_sample(list(possibleFutures_mat[j, ])), 
-                                          confidence)
-    lower[[j]] <- intervalsHilo[[1]]$lower
-    upper[[j]] <- intervalsHilo[[1]]$upper
+    intervalsHilo <- quantile(possibleFutures_mat[j, ], probs = c(lower_q, upper_q))
+    # intervalsHilo <- distributional::hilo(distributional::dist_sample(list(possibleFutures_mat[j, ])), 
+    #                                       confidence)
+    lower[[j]] <- intervalsHilo[[1]]
+    upper[[j]] <- intervalsHilo[[2]]
   }
   lower <- unlist(lower)
   upper <- unlist(upper)

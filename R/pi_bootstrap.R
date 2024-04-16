@@ -80,7 +80,8 @@ pi_bootstrap <- function(object, newdata, season.period = 1,
     lower = lower,
     upper = upper
   )
-  return(bounds)
+  output <- list("bounds" = bounds, "sample_paths" = possibleFutures_mat)
+  return(output)
 }
 
 
@@ -362,7 +363,7 @@ possibleFutures_benchmark <- function(object, newdata, bootstraps,
 #' 
 #' Computes the actual coverage probability of a calculated prediction interval.
 #' 
-#' @param bounds The `tibble` returned from `pi_bootstrap()`.
+#' @param bounds The list returned from `pi_bootstrap()`.
 #' @param newdata The set of new data on for which the forecasts are required 
 #' (i.e. test set; should be a `tsibble`).
 #' @param yvar Response variable as a character string.
@@ -372,7 +373,7 @@ coverage <- function(bounds, newdata, yvar){
   actual <- newdata[ , {{yvar}}][[1]]
   within_count <- 0
   for(i in 1:length(actual)){
-    if((actual[i] > bounds$lower[i]) & (actual[i] < bounds$upper[i])){
+    if((actual[i] > bounds$bounds$lower[i]) & (actual[i] < bounds$bounds$upper[i])){
       within_count <- within_count + 1
     }
   }

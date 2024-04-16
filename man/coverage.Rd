@@ -7,7 +7,7 @@
 coverage(bounds, newdata, yvar)
 }
 \arguments{
-\item{bounds}{The \code{tibble} returned from \code{pi_bootstrap()}.}
+\item{bounds}{The list returned from \code{pi_bootstrap()}.}
 
 \item{newdata}{The set of new data on for which the forecasts are required
 (i.e. test set; should be a \code{tsibble}).}

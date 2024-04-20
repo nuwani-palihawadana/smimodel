@@ -6,6 +6,7 @@
 \usage{
 greedy.fit(
   data,
+  val.data,
   yvar,
   neighbour = 0,
   family = gaussian(),
@@ -32,12 +33,18 @@ greedy.fit(
   NonConvex = -1,
   verbose = FALSE,
   parallel = FALSE,
-  workers = NULL
+  workers = NULL,
+  recursive = FALSE,
+  recursive_colRange = NULL
 )
 }
 \arguments{
 \item{data}{Training data set on which models will be trained. Should be a
-\code{tibble}.}
+\code{tsibble}.}
+
+\item{val.data}{Validation data set. (The data set on which the penalty
+parameter selection will be performed.) Must be a data set of class
+\code{tsibble}.}
 
 \item{yvar}{Name of the response variable as a character string.}
 
@@ -130,10 +137,16 @@ non-convex quadratic constraints in Gurobi solver.}
 for different penalty parameter combinations.}
 
 \item{workers}{If \code{parallel = TRUE}: Number of cores to use.}
+
+\item{recursive}{Whether to obtain recursive forecasts or not (default -
+FALSE).}
+
+\item{recursive_colRange}{If \code{recursive = TRUE}, The range of column numbers
+in \code{val.data} to be filled with forecasts.}
 }
 \description{
 Function to perform a greedy search over a given grid of penalty parameter
 combinations (lambda0, lambda2), and fits a single SMI model with the best
-(lowest in-sample MSE) penalty parameter combination. This is a helper
+(lowest validation set MSE) penalty parameter combination. This is a helper
 function designed to be called from \code{greedy_smimodel()}.
 }

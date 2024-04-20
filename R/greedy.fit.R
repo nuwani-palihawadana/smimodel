@@ -2,11 +2,14 @@
 #'
 #' Function to perform a greedy search over a given grid of penalty parameter
 #' combinations (lambda0, lambda2), and fits a single SMI model with the best
-#' (lowest in-sample MSE) penalty parameter combination. This is a helper
+#' (lowest validation set MSE) penalty parameter combination. This is a helper
 #' function designed to be called from `greedy_smimodel()`.
 #'
 #' @param data Training data set on which models will be trained. Should be a
-#'   `tibble`.
+#'   `tsibble`.
+#' @param val.data Validation data set. (The data set on which the penalty
+#'   parameter selection will be performed.) Must be a data set of class
+#'   `tsibble`.
 #' @param yvar Name of the response variable as a character string.
 #' @param neighbour If multiple models are fitted: Number of neighbours of each
 #'   key (i.e. grouping variable) to be considered in model fitting to handle
@@ -72,13 +75,17 @@
 #' @param parallel The option to use parallel processing in fitting `smimodel`s
 #'   for different penalty parameter combinations.
 #' @param workers If `parallel = TRUE`: Number of cores to use.
+#' @param recursive Whether to obtain recursive forecasts or not (default -
+#'   FALSE).
+#' @param recursive_colRange If `recursive = TRUE`, The range of column numbers
+#'   in `val.data` to be filled with forecasts.
 #'
 #' @importFrom future plan
 #' @importFrom furrr future_map
 #' @importFrom purrr map
 #' @importFrom stats gaussian
 
-greedy.fit <- function(data, yvar, neighbour = 0, 
+greedy.fit <- function(data, val.data, yvar, neighbour = 0, 
                        family = gaussian(), index.vars, 
                        initialise = c("ppr", "additive", "linear", 
                                       "multiple", "userInput"),
@@ -88,7 +95,8 @@ greedy.fit <- function(data, yvar, neighbour = 0,
                        lambda0_start_seq, lambda2_start_seq, 
                        M = 10, max.iter = 50, tol = 0.001, tolCoefs = 0.001,
                        TimeLimit = Inf, MIPGap = 1e-4, NonConvex = -1, 
-                       verbose = FALSE, parallel = FALSE, workers = NULL){
+                       verbose = FALSE, parallel = FALSE, workers = NULL,
+                       recursive = FALSE, recursive_colRange = NULL){
   # Full grid
   grid1 <- expand.grid(lambda0_seq, lambda2_seq)
   # Data frame for storing all combinations searched
@@ -108,7 +116,7 @@ greedy.fit <- function(data, yvar, neighbour = 0,
   lambda_comb <- expand.grid(lambda0_start_seq, lambda2_start_seq)
   # Model fitting for each combination of lambdas
   MSE_list <- seq(1, NROW(lambda_comb), by = 1) %>%
-    map_f(~ tune_smimodel(data = data, yvar = yvar, 
+    map_f(~ tune_smimodel(data = data, val.data = val.data, yvar = yvar, 
                           neighbour = neighbour,
                           family = family,
                           index.vars = index.vars, 
@@ -123,7 +131,9 @@ greedy.fit <- function(data, yvar, neighbour = 0,
                           M = M, max.iter = max.iter, 
                           tol = tol, tolCoefs = tolCoefs,
                           TimeLimit = TimeLimit, MIPGap = MIPGap,
-                          NonConvex = NonConvex, verbose = verbose))
+                          NonConvex = NonConvex, verbose = verbose,
+                          recursive = recursive,
+                          recursive_colRange = recursive_colRange))
   #if (parallel) future:::ClusterRegistry("stop")
   # Selecting best starting point
   min_lambda_pos <- which.min(unlist(MSE_list))
@@ -150,7 +160,7 @@ greedy.fit <- function(data, yvar, neighbour = 0,
       break 
     }else{
       MSE_list <- seq(1, NROW(lambda_comb), by = 1) %>%
-        map_f(~ tune_smimodel(data = data, yvar = yvar, 
+        map_f(~ tune_smimodel(data = data, val.data = val.data, yvar = yvar, 
                               neighbour = neighbour,
                               family = family,
                               index.vars = index.vars, 
@@ -165,7 +175,9 @@ greedy.fit <- function(data, yvar, neighbour = 0,
                               M = M, max.iter = max.iter, 
                               tol = tol, tolCoefs = tolCoefs,
                               TimeLimit = TimeLimit, MIPGap = MIPGap,
-                              NonConvex = NonConvex, verbose = verbose))
+                              NonConvex = NonConvex, verbose = verbose,
+                              recursive = recursive,
+                              recursive_colRange = recursive_colRange))
       # Selecting best starting point
       min_lambda_pos <- which.min(unlist(MSE_list))
       min_MSE <- min(unlist(MSE_list))

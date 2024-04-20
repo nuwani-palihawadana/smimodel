@@ -6,6 +6,7 @@
 \usage{
 tune_smimodel(
   data,
+  val.data,
   yvar,
   neighbour = 0,
   family = gaussian(),
@@ -26,12 +27,18 @@ tune_smimodel(
   TimeLimit = Inf,
   MIPGap = 1e-04,
   NonConvex = -1,
-  verbose = FALSE
+  verbose = FALSE,
+  recursive = FALSE,
+  recursive_colRange = NULL
 )
 }
 \arguments{
 \item{data}{Training data set on which models will be trained. Should be a
 \code{tibble}.}
+
+\item{val.data}{Validation data set. (The data set on which the penalty
+parameter selection will be performed.) Must be a data set of class
+\code{tsibble}.}
 
 \item{yvar}{Name of the response variable as a character string.}
 
@@ -107,10 +114,16 @@ MIP iteration.}
 non-convex quadratic constraints in Gurobi solver.}
 
 \item{verbose}{The option to print detailed solver output.}
+
+\item{recursive}{Whether to obtain recursive forecasts or not (default -
+FALSE).}
+
+\item{recursive_colRange}{If \code{recursive = TRUE}, The range of column numbers
+in \code{val.data} to be filled with forecasts.}
 }
 \description{
-Fits a nonparametric multiple index model to the data for a given
-combination of the penalty parameters (lambda0, lambda2), and returns the
-in-sample mean squared error (MSE). (Used within \code{greedy.fit()}; users are not
-expected to use this function directly.)
+Fits a nonparametric multiple index model to the data for a given combination
+of the penalty parameters (lambda0, lambda2), and returns the validation set
+mean squared error (MSE). (Used within \code{greedy.fit()}; users are not expected
+to use this function directly.)
 }

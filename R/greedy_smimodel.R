@@ -1,11 +1,14 @@
 #' SMI Model Estimation through a Greedy Search for Penalty Parameters
 #'
 #' Performs a greedy search over a given grid of penalty parameter combinations
-#' (lambda0, lambda2), and fits SMI model(s) with best (lowest in-sample MSE)
+#' (lambda0, lambda2), and fits SMI model(s) with best (lowest validation set MSE)
 #' penalty parameter combinations. If a grouping variable is used, penalty
 #' parameters are tuned separately for each individual model.
 #'
 #' @param data Training data set on which models will be trained. Should be a
+#'   `tsibble`.
+#' @param val.data Validation data set. (The data set on which the penalty
+#'   parameter selection will be performed.) Must be a data set of class
 #'   `tsibble`.
 #' @param yvar Name of the response variable as a character string.
 #' @param neighbour If multiple models are fitted: Number of neighbours of each
@@ -72,6 +75,10 @@
 #' @param parallel The option to use parallel processing in fitting `smimodel`s
 #'   for different penalty parameter combinations.
 #' @param workers If `parallel = TRUE`: Number of cores to use.
+#' @param recursive Whether to obtain recursive forecasts or not (default -
+#'   FALSE).
+#' @param recursive_colRange If `recursive = TRUE`, The range of column numbers
+#'   in `val.data` to be filled with forecasts.
 #'
 #' @importFrom future plan
 #' @importFrom furrr future_map
@@ -79,7 +86,7 @@
 #' @importFrom stats gaussian
 #'
 #' @export
-greedy_smimodel <- function(data, yvar, neighbour = 0, 
+greedy_smimodel <- function(data, val.data, yvar, neighbour = 0, 
                             family = gaussian(), index.vars, 
                             initialise = c("ppr", "additive", "linear", 
                                            "multiple", "userInput"),
@@ -91,17 +98,24 @@ greedy_smimodel <- function(data, yvar, neighbour = 0,
                             M = 10, max.iter = 50, 
                             tol = 0.001, tolCoefs = 0.001,
                             TimeLimit = Inf, MIPGap = 1e-4, NonConvex = -1, 
-                            verbose = FALSE, parallel = FALSE, workers = NULL){
+                            verbose = FALSE, parallel = FALSE, workers = NULL,
+                            recursive = FALSE, recursive_colRange = NULL){
   stopifnot(tsibble::is_tsibble(data))
+  stopifnot(tsibble::is_tsibble(val.data))
   initialise <- match.arg(initialise)
+  # Data Preparation
   data1 <- data
+  data2 <- val.data
   data_index <- index(data1)
   data_key <- key(data1)
   if (length(key(data1)) == 0) {
     data1 <- data1 %>%
-      dplyr::mutate(dummy_key = rep(1, NROW(data1))) %>%
-      tsibble::as_tsibble(index = data_index, key = dummy_key)
+      mutate(dummy_key = rep(1, NROW(data1))) %>%
+      as_tsibble(index = data_index, key = dummy_key)
     data_key <- key(data1)
+    data2 <- data2 %>%
+      mutate(dummy_key = rep(1, NROW(data2))) %>%
+      as_tsibble(index = data_index, key = dummy_key)
   }
   key11 <- key(data1)[[1]]
   key_unique <- unique(as.character(sort(dplyr::pull((data1[, {{ key11 }}])[, 1]))))
@@ -111,14 +125,23 @@ greedy_smimodel <- function(data, yvar, neighbour = 0,
     dplyr::mutate(
       num_key = as.numeric(factor(as.character({{ key11 }}), levels = key_unique))
     )
+  data2 <- data2 %>%
+    dplyr::mutate(
+      num_key = as.numeric(factor(as.character({{ key11 }}), levels = key_unique))
+    )
   smimodels_list <- vector(mode = "list", length = NROW(ref))
   for (i in seq_along(ref$key_num)){
     print(paste0('model ', paste0(i)))
     df_cat <- data1 %>%
       dplyr::filter((abs(num_key - ref$key_num[i]) <= neighbour) |
                       (abs(num_key - ref$key_num[i] + NROW(ref)) <= neighbour) |
+                      (abs(num_key - ref$key_num[i] - NROW(ref)) <= neighbour))
+    df_cat_val <- data2 %>%
+      dplyr::filter((abs(num_key - ref$key_num[i]) <= neighbour) |
+                      (abs(num_key - ref$key_num[i] + NROW(ref)) <= neighbour) |
                       (abs(num_key - ref$key_num[i] - NROW(ref)) <= neighbour)) 
-    smimodels_list[[i]] <- greedy.fit(data = df_cat, yvar = yvar, 
+    smimodels_list[[i]] <- greedy.fit(data = df_cat, val.data = df_cat_val, 
+                                      yvar = yvar, 
                                       neighbour = neighbour,
                                       family = family, index.vars = index.vars, 
                                       initialise = initialise,
@@ -135,7 +158,9 @@ greedy_smimodel <- function(data, yvar, neighbour = 0,
                                       tol = tol, tolCoefs = tolCoefs,
                                       TimeLimit = TimeLimit, MIPGap = MIPGap, 
                                       NonConvex = NonConvex, verbose = verbose, 
-                                      parallel = parallel, workers = workers)
+                                      parallel = parallel, workers = workers,
+                                      recursive = recursive, 
+                                      recursive_colRange = recursive_colRange)
   }
   data_list <- list(key_unique, smimodels_list)
   models <- tibble::as_tibble(

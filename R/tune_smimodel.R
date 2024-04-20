@@ -1,12 +1,15 @@
 #' Sparse Multiple Index (SMI) model with a given penalty parameter combination
 #'
-#' Fits a nonparametric multiple index model to the data for a given
-#' combination of the penalty parameters (lambda0, lambda2), and returns the
-#' in-sample mean squared error (MSE). (Used within `greedy.fit()`; users are not
-#' expected to use this function directly.)
+#' Fits a nonparametric multiple index model to the data for a given combination
+#' of the penalty parameters (lambda0, lambda2), and returns the validation set
+#' mean squared error (MSE). (Used within `greedy.fit()`; users are not expected
+#' to use this function directly.)
 #'
 #' @param data Training data set on which models will be trained. Should be a
 #'   `tibble`.
+#' @param val.data Validation data set. (The data set on which the penalty
+#'   parameter selection will be performed.) Must be a data set of class
+#'   `tsibble`.
 #' @param yvar Name of the response variable as a character string.
 #' @param neighbour If multiple models are fitted: Number of neighbours of each
 #'   key (i.e. grouping variable) to be considered in model fitting to handle
@@ -61,10 +64,14 @@
 #' @param NonConvex The strategy for handling non-convex quadratic objectives or
 #'   non-convex quadratic constraints in Gurobi solver.
 #' @param verbose The option to print detailed solver output.
-#' 
+#' @param recursive Whether to obtain recursive forecasts or not (default -
+#'   FALSE).
+#' @param recursive_colRange If `recursive = TRUE`, The range of column numbers
+#'   in `val.data` to be filled with forecasts.
+#'
 #' @importFrom fabletools MSE
 
-tune_smimodel <- function(data, yvar, neighbour = 0,
+tune_smimodel <- function(data, val.data, yvar, neighbour = 0,
                           family = gaussian(), index.vars, 
                           initialise = c("ppr", "additive", "linear", 
                                          "multiple", "userInput"),
@@ -73,7 +80,8 @@ tune_smimodel <- function(data, yvar, neighbour = 0,
                           s.vars = NULL, linear.vars = NULL, lambda.comb = c(1, 1), 
                           M = 10, max.iter = 50, tol = 0.001, tolCoefs = 0.001,
                           TimeLimit = Inf, MIPGap = 1e-4, 
-                          NonConvex = -1, verbose = FALSE){
+                          NonConvex = -1, verbose = FALSE, recursive = FALSE,
+                          recursive_colRange = NULL){
   # Estimating smimodel
   smimodel <- smimodel.fit(data = data, yvar = yvar, 
                            neighbour = neighbour,
@@ -91,7 +99,13 @@ tune_smimodel <- function(data, yvar, neighbour = 0,
                            tol = tol, tolCoefs = tolCoefs,
                            TimeLimit = TimeLimit, MIPGap = MIPGap,
                            NonConvex = NonConvex, verbose = verbose)
-  # In-sample MSE
-  smimodel_mse <- fabletools::MSE(.resid = smimodel$best$gam$residuals)
+  # Validation set MSE
+  # Predictions
+  pred <- predict(object = smimodel, newdata = val.data, recursive = recursive,
+                  recursive_colRange = recursive_colRange)$.predict
+  # MSE
+  smimodel_mse = MSE(.resid = (as.numeric(as.matrix(val.data[,{{yvar}}], ncol = 1)) - pred))
+  # # In-sample MSE
+  # smimodel_mse <- fabletools::MSE(.resid = smimodel$best$gam$residuals)
   return(smimodel_mse)
 }

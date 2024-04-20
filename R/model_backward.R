@@ -7,7 +7,9 @@
 #' @param data The data set on which the model(s) will be trained. Must be a
 #'   data set of class `tsibble`.
 #' @param val.data Validation data set. (The data set on which the model
-#'   selection will be performed.) Must be a data set of class `tsibble`.
+#'   selection will be performed.) Must be a data set of class `tsibble`. (Once
+#'   the model selection is completed, the best model will be re-fitted for the
+#'   combined data set `data` + `val.data`.)
 #' @param yvar Name of the response variable as a character string.
 #' @param family A description of the error distribution and link function to be
 #'   used in the model (see `glm` and `family`).
@@ -26,14 +28,14 @@
 #' @param linear.vars A character vector of names of the predictor variables
 #'   that should be included linearly into the model (i.e. linear predictors).
 #'   (default: NULL)
-#' @param tol Tolerance for the ratio of relative change in MAPE, used in model
+#' @param tol Tolerance for the ratio of relative change in MSE, used in model
 #'   selection. (default: 0.001)
 #' @param parallel Whether to use parallel computing in model selection or not.
 #'   (default: FALSE)
 #' @param workers If `parallel = TRUE`, number of workers to use. (default:
 #'   NULL)
 #'
-#' @importFrom dplyr pull 
+#' @importFrom dplyr pull
 #' @importFrom fabletools MSE
 #' @importFrom future multisession
 #' @importFrom stats predict var as.formula
@@ -136,7 +138,7 @@ model_backward <- function(data, val.data, yvar,
                           linear.vars = Temp_linear.vars))
       # Selecting best model
       best_model_pos <- which.min(unlist(MSE_list))
-      # MAPE check
+      # MSE check
       mse_new <- MSE_list[[best_model_pos]]
       mseMinRatio <- (mse_old - mse_new)/mse_old
       mse_old <- mse_new
@@ -149,6 +151,10 @@ model_backward <- function(data, val.data, yvar,
         }
       }
     }
+    # Re-fit the best model for the combined data set training + validation
+    # Data
+    combinedData <- dplyr::bind_rows(df_cat, df_cat_val)
+    # Model formula
     allVars = c(Temp_s.vars, Temp_linear.vars)
     pre.formula <- paste0(yvar, " ~ ")
     for(p in seq_along(allVars)){
@@ -166,9 +172,10 @@ model_backward <- function(data, val.data, yvar,
       }
     }
     my.formula <- as.formula(pre.formula)
+    # Model fitting
     models_list[[i]] <- mgcv::gam(my.formula, family = family, method = "REML",
-                                  data = df_cat)
-    add <- df_cat %>%
+                                  data = combinedData)
+    add <- combinedData %>%
       drop_na() %>%
       select({{ index_train }}, {{ key_train }})
     models_list[[i]]$model <- bind_cols(add, models_list[[i]]$model)

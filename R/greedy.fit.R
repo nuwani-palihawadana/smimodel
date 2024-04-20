@@ -9,7 +9,8 @@
 #'   `tsibble`.
 #' @param val.data Validation data set. (The data set on which the penalty
 #'   parameter selection will be performed.) Must be a data set of class
-#'   `tsibble`.
+#'   `tsibble`. (Once the penalty parameter selection is completed, the best
+#'   model will be re-fitted for the combined data set `data` + `val.data`.)
 #' @param yvar Name of the response variable as a character string.
 #' @param neighbour If multiple models are fitted: Number of neighbours of each
 #'   key (i.e. grouping variable) to be considered in model fitting to handle
@@ -187,8 +188,10 @@ greedy.fit <- function(data, val.data, yvar, neighbour = 0,
       all_comb <- bind_rows(all_comb, lambda_comb)
     }
   }
-  # Final smimodel
-  final_smimodel_list <- smimodel.fit(data = data, yvar = yvar, 
+  # Final smimodel: re-fit the best model for the combined data set training + validation
+  # Data
+  combinedData <- dplyr::bind_rows(data, val.data)
+  final_smimodel_list <- smimodel.fit(data = combinedData, yvar = yvar, 
                                       neighbour = neighbour,
                                       family = family,
                                       index.vars = index.vars, 

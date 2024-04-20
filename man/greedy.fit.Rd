@@ -44,7 +44,8 @@ greedy.fit(
 
 \item{val.data}{Validation data set. (The data set on which the penalty
 parameter selection will be performed.) Must be a data set of class
-\code{tsibble}.}
+\code{tsibble}. (Once the penalty parameter selection is completed, the best
+model will be re-fitted for the combined data set \code{data} + \code{val.data}.)}
 
 \item{yvar}{Name of the response variable as a character string.}
 

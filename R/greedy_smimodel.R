@@ -1,15 +1,16 @@
 #' SMI Model Estimation through a Greedy Search for Penalty Parameters
 #'
 #' Performs a greedy search over a given grid of penalty parameter combinations
-#' (lambda0, lambda2), and fits SMI model(s) with best (lowest validation set MSE)
-#' penalty parameter combinations. If a grouping variable is used, penalty
+#' (lambda0, lambda2), and fits SMI model(s) with best (lowest validation set
+#' MSE) penalty parameter combinations. If a grouping variable is used, penalty
 #' parameters are tuned separately for each individual model.
 #'
 #' @param data Training data set on which models will be trained. Should be a
 #'   `tsibble`.
 #' @param val.data Validation data set. (The data set on which the penalty
 #'   parameter selection will be performed.) Must be a data set of class
-#'   `tsibble`.
+#'   `tsibble`. (Once the penalty parameter selection is completed, the best
+#'   model will be re-fitted for the combined data set `data` + `val.data`.)
 #' @param yvar Name of the response variable as a character string.
 #' @param neighbour If multiple models are fitted: Number of neighbours of each
 #'   key (i.e. grouping variable) to be considered in model fitting to handle

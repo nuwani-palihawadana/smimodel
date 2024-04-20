@@ -23,7 +23,9 @@ model_backward(
 data set of class \code{tsibble}.}
 
 \item{val.data}{Validation data set. (The data set on which the model
-selection will be performed.) Must be a data set of class \code{tsibble}.}
+selection will be performed.) Must be a data set of class \code{tsibble}. (Once
+the model selection is completed, the best model will be re-fitted for the
+combined data set \code{data} + \code{val.data}.)}
 
 \item{yvar}{Name of the response variable as a character string.}
 
@@ -49,7 +51,7 @@ corresponding to \code{s.vars}. (For more information refer \code{mgcv::s()}.)
 that should be included linearly into the model (i.e. linear predictors).
 (default: NULL)}
 
-\item{tol}{Tolerance for the ratio of relative change in MAPE, used in model
+\item{tol}{Tolerance for the ratio of relative change in MSE, used in model
 selection. (default: 0.001)}
 
 \item{parallel}{Whether to use parallel computing in model selection or not.

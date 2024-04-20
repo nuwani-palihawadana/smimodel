@@ -44,7 +44,8 @@ greedy_smimodel(
 
 \item{val.data}{Validation data set. (The data set on which the penalty
 parameter selection will be performed.) Must be a data set of class
-\code{tsibble}.}
+\code{tsibble}. (Once the penalty parameter selection is completed, the best
+model will be re-fitted for the combined data set \code{data} + \code{val.data}.)}
 
 \item{yvar}{Name of the response variable as a character string.}
 
@@ -146,7 +147,7 @@ in \code{val.data} to be filled with forecasts.}
 }
 \description{
 Performs a greedy search over a given grid of penalty parameter combinations
-(lambda0, lambda2), and fits SMI model(s) with best (lowest validation set MSE)
-penalty parameter combinations. If a grouping variable is used, penalty
+(lambda0, lambda2), and fits SMI model(s) with best (lowest validation set
+MSE) penalty parameter combinations. If a grouping variable is used, penalty
 parameters are tuned separately for each individual model.
 }

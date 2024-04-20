@@ -1,4 +1,4 @@
-#' SMI Model Estimation through a Greedy Search for Penalty Parameters
+#' SMI model estimation through a greedy search for penalty parameters
 #'
 #' Performs a greedy search over a given grid of penalty parameter combinations
 #' (lambda0, lambda2), and fits SMI model(s) with best (lowest validation set

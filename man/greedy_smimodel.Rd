@@ -2,7 +2,7 @@
 % Please edit documentation in R/greedy_smimodel.R
 \name{greedy_smimodel}
 \alias{greedy_smimodel}
-\title{SMI Model Estimation through a Greedy Search for Penalty Parameters}
+\title{SMI model estimation through a greedy search for penalty parameters}
 \usage{
 greedy_smimodel(
   data,

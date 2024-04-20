@@ -1,4 +1,4 @@
-#' Sparse Multiple Index (SMI) models
+#' Sparse Multiple Index (SMI) Models
 #'
 #' Fits nonparametric multiple index model(s) to the data, with simultaneous
 #' variable selection (hence "sparse"). Possible to fit multiple SMI models

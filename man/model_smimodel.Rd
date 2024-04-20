@@ -2,7 +2,7 @@
 % Please edit documentation in R/model_smimodel.R
 \name{model_smimodel}
 \alias{model_smimodel}
-\title{Sparse Multiple Index (SMI) models}
+\title{Sparse Multiple Index (SMI) Models}
 \usage{
 model_smimodel(
   data,

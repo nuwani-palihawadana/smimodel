@@ -9,7 +9,6 @@ model_backward(
   val.data,
   yvar,
   family = gaussian(),
-  log.transformed = FALSE,
   neighbour = 0,
   s.vars = NULL,
   s.basedim = NULL,
@@ -30,8 +29,6 @@ selection will be performed.) Must be a data set of class \code{tsibble}.}
 
 \item{family}{A description of the error distribution and link function to be
 used in the model (see \code{glm} and \code{family}).}
-
-\item{log.transformed}{Whether the response is log-transformed or not.}
 
 \item{neighbour}{If multiple models are fitted: Number of neighbours of each
 key (i.e. grouping variable) to be considered in model fitting to handle

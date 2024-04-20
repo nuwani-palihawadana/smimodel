@@ -11,7 +11,6 @@
 #' @param yvar Name of the response variable as a character string.
 #' @param family A description of the error distribution and link function to be
 #'   used in the model (see `glm` and `family`).
-#' @param log.transformed Whether the response is log-transformed or not.
 #' @param neighbour If multiple models are fitted: Number of neighbours of each
 #'   key (i.e. grouping variable) to be considered in model fitting to handle
 #'   smoothing over the key. Should be an integer. If `neighbour = x`, `x`
@@ -35,7 +34,7 @@
 #'   NULL)
 #'
 #' @importFrom dplyr pull 
-#' @importFrom fabletools MAPE
+#' @importFrom fabletools MSE
 #' @importFrom future multisession
 #' @importFrom stats predict var as.formula
 #' @importFrom tidyselect all_of
@@ -45,11 +44,11 @@
 #'   27(1), 134-141. \url{http://doi.org/10.1109/TPWRS.2011.2162082}
 #'
 #' @export
-model_backward <- function(data, val.data, yvar, family = gaussian(),
-                     log.transformed = FALSE, neighbour = 0, 
-                     s.vars = NULL, s.basedim = NULL, 
-                     linear.vars = NULL,  tol = 0.001, 
-                     parallel = FALSE, workers = NULL){
+model_backward <- function(data, val.data, yvar, 
+                           family = gaussian(), neighbour = 0, 
+                           s.vars = NULL, s.basedim = NULL, 
+                           linear.vars = NULL,  tol = 0.001, 
+                           parallel = FALSE, workers = NULL){
   if (!is_tsibble(data)) stop("data is not a tsibble.")
   if (!is_tsibble(val.data)) stop("val.data is not a tsibble.")
   if (is.null(c(linear.vars, s.vars))) 
@@ -118,41 +117,31 @@ model_backward <- function(data, val.data, yvar, family = gaussian(),
     # Model fitting
     model1 <- mgcv::gam(my.formula, family = family, method = "REML", 
                         data = df_cat)
-    # Validation set MAPE
+    # Validation set MSE
     # Predictions
     pred <- predict(object = model1, newdata = df_cat_val, type = "response")
-    if(log.transformed == TRUE){
-      # Back-transformation and bias-adjustment
-      res_output <- model1$residuals
-      pred_final <- as.vector((exp(pred)*(1+(var(res_output)/2))))
-      # MAPE
-      mape1 = MAPE(.resid = (exp(as.numeric(df_cat_val[,{{yvar}}])) - pred_final), 
-                   .actual = exp(as.numeric(df_cat_val[,{{yvar}}])))
-    }else{
-      # MAPE
-      mape1 = MAPE(.resid = (as.numeric(as.matrix(df_cat_val[,{{yvar}}], ncol = 1)) - pred), 
-                   .actual = as.numeric(as.matrix(df_cat_val[,{{yvar}}])))
-    }
-    mape_old <- mape1
-    mapeMinRatio <- 1
+    # MSE
+    mse1 = MSE(.resid = (as.numeric(as.matrix(df_cat_val[,{{yvar}}], ncol = 1)) - pred))
+    mse_old <- mse1
+    mseMinRatio <- 1
     Temp_s.vars <- s.vars
     Temp_linear.vars <- linear.vars
     # Testing reduced models
-    while(mapeMinRatio > tol){
+    while(mseMinRatio > tol){
       allVars = c(Temp_s.vars, Temp_linear.vars)
-      MAPE_list <- seq_along(allVars) %>%
+      MSE_list <- seq_along(allVars) %>%
         map_f(~ eliminate(ind = ., train = df_cat, val = df_cat_val, 
-                          yvar = yvar, log.transformed = log.transformed, 
+                          yvar = yvar,
                           s.vars = Temp_s.vars, s.basedim = s.basedim, 
                           linear.vars = Temp_linear.vars))
       # Selecting best model
-      best_model_pos <- which.min(unlist(MAPE_list))
+      best_model_pos <- which.min(unlist(MSE_list))
       # MAPE check
-      mape_new <- MAPE_list[[best_model_pos]]
-      mapeMinRatio <- (mape_old - mape_new)/mape_old
-      mape_old <- mape_new
+      mse_new <- MSE_list[[best_model_pos]]
+      mseMinRatio <- (mse_old - mse_new)/mse_old
+      mse_old <- mse_new
       # Update Temp_s.vars and Temp_linear.vars
-      if(mapeMinRatio >= 0){
+      if(mseMinRatio >= 0){
         if(allVars[best_model_pos] %in% Temp_s.vars){
           Temp_s.vars <- Temp_s.vars[-best_model_pos]
         }else if(allVars[best_model_pos] %in% Temp_linear.vars){
@@ -201,3 +190,63 @@ model_backward <- function(data, val.data, yvar, family = gaussian(),
   return(models)
 }
 utils::globalVariables(c("...1", "...2"))
+
+
+
+#' Function to eliminate a specified variable and fit a nonparametric additive
+#' model with remaining variables
+#'
+#' This is an internal function of the package `smimodel`, and designed to be
+#' called from `model_backward()`.
+#'
+#' @param ind An integer corresponding to the position of the predictor variable
+#'   to be eliminated when fitting the model. (i.e. the function will combine
+#'   `s.vars` and `linear.vars` in a single vector and eliminate the element
+#'   corresponding to `ind`.)
+#' @param train The data set on which the model(s) will be trained. Must be a
+#'   data set of class `tsibble`.
+#' @param val Validation data set. (The data set on which the model
+#'   selection will be performed.) Must be a data set of class `tsibble`.
+#' @param yvar Name of the response variable as a character string.
+#' @param family A description of the error distribution and link function to be
+#'   used in the model (see `glm` and `family`).
+#' @param s.vars A character vector of names of the predictor variables for
+#'   which splines should be fitted (i.e. non-linear predictors). (default:
+#'   NULL)
+#' @param s.basedim Dimension of the bases used to represent the smooth terms
+#'   corresponding to `s.vars`. (For more information refer `mgcv::s()`.)
+#'   (default: NULL)
+#' @param linear.vars A character vector of names of the predictor variables
+#'   that should be included linearly into the model (i.e. linear predictors).
+#'   (default: NULL)
+
+eliminate <- function(ind, train, val, yvar, family = gaussian(), 
+                      s.vars = NULL, s.basedim = NULL, 
+                      linear.vars = NULL){
+  allVars = c(s.vars, linear.vars)
+  pre.formula <- paste0(yvar, " ~ ")
+  temp.var1 <- allVars[-ind]
+  for(j in seq_along(temp.var1)){
+    if(temp.var1[j] %in% s.vars){
+      if (!is.null(s.basedim)) {
+        pre.formula <- paste0(
+          pre.formula, "+s(", paste0(temp.var1[j]), ',bs="cr",k=',
+          paste0(s.basedim), ")"
+        )
+      } else {
+        pre.formula <- paste0(pre.formula, "+s(", paste0(temp.var1[j]), ',bs="cr")')
+      }
+    }else if(temp.var1[j] %in% linear.vars){
+      pre.formula <- paste0(pre.formula, "+", paste0(temp.var1[j]))
+    }
+  }
+  my.formula <- as.formula(pre.formula)
+  # Model fitting
+  model1 <- mgcv::gam(my.formula, family = family, method = "REML", data = train)
+  # Validation set MSE
+  # Predictions
+  pred <- predict(object = model1, newdata = val, type = "response")
+  # MSE
+  mse1 = MSE(.resid = (as.numeric(as.matrix(val[,{{yvar}}], ncol = 1)) - pred))
+  return(mse1)
+}

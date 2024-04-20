@@ -101,7 +101,7 @@ tune_smimodel <- function(data, val.data, yvar, neighbour = 0,
                            NonConvex = NonConvex, verbose = verbose)
   # Validation set MSE
   # Predictions
-  pred <- predict(object = smimodel, newdata = val.data, recursive = recursive,
+  pred <- predict(object = smimodel$best, newdata = val.data, recursive = recursive,
                   recursive_colRange = recursive_colRange)$.predict
   # MSE
   smimodel_mse = MSE(.resid = (as.numeric(as.matrix(val.data[,{{yvar}}], ncol = 1)) - pred))

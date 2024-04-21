@@ -124,11 +124,32 @@ model_backward <- function(data, val.data, yvar,
     # Model fitting
     model1 <- mgcv::gam(my.formula, family = family, method = "REML", 
                         data = df_cat)
+    class(model1) <- c("gamFit", "gam", "glm", "lm")
     # Validation set MSE
+    valData <- df_cat_val
+    if(recursive == TRUE){
+      index_val <- index(valData)
+      key_val <- key(valData)[[1]]
+      # Convert to a tibble
+      valData <- valData %>%
+        as_tibble() %>%
+        arrange(index_val)
+      # Adjust validation set for recursive forecasts
+      for(i in recursive_colRange){
+        valData[(i - (recursive_colRange[1] - 2)):NROW(valData), i] <- NA
+      }
+      # Convert back to a tsibble
+      valData <- valData %>%
+        as_tsibble(index = index_val, key = key_val)
+    }
     # Predictions
-    pred <- predict(object = model1, newdata = df_cat_val, type = "response")
+    pred <- predict(object = model1, newdata = valData, recursive = recursive,
+                    recursive_colRange = recursive_colRange)$.predict
+    # # Validation set MSE
+    # # Predictions
+    # pred <- predict(object = model1, newdata = df_cat_val, type = "response")
     # MSE
-    mse1 = MSE(.resid = (as.numeric(as.matrix(df_cat_val[,{{yvar}}], ncol = 1)) - pred))
+    mse1 = MSE(.resid = (as.numeric(as.matrix(valData[,{{yvar}}], ncol = 1)) - pred))
     mse_old <- mse1
     mseMinRatio <- 1
     Temp_s.vars <- s.vars
@@ -231,10 +252,15 @@ utils::globalVariables(c("...1", "...2"))
 #' @param linear.vars A character vector of names of the predictor variables
 #'   that should be included linearly into the model (i.e. linear predictors).
 #'   (default: NULL)
+#' @param recursive Whether to obtain recursive forecasts or not (default -
+#'   FALSE).
+#' @param recursive_colRange If `recursive = TRUE`, The range of column numbers
+#'   in `val.data` to be filled with forecasts.
 
 eliminate <- function(ind, train, val, yvar, family = gaussian(), 
                       s.vars = NULL, s.basedim = NULL, 
-                      linear.vars = NULL){
+                      linear.vars = NULL,
+                      recursive = FALSE, recursive_colRange = NULL){
   allVars = c(s.vars, linear.vars)
   pre.formula <- paste0(yvar, " ~ ")
   temp.var1 <- allVars[-ind]
@@ -255,10 +281,31 @@ eliminate <- function(ind, train, val, yvar, family = gaussian(),
   my.formula <- as.formula(pre.formula)
   # Model fitting
   model1 <- mgcv::gam(my.formula, family = family, method = "REML", data = train)
+  class(model1) <- c("gamFit", "gam", "glm", "lm")
   # Validation set MSE
+  valData <- val
+  if(recursive == TRUE){
+    index_val <- index(valData)
+    key_val <- key(valData)[[1]]
+    # Convert to a tibble
+    valData <- valData %>%
+      as_tibble() %>%
+      arrange(index_val)
+    # Adjust validation set for recursive forecasts
+    for(i in recursive_colRange){
+      valData[(i - (recursive_colRange[1] - 2)):NROW(valData), i] <- NA
+    }
+    # Convert back to a tsibble
+    valData <- valData %>%
+      as_tsibble(index = index_val, key = key_val)
+  }
   # Predictions
-  pred <- predict(object = model1, newdata = val, type = "response")
+  pred <- predict(object = model1, newdata = valData, recursive = recursive,
+                  recursive_colRange = recursive_colRange)$.predict
+  # # Validation set MSE
+  # # Predictions
+  # pred <- predict(object = model1, newdata = val, type = "response")
   # MSE
-  mse1 = MSE(.resid = (as.numeric(as.matrix(val[,{{yvar}}], ncol = 1)) - pred))
+  mse1 = MSE(.resid = (as.numeric(as.matrix(valData[,{{yvar}}], ncol = 1)) - pred))
   return(mse1)
 }

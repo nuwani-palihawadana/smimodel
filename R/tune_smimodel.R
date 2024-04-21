@@ -69,6 +69,7 @@
 #' @param recursive_colRange If `recursive = TRUE`, The range of column numbers
 #'   in `val.data` to be filled with forecasts.
 #'
+#' @importFrom dplyr arrange
 #' @importFrom fabletools MSE
 
 tune_smimodel <- function(data, val.data, yvar, neighbour = 0,
@@ -100,11 +101,27 @@ tune_smimodel <- function(data, val.data, yvar, neighbour = 0,
                            TimeLimit = TimeLimit, MIPGap = MIPGap,
                            NonConvex = NonConvex, verbose = verbose)
   # Validation set MSE
+  valData <- val.data
+  if(recursive == TRUE){
+    index_val <- index(valData)
+    key_val <- key(valData)[[1]]
+    # Convert to a tibble
+    valData <- valData %>%
+      as_tibble() %>%
+      arrange(index_val)
+    # Adjust validation set for recursive forecasts
+    for(i in recursive_colRange){
+      valData[(i - (recursive_colRange[1] - 2)):NROW(valData), i] <- NA
+    }
+    # Convert back to a tsibble
+    valData <- valData %>%
+      as_tsibble(index = index_val, key = key_val)
+  }
   # Predictions
-  pred <- predict(object = smimodel$best, newdata = val.data, recursive = recursive,
+  pred <- predict(object = smimodel$best, newdata = valData, recursive = recursive,
                   recursive_colRange = recursive_colRange)$.predict
   # MSE
-  smimodel_mse = MSE(.resid = (as.numeric(as.matrix(val.data[,{{yvar}}], ncol = 1)) - pred))
+  smimodel_mse = MSE(.resid = (as.numeric(as.matrix(valData[,{{yvar}}], ncol = 1)) - pred))
   # # In-sample MSE
   # smimodel_mse <- fabletools::MSE(.resid = smimodel$best$gam$residuals)
   return(smimodel_mse)

@@ -13,7 +13,9 @@ eliminate(
   family = gaussian(),
   s.vars = NULL,
   s.basedim = NULL,
-  linear.vars = NULL
+  linear.vars = NULL,
+  recursive = FALSE,
+  recursive_colRange = NULL
 )
 }
 \arguments{
@@ -44,6 +46,12 @@ corresponding to \code{s.vars}. (For more information refer \code{mgcv::s()}.)
 \item{linear.vars}{A character vector of names of the predictor variables
 that should be included linearly into the model (i.e. linear predictors).
 (default: NULL)}
+
+\item{recursive}{Whether to obtain recursive forecasts or not (default -
+FALSE).}
+
+\item{recursive_colRange}{If \code{recursive = TRUE}, The range of column numbers
+in \code{val.data} to be filled with forecasts.}
 }
 \description{
 This is an internal function of the package \code{smimodel}, and designed to be

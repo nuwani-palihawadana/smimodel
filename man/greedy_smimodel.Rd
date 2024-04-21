@@ -44,8 +44,11 @@ greedy_smimodel(
 
 \item{val.data}{Validation data set. (The data set on which the penalty
 parameter selection will be performed.) Must be a data set of class
-\code{tsibble}. (Once the penalty parameter selection is completed, the best
-model will be re-fitted for the combined data set \code{data} + \code{val.data}.)}
+\code{tsibble}. If forecasts should be obtained recursively (refer the argument
+\code{recursive} below), the corresponding columns of the validation set (i.e.
+\code{recursive_colRange}) should be adjusted to contain \code{NA}s appropriately.
+(Once the penalty parameter selection is completed, the best model will be
+re-fitted for the combined data set \code{data} + \code{val.data}.)}
 
 \item{yvar}{Name of the response variable as a character string.}
 

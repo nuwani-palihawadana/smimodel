@@ -15,17 +15,22 @@ model_backward(
   linear.vars = NULL,
   tol = 0.001,
   parallel = FALSE,
-  workers = NULL
+  workers = NULL,
+  recursive = FALSE,
+  recursive_colRange = NULL
 )
 }
 \arguments{
 \item{data}{The data set on which the model(s) will be trained. Must be a
 data set of class \code{tsibble}.}
 
-\item{val.data}{Validation data set. (The data set on which the model
-selection will be performed.) Must be a data set of class \code{tsibble}. (Once
-the model selection is completed, the best model will be re-fitted for the
-combined data set \code{data} + \code{val.data}.)}
+\item{val.data}{Validation data set. (The data set on which the penalty
+parameter selection will be performed.) Must be a data set of class
+\code{tsibble}. If forecasts should be obtained recursively (refer the argument
+\code{recursive} below), the corresponding columns of the validation set (i.e.
+\code{recursive_colRange}) should be adjusted to contain \code{NA}s appropriately.
+(Once the penalty parameter selection is completed, the best model will be
+re-fitted for the combined data set \code{data} + \code{val.data}.)}
 
 \item{yvar}{Name of the response variable as a character string.}
 
@@ -59,6 +64,12 @@ selection. (default: 0.001)}
 
 \item{workers}{If \code{parallel = TRUE}, number of workers to use. (default:
 NULL)}
+
+\item{recursive}{Whether to obtain recursive forecasts or not (default -
+FALSE).}
+
+\item{recursive_colRange}{If \code{recursive = TRUE}, The range of column numbers
+in \code{val.data} to be filled with forecasts.}
 }
 \description{
 Fits a nonparametric additive model, with simultaneous variable selection

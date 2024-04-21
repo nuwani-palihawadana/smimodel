@@ -108,7 +108,7 @@ tune_smimodel <- function(data, val.data, yvar, neighbour = 0,
     # Convert to a tibble
     valData <- valData %>%
       as_tibble() %>%
-      arrange(index_val)
+      arrange({{index_val}})
     # Adjust validation set for recursive forecasts
     for(i in recursive_colRange){
       valData[(i - (recursive_colRange[1] - 2)):NROW(valData), i] <- NA

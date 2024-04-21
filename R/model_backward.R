@@ -8,11 +8,8 @@
 #'   data set of class `tsibble`.
 #' @param val.data Validation data set. (The data set on which the penalty
 #'   parameter selection will be performed.) Must be a data set of class
-#'   `tsibble`. If forecasts should be obtained recursively (refer the argument
-#'   `recursive` below), the corresponding columns of the validation set (i.e.
-#'   `recursive_colRange`) should be adjusted to contain `NA`s appropriately.
-#'   (Once the penalty parameter selection is completed, the best model will be
-#'   re-fitted for the combined data set `data` + `val.data`.)
+#'   `tsibble`. (Once the penalty parameter selection is completed, the best
+#'   model will be re-fitted for the combined data set `data` + `val.data`.)
 #' @param yvar Name of the response variable as a character string.
 #' @param family A description of the error distribution and link function to be
 #'   used in the model (see `glm` and `family`).

@@ -556,11 +556,12 @@ predict.lmFit <- function(object, newdata,
 predict.gamFit <- function(object, newdata, 
                           recursive = FALSE, recursive_colRange = NULL, ...){
   if (!is_tibble(newdata)) stop("newdata is not a tibble.")
+  predict_fn <- mgcv::predict.gam
   if(recursive == TRUE){
     predictions =  vector(mode = "list", length = NROW(newdata))
     for(m in 1:(NROW(newdata) - 1)){
       data_temp = newdata[m, ]
-      pred <- predict(object, data_temp, type = "response")
+      pred <- predict_fn(object, data_temp, type = "response")
       predictions[[m]] <- pred
       x_seq = seq((m+1), (m+((max(recursive_colRange) - min(recursive_colRange)) + 1)))
       y_seq = recursive_colRange
@@ -571,12 +572,12 @@ predict.gamFit <- function(object, newdata,
       }
     }
     data_temp = newdata[NROW(newdata), ]
-    predictions[[NROW(newdata)]] = predict(object, data_temp, type = "response")
+    predictions[[NROW(newdata)]] = predict_fn(object, data_temp, type = "response")
     pred <- unlist(predictions)
     pred_F <- newdata %>% 
       mutate(.predict = pred)
   }else if(recursive == FALSE){
-    pred <- predict(object, newdata, type = "response")
+    pred <- predict_fn(object, newdata, type = "response")
     pred_F <- newdata %>% 
       dplyr::mutate(.predict = pred)
   }

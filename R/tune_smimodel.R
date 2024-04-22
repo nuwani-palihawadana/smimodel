@@ -113,9 +113,6 @@ tune_smimodel <- function(data, val.data, yvar, neighbour = 0,
     for(i in recursive_colRange){
       valData[(i - (recursive_colRange[1] - 2)):NROW(valData), i] <- NA
     }
-    # Convert back to a tsibble
-    valData <- valData %>%
-      as_tsibble(index = index_val, key = key_val)
   }
   # Predictions
   pred <- predict(object = smimodel$best, newdata = valData, recursive = recursive,

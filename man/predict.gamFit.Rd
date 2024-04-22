@@ -10,7 +10,7 @@
 \item{object}{A \code{gamFit} object.}
 
 \item{newdata}{The set of new data on for which the forecasts are required
-(i.e. test set; should be a \code{tsibble}).}
+(i.e. test set; should be a \code{tibble}).}
 
 \item{recursive}{Whether to obtain recursive forecasts or not (default -
 FALSE).}

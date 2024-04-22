@@ -138,9 +138,6 @@ model_backward <- function(data, val.data, yvar,
       for(i in recursive_colRange){
         valData[(i - (recursive_colRange[1] - 2)):NROW(valData), i] <- NA
       }
-      # Convert back to a tsibble
-      valData <- valData %>%
-        as_tsibble(index = index_val, key = key_val)
     }
     # Predictions
     pred <- predict(object = model1, newdata = valData, recursive = recursive,
@@ -295,9 +292,6 @@ eliminate <- function(ind, train, val, yvar, family = gaussian(),
     for(i in recursive_colRange){
       valData[(i - (recursive_colRange[1] - 2)):NROW(valData), i] <- NA
     }
-    # Convert back to a tsibble
-    valData <- valData %>%
-      as_tsibble(index = index_val, key = key_val)
   }
   # Predictions
   pred <- predict(object = model1, newdata = valData, recursive = recursive,

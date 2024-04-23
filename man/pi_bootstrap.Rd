@@ -41,6 +41,46 @@ Generates multi-step prediction intervals corresponding to the forecasts
 obtained on a given test set (i.e. \code{newdata}), using single season block
 bootstrapping method.
 }
+\examples{
+library(dplyr)
+library(ROI)
+library(tibble)
+library(tidyr)
+library(tsibble)
+n = 1205
+set.seed(123)
+sim_data <- tibble(x_lag_000 = runif(n)) \%>\%
+  mutate(
+    # Add x_lags
+    x_lag = lag_matrix(x_lag_000, 5)) \%>\%
+  unpack(x_lag, names_sep = "_") \%>\%
+  mutate(
+    # Response variable
+    y1 = (0.9*x_lag_000 + 0.6*x_lag_001 + 0.45*x_lag_003)^3 + rnorm(n, sd = 0.1),
+    # Add an index to the data set
+    inddd = seq(1, n)) \%>\%
+  drop_na() \%>\%
+  select(inddd, y1, starts_with("x_lag")) \%>\%
+  # Make the data set a `tsibble`
+  as_tsibble(index = inddd)
+# Training set
+sim_train <- sim_data[1:1000, ]
+# Test set
+sim_test <- sim_data[1001:1200, ]
+# Index variables
+index.vars <- colnames(sim_data)[3:8]
+# Model fitting
+model1 <- model_smimodel(data = sim_train,
+                         yvar = "y1",
+                         index.vars = index.vars,
+                         initialise = "ppr")
+# Calculating lower and upper bounds for 95\% prediction interval
+PI_model1 <- pi_bootstrap(object = model1, 
+                         newdata = sim_test)
+# Lower and upper bounds
+PI_model1$bounds
+                         
+}
 \references{
 Hyndman, R.J. & Fan, S. (2010). Density Forecasting for Long-Term
 Peak Electricity Demand. \emph{IEEE Transactions on Power Systems}, 25(2),

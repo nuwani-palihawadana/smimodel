@@ -15,13 +15,16 @@ lag_matrix(variable, n = 10)
 A \code{tibble}.
 }
 \description{
-Generates specified number of lagged variables of the given variable in
-the form of a tibble.
+Generates specified number of lagged variables of the given variable in the
+form of a tibble.
 }
 \examples{
-# Adding lagged variables to an existing tibble
 library(dplyr)
-demand_data <- tsibbledata::vic_elec \%>\%
-  mutate(Temperature_lag = lag_matrix(Temperature, 30)) \%>\%
-  tidyr::unpack(Temperature_lag, names_sep = "_")
+library(tibble)
+library(tidyr)
+# Adding lagged variables to an existing tibble
+set.seed(123)
+sim_data <- tibble(x_lag_000 = runif(100)) \%>\%
+  mutate(x_lag = lag_matrix(x_lag_000, 3)) \%>\%
+  unpack(x_lag, names_sep = "_")
 }

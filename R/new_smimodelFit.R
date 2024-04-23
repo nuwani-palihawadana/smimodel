@@ -128,7 +128,7 @@ new_smimodelFit <- function(data, yvar, neighbour = 0,
         if(all(alpha[ind_pos[[i]]] == 0)){
           ind_rm_id <- c(ind_rm_id, i)
           ind_rm_pos <- c(ind_rm_pos, ind_pos[[i]])
-          warning(paste0('Initial model', ': All coefficients of index', i,
+          message(paste0('Initial model', ': All coefficients of index', i,
                          ' are zero. Removing index', i, 
                          '. However, the variables in the removed index are considered in subsequent model searches.')) 
         }

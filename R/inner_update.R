@@ -92,7 +92,7 @@ inner_update <- function(x, data, yvar, family = gaussian(), index.vars,
         if(all(alpha_new[ind_pos[[i]]] == 0)){
           ind_rm_id <- c(ind_rm_id, i)
           ind_rm_pos <- c(ind_rm_pos, ind_pos[[i]])
-          warning(paste0('Iteration ', maxIt, ': All coefficients of index', i,
+          message(paste0('Iteration ', maxIt, ': All coefficients of index', i,
                          ' are zero. Removing index', i, ' from subsequent iterations.')) 
         }
       }

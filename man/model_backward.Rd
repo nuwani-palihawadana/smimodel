@@ -73,6 +73,41 @@ Fits a nonparametric additive model, with simultaneous variable selection
 through a backward elimination procedure as proposed by Fan and Hyndman
 (2012).
 }
+\examples{
+library(dplyr)
+library(tibble)
+library(tidyr)
+library(tsibble)
+n = 1205
+set.seed(123)
+sim_data <- tibble(x_lag_000 = runif(n)) \%>\%
+  mutate(
+    # Add x_lags
+    x_lag = lag_matrix(x_lag_000, 5)) \%>\%
+  unpack(x_lag, names_sep = "_") \%>\%
+  mutate(
+    # Response variable
+    y1 = (0.9*x_lag_000 + 0.6*x_lag_001 + 0.45*x_lag_003)^3 + rnorm(n, sd = 0.1),
+    # Add an index to the data set
+    inddd = seq(1, n)) \%>\%
+  drop_na() \%>\%
+  select(inddd, y1, starts_with("x_lag")) \%>\%
+  # Make the data set a `tsibble`
+  as_tsibble(index = inddd)
+# Training set
+sim_train <- sim_data[1:1000, ]
+# Validation set
+sim_val <- sim_data[1001:1200, ]
+# Smooth variables
+s.vars <- colnames(sim_data)[3:8]
+# Model fitting
+backwardModel <- model_backward(data = sim_train,
+                                val.data = sim_val,
+                                yvar = "y1",
+                                s.vars = s.vars)
+backwardModel$fit[[1]]
+
+}
 \references{
 Fan, S. & Hyndman, R.J. (2012). Short-Term Load Forecasting Based
 on a Semi-Parametric Additive Model. \emph{IEEE Transactions on Power Systems},

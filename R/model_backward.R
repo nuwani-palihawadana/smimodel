@@ -169,8 +169,8 @@ model_backward <- function(data, val.data, yvar,
         as_tibble() %>%
         arrange({{index_val}})
       # Adjust validation set for recursive forecasts
-      for(i in recursive_colRange){
-        valData[(i - (recursive_colRange[1] - 2)):NROW(valData), i] <- NA
+      for(k in recursive_colRange){
+        valData[(k - (recursive_colRange[1] - 2)):NROW(valData), k] <- NA
       }
     }
     # Predictions
@@ -323,8 +323,8 @@ eliminate <- function(ind, train, val, yvar, family = gaussian(),
       as_tibble() %>%
       arrange({{index_val}})
     # Adjust validation set for recursive forecasts
-    for(i in recursive_colRange){
-      valData[(i - (recursive_colRange[1] - 2)):NROW(valData), i] <- NA
+    for(a in recursive_colRange){
+      valData[(a - (recursive_colRange[1] - 2)):NROW(valData), a] <- NA
     }
   }
   # Predictions

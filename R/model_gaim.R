@@ -93,12 +93,14 @@ model_gaim <- function(data, yvar, neighbour = 0, index.vars, index.ind,
     paste(collapse = ",") %>% 
     paste0(")") %>%
     paste0(yvar, " ~ g(", .)
-  for(j in 2:length(ind_pos)){
-    var_list <- index.vars[ind_pos[[j]]]
-    pre.formula <- lapply(var_list, function(var) paste0(var)) %>%
-      paste(collapse = ",") %>% 
-      paste0(")") %>%
-      paste0(pre.formula, " + g(", .)
+  if(length(ind_pos) > 1){
+    for(j in 2:length(ind_pos)){
+      var_list <- index.vars[ind_pos[[j]]]
+      pre.formula <- lapply(var_list, function(var) paste0(var)) %>%
+        paste(collapse = ",") %>% 
+        paste0(")") %>%
+        paste0(pre.formula, " + g(", .)
+    }
   }
   if (!is.null(s.vars)){
     pre.formula <- lapply(s.vars, function(var) paste0("s(", var, ")")) %>%

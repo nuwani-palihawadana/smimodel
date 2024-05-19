@@ -24,6 +24,7 @@ greedy.fit(
   lambda_step,
   lambda0_start_seq,
   lambda2_start_seq,
+  refit = TRUE,
   M = 10,
   max.iter = 50,
   tol = 0.001,
@@ -114,6 +115,10 @@ points for the greedy search.}
 
 \item{lambda2_start_seq}{A subset from \code{lambda2_seq} as candidate starting
 points for the greedy search.}
+
+\item{refit}{Whether to refit the model combining training and validation
+sets after parameter tuning. If \code{FALSE}, the final model will be estimated
+only on the training set.}
 
 \item{M}{Big-M value used in MIP.}
 

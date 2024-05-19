@@ -62,6 +62,9 @@
 #'   points for the greedy search.
 #' @param lambda2_start_seq A subset from `lambda2_seq` as candidate starting
 #'   points for the greedy search.
+#' @param refit Whether to refit the model combining training and validation
+#'   sets after parameter tuning. If `FALSE`, the final model will be estimated
+#'   only on the training set.
 #' @param M Big-M value used in MIP.
 #' @param max.iter Maximum number of MIP iterations performed to update index
 #'   coefficients for a given model.
@@ -93,7 +96,7 @@ greedy.fit <- function(data, val.data, yvar, neighbour = 0,
                        num_ind = 5, num_models = 5, seed = 123, index.ind = NULL, 
                        index.coefs = NULL, s.vars = NULL, linear.vars = NULL, 
                        lambda0_seq, lambda2_seq, lambda_step,
-                       lambda0_start_seq, lambda2_start_seq, 
+                       lambda0_start_seq, lambda2_start_seq, refit = TRUE,
                        M = 10, max.iter = 50, tol = 0.001, tolCoefs = 0.001,
                        TimeLimit = Inf, MIPGap = 1e-4, NonConvex = -1, 
                        verbose = FALSE, parallel = FALSE, workers = NULL,
@@ -190,24 +193,44 @@ greedy.fit <- function(data, val.data, yvar, neighbour = 0,
   }
   # Final smimodel: re-fit the best model for the combined data set training + validation
   # Data
-  combinedData <- dplyr::bind_rows(data, val.data)
-  final_smimodel_list <- smimodel.fit(data = combinedData, yvar = yvar, 
-                                      neighbour = neighbour,
-                                      family = family,
-                                      index.vars = index.vars, 
-                                      initialise = initialise, 
-                                      num_ind = num_ind, num_models = num_models, 
-                                      seed = seed,
-                                      index.ind = index.ind, 
-                                      index.coefs = index.coefs,
-                                      s.vars = s.vars,
-                                      linear.vars = linear.vars,
-                                      lambda0 = current_lambdas[1], 
-                                      lambda2 = current_lambdas[2],
-                                      M = M, max.iter = max.iter, 
-                                      tol = tol, tolCoefs = tolCoefs,
-                                      TimeLimit = TimeLimit, MIPGap = MIPGap,
-                                      NonConvex = NonConvex, verbose = verbose)
+  if(refit == TRUE){
+    combinedData <- dplyr::bind_rows(data, val.data)
+    final_smimodel_list <- smimodel.fit(data = combinedData, yvar = yvar, 
+                                        neighbour = neighbour,
+                                        family = family,
+                                        index.vars = index.vars, 
+                                        initialise = initialise, 
+                                        num_ind = num_ind, num_models = num_models, 
+                                        seed = seed,
+                                        index.ind = index.ind, 
+                                        index.coefs = index.coefs,
+                                        s.vars = s.vars,
+                                        linear.vars = linear.vars,
+                                        lambda0 = current_lambdas[1], 
+                                        lambda2 = current_lambdas[2],
+                                        M = M, max.iter = max.iter, 
+                                        tol = tol, tolCoefs = tolCoefs,
+                                        TimeLimit = TimeLimit, MIPGap = MIPGap,
+                                        NonConvex = NonConvex, verbose = verbose)
+  }else{
+    final_smimodel_list <- smimodel.fit(data = data, yvar = yvar, 
+                                        neighbour = neighbour,
+                                        family = family,
+                                        index.vars = index.vars, 
+                                        initialise = initialise, 
+                                        num_ind = num_ind, num_models = num_models, 
+                                        seed = seed,
+                                        index.ind = index.ind, 
+                                        index.coefs = index.coefs,
+                                        s.vars = s.vars,
+                                        linear.vars = linear.vars,
+                                        lambda0 = current_lambdas[1], 
+                                        lambda2 = current_lambdas[2],
+                                        M = M, max.iter = max.iter, 
+                                        tol = tol, tolCoefs = tolCoefs,
+                                        TimeLimit = TimeLimit, MIPGap = MIPGap,
+                                        NonConvex = NonConvex, verbose = verbose)
+  }
   print("Final model fitted!")
   output <- list("initial" = final_smimodel_list$initial, 
                  "best" = final_smimodel_list$best,

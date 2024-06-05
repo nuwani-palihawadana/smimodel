@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# smimodel
+# smimodel <img src='man/figures/hex.png' align="right" height="138.5" /></a>
 
 <!-- badges: start -->
 <!-- badges: end -->
@@ -14,14 +14,8 @@ parsimonious forecasting models in a high-dimensional context.
 
 ## Installation
 
-You can install the released version of smoothlags from
-[CRAN](https://CRAN.R-project.org) with:
-
-``` r
-# install.packages("smimodel")
-```
-
-And the development version from [GitHub](https://github.com/) with:
+You can install the the development version of smimodel from
+[GitHub](https://github.com/) with:
 
 ``` r
 # install.packages("devtools")

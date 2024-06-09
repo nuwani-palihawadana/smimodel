@@ -1,3 +1,295 @@
+#' Single season block bootstrap prediction intervals - to be corrected
+#'
+#' Compute prediction intervals by applying the single season block bootstrap
+#' method.
+#'
+#' @param data Training data set. Must be a data set of class `tsibble`.(Make
+#'   sure there are no additional date/time/date-time/yearmonth/POSIXct/POSIXt
+#'   variables except for the `index` of the `tsibble`). If multiple models are
+#'   fitted, the grouping variable should be the key of the `tsibble`.
+#' @param newdata Test data set. Must be a data set of class `tsibble`.
+#' @param yvar Name of the response variable as a character string.
+#' @param neighbour If multiple models are fitted: Number of neighbours of each
+#'   key (i.e. grouping variable) to be considered in model fitting to handle
+#'   smoothing over the key. Should be an integer. If `neighbour = x`, `x`
+#'   number of keys before the key of interest and `x` number of keys after the
+#'   key of interest are grouped together for model fitting. The default is `0`
+#'   (i.e. no neighbours are considered for model fitting).
+#' @param predictor.vars A character vector of names of the predictor variables.
+#' @param modelfun Model fitting function.
+#' @param h Forecast horizon.
+#' @param season.period Length of the seasonal period.
+#' @param m Multiplier. (Block size = `season.period` * `m`)
+#' @param num.futures Number of possible future sample paths to be generated.
+#' @param level Confidence level for prediction intervals.
+#' @param forward If \code{TRUE}, the final forecast origin for forecasting is
+#'   \eqn{y_T}. Otherwise, the final forecast origin is \eqn{y_{T-1}}.
+#' @param initial Initial period of the time series where no cross-validation
+#'   forecasting is performed.
+#' @param window Length of the rolling window. If \code{NULL}, a rolling window
+#'   will not be used.
+#' @param recursive Whether to obtain recursive forecasts or not (default -
+#'   FALSE).
+#' @param recursive_colNames If `recursive = TRUE`, a character vector giving
+#'   the names of the columns in test data to be filled with forecasts.
+#' @param ... Other arguments not currently used.
+#'
+#' @importFrom stats as.ts frequency start
+#' @importFrom rlang `:=`
+#'
+#' @export
+crossVal_bb <- function(data, newdata, yvar, neighbour = 0, predictor.vars, 
+                        modelfun, h = 1, season.period = 1, m = 1, 
+                        num.futures = 1000, level = c(80, 95), forward = TRUE, 
+                        initial = 1, window = NULL, 
+                        recursive = FALSE, recursive_colNames = NULL, ...) {
+  # Check input data 
+  if (!is_tsibble(data)) stop("data is not a tsibble.")
+  if (!is_tsibble(newdata)) stop("newdata is not a tsibble.")
+  index_data <- index(data)
+  key_data <- key(data)
+  if (length(key(data)) == 0) {
+    data <- data %>%
+      dplyr::mutate(dummy_key = rep(1, NROW(data))) %>%
+      tsibble::as_tsibble(index = index_data, key = dummy_key)
+    key_data <- key(data)
+    newdata <- newdata %>%
+      dplyr::mutate(dummy_key = rep(1, NROW(newdata))) %>%
+      tsibble::as_tsibble(index = index_data, key = dummy_key)
+  }
+  key_data1 <- key(data)[[1]]
+  data1 <- data |> 
+    as_tibble() |> 
+    arrange({{index_data}})
+  y <- as.ts(data1[ , yvar][[1]])
+  n <- length(y)
+  
+  # Check confidence levels
+  if (min(level) > 0 && max(level) < 1) {
+    level <- 100 * level
+  } else if (min(level) < 0 || max(level) > 99.99) {
+    stop("confidence limit out of range")
+  }
+  level <- sort(level)
+  
+  # Check other inputs
+  if (h <= 0)
+    stop("forecast horizon out of bounds")
+  if (initial < 1 | initial > n)
+    stop("initial period out of bounds")
+  if (initial == n && !forward)
+    stop("initial period out of bounds")
+  if (!is.null(window)) {
+    if (window < 1 | window > n)
+      stop("window out of bounds")
+    if (window == n && !forward)
+      stop("window out of bounds")
+  }
+  forwardData <- bind_rows(data, newdata)
+  xreg <- forwardData[ , c(as.character(index_data), as.character(key_data1), 
+                           predictor.vars)]
+  xreg <- ts(as.matrix(xreg),
+             start = start(y),
+             frequency = frequency(y))
+  if (nrow(xreg) < n)
+    stop("xreg should be at least of the same size as y")
+  if (nrow(xreg) < n + forward * h)
+    # Pad xreg with NAs
+    xreg <- ts(rbind(xreg, matrix(NA, nrow=n+forward*h-nrow(xreg), ncol=ncol(xreg))),
+               start = start(y),
+               frequency = frequency(y))
+  if (nrow(xreg) > n + forward * h) {
+    warning(sprintf("only first %s rows of xreg are being used", n + forward * h))
+    xreg <- subset(xreg, start = 1L, end = n + forward * h)
+  }
+  if (is.null(colnames(xreg))) {
+    colnames(xreg) <- if (ncol(xreg) == 1) "xreg" else paste0("xreg", 1:ncol(xreg))
+  }
+  
+  N <- ifelse(forward, n + h, n + h - 1L)
+  nlast <- ifelse(forward, n, n - 1L)
+  nfirst <- ifelse(is.null(window), initial, max(window, initial))
+  indx <- seq(nfirst, nlast, by = 1L)
+  fit_times <- length(indx)
+  
+  pf <- `colnames<-` (ts(matrix(NA_real_, nrow = N, ncol = h),
+                         start = start(y), frequency = frequency(y)),
+                      paste0("h=", 1:h))
+  if(is.null(window)){
+    res <- ts(matrix(NA_real_, nrow = N, ncol = max(indx)),
+              start = start(y), frequency = frequency(y))
+  }else{
+    res <- ts(matrix(NA_real_, nrow = N, ncol = window),
+              start = start(y), frequency = frequency(y))
+  }
+  
+  namatrix <- ts(matrix(NA_real_, nrow = N, ncol = h),
+                 start = start(pf),
+                 frequency = frequency(pf))
+  colnames(namatrix) <- paste0("h=", seq(h))
+  lower <- upper <- `names<-` (rep(list(namatrix), length(level)),
+                               paste0(level, "%"))
+  out <- list(x = y)
+  
+  modelFit = vector(mode = "list", length = length(indx))
+  pFutures = vector(mode = "list", length = length(indx))
+  for (i in indx) {
+    y_subset <- subset(y,
+                       start = ifelse(is.null(window), 1L, i - window + 1L),
+                       end = i)
+    xreg_subset <- subset(xreg,
+                          start = ifelse(is.null(window), 1L, i - window + 1L),
+                          end = i)
+    xreg_future <- subset(xreg,
+                          start = i + 1L,
+                          end = i + h)
+    train <- xreg_subset |>
+      as_tibble() |> 
+      arrange({{index_data}}) |> 
+      mutate(!!yvar := as.numeric(y_subset)) |> 
+      select(all_of(index_data), all_of(key_data1), all_of(yvar), all_of(predictor.vars)) |> 
+      as_tsibble(index = index_data, key = key_data1)
+    test <- xreg_future |>
+      as_tibble() |> 
+      arrange({{index_data}}) |> 
+      select(all_of(index_data), all_of(key_data1), all_of(predictor.vars)) |> 
+      as_tsibble(index = index_data, key = key_data1)
+    if(recursive == TRUE){
+      recursive_colRange <- suppressWarnings(which(colnames(test) %in% recursive_colNames))
+      # Convert to a tibble
+      test <- test |> 
+        as_tibble() |> 
+        arrange({{index_data}})
+      ## Adjusting the test set data to remove future response lags
+      for(i in recursive_colRange){
+        test[(i - (recursive_colRange[1] - 2)):NROW(test), i] <- NA
+      }
+      # Convert back to a tsibble
+      test <- test %>%
+        as_tsibble(index = index_data, key = key_data1)
+    }else{
+      recursive_colRange <- NULL
+    }
+    
+    # Model fitting
+    modelFit[[i]] <- modelfun(data = train, yvar = yvar, 
+                              neighbour = neighbour, ...)
+    # Obtain predictions on validation set
+    preds <- predict(object = modelFit[[i]], 
+                     newdata = test, 
+                     recursive = recursive, 
+                     recursive_colRange = recursive_colRange)
+    # Store predictions
+    pf[i, ] <- as.numeric(preds$.predict)
+    # Obtain in-sample residuals
+    resids <- augment(x = modelFit[[i]])
+    # Store residuls
+    res[i, 1:length(resids$.resid)] <- as.numeric(resids$.resid)
+    # Possible futures through block bootstrapping on in-sample residuals
+    pFutures[[i]] <- blockBootstrap(object = modelFit[[i]], newdata = test,
+                                    resids = na.omit(res[i, ]), preds = pf[i, ], 
+                                    season.period = season.period, m = m, 
+                                    num.futures = num.futures, 
+                                    recursive = recursive, 
+                                    recursive_colRange = recursive_colRange)
+    # Prediction interval bounds
+    lower_q <- (1 - (level/100))/2
+    upper_q <- lower_q + (level/100)
+    for(j in 1:NROW(pFutures[[i]])){
+      intervalsHilo <- quantile(pFutures[[i]][j, ], probs = c(lower_q, upper_q))
+      nint <- length(level)
+      lowerBound <- matrix(NA, ncol = nint, nrow = 1)
+      upperBound <- lowerBound
+      for (k in 1:nint) {
+        lowerBound[1, k] <- intervalsHilo[[k]]
+        upperBound[1, k] <- intervalsHilo[[(k + 2)]]
+      }
+      colnames(lowerBound) <- colnames(upperBound) <- paste(level, "%", sep = "")
+      for (l in level) {
+        levelname <- paste0(l, "%")
+        lower[[levelname]][i, j] <- lowerBound[ , levelname]
+        upper[[levelname]][i, j] <- upperBound[ , levelname]
+      }
+    }
+  }
+  
+  out$method <- paste("crossVal")
+  out$fit_times <- fit_times
+  out$mean <- pf[rowSums(is.na(pf)) != ncol(pf), ]
+  row.names(out$mean) <- seq(nfirst, nlast, by = 1)
+  out$res <- res[rowSums(is.na(res)) != ncol(res), ]
+  row.names(out$res) <- seq(nfirst, nlast, by = 1)
+  out$level <- level
+  for (l in level) {
+    levelname <- paste0(l, "%")
+    lower[[levelname]] <- lower[[levelname]][rowSums(is.na(lower[[levelname]])) != ncol(lower[[levelname]]), ]
+    row.names(lower[[levelname]]) <- seq(nfirst, nlast, by = 1)
+    upper[[levelname]] <- upper[[levelname]][rowSums(is.na(upper[[levelname]])) != ncol(upper[[levelname]]), ]
+    row.names(upper[[levelname]]) <- seq(nfirst, nlast, by = 1)
+  }
+  out$lower <- lower
+  out$upper <- upper
+  
+  return(structure(out, class = "crossVal"))
+}
+
+
+#' Futures through single season block bootstrapping - to be corrected
+#'
+#' Gerenates possible future sample paths by applying the single season block
+#' bootstrap method.
+#'
+#' @param object Fitted model object.
+#' @param newdata Test data set. Must be a data set of class `tsibble`.
+#' @param resids In-sample residuals from the fitted model.
+#' @param preds Predictions for the test set (i.e. data for the forecast
+#'   horizon).
+#' @param season.period Length of the seasonal period.
+#' @param m Multiplier. (Block size = `season.period` * `m`)
+#' @param num.futures Number of possible future sample paths to be generated.
+#' @param recursive Whether to obtain recursive forecasts or not (default -
+#'   FALSE).
+#' @param recursive_colRange If `recursive = TRUE`, The range of column numbers
+#'   in test data to be filled with forecasts.
+#'
+#' @export
+blockBootstrap <- function(object, newdata, resids, preds, season.period = 1, 
+                           m = 1, num.futures = 1000, 
+                           recursive = FALSE, recursive_colRange = NULL){
+  
+  # Generate the matrix of bootstrapped series
+  bootstraps <- residBootstrap(x = resids, season.period = season.period, m = m,
+                                          num.bootstrap = num.futures)
+  # Generate possible futures
+  npreds <- length(preds)
+  if(recursive == FALSE){
+    possibleFutures <- vector(mode = "list", length = npreds)
+    for(i in 1:npreds){
+      possibleFutures[[i]] <- preds[i] + bootstraps[i, ]
+    }
+    possibleFutures_mat <- as.matrix(bind_rows(possibleFutures))
+  }else if(recursive == TRUE){
+    if ("smimodel" %in% class(object)){
+      futures <- possibleFutures_smimodel(object = object, 
+                                                     newdata = newdata, 
+                                                     bootstraps = bootstraps, 
+                                                     recursive_colRange = recursive_colRange)
+    }else{
+      futures <- possibleFutures_benchmark(object = object, 
+                                                      newdata = newdata, 
+                                                      bootstraps = bootstraps, 
+                                                      recursive_colRange = recursive_colRange)
+    }
+    names(futures$future_cols) <- 1:length(futures$future_cols)
+    possibleFutures_part2 <- as.matrix(bind_cols(futures$future_cols))
+    possibleFutures_part1 <- matrix(futures$firstFuture, nrow = 1, 
+                                    ncol = length(futures$firstFuture))
+    possibleFutures_mat <- rbind(possibleFutures_part1, possibleFutures_part2)
+  }
+  return(possibleFutures_mat)
+}
+
+
 #' Prediction intervals using single season block bootstrapping
 #'
 #' Generates multi-step prediction intervals corresponding to the forecasts

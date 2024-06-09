@@ -10,10 +10,17 @@ The R package *smimodel* provides functions to estimate Sparse Multiple
 Index (SMI) Models for nonparametric forecasting. The SMI Modelling
 algorithm simultaneously performs optimal predictor selection (hence
 “sparse”) and predictor grouping, enabling parsimonious forecasting
-models in a high-dimensional context. The package also includes
-functions to fit some benchmark comparison methods namely nonparametric
-additive model with backward elimination, group-wise additive index
-model and projection pursuit regression.
+models in a high-dimensional context.
+
+The package also includes functions to fit some benchmark comparison
+methods namely nonparametric additive model with backward elimination,
+group-wise additive index model and projection pursuit regression. These
+functions have a similar syntax and output format to `model_smimodel()`
+for convenient usage and interchangeability.
+
+For detailed information regarding the SMI Modelling algorithm refer
+<https://github.com/nuwani-palihawadana/smimodel_paper/blob/main/paper/smimodel.pdf>
+.
 
 ## Installation
 
@@ -103,7 +110,7 @@ augment(x = smimodel_ppr)
 ```
 
 ``` r
-# Obtain predistions on the test set
+# Obtain forecasts on the test set
 predict(object = smimodel_ppr, newdata = sim_test)$.predict
 ```
 

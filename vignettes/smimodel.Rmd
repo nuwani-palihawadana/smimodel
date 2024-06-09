@@ -1,0 +1,157 @@
+---
+title: "Introduction to smimodel"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Introduction to smimodel}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  warning = FALSE,
+  message = FALSE,
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+The *smimodel* package provides functions to estimate **Sparse Multiple Index (SMI) Models** for high-dimensional nonparametric forecasting, which can be used with tidy temporal data in the `tsibble` format. (For detailed information regarding the SMI model and the estimation algorithm refer https://github.com/nuwani-palihawadana/smimodel_paper/blob/main/paper/smimodel.pdf .)
+
+```{r setup}
+library(smimodel)
+library(dplyr)
+library(fabletools)
+library(ROI)
+library(tibble)
+library(tidyr)
+library(tsibble)
+```
+
+## Data simulation
+
+Suppose we are interested in forecasting a time series $y_{1}$, which is a nonlinear function of three predictor variables $x\_000, x\_001$ and $x\_003$ plus a normally distributed white noise component. Here, the variables $x\_001$ and $x\_003$ are the first and third lags of $x\_000$ respectively. 
+
+```{r data}
+n = 1205 # length of the time series
+set.seed(123)
+# Data
+sim_data <- tibble(x_000 = runif(n)) %>%
+  mutate(
+    # Add x_lags
+    x = lag_matrix(x_000, 5)) %>%
+  unpack(x, names_sep = "_") %>%
+  mutate(
+    # Response variable
+    y1 = (0.9*x_000 + 0.6*x_001 + 0.45*x_003)^3 + rnorm(n, sd = 0.1),
+    # Add an index to the data set
+    inddd = seq(1, n)) %>%
+  drop_na() %>%
+  select(inddd, y1, starts_with("x_")) %>%
+  # Make the data set a `tsibble`
+  as_tsibble(index = inddd)
+```
+
+Note that here we create an additional variable `inddd` to serve as the `index` of the data set, when we convert the data set into an object of class `tsibble`. 
+
+Next, we split the data into train, validation and test sets so that the models can be estimated using the train data set, parameter tuning (if we are tuning for the penalty parameters of the SMI model) and model selection (benchmark method - nonparametric additive model with backward elimination) can be performed using the validation set, and the fitted models can be evaluated on the forecasts obtained for the test set, which is not used for model estimation. 
+
+```{r datasplit}
+# Train set
+sim_train <- sim_data[1:1000, ]
+
+# Test set
+sim_test <- sim_data[1001:1200, ]
+```
+
+## SMI model
+
+We first train SMI models on the train set using three different initialisation options "PPR", "Additive" and "Linear" for comparison purposes. 
+
+(Note: The choice of the initialisation might depend on the data and application. Thus, users are encouraged to follow a trial-and-error procedure to determine the most suitable initial model for a given application.)
+
+Here, we assume that we do not have any prior knowledge about the construction of the response variable $y_{1}$. Hence, we input $x\_000$ and its first five lags as our predictor variables into the estimation algorithm, as predictors which are entering indices. 
+
+```{r indexvar}
+# Index variables
+index.vars <- colnames(sim_data)[3:8]
+```
+
+```{r smimodelppr, message=FALSE}
+# SMI model with "PPR" initialisation
+smimodel_ppr <- model_smimodel(data = sim_train,
+                               yvar = "y1",
+                               index.vars = index.vars,
+                               initialise = "ppr")
+# Fitted optimal SMI model
+smimodel_ppr$fit[[1]]$best
+# Estimated index structure
+smimodel_ppr$fit[[1]]$best$alpha
+```
+
+```{r smimodeladditive, message=FALSE}
+# SMI model with "Additive" initialisation
+smimodel_additive <- model_smimodel(data = sim_train,
+                                    yvar = "y1",
+                                    index.vars = index.vars,
+                                    initialise = "additive")
+# Fitted optimal SMI model
+smimodel_additive$fit[[1]]$best
+# Estimated index structure
+smimodel_additive$fit[[1]]$best$alpha
+```
+
+```{r smimodellinear, message=FALSE}
+# SMI model with "Linear" initialisation
+smimodel_linear <- model_smimodel(data = sim_train,
+                                  yvar = "y1",
+                                  index.vars = index.vars,
+                                  initialise = "linear")
+# Fitted optimal SMI model
+smimodel_linear$fit[[1]]$best
+# Estimated index structure
+smimodel_linear$fit[[1]]$best$alpha
+```
+
+Notice that in this case, the SMI models fitted with all three initialisation options have correctly identified the index structure of the response $y_{1}$ by estimating only one linear combination (i.e. index), while dropping out the irrelevant predictors $x\_002, x\_004$ and $x\_005$.
+
+Here, all the SMI models were fitted using the default penalty parameter values $\lambda_{0} = 1$ and $\lambda_{2} = 1$. To fit a SMI model with simultaneous parameter tuning, we can use the function `greedy_smimodel()`, which performs a greedy search over a given grid of penalty parameter combinations ($\lambda_{0}$, $\lambda_{2}$), and fits the SMI model using the best (lowest validation set MSE) penalty parameter combination. In this case, we need to provide a validation set, which is separate from the train data set. 
+
+## Visualisation of estimated smooths
+
+Once you fit a SMI model, the partial effects of the estimated smooths corresponding to the estimated indices can be plotted using the `autoplot` method as below. 
+
+```{r autoplot, message=FALSE}
+# Plot estimated smooths
+autoplot(object = smimodel_ppr)
+```
+
+## Residuals and fitted values
+
+We can use the `augment` method to obtain the residuals and the fitted values from an estimated SMI model.
+
+```{r augment, message=FALSE}
+# Obtain residuals and fitted values
+augment(x = smimodel_ppr)
+```
+
+## Forecasts on a test set
+
+Based on an estimated SMI model, we obtain forecasts on a test set as below, using the `predict` method.
+
+```{r predict, message=FALSE}
+# Obtain forecasts on the test set
+preds = predict(object = smimodel_ppr, newdata = sim_test)
+preds$.predict
+```
+
+Once we obtain forecasts, we can evaluate the forecasting performance of the estimated SMI model by calculating forecast error measurements as desired, using a common function from an appropriate package.  
+
+```{r forecasterror, message=FALSE}
+# Calculate test set MSE and MAE
+MSE_SMI_ppr = fabletools::MSE(.resid = (preds$y1 - preds$.predict))
+MSE_SMI_ppr
+MAE_SMI_ppr = fabletools::MAE(.resid = (preds$y1 - preds$.predict))
+MAE_SMI_ppr
+```
+

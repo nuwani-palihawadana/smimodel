@@ -54,6 +54,7 @@ A wrapper for \code{cgaim::cgaim()} enabling multiple GAIM models based on a
 grouping variable. Currently does not support Constrained GAIM (CGAIM)s.
 }
 \examples{
+library(cgaim)
 library(dplyr)
 library(tibble)
 library(tidyr)

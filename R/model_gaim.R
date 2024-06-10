@@ -32,6 +32,7 @@
 #' @importFrom cgaim cgaim
 #' 
 #' @examples
+#' library(cgaim)
 #' library(dplyr)
 #' library(tibble)
 #' library(tidyr)
@@ -144,7 +145,3 @@ model_gaim <- function(data, yvar, neighbour = 0, index.vars, index.ind,
   class(models) <- c("gaimFit", "tbl_df", "tbl", "data.frame")
   return(models)
 }
-#' @export
-cgaim::g
-#' @export
-cgaim::s

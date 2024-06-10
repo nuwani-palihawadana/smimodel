@@ -1,8 +1,10 @@
-#' Single season block bootstrap prediction intervals - to be corrected
+#' Single season block bootstrap prediction intervals
 #'
 #' Compute prediction intervals by applying the single season block bootstrap
 #' method.
 #'
+#' @param object Fitted model object of class `smimodel`, `backward`, `gaimFit`
+#'   or `pprFit`.
 #' @param data Training data set. Must be a data set of class `tsibble`.(Make
 #'   sure there are no additional date/time/date-time/yearmonth/POSIXct/POSIXt
 #'   variables except for the `index` of the `tsibble`). If multiple models are
@@ -16,7 +18,6 @@
 #'   key of interest are grouped together for model fitting. The default is `0`
 #'   (i.e. no neighbours are considered for model fitting).
 #' @param predictor.vars A character vector of names of the predictor variables.
-#' @param modelfun Model fitting function.
 #' @param h Forecast horizon.
 #' @param season.period Length of the seasonal period.
 #' @param m Multiplier. (Block size = `season.period` * `m`)
@@ -38,8 +39,8 @@
 #' @importFrom rlang `:=`
 #'
 #' @export
-crossVal_bb <- function(data, newdata, yvar, neighbour = 0, predictor.vars, 
-                        modelfun, h = 1, season.period = 1, m = 1, 
+crossVal_bb <- function(object, data, newdata, yvar, neighbour = 0, predictor.vars, 
+                        h = 1, season.period = 1, m = 1, 
                         num.futures = 1000, level = c(80, 95), forward = TRUE, 
                         initial = 1, window = NULL, 
                         recursive = FALSE, recursive_colNames = NULL, ...) {
@@ -86,9 +87,12 @@ crossVal_bb <- function(data, newdata, yvar, neighbour = 0, predictor.vars,
       stop("window out of bounds")
   }
   forwardData <- bind_rows(data, newdata)
+  forwardData <- forwardData |> 
+    as_tibble() |> 
+    arrange({{index_data}})
   xreg <- forwardData[ , c(as.character(index_data), as.character(key_data1), 
                            predictor.vars)]
-  xreg <- ts(as.matrix(xreg),
+  xreg <- ts(xreg,
              start = start(y),
              frequency = frequency(y))
   if (nrow(xreg) < n)
@@ -143,17 +147,17 @@ crossVal_bb <- function(data, newdata, yvar, neighbour = 0, predictor.vars,
     xreg_future <- subset(xreg,
                           start = i + 1L,
                           end = i + h)
-    train <- xreg_subset |>
-      as_tibble() |> 
-      arrange({{index_data}}) |> 
-      mutate(!!yvar := as.numeric(y_subset)) |> 
-      select(all_of(index_data), all_of(key_data1), all_of(yvar), all_of(predictor.vars)) |> 
-      as_tsibble(index = index_data, key = key_data1)
-    test <- xreg_future |>
-      as_tibble() |> 
-      arrange({{index_data}}) |> 
-      select(all_of(index_data), all_of(key_data1), all_of(predictor.vars)) |> 
-      as_tsibble(index = index_data, key = key_data1)
+    suppressWarnings(train <- xreg_subset |>
+                       as_tibble() |> 
+                       arrange({{index_data}}) |> 
+                       mutate(!!yvar := as.numeric(y_subset)) |> 
+                       select(all_of(index_data), all_of(key_data1), all_of(yvar), all_of(predictor.vars)) |> 
+                       as_tsibble(index = index_data, key = key_data1))
+    suppressWarnings(test <- xreg_future |>
+                       as_tibble() |> 
+                       arrange({{index_data}}) |> 
+                       select(all_of(index_data), all_of(key_data1), all_of(predictor.vars)) |> 
+                       as_tsibble(index = index_data, key = key_data1))
     if(recursive == TRUE){
       recursive_colRange <- suppressWarnings(which(colnames(test) %in% recursive_colNames))
       # Convert to a tibble
@@ -161,8 +165,8 @@ crossVal_bb <- function(data, newdata, yvar, neighbour = 0, predictor.vars,
         as_tibble() |> 
         arrange({{index_data}})
       ## Adjusting the test set data to remove future response lags
-      for(i in recursive_colRange){
-        test[(i - (recursive_colRange[1] - 2)):NROW(test), i] <- NA
+      for(a in recursive_colRange){
+        test[(a - (recursive_colRange[1] - 2)):NROW(test), a] <- NA
       }
       # Convert back to a tsibble
       test <- test %>%
@@ -171,9 +175,145 @@ crossVal_bb <- function(data, newdata, yvar, neighbour = 0, predictor.vars,
       recursive_colRange <- NULL
     }
     
-    # Model fitting
-    modelFit[[i]] <- modelfun(data = train, yvar = yvar, 
-                              neighbour = neighbour, ...)
+    # Model fitting in each expanding/rolling window
+    key_unique <- unique(as.character(sort(dplyr::pull((train[, {{ key_data1 }}])[, 1]))))
+    key_num <- seq_along(key_unique)
+    ref <- data.frame(key_unique, key_num)
+    train <- train %>%
+      dplyr::mutate(
+        num_key = as.numeric(factor(as.character({{ key_data1 }}), levels = key_unique))
+      )
+    
+    if ("smimodel" %in% class(object)){
+      indexStr <- vector(mode = "list", length = NROW(ref))
+      model_list <- vector(mode = "list", length = NROW(ref))
+    }else{
+      model_list <- vector(mode = "list", length = NROW(ref)) 
+    }
+    
+    for (b in seq_along(ref$key_num)){
+      # Data filtered by the relevant key
+      df_cat <- train %>%
+        dplyr::filter((abs(num_key - ref$key_num[b]) <= neighbour) |
+                        (abs(num_key - ref$key_num[b] + NROW(ref)) <= neighbour) |
+                        (abs(num_key - ref$key_num[b] - NROW(ref)) <= neighbour)) 
+      if ("smimodel" %in% class(object)){
+        # Index structure for the relevant key
+        for(d in 1:ncol(object$fit[[b]]$best$alpha)){
+          nonzero <- which(object$fit[[b]]$best$alpha[ , d] != 0)
+          indexStr[[b]]$index.vars <- c(indexStr[[b]]$index.vars, names(nonzero))
+          indexStr[[b]]$index.ind <- c(indexStr[[b]]$index.ind, rep(d, length(nonzero)))
+        }
+        # Formula
+        ind_pos <- split(seq_along(indexStr[[b]]$index.ind), indexStr[[b]]$index.ind)
+        var_list <- indexStr[[b]]$index.vars[ind_pos[[1]]]
+        if(length(var_list) > 1){
+          pre.formula <- lapply(var_list, function(var) paste0(var)) %>%
+            paste(collapse = ",") %>% 
+            paste0(")") %>%
+            paste0(yvar, " ~ g(", .)
+        }else{
+          pre.formula <- lapply(var_list, function(var) paste0(var)) %>%
+            paste0(")") %>%
+            paste0(yvar, " ~ s(", .)
+        }
+        if(length(ind_pos) > 1){
+          for(j in 2:length(ind_pos)){
+            var_list <- indexStr[[b]]$index.vars[ind_pos[[j]]]
+            if(length(var_list) > 1){
+              pre.formula <- lapply(var_list, function(var) paste0(var)) %>%
+                paste(collapse = ",") %>% 
+                paste0(")") %>%
+                paste0(pre.formula, " + g(", .)
+            }else{
+              pre.formula <- lapply(var_list, function(var) paste0(var)) %>%
+                paste0(")") %>%
+                paste0(pre.formula, " +s(", .)
+            }
+          }
+        }
+        if (!is.null(object$fit[[1]]$best$vars_s)){
+          pre.formula <- lapply(object$fit[[1]]$best$vars_s, function(var) paste0("s(", var, ")")) %>%
+            paste(collapse = "+") %>% 
+            paste(pre.formula, "+", .)
+        }
+        if (!is.null(object$fit[[1]]$best$vars_linear)){
+          pre.formula <- lapply(object$fit[[1]]$best$vars_linear, function(var) paste0(var)) %>%
+            paste(collapse = "+") %>% 
+            paste(pre.formula, "+", .)
+        }
+        # Model fitting
+        model_list[[b]] <- cgaim::cgaim(formula = as.formula(pre.formula),
+                                        data = df_cat)
+        modelFrame <- model.frame(formula = as.formula(pre.formula), 
+                                  data = df_cat)
+        add <- df_cat %>%
+          drop_na() %>%
+          select({{ index_data }}, {{ key_data1 }})
+        model_list[[b]]$model <- bind_cols(add, modelFrame)
+        model_list[[b]]$model <- as_tsibble(model_list[[b]]$model,
+                                            index = index_data,
+                                            key = all_of(key_data1))
+      }else if("backward" %in% class(object)){
+        # Model fitting
+        model_list[[b]] <- mgcv::gam(formula = object$fit[[b]]$formula, 
+                                     family = object$fit[[b]]$family$family, 
+                                     method = "REML",
+                                     data = df_cat)
+        add <- df_cat %>%
+          drop_na() %>%
+          select({{ index_data }}, {{ key_data1 }})
+        model_list[[b]]$model <- bind_cols(add, model_list[[b]]$model)
+        model_list[[b]]$model <- as_tsibble(model_list[[b]]$model,
+                                            index = index_data,
+                                            key = all_of(key_data1))
+      }else if("gaimFit" %in% class(object)){
+        pre.formula <- object$fit[[b]]$terms
+        attributes(pre.formula) <- NULL
+        model_list[[b]] <- cgaim::cgaim(formula = as.formula(pre.formula),
+                                        data = df_cat)
+        modelFrame <- model.frame(formula = as.formula(pre.formula), 
+                                  data = df_cat)
+        add <- df_cat %>%
+          drop_na() %>%
+          select({{ index_data }}, {{ key_data1 }})
+        model_list[[b]]$model <- bind_cols(add, modelFrame)
+        model_list[[b]]$model <- as_tsibble(model_list[[b]]$model,
+                                            index = index_data,
+                                            key = all_of(key_data1))
+      }else if("pprFit" %in% class(object)){
+        pre.formula <- object$fit[[b]]$terms
+        attributes(pre.formula) <- NULL
+        model_list[[b]] <- stats::ppr(formula = as.formula(pre.formula),
+                                      data = df_cat)
+        add <- df_cat %>%
+          drop_na() %>%
+          select({{ index_data }}, {{ key_data1 }})
+        model_list[[b]]$model <- bind_cols(add, model_list[[b]]$model)
+        model_list[[b]]$model <- as_tsibble(model_list[[b]]$model,
+                                            index = index_data,
+                                            key = all_of(key_data1))
+      }
+    }
+    # Structuring the output
+    data_list <- list(key_unique, model_list)
+    modelFit[[i]] <- tibble::as_tibble(
+      x = data_list, .rows = length(data_list[[1]]),
+      .name_repair = ~ vctrs::vec_as_names(..., repair = "universal", quiet = TRUE)
+    )
+    modelFit[[i]] <- modelFit[[i]] %>%
+      dplyr::rename(key = ...1) %>%
+      dplyr::rename(fit = ...2)
+    if ("smimodel" %in% class(object)){
+      class(modelFit[[i]]) <- c("gaimFit", "tbl_df", "tbl", "data.frame")
+    }else if("backward" %in% class(object)){
+      class(modelFit[[i]]) <- c("backward", "tbl_df", "tbl", "data.frame")
+    }else if("gaimFit" %in% class(object)){
+      class(modelFit[[i]]) <- c("gaimFit", "tbl_df", "tbl", "data.frame")
+    }else if("pprFit" %in% class(object)){
+      class(modelFit[[i]]) <- c("pprFit", "tbl_df", "tbl", "data.frame")
+    }
+    
     # Obtain predictions on validation set
     preds <- predict(object = modelFit[[i]], 
                      newdata = test, 
@@ -186,12 +326,12 @@ crossVal_bb <- function(data, newdata, yvar, neighbour = 0, predictor.vars,
     # Store residuls
     res[i, 1:length(resids$.resid)] <- as.numeric(resids$.resid)
     # Possible futures through block bootstrapping on in-sample residuals
-    pFutures[[i]] <- blockBootstrap(object = modelFit[[i]], newdata = test,
-                                    resids = na.omit(res[i, ]), preds = pf[i, ], 
-                                    season.period = season.period, m = m, 
-                                    num.futures = num.futures, 
-                                    recursive = recursive, 
-                                    recursive_colRange = recursive_colRange)
+    pFutures[[i]] <- smimodel::blockBootstrap(object = modelFit[[i]], newdata = test,
+                                              resids = na.omit(res[i, ]), preds = pf[i, ], 
+                                              season.period = season.period, m = m, 
+                                              num.futures = num.futures, 
+                                              recursive = recursive, 
+                                              recursive_colRange = recursive_colRange)
     # Prediction interval bounds
     lower_q <- (1 - (level/100))/2
     upper_q <- lower_q + (level/100)
@@ -220,8 +360,8 @@ crossVal_bb <- function(data, newdata, yvar, neighbour = 0, predictor.vars,
   out$res <- res[rowSums(is.na(res)) != ncol(res), ]
   row.names(out$res) <- seq(nfirst, nlast, by = 1)
   out$level <- level
-  for (l in level) {
-    levelname <- paste0(l, "%")
+  for (m in level) {
+    levelname <- paste0(m, "%")
     lower[[levelname]] <- lower[[levelname]][rowSums(is.na(lower[[levelname]])) != ncol(lower[[levelname]]), ]
     row.names(lower[[levelname]]) <- seq(nfirst, nlast, by = 1)
     upper[[levelname]] <- upper[[levelname]][rowSums(is.na(upper[[levelname]])) != ncol(upper[[levelname]]), ]
@@ -234,7 +374,7 @@ crossVal_bb <- function(data, newdata, yvar, neighbour = 0, predictor.vars,
 }
 
 
-#' Futures through single season block bootstrapping - to be corrected
+#' Futures through single season block bootstrapping
 #'
 #' Gerenates possible future sample paths by applying the single season block
 #' bootstrap method.

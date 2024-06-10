@@ -2,7 +2,7 @@
 % Please edit documentation in R/pi_bootstrap.R
 \name{blockBootstrap}
 \alias{blockBootstrap}
-\title{Futures through single season block bootstrapping - to be corrected}
+\title{Futures through single season block bootstrapping}
 \usage{
 blockBootstrap(
   object,

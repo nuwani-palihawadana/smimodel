@@ -2,15 +2,15 @@
 % Please edit documentation in R/pi_bootstrap.R
 \name{crossVal_bb}
 \alias{crossVal_bb}
-\title{Single season block bootstrap prediction intervals - to be corrected}
+\title{Single season block bootstrap prediction intervals}
 \usage{
 crossVal_bb(
+  object,
   data,
   newdata,
   yvar,
   neighbour = 0,
   predictor.vars,
-  modelfun,
   h = 1,
   season.period = 1,
   m = 1,
@@ -25,6 +25,9 @@ crossVal_bb(
 )
 }
 \arguments{
+\item{object}{Fitted model object of class \code{smimodel}, \code{backward}, \code{gaimFit}
+or \code{pprFit}.}
+
 \item{data}{Training data set. Must be a data set of class \code{tsibble}.(Make
 sure there are no additional date/time/date-time/yearmonth/POSIXct/POSIXt
 variables except for the \code{index} of the \code{tsibble}). If multiple models are
@@ -42,8 +45,6 @@ key of interest are grouped together for model fitting. The default is \code{0}
 (i.e. no neighbours are considered for model fitting).}
 
 \item{predictor.vars}{A character vector of names of the predictor variables.}
-
-\item{modelfun}{Model fitting function.}
 
 \item{h}{Forecast horizon.}
 

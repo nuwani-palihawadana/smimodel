@@ -1,7 +1,7 @@
-#' Single season block bootstrap prediction intervals
+#' Single season block bootstrap prediction intervals through cross-validation
 #'
 #' Compute prediction intervals by applying the single season block bootstrap
-#' method.
+#' method to subsets of time series data using a rolling forecast origin.
 #'
 #' @param object Fitted model object of class `smimodel`, `backward`, `gaimFit`
 #'   or `pprFit`.
@@ -35,7 +35,7 @@
 #'   the names of the columns in test data to be filled with forecasts.
 #' @param ... Other arguments not currently used.
 #'
-#' @importFrom stats as.ts frequency start
+#' @importFrom stats as.ts frequency start time tsp
 #' @importFrom rlang `:=`
 #'
 #' @export
@@ -127,11 +127,7 @@ crossVal_bb <- function(object, data, newdata, yvar, neighbour = 0, predictor.va
               start = start(y), frequency = frequency(y))
   }
   
-  namatrix <- ts(matrix(NA_real_, nrow = N, ncol = h),
-                 start = start(pf),
-                 frequency = frequency(pf))
-  colnames(namatrix) <- paste0("h=", seq(h))
-  lower <- upper <- `names<-` (rep(list(namatrix), length(level)),
+  lower <- upper <- `names<-` (rep(list(pf), length(level)),
                                paste0(level, "%"))
   out <- list(x = y)
   
@@ -355,22 +351,18 @@ crossVal_bb <- function(object, data, newdata, yvar, neighbour = 0, predictor.va
   
   out$method <- paste("crossVal")
   out$fit_times <- fit_times
-  out$mean <- pf[rowSums(is.na(pf)) != ncol(pf), ]
-  row.names(out$mean) <- seq(nfirst, nlast, by = 1)
+  out$mean <- lagmatrix(pf, 1:h) |> window(start = time(pf)[nfirst + 1L])
   out$res <- res[rowSums(is.na(res)) != ncol(res), ]
   row.names(out$res) <- seq(nfirst, nlast, by = 1)
   out$level <- level
-  for (m in level) {
-    levelname <- paste0(m, "%")
-    lower[[levelname]] <- lower[[levelname]][rowSums(is.na(lower[[levelname]])) != ncol(lower[[levelname]]), ]
-    row.names(lower[[levelname]]) <- seq(nfirst, nlast, by = 1)
-    upper[[levelname]] <- upper[[levelname]][rowSums(is.na(upper[[levelname]])) != ncol(upper[[levelname]]), ]
-    row.names(upper[[levelname]]) <- seq(nfirst, nlast, by = 1)
-  }
-  out$lower <- lower
-  out$upper <- upper
+  out$lower <- lapply(lower,
+                      function(low) lagmatrix(low, 1:h) |>
+                        window(start = time(low)[nfirst + 1L]))
+  out$upper <- lapply(upper,
+                      function(up) lagmatrix(up, 1:h) |>
+                        window(start = time(up)[nfirst + 1L]))
   
-  return(structure(out, class = "crossVal"))
+  return(structure(out, class = "cvbb"))
 }
 
 
@@ -829,68 +821,128 @@ possibleFutures_benchmark <- function(object, newdata, bootstraps,
 }
 
 
-
-#' Coverage of a calculated prediction interval
-#' 
-#' Computes the actual coverage probability of a calculated prediction interval.
-#' 
-#' @param bounds The list returned from `pi_bootstrap()`.
-#' @param newdata The set of new data on for which the forecasts are required 
-#' (i.e. test set; should be a `tsibble`).
-#' @param yvar Response variable as a character string.
-#' 
-#' @examples
-#' library(dplyr)
-#' library(ROI)
-#' library(tibble)
-#' library(tidyr)
-#' library(tsibble)
-#' n = 1205
-#' set.seed(123)
-#' sim_data <- tibble(x_lag_000 = runif(n)) %>%
-#'   mutate(
-#'     # Add x_lags
-#'     x_lag = lag_matrix(x_lag_000, 5)) %>%
-#'   unpack(x_lag, names_sep = "_") %>%
-#'   mutate(
-#'     # Response variable
-#'     y1 = (0.9*x_lag_000 + 0.6*x_lag_001 + 0.45*x_lag_003)^3 + rnorm(n, sd = 0.1),
-#'     # Add an index to the data set
-#'     inddd = seq(1, n)) %>%
-#'   drop_na() %>%
-#'   select(inddd, y1, starts_with("x_lag")) %>%
-#'   # Make the data set a `tsibble`
-#'   as_tsibble(index = inddd)
-#' # Training set
-#' sim_train <- sim_data[1:1000, ]
-#' # Test set
-#' sim_test <- sim_data[1001:1200, ]
-#' # Index variables
-#' index.vars <- colnames(sim_data)[3:8]
-#' # Model fitting
-#' model1 <- model_smimodel(data = sim_train,
-#'                          yvar = "y1",
-#'                          index.vars = index.vars,
-#'                          initialise = "ppr")
-#' # Calculating lower and upper bounds for 95% prediction interval
-#' PI_model1 <- pi_bootstrap(object = model1, 
-#'                          newdata = sim_test)
-#' # Lower and upper bounds
-#' PI_model1$bounds
-#' # Actual coverage
-#' cover_PI_model1 <- coverage(bounds = PI_model1,
-#'                             newdata = sim_test,
-#'                             yvar = "y1")
-#' cover_PI_model1
+#' Calculate interval forecast coverage - copied from conformalForecast package
+#' and modified
+#'
+#' Calculate the mean coverage and the ifinn matrix for prediction intervals on
+#' validation set. If \code{window} is not \code{NULL}, a matrix of the rolling
+#' means of interval forecast coverage is also returned.
+#'
+#' @param object An object of class \code{cvbb}.
+#' @param level Target confidence level for prediction intervals.
+#' @param window If not \code{NULL}, the rolling mean matrix for coverage is
+#'   also returned.
+#' @param na.rm A logical indicating whether \code{NA} values should be stripped
+#'   before the rolling mean computation proceeds.
+#'
+#' @return A list of class \code{coverage} with the following components:
+#'   \item{mean}{Mean coverage across the validation set.}
+#' \item{ifinn}{A indicator matrix as a multivariate time series, where the \eqn{h}th column
+#' holds the coverage for forecast horizon \eqn{h}. The time index
+#' corresponds to the period for which the forecast is produced.}
+#' \item{rollmean}{If \code{window} is not NULL, a matrix of the rolling means
+#' of interval forecast coverage will be returned.}
+#'
+#' @importFrom stats window
+#' @importFrom zoo rollmean
 #' @export
-coverage <- function(bounds, newdata, yvar){
-  actual <- newdata[ , {{yvar}}][[1]]
-  within_count <- 0
-  for(i in 1:length(actual)){
-    if((actual[i] > bounds$bounds$lower[i]) & (actual[i] < bounds$bounds$upper[i])){
-      within_count <- within_count + 1
+coverage <- function(object, level = 95, window = NULL, na.rm = FALSE) {
+  # Check inputs
+  if (level > 0 && level < 1) {
+    level <- 100 * level
+  } else if (level < 0 || level > 99.99) {
+    stop("confidence limit out of range")
+  }
+  if (!(level %in% object$level))
+    stop("no interval forecasts of target confidence level in object")
+  
+  levelname <- paste0(level, "%")
+  x <- object$x
+  lower <- object$lower[[levelname]]
+  upper <- object$upper[[levelname]]
+  horizon <- ncol(lower)
+  period <- frequency(object$x)
+  x <- ts(matrix(rep(object$x, horizon), ncol = horizon, byrow = FALSE),
+          start = start(object$x),
+          frequency = period)
+  
+  # Match time
+  tspx <- tsp(x)
+  tspl <- tsp(lower)
+  tspu <- tsp(upper)
+  start <- max(tspx[1], tspl[1], tspu[1])
+  end <- min(tspx[2], tspl[2], tspu[2])
+  
+  x <- window(x, start = start, end = end)
+  lower <- window(lower, start = start, end = end)
+  upper <- window(upper, start = start, end = end)
+  n <- nrow(x)
+  
+  # If coverage matrix
+  covmat <- (lower <= x & x <= upper) |>
+    ts(start = start, end = end, frequency = period)
+  colnames(covmat) <- colnames(lower)
+  
+  # Mean coverage
+  covmean <- apply(covmat, 2, mean, na.rm = TRUE)
+  
+  # Rolling mean coverage
+  if (!is.null(window)) {
+    if (window >= n)
+      stop("the `window` argument should be smaller than the total period of interest")
+    covrmean <- apply(covmat, 2, zoo::rollmean, k = window, na.rm = na.rm) |>
+      ts(end = end, frequency = period)
+  }
+  
+  out <- list(
+    mean = covmean,
+    ifinn = covmat
+  )
+  if (!is.null(window)) out <- append(out, list(rollmean = covrmean))
+  return(structure(out, class = "coverage"))
+}
+
+
+#' Create lags or leads of a matrix - copied from conformalForecast package
+#'
+#' Find a shifted version of a matrix, adjusting the time base backward (lagged)
+#' or forward (leading) by a specified number of observations for each column.
+#'
+#' @param x A matrix or multivariate time series.
+#' @param lag A vector of lags (positive values) or leads (negative values) with
+#' a length equal to the number of columns of \code{x}.
+#'
+#' @return A matrix with the same class and size as \code{x}.
+#'
+#' @examples
+#' x <- matrix(rnorm(20), nrow = 5, ncol = 4)
+#'
+#' # Create lags of a matrix
+#' lagmatrix(x, c(0, 1, 2, 3))
+#'
+#' # Create leads of a matrix
+#' lagmatrix(x, c(0, -1, -2, -3))
+#'
+#' @export
+lagmatrix <- function(x, lag) {
+  # Ensure 'x' is a matrix
+  if (!is.matrix(x))
+    stop("ensure x is a matrix")
+  n <- nrow(x)
+  k <- length(lag)
+  
+  if (ncol(x) != k)
+    stop("lag must have the same number of columns as x")
+  
+  lmat <- x
+  for (i in 1:k) {
+    if (lag[i] == 0) {
+      lmat[, i] <- x[, i]
+    } else if (lag[i] > 0) {
+      lmat[, i] <- c(rep(NA, lag[i]), x[1:(n - lag[i]), i])
+    } else {
+      lmat[, i] <- c(x[(abs(lag[i])+1):n, i], rep(NA, abs(lag[i])))
     }
   }
-  cover <- within_count/length(actual)
-  return(cover)
+  return(structure(lmat, class = class(x)))
 }

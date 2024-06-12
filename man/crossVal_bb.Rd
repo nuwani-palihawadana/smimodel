@@ -2,7 +2,7 @@
 % Please edit documentation in R/pi_bootstrap.R
 \name{crossVal_bb}
 \alias{crossVal_bb}
-\title{Single season block bootstrap prediction intervals}
+\title{Single season block bootstrap prediction intervals through cross-validation}
 \usage{
 crossVal_bb(
   object,
@@ -75,5 +75,5 @@ the names of the columns in test data to be filled with forecasts.}
 }
 \description{
 Compute prediction intervals by applying the single season block bootstrap
-method.
+method to subsets of time series data using a rolling forecast origin.
 }

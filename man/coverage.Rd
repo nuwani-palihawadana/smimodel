@@ -2,62 +2,33 @@
 % Please edit documentation in R/pi_bootstrap.R
 \name{coverage}
 \alias{coverage}
-\title{Coverage of a calculated prediction interval}
+\title{Calculate interval forecast coverage - copied from conformalForecast package
+and modified}
 \usage{
-coverage(bounds, newdata, yvar)
+coverage(object, level = 95, window = NULL, na.rm = FALSE)
 }
 \arguments{
-\item{bounds}{The list returned from \code{pi_bootstrap()}.}
+\item{object}{An object of class \code{cvbb}.}
 
-\item{newdata}{The set of new data on for which the forecasts are required
-(i.e. test set; should be a \code{tsibble}).}
+\item{level}{Target confidence level for prediction intervals.}
 
-\item{yvar}{Response variable as a character string.}
+\item{window}{If not \code{NULL}, the rolling mean matrix for coverage is
+also returned.}
+
+\item{na.rm}{A logical indicating whether \code{NA} values should be stripped
+before the rolling mean computation proceeds.}
+}
+\value{
+A list of class \code{coverage} with the following components:
+\item{mean}{Mean coverage across the validation set.}
+\item{ifinn}{A indicator matrix as a multivariate time series, where the \eqn{h}th column
+holds the coverage for forecast horizon \eqn{h}. The time index
+corresponds to the period for which the forecast is produced.}
+\item{rollmean}{If \code{window} is not NULL, a matrix of the rolling means
+of interval forecast coverage will be returned.}
 }
 \description{
-Computes the actual coverage probability of a calculated prediction interval.
-}
-\examples{
-library(dplyr)
-library(ROI)
-library(tibble)
-library(tidyr)
-library(tsibble)
-n = 1205
-set.seed(123)
-sim_data <- tibble(x_lag_000 = runif(n)) \%>\%
-  mutate(
-    # Add x_lags
-    x_lag = lag_matrix(x_lag_000, 5)) \%>\%
-  unpack(x_lag, names_sep = "_") \%>\%
-  mutate(
-    # Response variable
-    y1 = (0.9*x_lag_000 + 0.6*x_lag_001 + 0.45*x_lag_003)^3 + rnorm(n, sd = 0.1),
-    # Add an index to the data set
-    inddd = seq(1, n)) \%>\%
-  drop_na() \%>\%
-  select(inddd, y1, starts_with("x_lag")) \%>\%
-  # Make the data set a `tsibble`
-  as_tsibble(index = inddd)
-# Training set
-sim_train <- sim_data[1:1000, ]
-# Test set
-sim_test <- sim_data[1001:1200, ]
-# Index variables
-index.vars <- colnames(sim_data)[3:8]
-# Model fitting
-model1 <- model_smimodel(data = sim_train,
-                         yvar = "y1",
-                         index.vars = index.vars,
-                         initialise = "ppr")
-# Calculating lower and upper bounds for 95\% prediction interval
-PI_model1 <- pi_bootstrap(object = model1, 
-                         newdata = sim_test)
-# Lower and upper bounds
-PI_model1$bounds
-# Actual coverage
-cover_PI_model1 <- coverage(bounds = PI_model1,
-                            newdata = sim_test,
-                            yvar = "y1")
-cover_PI_model1
+Calculate the mean coverage and the ifinn matrix for prediction intervals on
+validation set. If \code{window} is not \code{NULL}, a matrix of the rolling
+means of interval forecast coverage is also returned.
 }

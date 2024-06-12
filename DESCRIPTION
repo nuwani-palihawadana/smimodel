@@ -45,7 +45,8 @@ Imports:
     tidyselect,
     tidyr,
     tsibble,
-    vctrs
+    vctrs,
+    zoo
 Suggests:
     knitr,
     lubridate,

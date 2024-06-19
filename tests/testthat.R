@@ -9,6 +9,5 @@
 library(testthat)
 library(smimodel)
 library(ROI)
-library(cgaim)
 
 test_check("smimodel")

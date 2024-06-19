@@ -2,7 +2,7 @@
 #' @aliases smimodel-package
 "_PACKAGE"
 
-#' @importFrom cgaim cgaim
+#' @importFrom cgaim cgaim g s
 #' @importFrom dplyr arrange bind_cols bind_rows filter lag mutate mutate_at pull rename select
 #' @importFrom fabletools MSE
 #' @importFrom future multisession plan

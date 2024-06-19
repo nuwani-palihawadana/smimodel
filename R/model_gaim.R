@@ -30,7 +30,6 @@
 #'   `cgaim::cgaim()`.)
 #' 
 #' @examples
-#' library(cgaim)
 #' library(dplyr)
 #' library(tibble)
 #' library(tidyr)

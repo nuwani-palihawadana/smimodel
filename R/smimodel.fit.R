@@ -59,9 +59,6 @@
 #' @param NonConvex The strategy for handling non-convex quadratic objectives or
 #'   non-convex quadratic constraints in Gurobi solver.
 #' @param verbose The option to print detailed solver output.
-#'
-#' @importFrom stats runif ppr
-#' @importFrom gtools permutations
 
 smimodel.fit <- function(data, yvar, neighbour = 0, 
                          family = gaussian(), index.vars, 
@@ -76,17 +73,17 @@ smimodel.fit <- function(data, yvar, neighbour = 0,
   stopifnot(tsibble::is_tsibble(data))
   data_index <- index(data)
   data_key <- key(data)[[1]]
-  data1 <- data %>%
-    tibble::as_tibble() %>%
+  data1 <- data |>
+    tibble::as_tibble() |>
     dplyr::arrange({{data_index}})
   initialise <- match.arg(initialise)
   if(initialise == "ppr"){
     scaled <- scaling(data = data1, index.vars = index.vars)
     scaledInfo <- scaled$scaled_info
     data1 <- scaled$scaled_data
-    pre.formula <- lapply(index.vars, function(var) paste0(var)) %>%
-      paste(collapse = "+") %>% 
-      paste(yvar, "~", .)
+    pre.formula <- lapply(index.vars, function(var) paste0(var)) |> 
+      paste(collapse = "+") 
+    pre.formula <- paste(yvar, "~", pre.formula)
     # Fitting PPR
     ppr_fit <- stats::ppr(as.formula(pre.formula), data = data1, 
                           nterms = num_ind)
@@ -108,7 +105,7 @@ smimodel.fit <- function(data, yvar, neighbour = 0,
     index.ind <- unlist(index.ind)
     index.coefs <- unlist(index.coefs)
     names(index.coefs) <- NULL
-    data1 <- data1 %>%
+    data1 <- data1 |>
       tsibble::as_tsibble(index = {{data_index}}, key = {{data_key}})
     # Constructing the initial `smimodel`
     init_smimodel <- new_smimodelFit(data = data1, yvar = yvar, 

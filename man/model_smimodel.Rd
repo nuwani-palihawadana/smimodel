@@ -126,18 +126,18 @@ library(tidyr)
 library(tsibble)
 n = 1005
 set.seed(123)
-sim_data <- tibble(x_lag_000 = runif(n)) \%>\%
+sim_data <- tibble(x_lag_000 = runif(n)) |>
   mutate(
     # Add x_lags
-    x_lag = lag_matrix(x_lag_000, 5)) \%>\%
-  unpack(x_lag, names_sep = "_") \%>\%
+    x_lag = lag_matrix(x_lag_000, 5)) |>
+  unpack(x_lag, names_sep = "_") |>
   mutate(
     # Response variable
     y1 = (0.9*x_lag_000 + 0.6*x_lag_001 + 0.45*x_lag_003)^3 + rnorm(n, sd = 0.1),
     # Add an index to the data set
-    inddd = seq(1, n)) \%>\%
-  drop_na() \%>\%
-  select(inddd, y1, starts_with("x_lag")) \%>\%
+    inddd = seq(1, n)) |>
+  drop_na() |>
+  select(inddd, y1, starts_with("x_lag")) |>
   # Make the data set a `tsibble`
   as_tsibble(index = inddd)
 # Index variables

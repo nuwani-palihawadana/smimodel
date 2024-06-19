@@ -26,16 +26,13 @@ augment.smimodel <- function(x, ...) {
                                             New = new_group[[i]],
                                             Old = old_group[[i]],
                                             .resid = model.resid[[i]],
-                                            .fitted = model.fitted[[i]])) %>%
+                                            .fitted = model.fitted[[i]])) |>
       dplyr::filter(New == Old)
   }
   mod_res <- dplyr::bind_rows(df)
   return(mod_res)
 }
 utils::globalVariables(c("dummy_key", "num_key", "New", "Old"))
-#' @export
-generics::augment
-
 
 
 #' Augment function for class `smimodelFit`
@@ -44,8 +41,6 @@ generics::augment
 #'
 #' @param x A `smimodelFit` object.
 #' @param ... Other arguments not currently used.
-#'
-#' @importFrom generics augment
 #'
 #' @method augment smimodelFit
 
@@ -58,7 +53,6 @@ augment.smimodelFit <- function(x, ...) {
   )
   return(df)
 }
-
 
 
 #' Augment function for class `backward`
@@ -88,13 +82,12 @@ augment.backward <- function(x, ...) {
       Index = time_variable[[i]], New = new_group[[i]],
       Old = old_group[[i]], .resid = model.resid[[i]],
       .fitted = model.fitted[[i]]
-    )) %>%
+    )) |>
       dplyr::filter(New == Old)
   }
   mod_res <- bind_rows(df)
   return(mod_res)
 }
-
 
 
 #' Augment function for class `pprFit`
@@ -124,13 +117,12 @@ augment.pprFit <- function(x, ...) {
       Index = time_variable[[i]], New = new_group[[i]],
       Old = old_group[[i]], .resid = model.resid[[i]],
       .fitted = model.fitted[[i]]
-    )) %>%
+    )) |>
       dplyr::filter(New == Old)
   }
   mod_res <- bind_rows(df)
   return(mod_res)
 }
-
 
 
 #' Augment function for class `gaimFit`
@@ -160,7 +152,7 @@ augment.gaimFit <- function(x, ...) {
       Index = time_variable[[i]], New = new_group[[i]],
       Old = old_group[[i]], .resid = model.resid[[i]],
       .fitted = model.fitted[[i]]
-    )) %>%
+    )) |>
       dplyr::filter(New == Old)
   }
   mod_res <- bind_rows(df)
@@ -195,7 +187,7 @@ augment.lmFit <- function(x, ...) {
       Index = time_variable[[i]], New = new_group[[i]],
       Old = old_group[[i]], .resid = model.resid[[i]],
       .fitted = model.fitted[[i]]
-    )) %>%
+    )) |>
       dplyr::filter(New == Old)
   }
   mod_res <- bind_rows(df)

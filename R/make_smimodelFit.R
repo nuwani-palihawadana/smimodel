@@ -21,9 +21,6 @@
 #'   part of an index considered in `index.vars`).
 #' @param linear.vars A character vector of names of the predictor variables
 #'   that are included linearly in the model.
-#'
-#' @importFrom gratia derivatives
-#' @importFrom methods as
 
 make_smimodelFit <- function(x, yvar, neighbour, index.vars, index.ind, index.data,
                           index.names, alpha, s.vars = NULL, linear.vars = NULL){

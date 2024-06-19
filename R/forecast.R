@@ -1,5 +1,3 @@
-#' @importFrom stats ts
-#' 
 #' @method forecast gaimFit
 #'
 #' @export
@@ -28,5 +26,3 @@ forecast.gaimFit <- function(object, h = 1, level = c(80, 95), newdata,
                         residuals = ts(residuals)), 
                    class = "forecast"))
 }
-#' @export
-generics::forecast

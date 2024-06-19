@@ -34,7 +34,6 @@ Imports:
     ggplot2,
     gratia,
     gtools,
-    magrittr, 
     Matrix,
     methods,
     mgcv, 

@@ -24,7 +24,7 @@ library(tibble)
 library(tidyr)
 # Adding lagged variables to an existing tibble
 set.seed(123)
-sim_data <- tibble(x_lag_000 = runif(100)) \%>\%
-  mutate(x_lag = lag_matrix(x_lag_000, 3)) \%>\%
+sim_data <- tibble(x_lag_000 = runif(100)) |>
+  mutate(x_lag = lag_matrix(x_lag_000, 3)) |>
   unpack(x_lag, names_sep = "_")
 }

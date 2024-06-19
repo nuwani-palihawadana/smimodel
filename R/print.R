@@ -15,7 +15,6 @@ print.smimodel <- function(x, ...) {
 }
 
 
-
 #' Printing a `smimodelFit` object
 #'
 #' The default print method for a `smimodelFit` object.
@@ -50,7 +49,6 @@ print.smimodelFit <- function(x, ...) {
 }
 
 
-
 #' Printing a `backward` object
 #'
 #' The default print method for a `backward` object.
@@ -68,7 +66,6 @@ print.backward <- function(x, ...) {
 }
 
 
-
 #' Printing a `pprFit` object
 #'
 #' The default print method for a `pprFit` object.
@@ -84,7 +81,6 @@ print.pprFit <- function(x, ...) {
   cat("Fitted Model(s):\n")
   NextMethod()
 }
-
 
 
 #' Printing a `gaimFit` object

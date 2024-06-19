@@ -38,7 +38,7 @@ inner_update <- function(x, data, yvar, family = gaussian(), index.vars,
                          lambda0 = 1, lambda2 = 1, M = 10, max.iter = 50, 
                          tol = 0.001, TimeLimit = Inf,
                          MIPGap = 1e-4, NonConvex = -1, verbose = FALSE){
-  data <- data %>%
+  data <- data |>
     drop_na()
   data.Y <- as.matrix(data[ , yvar])
   X_index <- as.matrix(data[ , index.vars])
@@ -117,18 +117,18 @@ inner_update <- function(x, data, yvar, family = gaussian(), index.vars,
       dat <- as_tibble(ind)
       # Nonlinear function update 
       # Constructing the formula
-      pre.formula <- lapply(dat_names, function(var) paste0("s(", var, ', bs="cr")')) %>%
-        paste(collapse = "+") %>% 
-        paste(yvar, "~", .)
+      pre.formula <- lapply(dat_names, function(var) paste0("s(", var, ', bs="cr")')) |>
+        paste(collapse = "+") 
+      pre.formula <- paste(yvar, "~", pre.formula)
       if (!is.null(s.vars)){
-        pre.formula <- lapply(s.vars, function(var) paste0("s(", var, ', bs="cr")')) %>%
-          paste(collapse = "+") %>% 
-          paste(pre.formula, "+", .)
+        svars.formula <- lapply(s.vars, function(var) paste0("s(", var, ', bs="cr")')) |>
+          paste(collapse = "+") 
+        pre.formula <- paste(pre.formula, "+", svars.formula)
       }
       if (!is.null(linear.vars)){
-        pre.formula <- lapply(linear.vars, function(var) paste0(var)) %>%
-          paste(collapse = "+") %>% 
-          paste(pre.formula, "+", .)
+        linear.formula <- lapply(linear.vars, function(var) paste0(var)) |>
+          paste(collapse = "+")
+        pre.formula <- paste(pre.formula, "+", linear.formula)
       }
       # Model fitting
       dat <- dplyr::bind_cols(data, dat)

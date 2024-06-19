@@ -38,12 +38,6 @@
 #'   FALSE).
 #' @param recursive_colRange If `recursive = TRUE`, The range of column numbers
 #'   in `val.data` to be filled with forecasts.
-#'
-#' @importFrom dplyr pull
-#' @importFrom fabletools MSE
-#' @importFrom future multisession
-#' @importFrom stats predict var as.formula
-#' @importFrom tidyselect all_of
 #' 
 #' @examples
 #' library(dplyr)
@@ -52,18 +46,18 @@
 #' library(tsibble)
 #' n = 1205
 #' set.seed(123)
-#' sim_data <- tibble(x_lag_000 = runif(n)) %>%
+#' sim_data <- tibble(x_lag_000 = runif(n)) |>
 #'   mutate(
 #'     # Add x_lags
-#'     x_lag = lag_matrix(x_lag_000, 5)) %>%
-#'   unpack(x_lag, names_sep = "_") %>%
+#'     x_lag = lag_matrix(x_lag_000, 5)) |>
+#'   unpack(x_lag, names_sep = "_") |>
 #'   mutate(
 #'     # Response variable
 #'     y1 = (0.9*x_lag_000 + 0.6*x_lag_001 + 0.45*x_lag_003)^3 + rnorm(n, sd = 0.1),
 #'     # Add an index to the data set
-#'     inddd = seq(1, n)) %>%
-#'   drop_na() %>%
-#'   select(inddd, y1, starts_with("x_lag")) %>%
+#'     inddd = seq(1, n)) |>
+#'   drop_na() |>
+#'   select(inddd, y1, starts_with("x_lag")) |>
 #'   # Make the data set a `tsibble`
 #'   as_tsibble(index = inddd)
 #' # Training set
@@ -105,23 +99,23 @@ model_backward <- function(data, val.data, yvar,
   data2 <- val.data
   index_train <- index(data)
   if (length(key(data1)) == 0) {
-    data1 <- data1 %>%
-      mutate(dummy_key = rep(1, NROW(data1))) %>%
+    data1 <- data1 |>
+      mutate(dummy_key = rep(1, NROW(data1))) |>
       as_tsibble(index = index_train, key = dummy_key)
-    data2 <- data2 %>%
-      mutate(dummy_key = rep(1, NROW(data2))) %>%
+    data2 <- data2 |>
+      mutate(dummy_key = rep(1, NROW(data2))) |>
       as_tsibble(index = index_train, key = dummy_key)
   }
   key_train <- key(data1)[[1]]
   key_unique <- unique(as.character(sort(pull((data1[, {{ key_train }}])[, 1]))))
   key_num <- seq_along(key_unique)
   ref <- data.frame(key_unique, key_num)
-  data1 <- data1 %>%
+  data1 <- data1 |>
     mutate(
       num_key = as.numeric(factor(as.character({{ key_train }}), 
                                   levels = key_unique))
     )
-  data2 <- data2 %>%
+  data2 <- data2 |>
     mutate(
       num_key = as.numeric(factor(as.character({{ key_train }}), 
                                   levels = key_unique))
@@ -129,11 +123,11 @@ model_backward <- function(data, val.data, yvar,
   models_list <- vector(mode = "list", length = NROW(ref))
   for (i in seq_along(ref$key_num)) {
     # Separating data for each element of the key
-    df_cat <- data1 %>%
+    df_cat <- data1 |>
       filter((abs(num_key - ref$key_num[i]) <= neighbour) |
                (abs(num_key - ref$key_num[i] + NROW(ref)) <= neighbour) |
                (abs(num_key - ref$key_num[i] - NROW(ref)) <= neighbour))
-    df_cat_val <- data2 %>%
+    df_cat_val <- data2 |>
       filter((abs(num_key - ref$key_num[i]) <= neighbour) |
                (abs(num_key - ref$key_num[i] + NROW(ref)) <= neighbour) |
                (abs(num_key - ref$key_num[i] - NROW(ref)) <= neighbour))
@@ -165,8 +159,8 @@ model_backward <- function(data, val.data, yvar,
       index_val <- index(valData)
       key_val <- key(valData)[[1]]
       # Convert to a tibble
-      valData <- valData %>%
-        as_tibble() %>%
+      valData <- valData |>
+        as_tibble() |>
         arrange({{index_val}})
       # Adjust validation set for recursive forecasts
       for(k in recursive_colRange){
@@ -188,7 +182,7 @@ model_backward <- function(data, val.data, yvar,
     # Testing reduced models
     while(mseMinRatio > tol){
       allVars = c(Temp_s.vars, Temp_linear.vars)
-      MSE_list <- seq_along(allVars) %>%
+      MSE_list <- seq_along(allVars) |>
         map_f(~ eliminate(ind = ., train = df_cat, val = df_cat_val, 
                           yvar = yvar,
                           s.vars = Temp_s.vars, s.basedim = s.basedim, 
@@ -232,8 +226,8 @@ model_backward <- function(data, val.data, yvar,
     # Model fitting
     models_list[[i]] <- mgcv::gam(my.formula, family = family, method = "REML",
                                   data = combinedData)
-    add <- combinedData %>%
-      drop_na() %>%
+    add <- combinedData |>
+      drop_na() |>
       select({{ index_train }}, {{ key_train }})
     models_list[[i]]$model <- bind_cols(add, models_list[[i]]$model)
     models_list[[i]]$model <- as_tsibble(models_list[[i]]$model,
@@ -247,8 +241,8 @@ model_backward <- function(data, val.data, yvar,
                       .name_repair = ~ vctrs::vec_as_names(..., 
                                                            repair = "universal", 
                                                            quiet = TRUE))
-  models <- models %>%
-    rename(key = ...1) %>%
+  models <- models |>
+    rename(key = ...1) |>
     rename(fit = ...2)
   class(models) <- c("backward", "tbl_df", "tbl", "data.frame")
   return(models)
@@ -319,8 +313,8 @@ eliminate <- function(ind, train, val, yvar, family = gaussian(),
     index_val <- index(valData)
     key_val <- key(valData)[[1]]
     # Convert to a tibble
-    valData <- valData %>%
-      as_tibble() %>%
+    valData <- valData |>
+      as_tibble() |>
       arrange({{index_val}})
     # Adjust validation set for recursive forecasts
     for(a in recursive_colRange){

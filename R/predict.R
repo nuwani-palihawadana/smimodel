@@ -20,16 +20,16 @@ predict.smimodel <- function(object, newdata, recursive = FALSE,
   index_n <- index(newdata)
   key_n <- key(newdata)
   if (length(key(newdata)) == 0) {
-    newdata <- newdata %>%
-      dplyr::mutate(dummy_key = rep(1, NROW(newdata))) %>%
+    newdata <- newdata |>
+      dplyr::mutate(dummy_key = rep(1, NROW(newdata))) |>
       tsibble::as_tsibble(index = index_n, key = dummy_key)
     key_n <- key(newdata)
   }
   key11 <- key(newdata)[[1]]
   predict_fn <- mgcv::predict.gam
   if(recursive == TRUE){
-    newdata <- newdata %>%
-      tibble::as_tibble() %>%
+    newdata <- newdata |>
+      tibble::as_tibble() |>
       dplyr::arrange({{index_n}})
     predictions =  vector(mode = "list", length = NROW(newdata))
     data_list <- vector(mode = "list", length = NROW(newdata))
@@ -96,8 +96,8 @@ predict.smimodel <- function(object, newdata, recursive = FALSE,
     predictions[[NROW(newdata)]] <- pred
     newdata1 <- dplyr::bind_rows(data_list)
     pred <- unlist(predictions)
-    pred_F <- newdata1 %>% 
-      dplyr::mutate(.predict = pred) %>%
+    pred_F <- newdata1 |> 
+      dplyr::mutate(.predict = pred) |>
       tsibble::as_tsibble(index = {{ index_n }}, key = {{ key11 }})
   }else if(recursive == FALSE){
     predictions <- vector(mode = "list", length = NROW(object))
@@ -130,13 +130,12 @@ predict.smimodel <- function(object, newdata, recursive = FALSE,
     }
     newdata1 <- dplyr::bind_rows(data_list)
     pred <- unlist(predictions)
-    pred_F <- newdata1 %>% 
-      dplyr::mutate(.predict = pred) %>%
+    pred_F <- newdata1 |> 
+      dplyr::mutate(.predict = pred) |>
       tsibble::as_tsibble(index = {{ index_n }}, key = {{ key11 }})
   }
   return(pred_F)
 }
-
 
 
 #' Obtaining forecasts on a test set from a `smimodelFit`
@@ -184,11 +183,11 @@ predict.smimodelFit <- function(object, newdata, recursive = FALSE,
       data_temp = newdata[NROW(newdata), ]
       predictions[[NROW(newdata)]] = predict_fn(object$gam, data_temp, type = "response")
       pred <- unlist(predictions)
-      pred_F <- newdata %>% 
+      pred_F <- newdata |> 
         dplyr::mutate(.predict = pred) 
     }else if(recursive == FALSE){
       pred <- predict_fn(object$gam, newdata, type = "response")
-      pred_F <- newdata %>% 
+      pred_F <- newdata |> 
         dplyr::mutate(.predict = pred)
     }
   }else{
@@ -229,7 +228,7 @@ predict.smimodelFit <- function(object, newdata, recursive = FALSE,
       predictions[[NROW(newdata)]] = predict_fn(object$gam, data_list[[NROW(newdata)]], type = "response")
       newdata1 <- dplyr::bind_rows(data_list)
       pred <- unlist(predictions)
-      pred_F <- newdata1 %>% 
+      pred_F <- newdata1 |> 
         dplyr::mutate(.predict = pred) 
     }else if(recursive == FALSE){
       X_test <- as.matrix(newdata[ , object$vars_index])
@@ -242,13 +241,12 @@ predict.smimodelFit <- function(object, newdata, recursive = FALSE,
       dat <- tibble::as_tibble(ind)
       data_list <- dplyr::bind_cols(newdata, dat)
       pred <- predict_fn(object$gam, data_list, type = "response")
-      pred_F <- data_list %>% 
+      pred_F <- data_list |> 
         dplyr::mutate(.predict = pred)
     }
   }
   return(pred_F)
 }
-
 
 
 #' Obtaining forecasts on a test set from a fitted `backward`
@@ -273,16 +271,16 @@ predict.backward <- function(object, newdata,
   index_n <- index(newdata)
   key_n <- key(newdata)
   if (length(key(newdata)) == 0) {
-    newdata <- newdata %>%
-      mutate(dummy_key = rep(1, NROW(newdata))) %>%
+    newdata <- newdata |>
+      mutate(dummy_key = rep(1, NROW(newdata))) |>
       as_tsibble(index = index_n, key = dummy_key)
     key_n <- key(newdata)
   }
   predict_fn <- mgcv::predict.gam
   key11 <- key(newdata)[[1]]
   if(recursive == TRUE){
-    newdata <- newdata %>%
-      as_tibble() %>%
+    newdata <- newdata |>
+      as_tibble() |>
       arrange({{index_n}})
     predictions =  vector(mode = "list", length = NROW(newdata))
     for(m in 1:(NROW(newdata) - 1)){
@@ -305,8 +303,8 @@ predict.backward <- function(object, newdata,
     predictions[[NROW(newdata)]] = predict_fn(object$fit[[key22_pos]], data_temp, 
                                               type = "response")
     pred <- unlist(predictions)
-    pred_F <- newdata %>% 
-      mutate(.predict = pred) %>%
+    pred_F <- newdata |> 
+      mutate(.predict = pred) |>
       as_tsibble(index = {{ index_n }}, key = {{ key11 }})
   }else if(recursive == FALSE){
     predictions <- vector(mode = "list", length = NROW(object))
@@ -315,13 +313,12 @@ predict.backward <- function(object, newdata,
       predictions[[i]] <- predict_fn(object$fit[[i]], newdata_cat, type = "response")
     }
     pred <- unlist(predictions)
-    pred_F <- newdata %>% 
-      mutate(.predict = pred) %>%
+    pred_F <- newdata |> 
+      mutate(.predict = pred) |>
       as_tsibble(index = {{ index_n }}, key = {{ key11 }})
   }
   return(pred_F)
 }
-
 
 
 #' Obtaining forecasts on a test set from a fitted `pprFit`
@@ -346,15 +343,15 @@ predict.pprFit <- function(object, newdata,
   index_n <- index(newdata)
   key_n <- key(newdata)
   if (length(key(newdata)) == 0) {
-    newdata <- newdata %>%
-      mutate(dummy_key = rep(1, NROW(newdata))) %>%
+    newdata <- newdata |>
+      mutate(dummy_key = rep(1, NROW(newdata))) |>
       as_tsibble(index = index_n, key = dummy_key)
     key_n <- key(newdata)
   }
   key11 <- key(newdata)[[1]]
   if(recursive == TRUE){
-    newdata <- newdata %>%
-      as_tibble() %>%
+    newdata <- newdata |>
+      as_tibble() |>
       arrange({{index_n}})
     predictions =  vector(mode = "list", length = NROW(newdata))
     for(m in 1:(NROW(newdata) - 1)){
@@ -377,8 +374,8 @@ predict.pprFit <- function(object, newdata,
     predictions[[NROW(newdata)]] = predict(object$fit[[key22_pos]], data_temp, 
                                            type = "response")
     pred <- unlist(predictions)
-    pred_F <- newdata %>% 
-      mutate(.predict = pred) %>%
+    pred_F <- newdata |> 
+      mutate(.predict = pred) |>
       as_tsibble(index = {{ index_n }}, key = {{ key11 }})
   }else if(recursive == FALSE){
     predictions <- vector(mode = "list", length = NROW(object))
@@ -387,13 +384,12 @@ predict.pprFit <- function(object, newdata,
       predictions[[i]] <- predict(object$fit[[i]], newdata_cat, type = "response")
     }
     pred <- unlist(predictions)
-    pred_F <- newdata %>% 
-      mutate(.predict = pred) %>%
+    pred_F <- newdata |> 
+      mutate(.predict = pred) |>
       as_tsibble(index = {{ index_n }}, key = {{ key11 }})
   }
   return(pred_F)
 }
-
 
 
 #' Obtaining forecasts on a test set from a fitted `gaimFit`
@@ -418,15 +414,15 @@ predict.gaimFit <- function(object, newdata,
   index_n <- index(newdata)
   key_n <- key(newdata)
   if (length(key(newdata)) == 0) {
-    newdata <- newdata %>%
-      mutate(dummy_key = rep(1, NROW(newdata))) %>%
+    newdata <- newdata |>
+      mutate(dummy_key = rep(1, NROW(newdata))) |>
       as_tsibble(index = index_n, key = dummy_key)
     key_n <- key(newdata)
   }
   key11 <- key(newdata)[[1]]
   if(recursive == TRUE){
-    newdata <- newdata %>%
-      as_tibble() %>%
+    newdata <- newdata |>
+      as_tibble() |>
       arrange({{index_n}})
     predictions =  vector(mode = "list", length = NROW(newdata))
     for(m in 1:(NROW(newdata) - 1)){
@@ -449,8 +445,8 @@ predict.gaimFit <- function(object, newdata,
     predictions[[NROW(newdata)]] = predict(object$fit[[key22_pos]], data_temp, 
                                               type = "response")
     pred <- unlist(predictions)
-    pred_F <- newdata %>% 
-      mutate(.predict = pred) %>%
+    pred_F <- newdata |> 
+      mutate(.predict = pred) |>
       as_tsibble(index = {{ index_n }}, key = {{ key11 }})
   }else if(recursive == FALSE){
     predictions <- vector(mode = "list", length = NROW(object))
@@ -459,8 +455,8 @@ predict.gaimFit <- function(object, newdata,
       predictions[[i]] <- predict(object$fit[[i]], newdata_cat, type = "response")
     }
     pred <- unlist(predictions)
-    pred_F <- newdata %>% 
-      mutate(.predict = pred) %>%
+    pred_F <- newdata |> 
+      mutate(.predict = pred) |>
       as_tsibble(index = {{ index_n }}, key = {{ key11 }})
   }
   return(pred_F)
@@ -489,15 +485,15 @@ predict.lmFit <- function(object, newdata,
   index_n <- index(newdata)
   key_n <- key(newdata)
   if (length(key(newdata)) == 0) {
-    newdata <- newdata %>%
-      mutate(dummy_key = rep(1, NROW(newdata))) %>%
+    newdata <- newdata |>
+      mutate(dummy_key = rep(1, NROW(newdata))) |>
       as_tsibble(index = index_n, key = dummy_key)
     key_n <- key(newdata)
   }
   key11 <- key(newdata)[[1]]
   if(recursive == TRUE){
-    newdata <- newdata %>%
-      as_tibble() %>%
+    newdata <- newdata |>
+      as_tibble() |>
       arrange({{index_n}})
     predictions =  vector(mode = "list", length = NROW(newdata))
     for(m in 1:(NROW(newdata) - 1)){
@@ -520,8 +516,8 @@ predict.lmFit <- function(object, newdata,
     predictions[[NROW(newdata)]] = predict(object$fit[[key22_pos]], data_temp, 
                                            type = "response")
     pred <- unlist(predictions)
-    pred_F <- newdata %>% 
-      mutate(.predict = pred) %>%
+    pred_F <- newdata |> 
+      mutate(.predict = pred) |>
       as_tsibble(index = {{ index_n }}, key = {{ key11 }})
   }else if(recursive == FALSE){
     predictions <- vector(mode = "list", length = NROW(object))
@@ -530,8 +526,8 @@ predict.lmFit <- function(object, newdata,
       predictions[[i]] <- predict(object$fit[[i]], newdata_cat, type = "response")
     }
     pred <- unlist(predictions)
-    pred_F <- newdata %>% 
-      mutate(.predict = pred) %>%
+    pred_F <- newdata |> 
+      mutate(.predict = pred) |>
       as_tsibble(index = {{ index_n }}, key = {{ key11 }})
   }
   return(pred_F)
@@ -574,11 +570,11 @@ predict.gamFit <- function(object, newdata,
     data_temp = newdata[NROW(newdata), ]
     predictions[[NROW(newdata)]] = predict_fn(object, data_temp, type = "response")
     pred <- unlist(predictions)
-    pred_F <- newdata %>% 
+    pred_F <- newdata |> 
       mutate(.predict = pred)
   }else if(recursive == FALSE){
     pred <- predict_fn(object, newdata, type = "response")
-    pred_F <- newdata %>% 
+    pred_F <- newdata |> 
       dplyr::mutate(.predict = pred)
   }
   return(pred_F)

@@ -35,9 +35,6 @@
 #'   the names of the columns in test data to be filled with forecasts.
 #' @param ... Other arguments not currently used.
 #'
-#' @importFrom stats as.ts frequency start time tsp
-#' @importFrom rlang `:=`
-#'
 #' @export
 crossVal_bb <- function(object, data, newdata, yvar, neighbour = 0, predictor.vars, 
                         h = 1, season.period = 1, m = 1, 
@@ -50,12 +47,12 @@ crossVal_bb <- function(object, data, newdata, yvar, neighbour = 0, predictor.va
   index_data <- index(data)
   key_data <- key(data)
   if (length(key(data)) == 0) {
-    data <- data %>%
-      dplyr::mutate(dummy_key = rep(1, NROW(data))) %>%
+    data <- data |>
+      dplyr::mutate(dummy_key = rep(1, NROW(data))) |>
       tsibble::as_tsibble(index = index_data, key = dummy_key)
     key_data <- key(data)
-    newdata <- newdata %>%
-      dplyr::mutate(dummy_key = rep(1, NROW(newdata))) %>%
+    newdata <- newdata |>
+      dplyr::mutate(dummy_key = rep(1, NROW(newdata))) |>
       tsibble::as_tsibble(index = index_data, key = dummy_key)
   }
   key_data1 <- key(data)[[1]]
@@ -165,7 +162,7 @@ crossVal_bb <- function(object, data, newdata, yvar, neighbour = 0, predictor.va
         test[(a - (recursive_colRange[1] - 2)):NROW(test), a] <- NA
       }
       # Convert back to a tsibble
-      test <- test %>%
+      test <- test |>
         as_tsibble(index = index_data, key = key_data1)
     }else{
       recursive_colRange <- NULL
@@ -175,7 +172,7 @@ crossVal_bb <- function(object, data, newdata, yvar, neighbour = 0, predictor.va
     key_unique <- unique(as.character(sort(dplyr::pull((train[, {{ key_data1 }}])[, 1]))))
     key_num <- seq_along(key_unique)
     ref <- data.frame(key_unique, key_num)
-    train <- train %>%
+    train <- train |>
       dplyr::mutate(
         num_key = as.numeric(factor(as.character({{ key_data1 }}), levels = key_unique))
       )
@@ -189,7 +186,7 @@ crossVal_bb <- function(object, data, newdata, yvar, neighbour = 0, predictor.va
     
     for (b in seq_along(ref$key_num)){
       # Data filtered by the relevant key
-      df_cat <- train %>%
+      df_cat <- train |>
         dplyr::filter((abs(num_key - ref$key_num[b]) <= neighbour) |
                         (abs(num_key - ref$key_num[b] + NROW(ref)) <= neighbour) |
                         (abs(num_key - ref$key_num[b] - NROW(ref)) <= neighbour)) 
@@ -204,38 +201,38 @@ crossVal_bb <- function(object, data, newdata, yvar, neighbour = 0, predictor.va
         ind_pos <- split(seq_along(indexStr[[b]]$index.ind), indexStr[[b]]$index.ind)
         var_list <- indexStr[[b]]$index.vars[ind_pos[[1]]]
         if(length(var_list) > 1){
-          pre.formula <- lapply(var_list, function(var) paste0(var)) %>%
-            paste(collapse = ",") %>% 
-            paste0(")") %>%
+          pre.formula <- lapply(var_list, function(var) paste0(var)) |>
+            paste(collapse = ",") |> 
+            paste0(")") |>
             paste0(yvar, " ~ g(", .)
         }else{
-          pre.formula <- lapply(var_list, function(var) paste0(var)) %>%
-            paste0(")") %>%
+          pre.formula <- lapply(var_list, function(var) paste0(var)) |>
+            paste0(")") |>
             paste0(yvar, " ~ s(", .)
         }
         if(length(ind_pos) > 1){
           for(j in 2:length(ind_pos)){
             var_list <- indexStr[[b]]$index.vars[ind_pos[[j]]]
             if(length(var_list) > 1){
-              pre.formula <- lapply(var_list, function(var) paste0(var)) %>%
-                paste(collapse = ",") %>% 
-                paste0(")") %>%
+              pre.formula <- lapply(var_list, function(var) paste0(var)) |>
+                paste(collapse = ",") |> 
+                paste0(")") |>
                 paste0(pre.formula, " + g(", .)
             }else{
-              pre.formula <- lapply(var_list, function(var) paste0(var)) %>%
-                paste0(")") %>%
+              pre.formula <- lapply(var_list, function(var) paste0(var)) |>
+                paste0(")") |>
                 paste0(pre.formula, " +s(", .)
             }
           }
         }
         if (!is.null(object$fit[[1]]$best$vars_s)){
-          pre.formula <- lapply(object$fit[[1]]$best$vars_s, function(var) paste0("s(", var, ")")) %>%
-            paste(collapse = "+") %>% 
+          pre.formula <- lapply(object$fit[[1]]$best$vars_s, function(var) paste0("s(", var, ")")) |>
+            paste(collapse = "+") |> 
             paste(pre.formula, "+", .)
         }
         if (!is.null(object$fit[[1]]$best$vars_linear)){
-          pre.formula <- lapply(object$fit[[1]]$best$vars_linear, function(var) paste0(var)) %>%
-            paste(collapse = "+") %>% 
+          pre.formula <- lapply(object$fit[[1]]$best$vars_linear, function(var) paste0(var)) |>
+            paste(collapse = "+") |> 
             paste(pre.formula, "+", .)
         }
         # Model fitting
@@ -243,8 +240,8 @@ crossVal_bb <- function(object, data, newdata, yvar, neighbour = 0, predictor.va
                                         data = df_cat)
         modelFrame <- model.frame(formula = as.formula(pre.formula), 
                                   data = df_cat)
-        add <- df_cat %>%
-          drop_na() %>%
+        add <- df_cat |>
+          drop_na() |>
           select({{ index_data }}, {{ key_data1 }})
         model_list[[b]]$model <- bind_cols(add, modelFrame)
         model_list[[b]]$model <- as_tsibble(model_list[[b]]$model,
@@ -256,8 +253,8 @@ crossVal_bb <- function(object, data, newdata, yvar, neighbour = 0, predictor.va
                                      family = object$fit[[b]]$family$family, 
                                      method = "REML",
                                      data = df_cat)
-        add <- df_cat %>%
-          drop_na() %>%
+        add <- df_cat |>
+          drop_na() |>
           select({{ index_data }}, {{ key_data1 }})
         model_list[[b]]$model <- bind_cols(add, model_list[[b]]$model)
         model_list[[b]]$model <- as_tsibble(model_list[[b]]$model,
@@ -270,8 +267,8 @@ crossVal_bb <- function(object, data, newdata, yvar, neighbour = 0, predictor.va
                                         data = df_cat)
         modelFrame <- model.frame(formula = as.formula(pre.formula), 
                                   data = df_cat)
-        add <- df_cat %>%
-          drop_na() %>%
+        add <- df_cat |>
+          drop_na() |>
           select({{ index_data }}, {{ key_data1 }})
         model_list[[b]]$model <- bind_cols(add, modelFrame)
         model_list[[b]]$model <- as_tsibble(model_list[[b]]$model,
@@ -282,8 +279,8 @@ crossVal_bb <- function(object, data, newdata, yvar, neighbour = 0, predictor.va
         attributes(pre.formula) <- NULL
         model_list[[b]] <- stats::ppr(formula = as.formula(pre.formula),
                                       data = df_cat)
-        add <- df_cat %>%
-          drop_na() %>%
+        add <- df_cat |>
+          drop_na() |>
           select({{ index_data }}, {{ key_data1 }})
         model_list[[b]]$model <- bind_cols(add, model_list[[b]]$model)
         model_list[[b]]$model <- as_tsibble(model_list[[b]]$model,
@@ -297,8 +294,8 @@ crossVal_bb <- function(object, data, newdata, yvar, neighbour = 0, predictor.va
       x = data_list, .rows = length(data_list[[1]]),
       .name_repair = ~ vctrs::vec_as_names(..., repair = "universal", quiet = TRUE)
     )
-    modelFit[[i]] <- modelFit[[i]] %>%
-      dplyr::rename(key = ...1) %>%
+    modelFit[[i]] <- modelFit[[i]] |>
+      dplyr::rename(key = ...1) |>
       dplyr::rename(fit = ...2)
     if ("smimodel" %in% class(object)){
       class(modelFit[[i]]) <- c("gaimFit", "tbl_df", "tbl", "data.frame")
@@ -440,9 +437,6 @@ blockBootstrap <- function(object, newdata, resids, preds, season.period = 1,
 #'   FALSE).
 #' @param recursive_colRange If `recursive = TRUE`, the range of column numbers
 #'   in `newdata` to be filled with forecasts.
-#'
-#' @importFrom stats quantile
-#' @importFrom tibble tibble
 #' 
 #' @examples
 #' library(dplyr)
@@ -452,18 +446,18 @@ blockBootstrap <- function(object, newdata, resids, preds, season.period = 1,
 #' library(tsibble)
 #' n = 1205
 #' set.seed(123)
-#' sim_data <- tibble(x_lag_000 = runif(n)) %>%
+#' sim_data <- tibble(x_lag_000 = runif(n)) |>
 #'   mutate(
 #'     # Add x_lags
-#'     x_lag = lag_matrix(x_lag_000, 5)) %>%
-#'   unpack(x_lag, names_sep = "_") %>%
+#'     x_lag = lag_matrix(x_lag_000, 5)) |>
+#'   unpack(x_lag, names_sep = "_") |>
 #'   mutate(
 #'     # Response variable
 #'     y1 = (0.9*x_lag_000 + 0.6*x_lag_001 + 0.45*x_lag_003)^3 + rnorm(n, sd = 0.1),
 #'     # Add an index to the data set
-#'     inddd = seq(1, n)) %>%
-#'   drop_na() %>%
-#'   select(inddd, y1, starts_with("x_lag")) %>%
+#'     inddd = seq(1, n)) |>
+#'   drop_na() |>
+#'   select(inddd, y1, starts_with("x_lag")) |>
 #'   # Make the data set a `tsibble`
 #'   as_tsibble(index = inddd)
 #' # Training set
@@ -548,7 +542,6 @@ pi_bootstrap <- function(object, newdata, season.period = 1,
 }
 
 
-
 #' Generate multiple single season block bootstrap series
 #' 
 #' Generates multiple replications of single season block bootstrap series.
@@ -569,7 +562,6 @@ residBootstrap <- function(x, season.period = 1, m = 1, num.bootstrap = 1000){
 }
 
 
-
 #' Single season block bootstrap
 #' 
 #' Generates a single replication of single season block bootstrap series.
@@ -577,9 +569,7 @@ residBootstrap <- function(x, season.period = 1, m = 1, num.bootstrap = 1000){
 #' @param x A series of residuals from which bootstrap series to be generated.
 #' @param season.period Length of the seasonal period.
 #' @param m Multiplier. (Block size = `season.period` * `m`)
-#' 
-#' @importFrom stats na.omit
-#' 
+
 seasonBootstrap <- function(x, season.period = 1, m = 1){
   n <- length(x)
   # Block size
@@ -600,6 +590,7 @@ seasonBootstrap <- function(x, season.period = 1, m = 1){
 #'
 #' @param series A series from which a block should be sampled.
 #' @param block.size Size of the block to be sampled.
+
 randomBlock <- function(series, block.size){
   start_ind <- sample(seq(length(series) - block.size + 1), 1)
   block <- series[start_ind:(start_ind + block.size -1)]
@@ -619,19 +610,20 @@ randomBlock <- function(series, block.size){
 #' @param bootstraps Generated matrix of bootstrapped residual series.
 #' @param recursive_colRange The range of column numbers in `newdata` to be
 #'   filled with forecasts.
+
 possibleFutures_smimodel <- function(object, newdata, bootstraps, 
                                      recursive_colRange){
   index_n <- index(newdata)
   key_n <- key(newdata)
   if (length(key(newdata)) == 0) {
-    newdata <- newdata %>%
-      mutate(dummy_key = rep(1, NROW(newdata))) %>%
+    newdata <- newdata |>
+      mutate(dummy_key = rep(1, NROW(newdata))) |>
       as_tsibble(index = index_n, key = dummy_key)
     key_n <- key(newdata)
   }
   key11 <- key(newdata)[[1]]
-  newdata <- newdata %>%
-    tibble::as_tibble() %>%
+  newdata <- newdata |>
+    tibble::as_tibble() |>
     dplyr::arrange({{index_n}})
   predict_fn <- mgcv::predict.gam
   # Recursive possible futures
@@ -746,7 +738,6 @@ possibleFutures_smimodel <- function(object, newdata, bootstraps,
 }
 
 
-
 #' Possible future sample paths (multi-step) from residuals of a fitted
 #' benchmark model
 #'
@@ -760,19 +751,20 @@ possibleFutures_smimodel <- function(object, newdata, bootstraps,
 #' @param bootstraps Generated matrix of bootstrapped residual series.
 #' @param recursive_colRange The range of column numbers in `newdata` to be
 #'   filled with forecasts.
+
 possibleFutures_benchmark <- function(object, newdata, bootstraps, 
                                       recursive_colRange){
   index_n <- index(newdata)
   key_n <- key(newdata)
   if (length(key(newdata)) == 0) {
-    newdata <- newdata %>%
-      mutate(dummy_key = rep(1, NROW(newdata))) %>%
+    newdata <- newdata |>
+      mutate(dummy_key = rep(1, NROW(newdata))) |>
       as_tsibble(index = index_n, key = dummy_key)
     key_n <- key(newdata)
   }
   key11 <- key(newdata)[[1]]
-  newdata <- newdata %>%
-    tibble::as_tibble() %>%
+  newdata <- newdata |>
+    tibble::as_tibble() |>
     dplyr::arrange({{index_n}})
   # Recursive possible futures
   # First, one-step-ahead possible futures
@@ -843,8 +835,6 @@ possibleFutures_benchmark <- function(object, newdata, bootstraps,
 #' \item{rollmean}{If \code{window} is not NULL, a matrix of the rolling means
 #' of interval forecast coverage will be returned.}
 #'
-#' @importFrom stats window
-#' @importFrom zoo rollmean
 #' @export
 coverage <- function(object, level = 95, window = NULL, na.rm = FALSE) {
   # Check inputs

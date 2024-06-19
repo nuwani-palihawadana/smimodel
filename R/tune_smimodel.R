@@ -68,9 +68,6 @@
 #'   FALSE).
 #' @param recursive_colRange If `recursive = TRUE`, The range of column numbers
 #'   in `val.data` to be filled with forecasts.
-#'
-#' @importFrom dplyr arrange
-#' @importFrom fabletools MSE
 
 tune_smimodel <- function(data, val.data, yvar, neighbour = 0,
                           family = gaussian(), index.vars, 
@@ -106,8 +103,8 @@ tune_smimodel <- function(data, val.data, yvar, neighbour = 0,
     index_val <- index(valData)
     key_val <- key(valData)[[1]]
     # Convert to a tibble
-    valData <- valData %>%
-      as_tibble() %>%
+    valData <- valData |>
+      as_tibble() |>
       arrange({{index_val}})
     # Adjust validation set for recursive forecasts
     for(i in recursive_colRange){

@@ -19,10 +19,6 @@
 #'   non-convex quadratic constraints in Gurobi solver.
 #' @param verbose The option to print detailed solver output.
 #' @param ... Other arguments not currently used.
-#'
-#' @importFrom dplyr bind_rows bind_cols
-#' @importFrom tibble as_tibble is_tibble
-#' @importFrom tidyr drop_na
 
 update_smimodelFit <- function(object, data, lambda0 = 1, lambda2 = 1, 
                             M = 10, max.iter = 50, 
@@ -32,7 +28,7 @@ update_smimodelFit <- function(object, data, lambda0 = 1, lambda2 = 1,
   if (!tsibble::is_tsibble(data)) stop("data is not a tsibble.")
   data_index <- index(data)
   data_key <- key(data)[[1]]
-  data <- data %>% drop_na()
+  data <- data |> drop_na()
   # Preparing inputs to `inner_update()`
   list_index <- object$alpha
   num_ind <- NCOL(list_index)
@@ -58,27 +54,27 @@ update_smimodelFit <- function(object, data, lambda0 = 1, lambda2 = 1,
   if(all(best_alpha1$best_alpha == 0)){
     # Constructing the formula and model fitting
     if (!is.null(object$vars_s) & !is.null(object$vars_linear)){
-      pre.formula <- lapply(object$vars_s, function(var) paste0("s(", var, ', bs="cr")')) %>%
-        paste(collapse = "+") %>% 
-        paste(object$var_y, "~", .)
-      pre.formula <- lapply(object$vars_linear, function(var) paste0(var)) %>%
-        paste(collapse = "+") %>% 
-        paste(pre.formula, "+", .)
+      pre.formula <- lapply(object$vars_s, function(var) paste0("s(", var, ', bs="cr")')) |>
+        paste(collapse = "+") 
+      pre.formula <- paste(object$var_y, "~", pre.formula)
+      linear.formula <- lapply(object$vars_linear, function(var) paste0(var)) |>
+        paste(collapse = "+")
+      pre.formula <- paste(pre.formula, "+", linear.formula)
     }else if(!is.null(object$vars_s)){
-      pre.formula <- lapply(object$vars_s, function(var) paste0("s(", var, ', bs="cr")')) %>%
-        paste(collapse = "+") %>% 
-        paste(object$var_y, "~", .)
+      pre.formula <- lapply(object$vars_s, function(var) paste0("s(", var, ', bs="cr")')) |>
+        paste(collapse = "+")
+      pre.formula <- paste(object$var_y, "~", pre.formula)
     }else if(!is.null(object$vars_linear)){
-      pre.formula <- lapply(object$vars_linear, function(var) paste0(var)) %>%
-        paste(collapse = "+") %>% 
-        paste(object$var_y, "~", .)
+      pre.formula <- lapply(object$vars_linear, function(var) paste0(var)) |>
+        paste(collapse = "+")
+      pre.formula <- paste(object$var_y, "~", pre.formula)
     }else{
       pre.formula <- paste(object$var_y, "~", 1)
     }
     fun1_final <- mgcv::gam(as.formula(pre.formula), data = data, 
                             family = object$gam$family$family, method = "REML")
-    add <- data %>%
-      drop_na() %>%
+    add <- data |>
+      drop_na() |>
       select({{ data_index }}, {{ data_key }})
     fun1_final$model <- bind_cols(add, fun1_final$model)
     fun1_final$model <- as_tsibble(fun1_final$model,
@@ -126,18 +122,18 @@ update_smimodelFit <- function(object, data, lambda0 = 1, lambda2 = 1,
         dat <- as_tibble(ind)
         # Nonlinear function update 
         # Constructing the formula
-        pre.formula <- lapply(dat_names, function(var) paste0("s(", var, ',bs="cr")')) %>%
-          paste(collapse = "+") %>% 
-          paste(object$var_y, "~", .)
+        pre.formula <- lapply(dat_names, function(var) paste0("s(", var, ',bs="cr")')) |>
+          paste(collapse = "+") 
+        pre.formula <- paste(object$var_y, "~", pre.formula)
         if (!is.null(object$vars_s)){
-          pre.formula <- lapply(object$vars_s, function(var) paste0("s(", var, ',bs="cr")')) %>%
-            paste(collapse = "+") %>% 
-            paste(pre.formula, "+", .)
+          svars.formula <- lapply(object$vars_s, function(var) paste0("s(", var, ',bs="cr")')) |>
+            paste(collapse = "+")
+          pre.formula <- paste(pre.formula, "+", svars.formula)
         }
         if (!is.null(object$vars_linear)){
-          pre.formula <- lapply(object$vars_linear, function(var) paste0(var)) %>%
-            paste(collapse = "+") %>% 
-            paste(pre.formula, "+", .)
+          linear.formula <- lapply(object$vars_linear, function(var) paste0(var)) |>
+            paste(collapse = "+")
+          pre.formula <- paste(pre.formula, "+", linear.formula)
         }
         # Model fitting
         dat <- dplyr::bind_cols(data, dat)
@@ -170,18 +166,18 @@ update_smimodelFit <- function(object, data, lambda0 = 1, lambda2 = 1,
         dat <- as_tibble(ind)
         # Nonlinear function update 
         # Constructing the formula
-        pre.formula <- lapply(dat_names, function(var) paste0("s(", var, ',bs="cr")')) %>%
-          paste(collapse = "+") %>% 
-          paste(object$var_y, "~", .)
+        pre.formula <- lapply(dat_names, function(var) paste0("s(", var, ',bs="cr")')) |>
+          paste(collapse = "+") 
+        pre.formula <- paste(object$var_y, "~", pre.formula)
         if (!is.null(object$vars_s)){
-          pre.formula <- lapply(object$vars_s, function(var) paste0("s(", var, ',bs="cr")')) %>%
-            paste(collapse = "+") %>% 
-            paste(pre.formula, "+", .)
+          svars.formula <- lapply(object$vars_s, function(var) paste0("s(", var, ',bs="cr")')) |>
+            paste(collapse = "+") 
+          pre.formula <- paste(pre.formula, "+", svars.formula)
         }
         if (!is.null(object$vars_linear)){
-          pre.formula <- lapply(object$vars_linear, function(var) paste0(var)) %>%
-            paste(collapse = "+") %>% 
-            paste(pre.formula, "+", .)
+          linear.formula <- lapply(object$vars_linear, function(var) paste0(var)) |>
+            paste(collapse = "+")
+          pre.formula <- paste(pre.formula, "+", linear.formula)
         }
         # Model fitting
         dat <- dplyr::bind_cols(data, dat)
@@ -211,28 +207,28 @@ update_smimodelFit <- function(object, data, lambda0 = 1, lambda2 = 1,
         if(all(best_alpha2$best_alpha == 0)){
           # Constructing the formula and model fitting
           if (!is.null(object$vars_s) & !is.null(object$vars_linear)){
-            pre.formula <- lapply(object$vars_s, function(var) paste0("s(", var, ', bs="cr")')) %>%
-              paste(collapse = "+") %>% 
-              paste(object$var_y, "~", .)
-            pre.formula <- lapply(object$vars_linear, function(var) paste0(var)) %>%
-              paste(collapse = "+") %>% 
-              paste(pre.formula, "+", .)
+            pre.formula <- lapply(object$vars_s, function(var) paste0("s(", var, ', bs="cr")')) |>
+              paste(collapse = "+")
+            pre.formula <- paste(object$var_y, "~", pre.formula)
+            linear.formula <- lapply(object$vars_linear, function(var) paste0(var)) |>
+              paste(collapse = "+") 
+            pre.formula <- paste(pre.formula, "+", linear.formula)
           }else if(!is.null(object$vars_s)){
-            pre.formula <- lapply(object$vars_s, function(var) paste0("s(", var, ', bs="cr")')) %>%
-              paste(collapse = "+") %>% 
-              paste(object$var_y, "~", .)
+            pre.formula <- lapply(object$vars_s, function(var) paste0("s(", var, ', bs="cr")')) |>
+              paste(collapse = "+") 
+            pre.formula <- paste(object$var_y, "~", pre.formula)
           }else if(!is.null(object$vars_linear)){
-            pre.formula <- lapply(object$vars_linear, function(var) paste0(var)) %>%
-              paste(collapse = "+") %>% 
-              paste(object$var_y, "~", .)
+            pre.formula <- lapply(object$vars_linear, function(var) paste0(var)) |>
+              paste(collapse = "+") 
+            pre.formula <- paste(object$var_y, "~", pre.formula)
           }else{
             pre.formula <- paste(object$var_y, "~", 1)
           }
           fun_null <- mgcv::gam(as.formula(pre.formula), data = data, 
                                 family = object$gam$family$family, 
                                 method = "REML")
-          add <- data %>%
-            drop_na() %>%
+          add <- data |>
+            drop_na() |>
             select({{ data_index }}, {{ data_key }})
           fun_null$model <- bind_cols(add, fun_null$model)
           fun_null$model <- as_tsibble(fun_null$model,
@@ -312,25 +308,25 @@ update_smimodelFit <- function(object, data, lambda0 = 1, lambda2 = 1,
       dat <- tibble::as_tibble(ind)
       ## Nonlinear function update 
       # Constructing the formula
-      pre.formula <- lapply(dat_names, function(var) paste0("s(", var, ',bs="cr")')) %>%
-        paste(collapse = "+") %>% 
-        paste(object$var_y, "~", .)
+      pre.formula <- lapply(dat_names, function(var) paste0("s(", var, ',bs="cr")')) |>
+        paste(collapse = "+") 
+      pre.formula <- paste(object$var_y, "~", pre.formula)
       if (!is.null(object$vars_s)){
-        pre.formula <- lapply(object$vars_s, function(var) paste0("s(", var, ',bs="cr")')) %>%
-          paste(collapse = "+") %>% 
-          paste(pre.formula, "+", .)
+        svars.formula <- lapply(object$vars_s, function(var) paste0("s(", var, ',bs="cr")')) |>
+          paste(collapse = "+") 
+        pre.formula <- paste(pre.formula, "+", svars.formula)
       }
       if (!is.null(object$vars_linear)){
-        pre.formula <- lapply(object$vars_linear, function(var) paste0(var)) %>%
-          paste(collapse = "+") %>% 
-          paste(pre.formula, "+", .)
+        linear.formula <- lapply(object$vars_linear, function(var) paste0(var)) |>
+          paste(collapse = "+")
+        pre.formula <- paste(pre.formula, "+", linear.formula)
       }
       dat <- dplyr::bind_cols(data, dat)
       # Model fitting
       fun1_final <- mgcv::gam(as.formula(pre.formula), data = dat, 
                               family = object$gam$family$family, method = "REML")
-      add <- data %>%
-        drop_na() %>%
+      add <- data |>
+        drop_na() |>
         select({{ data_index }}, {{ data_key }})
       fun1_final$model <- bind_cols(add, fun1_final$model)
       fun1_final$model <- as_tsibble(fun1_final$model,

@@ -83,11 +83,6 @@
 #'   FALSE).
 #' @param recursive_colRange If `recursive = TRUE`, The range of column numbers
 #'   in `val.data` to be filled with forecasts.
-#'
-#' @importFrom future plan
-#' @importFrom furrr future_map
-#' @importFrom purrr map
-#' @importFrom stats gaussian
 
 greedy.fit <- function(data, val.data, yvar, neighbour = 0, 
                        family = gaussian(), index.vars, 
@@ -119,7 +114,7 @@ greedy.fit <- function(data, val.data, yvar, neighbour = 0,
   # Starting point options
   lambda_comb <- expand.grid(lambda0_start_seq, lambda2_start_seq)
   # Model fitting for each combination of lambdas
-  MSE_list <- seq(1, NROW(lambda_comb), by = 1) %>%
+  MSE_list <- seq(1, NROW(lambda_comb), by = 1) |>
     map_f(~ tune_smimodel(data = data, val.data = val.data, yvar = yvar, 
                           neighbour = neighbour,
                           family = family,
@@ -163,7 +158,7 @@ greedy.fit <- function(data, val.data, yvar, neighbour = 0,
     if(NROW(lambda_comb) == 0){
       break 
     }else{
-      MSE_list <- seq(1, NROW(lambda_comb), by = 1) %>%
+      MSE_list <- seq(1, NROW(lambda_comb), by = 1) |>
         map_f(~ tune_smimodel(data = data, val.data = val.data, yvar = yvar, 
                               neighbour = neighbour,
                               family = family,

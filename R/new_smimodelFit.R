@@ -44,7 +44,7 @@ new_smimodelFit <- function(data, yvar, neighbour = 0,
   data_index <- index(data)
   data_key <- key(data)[[1]]
   initialise <- match.arg(initialise)
-  data <- data %>%
+  data <- data |>
     drop_na()
   Y_data <- as.matrix(data[ , yvar])
   X_index <- as.matrix(data[ , index.vars])
@@ -52,24 +52,24 @@ new_smimodelFit <- function(data, yvar, neighbour = 0,
     # Initialise the model with a linear model
     index.ind <- rep(1, length(index.vars))
     ind_pos <- split(seq_along(index.ind), index.ind)
-    pre.formula <- lapply(index.vars, function(var) paste0(var)) %>%
-      paste(collapse = "+") %>% 
-      paste(yvar, "~", .)
+    pre.formula <- lapply(index.vars, function(var) paste0(var)) |>
+      paste(collapse = "+") 
+    pre.formula <- paste(yvar, "~", pre.formula)
     if (!is.null(s.vars)){
-      pre.formula <- lapply(s.vars, function(var) paste0(var)) %>%
-        paste(collapse = "+") %>% 
-        paste(pre.formula, "+", .)
+      svars.formula <- lapply(s.vars, function(var) paste0(var)) |>
+        paste(collapse = "+")
+      pre.formula <- paste(pre.formula, "+", svars.formula)
     }
     if (!is.null(linear.vars)){
-      pre.formula <- lapply(linear.vars, function(var) paste0(var)) %>%
-        paste(collapse = "+") %>% 
-        paste(pre.formula, "+", .)
+      linear.formula <- lapply(linear.vars, function(var) paste0(var)) |>
+        paste(collapse = "+")
+      pre.formula <- paste(pre.formula, "+", linear.formula)
     }
     pre.formula <- paste(pre.formula, "-", 1)
     fun1 <- mgcv::gam(as.formula(pre.formula), data = data, family = family,
                       method = "REML")
-    add <- data %>%
-      drop_na() %>%
+    add <- data |>
+      drop_na() |>
       select({{ data_index }}, {{ data_key }})
     fun1$model <- bind_cols(add, fun1$model)
     fun1$model <- as_tsibble(fun1$model,
@@ -161,27 +161,27 @@ new_smimodelFit <- function(data, yvar, neighbour = 0,
     dat_names <- names(ind) <- paste0("index", 1:length(ind))
     dat <- tibble::as_tibble(ind)
     # Constructing the formula
-    pre.formula <- lapply(dat_names, function(var) paste0("s(", var, ', bs="cr")')) %>%
-      paste(collapse = "+") %>% 
-      paste(yvar, "~", .)
+    pre.formula <- lapply(dat_names, function(var) paste0("s(", var, ', bs="cr")')) |>
+      paste(collapse = "+") 
+    pre.formula <- paste(yvar, "~", pre.formula)
     if (!is.null(s.vars)){
-      pre.formula <- lapply(s.vars, function(var) paste0("s(", var, ', bs="cr")')) %>%
-        paste(collapse = "+") %>% 
-        paste(pre.formula, "+", .)
+      svars.formula <- lapply(s.vars, function(var) paste0("s(", var, ', bs="cr")')) |>
+        paste(collapse = "+") 
+      pre.formula <- paste(pre.formula, "+", svars.formula)
     }
     if (!is.null(linear.vars)){
-      pre.formula <- lapply(linear.vars, function(var) paste0(var)) %>%
-        paste(collapse = "+") %>% 
-        paste(pre.formula, "+", .)
+      linear.formula <- lapply(linear.vars, function(var) paste0(var)) |>
+        paste(collapse = "+")
+      pre.formula <- paste(pre.formula, "+", linear.formula)
     }
     # Model fitting
     dat_new <- dplyr::bind_cols(data, dat)
-    dat_new <- dat_new %>%
+    dat_new <- dat_new |>
       tsibble::as_tsibble(index = {{data_index}}, key = {{data_key}})
     fun1 <- mgcv::gam(as.formula(pre.formula), data = dat_new, family = family,
                       method = "REML")
-    add <- dat_new %>%
-      drop_na() %>%
+    add <- dat_new |>
+      drop_na() |>
       select({{ data_index }}, {{ data_key }})
     fun1$model <- bind_cols(add, fun1$model)
     fun1$model <- as_tsibble(fun1$model,

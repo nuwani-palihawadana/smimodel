@@ -11,9 +11,6 @@
 #'   set of multiple models fitted) to be plotted.
 #' @param ... Other arguments not currently used.
 #' 
-#' @importFrom ggplot2 autoplot
-#' @importFrom gratia draw
-#' 
 #' @return Plot(s) of fitted spline(s).
 #'
 #' @method autoplot smimodel
@@ -22,5 +19,3 @@
 autoplot.smimodel <- function(object, model = 1, ...){
   draw(object$fit[[model]]$best$gam)
 }
-#' @export
-ggplot2::autoplot

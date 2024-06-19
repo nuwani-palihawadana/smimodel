@@ -7,17 +7,14 @@
 #' @param n Number of lags. The default value is `n = 10`.
 #' @return A `tibble`.
 #'
-#' @importFrom purrr set_names map
-#' @importFrom dplyr lag
-#'
 #' @examples
 #' library(dplyr)
 #' library(tibble)
 #' library(tidyr)
 #' # Adding lagged variables to an existing tibble
 #' set.seed(123)
-#' sim_data <- tibble(x_lag_000 = runif(100)) %>%
-#'   mutate(x_lag = lag_matrix(x_lag_000, 3)) %>%
+#' sim_data <- tibble(x_lag_000 = runif(100)) |>
+#'   mutate(x_lag = lag_matrix(x_lag_000, 3)) |>
 #'   unpack(x_lag, names_sep = "_")
 #' @export
 lag_matrix <- function(variable, n = 10) {

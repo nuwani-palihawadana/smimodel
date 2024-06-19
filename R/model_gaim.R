@@ -28,8 +28,6 @@
 #'   `cgaim::cgaim()` related to constrained GAIMs are currently not supported.
 #'   Furthermore, the argument `subset` is also not supported due to a bug in
 #'   `cgaim::cgaim()`.)
-#'
-#' @importFrom cgaim cgaim
 #' 
 #' @examples
 #' library(cgaim)
@@ -39,18 +37,18 @@
 #' library(tsibble)
 #' n = 1005
 #' set.seed(123)
-#' sim_data <- tibble(x_lag_000 = runif(n)) %>%
+#' sim_data <- tibble(x_lag_000 = runif(n)) |>
 #'   mutate(
 #'     # Add x_lags
-#'     x_lag = lag_matrix(x_lag_000, 5)) %>%
-#'   unpack(x_lag, names_sep = "_") %>%
+#'     x_lag = lag_matrix(x_lag_000, 5)) |>
+#'   unpack(x_lag, names_sep = "_") |>
 #'   mutate(
 #'     # Response variable
 #'     y1 = (0.9*x_lag_000 + 0.6*x_lag_001 + 0.45*x_lag_003)^3 + rnorm(n, sd = 0.1),
 #'     # Add an index to the data set
-#'     inddd = seq(1, n)) %>%
-#'   drop_na() %>%
-#'   select(inddd, y1, starts_with("x_lag")) %>%
+#'     inddd = seq(1, n)) |>
+#'   drop_na() |>
+#'   select(inddd, y1, starts_with("x_lag")) |>
 #'   # Make the data set a `tsibble`
 #'   as_tsibble(index = inddd)
 #' # Index variables
@@ -74,8 +72,8 @@ model_gaim <- function(data, yvar, neighbour = 0, index.vars, index.ind,
   data_index <- index(data1)
   data_key <- key(data1)
   if (length(key(data1)) == 0) {
-    data1 <- data1 %>%
-      dplyr::mutate(dummy_key = rep(1, NROW(data1))) %>%
+    data1 <- data1 |>
+      dplyr::mutate(dummy_key = rep(1, NROW(data1))) |>
       tsibble::as_tsibble(index = data_index, key = dummy_key)
     data_key <- key(data1)
   }
@@ -83,41 +81,41 @@ model_gaim <- function(data, yvar, neighbour = 0, index.vars, index.ind,
   key_unique <- unique(as.character(sort(dplyr::pull((data1[, {{ key11 }}])[, 1]))))
   key_num <- seq_along(key_unique)
   ref <- data.frame(key_unique, key_num)
-  data1 <- data1 %>%
+  data1 <- data1 |>
     dplyr::mutate(
       num_key = as.numeric(factor(as.character({{ key11 }}), levels = key_unique))
     )
   # Constructing the formula
   ind_pos <- split(seq_along(index.ind), index.ind)
   var_list <- index.vars[ind_pos[[1]]]
-  pre.formula <- lapply(var_list, function(var) paste0(var)) %>%
-    paste(collapse = ",") %>% 
-    paste0(")") %>%
-    paste0(yvar, " ~ g(", .)
+  pre.formula <- lapply(var_list, function(var) paste0(var)) |>
+    paste(collapse = ",") |> 
+    paste0(")")
+  pre.formula <- paste0(yvar, " ~ g(", pre.formula)
   if(length(ind_pos) > 1){
     for(j in 2:length(ind_pos)){
       var_list <- index.vars[ind_pos[[j]]]
-      pre.formula <- lapply(var_list, function(var) paste0(var)) %>%
-        paste(collapse = ",") %>% 
-        paste0(")") %>%
-        paste0(pre.formula, " + g(", .)
+      index.formula <- lapply(var_list, function(var) paste0(var)) |>
+        paste(collapse = ",") |> 
+        paste0(")")
+      pre.formula <- paste0(pre.formula, " + g(", index.formula)
     }
   }
   if (!is.null(s.vars)){
-    pre.formula <- lapply(s.vars, function(var) paste0("s(", var, ")")) %>%
-      paste(collapse = "+") %>% 
-      paste(pre.formula, "+", .)
+    svars.formula <- lapply(s.vars, function(var) paste0("s(", var, ")")) |>
+      paste(collapse = "+") 
+    pre.formula <- paste(pre.formula, "+", svars.formula)
   }
   if (!is.null(linear.vars)){
-    pre.formula <- lapply(linear.vars, function(var) paste0(var)) %>%
-      paste(collapse = "+") %>% 
-      paste(pre.formula, "+", .)
+    linear.formula <- lapply(linear.vars, function(var) paste0(var)) |>
+      paste(collapse = "+") 
+    pre.formula <- paste(pre.formula, "+", linear.formula)
   }
   # Model fitting
   gaim_list <- vector(mode = "list", length = NROW(ref))
   for (i in seq_along(ref$key_num)){
     print(paste0('model ', paste0(i)))
-    df_cat <- data1 %>%
+    df_cat <- data1 |>
       dplyr::filter((abs(num_key - ref$key_num[i]) <= neighbour) |
                       (abs(num_key - ref$key_num[i] + NROW(ref)) <= neighbour) |
                       (abs(num_key - ref$key_num[i] - NROW(ref)) <= neighbour)) 
@@ -125,8 +123,8 @@ model_gaim <- function(data, yvar, neighbour = 0, index.vars, index.ind,
                                    data = df_cat, ... = ...)
     modelFrame <- model.frame(formula = as.formula(pre.formula), 
                               data = df_cat)
-    add <- df_cat %>%
-      drop_na() %>%
+    add <- df_cat |>
+      drop_na() |>
       select({{ data_index }}, {{ key11 }})
     gaim_list[[i]]$model <- bind_cols(add, modelFrame)
     gaim_list[[i]]$model <- as_tsibble(gaim_list[[i]]$model,
@@ -139,8 +137,8 @@ model_gaim <- function(data, yvar, neighbour = 0, index.vars, index.ind,
     x = data_list, .rows = length(data_list[[1]]),
     .name_repair = ~ vctrs::vec_as_names(..., repair = "universal", quiet = TRUE)
   )
-  models <- models %>%
-    dplyr::rename(key = ...1) %>%
+  models <- models |>
+    dplyr::rename(key = ...1) |>
     dplyr::rename(fit = ...2)
   class(models) <- c("gaimFit", "tbl_df", "tbl", "data.frame")
   return(models)

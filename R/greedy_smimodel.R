@@ -84,11 +84,6 @@
 #' @param recursive_colRange If `recursive = TRUE`, The range of column numbers
 #'   in `val.data` to be filled with forecasts.
 #'
-#' @importFrom future plan
-#' @importFrom furrr future_map
-#' @importFrom purrr map
-#' @importFrom stats gaussian
-#'
 #' @examples
 #' library(dplyr)
 #' library(ROI)
@@ -97,18 +92,18 @@
 #' library(tsibble)
 #' n = 1205
 #' set.seed(123)
-#' sim_data <- tibble(x_lag_000 = runif(n)) %>%
+#' sim_data <- tibble(x_lag_000 = runif(n)) |>
 #'   mutate(
 #'     # Add x_lags
-#'     x_lag = lag_matrix(x_lag_000, 5)) %>%
-#'   unpack(x_lag, names_sep = "_") %>%
+#'     x_lag = lag_matrix(x_lag_000, 5)) |>
+#'   unpack(x_lag, names_sep = "_") |>
 #'   mutate(
 #'     # Response variable
 #'     y1 = (0.9*x_lag_000 + 0.6*x_lag_001 + 0.45*x_lag_003)^3 + rnorm(n, sd = 0.1),
 #'     # Add an index to the data set
-#'     inddd = seq(1, n)) %>%
-#'   drop_na() %>%
-#'   select(inddd, y1, starts_with("x_lag")) %>%
+#'     inddd = seq(1, n)) |>
+#'   drop_na() |>
+#'   select(inddd, y1, starts_with("x_lag")) |>
 #'   # Make the data set a `tsibble`
 #'   as_tsibble(index = inddd)
 #' # Training set
@@ -166,34 +161,34 @@ greedy_smimodel <- function(data, val.data, yvar, neighbour = 0,
   data_index <- index(data1)
   data_key <- key(data1)
   if (length(key(data1)) == 0) {
-    data1 <- data1 %>%
-      mutate(dummy_key = rep(1, NROW(data1))) %>%
+    data1 <- data1 |>
+      mutate(dummy_key = rep(1, NROW(data1))) |>
       as_tsibble(index = data_index, key = dummy_key)
     data_key <- key(data1)
-    data2 <- data2 %>%
-      mutate(dummy_key = rep(1, NROW(data2))) %>%
+    data2 <- data2 |>
+      mutate(dummy_key = rep(1, NROW(data2))) |>
       as_tsibble(index = data_index, key = dummy_key)
   }
   key11 <- key(data1)[[1]]
   key_unique <- unique(as.character(sort(dplyr::pull((data1[, {{ key11 }}])[, 1]))))
   key_num <- seq_along(key_unique)
   ref <- data.frame(key_unique, key_num)
-  data1 <- data1 %>%
+  data1 <- data1 |>
     dplyr::mutate(
       num_key = as.numeric(factor(as.character({{ key11 }}), levels = key_unique))
     )
-  data2 <- data2 %>%
+  data2 <- data2 |>
     dplyr::mutate(
       num_key = as.numeric(factor(as.character({{ key11 }}), levels = key_unique))
     )
   smimodels_list <- vector(mode = "list", length = NROW(ref))
   for (i in seq_along(ref$key_num)){
     print(paste0('model ', paste0(i)))
-    df_cat <- data1 %>%
+    df_cat <- data1 |>
       dplyr::filter((abs(num_key - ref$key_num[i]) <= neighbour) |
                       (abs(num_key - ref$key_num[i] + NROW(ref)) <= neighbour) |
                       (abs(num_key - ref$key_num[i] - NROW(ref)) <= neighbour))
-    df_cat_val <- data2 %>%
+    df_cat_val <- data2 |>
       dplyr::filter((abs(num_key - ref$key_num[i]) <= neighbour) |
                       (abs(num_key - ref$key_num[i] + NROW(ref)) <= neighbour) |
                       (abs(num_key - ref$key_num[i] - NROW(ref)) <= neighbour)) 
@@ -225,8 +220,8 @@ greedy_smimodel <- function(data, val.data, yvar, neighbour = 0,
     x = data_list, .rows = length(data_list[[1]]),
     .name_repair = ~ vctrs::vec_as_names(..., repair = "universal", quiet = TRUE)
   )
-  models <- models %>%
-    dplyr::rename(key = ...1) %>%
+  models <- models |>
+    dplyr::rename(key = ...1) |>
     dplyr::rename(fit = ...2)
   class(models) <- c("smimodel", "tbl_df", "tbl", "data.frame")
   return(models)

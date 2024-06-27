@@ -56,20 +56,20 @@ derived from projection pursuit regression. The other options are
 model (i.e. a special case single-index model, where the initial values of
 the index coefficients are obtained through a linear regression),
 "multiple" - multiple models are fitted starting with different initial
-models (default \code{num_ind} (number of indices) = 5; five random instances of
-the model (i.e. the predictor assignment to indices and initial index
+models (number of indices = \code{num_ind}; \code{num_models} random instances of the
+model (i.e. the predictor assignment to indices and initial index
 coefficients are generated randomly) are considered), and the final optimal
-model with the lowest loss is returned (user can change the number of
-indices considered using \code{num_ind} argument), and "userInput" - user
-specifies the initial model structure (i.e. the number of indices and the
-placement of index variables among indices) and the initial index
-coefficients through \code{index.ind} and \code{index.coefs} arguments respectively.}
+model with the lowest loss is returned, and "userInput" - user specifies
+the initial model structure (i.e. the number of indices and the placement
+of index variables among indices) and the initial index coefficients
+through \code{index.ind} and \code{index.coefs} arguments respectively.}
 
 \item{num_ind}{If \verb{initialise = "ppr" or "multiple"}: an integer that
-specifies the number of indices to be used in the model(s).}
+specifies the number of indices to be used in the model(s). The default is
+5.}
 
 \item{num_models}{If \code{initialise = "multiple"}: an integer that specifies the
-number of starting points to be checked.}
+number of starting models to be checked. The default is 5.}
 
 \item{seed}{If \code{initialise = "multiple"}: the seed to be set when generating
 random starting points.}

@@ -27,18 +27,18 @@
 #'   model (i.e. a special case single-index model, where the initial values of
 #'   the index coefficients are obtained through a linear regression),
 #'   "multiple" - multiple models are fitted starting with different initial
-#'   models (default `num_ind` (number of indices) = 5; five random instances of
-#'   the model (i.e. the predictor assignment to indices and initial index
+#'   models (number of indices = `num_ind`; `num_models` random instances of the
+#'   model (i.e. the predictor assignment to indices and initial index
 #'   coefficients are generated randomly) are considered), and the final optimal
-#'   model with the lowest loss is returned (user can change the number of
-#'   indices considered using `num_ind` argument), and "userInput" - user
-#'   specifies the initial model structure (i.e. the number of indices and the
-#'   placement of index variables among indices) and the initial index
-#'   coefficients through `index.ind` and `index.coefs` arguments respectively.
+#'   model with the lowest loss is returned, and "userInput" - user specifies
+#'   the initial model structure (i.e. the number of indices and the placement
+#'   of index variables among indices) and the initial index coefficients
+#'   through `index.ind` and `index.coefs` arguments respectively.
 #' @param num_ind If `initialise = "ppr" or "multiple"`: an integer that
-#'   specifies the number of indices to be used in the model(s).
+#'   specifies the number of indices to be used in the model(s). The default is
+#'   5.
 #' @param num_models If `initialise = "multiple"`: an integer that specifies the
-#'   number of starting points to be checked.
+#'   number of starting models to be checked. The default is 5.
 #' @param seed If `initialise = "multiple"`: the seed to be set when generating
 #'   random starting points.
 #' @param index.ind If `initialise = "userInput"`: an integer vector that

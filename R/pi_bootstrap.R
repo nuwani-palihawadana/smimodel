@@ -203,37 +203,37 @@ crossVal_bb <- function(object, data, newdata, yvar, neighbour = 0, predictor.va
         if(length(var_list) > 1){
           pre.formula <- lapply(var_list, function(var) paste0(var)) |>
             paste(collapse = ",") |> 
-            paste0(")") |>
-            paste0(yvar, " ~ g(", .)
+            paste0(")")
+          pre.formula <- paste0(yvar, " ~ g(", pre.formula)
         }else{
           pre.formula <- lapply(var_list, function(var) paste0(var)) |>
-            paste0(")") |>
-            paste0(yvar, " ~ s(", .)
+            paste0(")")
+          pre.formula <- paste0(yvar, " ~ s(", pre.formula)
         }
         if(length(ind_pos) > 1){
           for(j in 2:length(ind_pos)){
             var_list <- indexStr[[b]]$index.vars[ind_pos[[j]]]
             if(length(var_list) > 1){
-              pre.formula <- lapply(var_list, function(var) paste0(var)) |>
+              add.formula <- lapply(var_list, function(var) paste0(var)) |>
                 paste(collapse = ",") |> 
-                paste0(")") |>
-                paste0(pre.formula, " + g(", .)
+                paste0(")")
+              pre.formula <- paste0(pre.formula, " + g(", add.formula)
             }else{
-              pre.formula <- lapply(var_list, function(var) paste0(var)) |>
-                paste0(")") |>
-                paste0(pre.formula, " +s(", .)
+              add.formula <- lapply(var_list, function(var) paste0(var)) |>
+                paste0(")")
+              pre.formula <- paste0(pre.formula, " +s(", add.formula)
             }
           }
         }
         if (!is.null(object$fit[[1]]$best$vars_s)){
-          pre.formula <- lapply(object$fit[[1]]$best$vars_s, function(var) paste0("s(", var, ")")) |>
-            paste(collapse = "+") |> 
-            paste(pre.formula, "+", .)
+          s.formula <- lapply(object$fit[[1]]$best$vars_s, function(var) paste0("s(", var, ")")) |>
+            paste(collapse = "+") 
+          pre.formula <- paste(pre.formula, "+", s.formula)
         }
         if (!is.null(object$fit[[1]]$best$vars_linear)){
-          pre.formula <- lapply(object$fit[[1]]$best$vars_linear, function(var) paste0(var)) |>
-            paste(collapse = "+") |> 
-            paste(pre.formula, "+", .)
+          linear.formula <- lapply(object$fit[[1]]$best$vars_linear, function(var) paste0(var)) |>
+            paste(collapse = "+") 
+          pre.formula <- paste(pre.formula, "+", linear.formula)
         }
         # Model fitting
         model_list[[b]] <- cgaim::cgaim(formula = as.formula(pre.formula),
@@ -348,15 +348,15 @@ crossVal_bb <- function(object, data, newdata, yvar, neighbour = 0, predictor.va
   
   out$method <- paste("crossVal")
   out$fit_times <- fit_times
-  out$mean <- lagmatrix(pf, 1:h) |> window(start = time(pf)[nfirst + 1L])
+  out$mean <- leadlagMat(pf, 1:h) |> window(start = time(pf)[nfirst + 1L])
   out$res <- res[rowSums(is.na(res)) != ncol(res), ]
   row.names(out$res) <- seq(nfirst, nlast, by = 1)
   out$level <- level
   out$lower <- lapply(lower,
-                      function(low) lagmatrix(low, 1:h) |>
+                      function(low) leadlagMat(low, 1:h) |>
                         window(start = time(low)[nfirst + 1L]))
   out$upper <- lapply(upper,
-                      function(up) lagmatrix(up, 1:h) |>
+                      function(up) leadlagMat(up, 1:h) |>
                         window(start = time(up)[nfirst + 1L]))
   
   return(structure(out, class = "cvbb"))
@@ -813,10 +813,10 @@ possibleFutures_benchmark <- function(object, newdata, bootstraps,
 }
 
 
-#' Calculate interval forecast coverage - copied from conformalForecast package
-#' and modified
+#' Calculate interval forecast coverage
 #'
-#' Calculate the mean coverage and the ifinn matrix for prediction intervals on
+#' This is a wrapper for the function `conformalForecast::coverage()`.
+#' Calculates the mean coverage and the ifinn matrix for prediction intervals on
 #' validation set. If \code{window} is not \code{NULL}, a matrix of the rolling
 #' means of interval forecast coverage is also returned.
 #'
@@ -836,71 +836,24 @@ possibleFutures_benchmark <- function(object, newdata, bootstraps,
 #' of interval forecast coverage will be returned.}
 #'
 #' @export
-coverage <- function(object, level = 95, window = NULL, na.rm = FALSE) {
-  # Check inputs
-  if (level > 0 && level < 1) {
-    level <- 100 * level
-  } else if (level < 0 || level > 99.99) {
-    stop("confidence limit out of range")
-  }
-  if (!(level %in% object$level))
-    stop("no interval forecasts of target confidence level in object")
-  
-  levelname <- paste0(level, "%")
-  x <- object$x
-  lower <- object$lower[[levelname]]
-  upper <- object$upper[[levelname]]
-  horizon <- ncol(lower)
-  period <- frequency(object$x)
-  x <- ts(matrix(rep(object$x, horizon), ncol = horizon, byrow = FALSE),
-          start = start(object$x),
-          frequency = period)
-  
-  # Match time
-  tspx <- tsp(x)
-  tspl <- tsp(lower)
-  tspu <- tsp(upper)
-  start <- max(tspx[1], tspl[1], tspu[1])
-  end <- min(tspx[2], tspl[2], tspu[2])
-  
-  x <- window(x, start = start, end = end)
-  lower <- window(lower, start = start, end = end)
-  upper <- window(upper, start = start, end = end)
-  n <- nrow(x)
-  
-  # If coverage matrix
-  covmat <- (lower <= x & x <= upper) |>
-    ts(start = start, end = end, frequency = period)
-  colnames(covmat) <- colnames(lower)
-  
-  # Mean coverage
-  covmean <- apply(covmat, 2, mean, na.rm = TRUE)
-  
-  # Rolling mean coverage
-  if (!is.null(window)) {
-    if (window >= n)
-      stop("the `window` argument should be smaller than the total period of interest")
-    covrmean <- apply(covmat, 2, zoo::rollmean, k = window, na.rm = na.rm) |>
-      ts(end = end, frequency = period)
-  }
-  
-  out <- list(
-    mean = covmean,
-    ifinn = covmat
-  )
-  if (!is.null(window)) out <- append(out, list(rollmean = covrmean))
-  return(structure(out, class = "coverage"))
+avgCoverage <- function(object, level = 95, window = NULL, na.rm = FALSE) {
+  object$LOWER <- object$lower
+  object$UPPER <- object$upper
+  output <- conformalForecast::coverage(object = object, level = level,
+                                        window = window, na.rm = na.rm)
+  return(output)
 }
 
 
-#' Create lags or leads of a matrix - copied from conformalForecast package
+#' Create lags or leads of a matrix
 #'
-#' Find a shifted version of a matrix, adjusting the time base backward (lagged)
-#' or forward (leading) by a specified number of observations for each column.
+#' This is a wrapper for the function `conformalForecast::lagmatrix()`.Find a
+#' shifted version of a matrix, adjusting the time base backward (lagged) or
+#' forward (leading) by a specified number of observations for each column.
 #'
 #' @param x A matrix or multivariate time series.
 #' @param lag A vector of lags (positive values) or leads (negative values) with
-#' a length equal to the number of columns of \code{x}.
+#'   a length equal to the number of columns of \code{x}.
 #'
 #' @return A matrix with the same class and size as \code{x}.
 #'
@@ -908,31 +861,13 @@ coverage <- function(object, level = 95, window = NULL, na.rm = FALSE) {
 #' x <- matrix(rnorm(20), nrow = 5, ncol = 4)
 #'
 #' # Create lags of a matrix
-#' lagmatrix(x, c(0, 1, 2, 3))
+#' leadlagMat(x, c(0, 1, 2, 3))
 #'
 #' # Create leads of a matrix
-#' lagmatrix(x, c(0, -1, -2, -3))
+#' leadlagMat(x, c(0, -1, -2, -3))
 #'
 #' @export
-lagmatrix <- function(x, lag) {
-  # Ensure 'x' is a matrix
-  if (!is.matrix(x))
-    stop("ensure x is a matrix")
-  n <- nrow(x)
-  k <- length(lag)
-  
-  if (ncol(x) != k)
-    stop("lag must have the same number of columns as x")
-  
-  lmat <- x
-  for (i in 1:k) {
-    if (lag[i] == 0) {
-      lmat[, i] <- x[, i]
-    } else if (lag[i] > 0) {
-      lmat[, i] <- c(rep(NA, lag[i]), x[1:(n - lag[i]), i])
-    } else {
-      lmat[, i] <- c(x[(abs(lag[i])+1):n, i], rep(NA, abs(lag[i])))
-    }
-  }
-  return(structure(lmat, class = class(x)))
+leadlagMat <- function(x, lag) {
+  lmat <- conformalForecast::lagmatrix(x = x, lag = lag)
+  return(lmat)
 }

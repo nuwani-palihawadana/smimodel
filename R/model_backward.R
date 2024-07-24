@@ -174,7 +174,7 @@ model_backward <- function(data, val.data, yvar,
     # # Predictions
     # pred <- predict(object = model1, newdata = df_cat_val, type = "response")
     # MSE
-    mse1 = MSE(.resid = (as.numeric(as.matrix(valData[,{{yvar}}], ncol = 1)) - pred))
+    mse1 = MSE(residuals = (as.numeric(as.matrix(valData[,{{yvar}}], ncol = 1)) - pred))
     mse_old <- mse1
     mseMinRatio <- 1
     Temp_s.vars <- s.vars
@@ -328,6 +328,6 @@ eliminate <- function(ind, train, val, yvar, family = gaussian(),
   # # Predictions
   # pred <- predict(object = model1, newdata = val, type = "response")
   # MSE
-  mse1 = MSE(.resid = (as.numeric(as.matrix(valData[,{{yvar}}], ncol = 1)) - pred))
+  mse1 = MSE(residuals = (as.numeric(as.matrix(valData[,{{yvar}}], ncol = 1)) - pred))
   return(mse1)
 }

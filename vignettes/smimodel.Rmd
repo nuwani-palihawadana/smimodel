@@ -21,7 +21,6 @@ The *smimodel* package provides functions to estimate **Sparse Multiple Index (S
 ```{r setup}
 library(smimodel)
 library(dplyr)
-library(fabletools)
 library(ROI)
 library(tibble)
 library(tidyr)
@@ -145,13 +144,13 @@ preds = predict(object = smimodel_ppr, newdata = sim_test)
 preds$.predict
 ```
 
-Once we obtain forecasts, we can evaluate the forecasting performance of the estimated SMI model by calculating forecast error measurements as desired, using a common function from an appropriate package.  
+Once we obtain forecasts, we can evaluate the forecasting performance of the estimated SMI model by calculating forecast error measurements as desired.
 
 ```{r forecasterror, message=FALSE}
 # Calculate test set MSE and MAE
-MSE_SMI_ppr = fabletools::MSE(.resid = (preds$y1 - preds$.predict))
+MSE_SMI_ppr = MSE(residuals = (preds$y1 - preds$.predict))
 MSE_SMI_ppr
-MAE_SMI_ppr = fabletools::MAE(.resid = (preds$y1 - preds$.predict))
+MAE_SMI_ppr = MAE(residuals = (preds$y1 - preds$.predict))
 MAE_SMI_ppr
 ```
 

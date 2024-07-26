@@ -134,11 +134,8 @@ model_gaim <- function(data, yvar, neighbour = 0, index.vars, index.ind,
   data_list <- list(key_unique, gaim_list)
   models <- tibble::as_tibble(
     x = data_list, .rows = length(data_list[[1]]),
-    .name_repair = ~ vctrs::vec_as_names(..., repair = "universal", quiet = TRUE)
+    .name_repair = ~ make.names(names = c("key", "fit"))
   )
-  models <- models |>
-    dplyr::rename(key = ...1) |>
-    dplyr::rename(fit = ...2)
   class(models) <- c("gaimFit", "tbl_df", "tbl", "data.frame")
   return(models)
 }

@@ -44,7 +44,6 @@ Imports:
     tidyselect,
     tidyr,
     tsibble,
-    vctrs,
     zoo
 Suggests:
     knitr,

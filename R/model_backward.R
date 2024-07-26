@@ -238,12 +238,7 @@ model_backward <- function(data, val.data, yvar,
   data_list <- list(key_unique, models_list)
   models <- as_tibble(x = data_list, 
                       .rows = length(data_list[[1]]),
-                      .name_repair = ~ vctrs::vec_as_names(..., 
-                                                           repair = "universal", 
-                                                           quiet = TRUE))
-  models <- models |>
-    rename(key = ...1) |>
-    rename(fit = ...2)
+                      .name_repair = ~ make.names(names = c("key", "fit")))
   class(models) <- c("backward", "tbl_df", "tbl", "data.frame")
   return(models)
 }

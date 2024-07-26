@@ -21,7 +21,6 @@
 #' @importFrom tidyr drop_na
 #' @importFrom tidyselect all_of
 #' @importFrom tsibble as_tsibble index is_tsibble key
-#' @importFrom vctrs vec_as_names
 #' @importFrom zoo rollmean
 NULL 
 

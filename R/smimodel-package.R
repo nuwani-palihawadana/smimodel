@@ -3,7 +3,6 @@
 "_PACKAGE"
 
 #' @importFrom cgaim cgaim g s
-#' @importFrom conformalForecast coverage lagmatrix
 #' @importFrom dplyr arrange bind_cols bind_rows filter lag mutate mutate_at pull rename select
 #' @importFrom future multisession plan
 #' @importFrom furrr future_map
@@ -14,14 +13,12 @@
 #' @importFrom Matrix bdiag
 #' @importFrom methods as
 #' @importFrom purrr map set_names
-#' @importFrom rlang `:=`
 #' @importFrom ROI Q_objective L_constraint OP V_bound ROI_solve 
 #' @importFrom stats as.formula as.ts frequency gaussian lm model.frame na.omit predict ppr quantile runif sd start time ts tsp var window 
 #' @importFrom tibble as_tibble is_tibble tibble
 #' @importFrom tidyr drop_na
 #' @importFrom tidyselect all_of
 #' @importFrom tsibble as_tsibble index is_tsibble key
-#' @importFrom zoo rollmean
 NULL 
 
 # Generics to re-export

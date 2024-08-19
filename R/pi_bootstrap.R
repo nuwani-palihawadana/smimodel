@@ -36,14 +36,15 @@
 #' @param ... Other arguments not currently used.
 #'
 #' @export
-crossVal_bb <- function(object, data, newdata, yvar, neighbour = 0, predictor.vars, 
+crossVal_bb <- function(object, data, #newdata, 
+                        yvar, neighbour = 0, predictor.vars, 
                         h = 1, season.period = 1, m = 1, 
                         num.futures = 1000, level = c(80, 95), forward = TRUE, 
                         initial = 1, window = NULL, 
                         recursive = FALSE, recursive_colNames = NULL, ...) {
   # Check input data 
   if (!is_tsibble(data)) stop("data is not a tsibble.")
-  if (!is_tsibble(newdata)) stop("newdata is not a tsibble.")
+  #if (!is_tsibble(newdata)) stop("newdata is not a tsibble.")
   index_data <- index(data)
   key_data <- key(data)
   if (length(key(data)) == 0) {
@@ -51,15 +52,17 @@ crossVal_bb <- function(object, data, newdata, yvar, neighbour = 0, predictor.va
       dplyr::mutate(dummy_key = rep(1, NROW(data))) |>
       tsibble::as_tsibble(index = index_data, key = dummy_key)
     key_data <- key(data)
-    newdata <- newdata |>
-      dplyr::mutate(dummy_key = rep(1, NROW(newdata))) |>
-      tsibble::as_tsibble(index = index_data, key = dummy_key)
+    # newdata <- newdata |>
+    #   dplyr::mutate(dummy_key = rep(1, NROW(newdata))) |>
+    #   tsibble::as_tsibble(index = index_data, key = dummy_key)
   }
   key_data1 <- key(data)[[1]]
   data1 <- data |> 
     as_tibble() |> 
     arrange({{index_data}})
-  y <- as.ts(data1[ , yvar][[1]])
+  test.length <- forward * h
+  y <- as.ts(data1[ , yvar][[1]][1:(NROW(data1) - test.length)])
+  #y <- as.ts(data1[ , yvar][[1]])
   n <- length(y)
   
   # Check confidence levels
@@ -83,11 +86,13 @@ crossVal_bb <- function(object, data, newdata, yvar, neighbour = 0, predictor.va
     if (window == n && !forward)
       stop("window out of bounds")
   }
-  forwardData <- bind_rows(data, newdata)
-  forwardData <- forwardData |> 
-    as_tibble() |> 
-    arrange({{index_data}})
-  xreg <- forwardData[ , c(as.character(index_data), as.character(key_data1), 
+  # forwardData <- bind_rows(data, newdata)
+  # forwardData <- forwardData |> 
+  #   as_tibble() |> 
+  #   arrange({{index_data}})
+  # xreg <- forwardData[ , c(as.character(index_data), as.character(key_data1), 
+  #                          predictor.vars)]
+  xreg <- data1[ , c(as.character(index_data), as.character(key_data1), 
                            predictor.vars)]
   xreg <- ts(xreg,
              start = start(y),

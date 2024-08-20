@@ -5,11 +5,10 @@
 #'
 #' @param object Fitted model object of class `smimodel`, `backward`, `gaimFit`
 #'   or `pprFit`.
-#' @param data Training data set. Must be a data set of class `tsibble`.(Make
+#' @param data Data set. Must be a data set of class `tsibble`.(Make
 #'   sure there are no additional date/time/date-time/yearmonth/POSIXct/POSIXt
 #'   variables except for the `index` of the `tsibble`). If multiple models are
 #'   fitted, the grouping variable should be the key of the `tsibble`.
-#' @param newdata Test data set. Must be a data set of class `tsibble`.
 #' @param yvar Name of the response variable as a character string.
 #' @param neighbour If multiple models are fitted: Number of neighbours of each
 #'   key (i.e. grouping variable) to be considered in model fitting to handle

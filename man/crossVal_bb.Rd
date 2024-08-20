@@ -7,7 +7,6 @@
 crossVal_bb(
   object,
   data,
-  newdata,
   yvar,
   neighbour = 0,
   predictor.vars,
@@ -28,12 +27,10 @@ crossVal_bb(
 \item{object}{Fitted model object of class \code{smimodel}, \code{backward}, \code{gaimFit}
 or \code{pprFit}.}
 
-\item{data}{Training data set. Must be a data set of class \code{tsibble}.(Make
+\item{data}{Data set. Must be a data set of class \code{tsibble}.(Make
 sure there are no additional date/time/date-time/yearmonth/POSIXct/POSIXt
 variables except for the \code{index} of the \code{tsibble}). If multiple models are
 fitted, the grouping variable should be the key of the \code{tsibble}.}
-
-\item{newdata}{Test data set. Must be a data set of class \code{tsibble}.}
 
 \item{yvar}{Name of the response variable as a character string.}
 

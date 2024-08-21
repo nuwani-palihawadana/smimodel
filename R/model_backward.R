@@ -12,7 +12,7 @@
 #'   model will be re-fitted for the combined data set `data` + `val.data`.)
 #' @param yvar Name of the response variable as a character string.
 #' @param family A description of the error distribution and link function to be
-#'   used in the model (see `glm` and `family`).
+#'   used in the model (see \code{\link{glm}} and \code{\link{family}}).
 #' @param neighbour If multiple models are fitted: Number of neighbours of each
 #'   key (i.e. grouping variable) to be considered in model fitting to handle
 #'   smoothing over the key. Should be an integer. If `neighbour = x`, `x`

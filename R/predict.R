@@ -534,11 +534,11 @@ predict.lmFit <- function(object, newdata,
 }
 
 
-#' Obtaining forecasts on a test set from a fitted `gamFit`
+#' Obtaining recursive forecasts on a test set from a fitted `mgcv::gam`
 #'
-#' Gives forecasts on a test set.
+#' Gives recursive forecasts on a test set.
 #'
-#' @param object A `gamFit` object.
+#' @param object A `gam` object.
 #' @param newdata The set of new data on for which the forecasts are required
 #'   (i.e. test set; should be a `tibble`).
 #' @param recursive Whether to obtain recursive forecasts or not (default -
@@ -546,10 +546,8 @@ predict.lmFit <- function(object, newdata,
 #' @param recursive_colRange If `recursive = TRUE`, The range of column numbers
 #'   in `newdata` to be filled with forecasts.
 #' @param ... Other arguments not currently used.
-#'
-#' @method predict gamFit
 
-predict.gamFit <- function(object, newdata, 
+predict_gam <- function(object, newdata, 
                           recursive = FALSE, recursive_colRange = NULL, ...){
   if (!is_tibble(newdata)) stop("newdata is not a tibble.")
   predict_fn <- mgcv::predict.gam

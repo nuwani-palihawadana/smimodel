@@ -152,7 +152,6 @@ model_backward <- function(data, val.data, yvar,
     # Model fitting
     model1 <- mgcv::gam(my.formula, family = family, method = "REML", 
                         data = df_cat)
-    class(model1) <- c("gamFit", "gam", "glm", "lm")
     # Validation set MSE
     valData <- df_cat_val
     if(recursive == TRUE){
@@ -168,7 +167,7 @@ model_backward <- function(data, val.data, yvar,
       }
     }
     # Predictions
-    pred <- predict(object = model1, newdata = valData, recursive = recursive,
+    pred <- predict_gam(object = model1, newdata = valData, recursive = recursive,
                     recursive_colRange = recursive_colRange)$.predict
     # # Validation set MSE
     # # Predictions
@@ -301,7 +300,6 @@ eliminate <- function(ind, train, val, yvar, family = gaussian(),
   my.formula <- as.formula(pre.formula)
   # Model fitting
   model1 <- mgcv::gam(my.formula, family = family, method = "REML", data = train)
-  class(model1) <- c("gamFit", "gam", "glm", "lm")
   # Validation set MSE
   valData <- val
   if(recursive == TRUE){
@@ -317,7 +315,7 @@ eliminate <- function(ind, train, val, yvar, family = gaussian(),
     }
   }
   # Predictions
-  pred <- predict(object = model1, newdata = valData, recursive = recursive,
+  pred <- predict_gam(object = model1, newdata = valData, recursive = recursive,
                   recursive_colRange = recursive_colRange)$.predict
   # # Validation set MSE
   # # Predictions

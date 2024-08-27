@@ -320,7 +320,7 @@ bb_cvforecast <- function(object, data, #newdata,
     # Store residuls
     res[i, 1:length(resids$.resid)] <- as.numeric(resids$.resid)
     # Possible futures through block bootstrapping on in-sample residuals
-    pFutures[[i]] <- smimodel::blockBootstrap(object = modelFit[[i]], newdata = test,
+    pFutures[[i]] <- blockBootstrap(object = modelFit[[i]], newdata = test,
                                               resids = na.omit(res[i, ]), preds = pf[i, ], 
                                               season.period = season.period, m = m, 
                                               num.futures = num.futures, 

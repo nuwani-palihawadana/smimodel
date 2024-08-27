@@ -35,12 +35,12 @@
 #' @param ... Other arguments not currently used.
 #'
 #' @export
-crossVal_bb <- function(object, data, #newdata, 
-                        yvar, neighbour = 0, predictor.vars, 
-                        h = 1, season.period = 1, m = 1, 
-                        num.futures = 1000, level = c(80, 95), forward = TRUE, 
-                        initial = 1, window = NULL, 
-                        recursive = FALSE, recursive_colNames = NULL, ...) {
+bb_cvforecast <- function(object, data, #newdata, 
+                          yvar, neighbour = 0, predictor.vars, 
+                          h = 1, season.period = 1, m = 1, 
+                          num.futures = 1000, level = c(80, 95), forward = TRUE, 
+                          initial = 1, window = NULL, 
+                          recursive = FALSE, recursive_colNames = NULL, ...) {
   # Check input data 
   if (!is_tsibble(data)) stop("data is not a tsibble.")
   #if (!is_tsibble(newdata)) stop("newdata is not a tsibble.")
@@ -335,8 +335,8 @@ crossVal_bb <- function(object, data, #newdata,
       lowerBound <- matrix(NA, ncol = nint, nrow = 1)
       upperBound <- lowerBound
       for (k in 1:nint) {
-        lowerBound[1, k] <- intervalsHilo[[k]]
-        upperBound[1, k] <- intervalsHilo[[(k + 2)]]
+        lowerBound[1, k] <- intervalsHilo[1:nint][[k]]
+        upperBound[1, k] <- intervalsHilo[(nint + 1):length(intervalsHilo)][[k]]
       }
       colnames(lowerBound) <- colnames(upperBound) <- paste(level, "%", sep = "")
       for (l in level) {
@@ -346,8 +346,7 @@ crossVal_bb <- function(object, data, #newdata,
       }
     }
   }
-  
-  out$method <- paste("crossVal")
+  out$method <- paste("bb_cvforecast")
   out$fit_times <- fit_times
   out$mean <- leadlagMat(pf, 1:h) |> window(start = time(pf)[nfirst + 1L])
   out$res <- res[rowSums(is.na(res)) != ncol(res), ]
@@ -360,7 +359,7 @@ crossVal_bb <- function(object, data, #newdata,
                       function(up) leadlagMat(up, 1:h) |>
                         window(start = time(up)[nfirst + 1L]))
   
-  return(structure(out, class = "cvbb"))
+  return(structure(out, class = "bb_cvforecast"))
 }
 
 
@@ -821,7 +820,7 @@ possibleFutures_benchmark <- function(object, newdata, bootstraps,
 #' validation set. If \code{window} is not \code{NULL}, a matrix of the rolling
 #' means of interval forecast coverage is also returned.
 #'
-#' @param object An object of class \code{cvbb}.
+#' @param object An object of class \code{bb_cvforecast}.
 #' @param level Target confidence level for prediction intervals.
 #' @param window If not \code{NULL}, the rolling mean matrix for coverage is
 #'   also returned.

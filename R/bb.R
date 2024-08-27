@@ -839,7 +839,7 @@ possibleFutures_benchmark <- function(object, newdata, bootstraps,
 avgCoverage <- function(object, level = 95, window = NULL, na.rm = FALSE) {
   object$LOWER <- object$lower
   object$UPPER <- object$upper
-  output <- conformalForecast::coverage(object = object, level = level,
+  output <- coverage(object = object, level = level,
                                         window = window, na.rm = na.rm)
   return(output)
 }
@@ -868,6 +868,6 @@ avgCoverage <- function(object, level = 95, window = NULL, na.rm = FALSE) {
 #'
 #' @export
 leadlagMat <- function(x, lag) {
-  lmat <- conformalForecast::lagmatrix(x = x, lag = lag)
+  lmat <- lagmatrix(x = x, lag = lag)
   return(lmat)
 }

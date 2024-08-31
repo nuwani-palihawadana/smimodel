@@ -203,29 +203,41 @@ bb_cvforecast <- function(object, data, #newdata,
         }
         # Formula
         ind_pos <- split(seq_along(indexStr[[b]]$index.ind), indexStr[[b]]$index.ind)
-        var_list <- indexStr[[b]]$index.vars[ind_pos[[1]]]
-        if(length(var_list) > 1){
-          pre.formula <- lapply(var_list, function(var) paste0(var)) |>
-            paste(collapse = ",") |> 
-            paste0(")")
-          pre.formula <- paste0(yvar, " ~ g(", pre.formula)
-        }else{
-          pre.formula <- lapply(var_list, function(var) paste0(var)) |>
-            paste0(")")
-          pre.formula <- paste0(yvar, " ~ s(", pre.formula)
+        temp <- vector(mode = "list", length = length(ind_pos))
+        for(a in 1:length(ind_pos)){
+          var_list <- indexStr[[b]]$index.vars[ind_pos[[a]]]
+          temp[[a]] <- ifelse(length(var_list) == 1, 1, 2)
         }
-        if(length(ind_pos) > 1){
-          for(j in 2:length(ind_pos)){
-            var_list <- indexStr[[b]]$index.vars[ind_pos[[j]]]
-            if(length(var_list) > 1){
-              add.formula <- lapply(var_list, function(var) paste0(var)) |>
-                paste(collapse = ",") |> 
-                paste0(")")
-              pre.formula <- paste0(pre.formula, " + g(", add.formula)
-            }else{
-              add.formula <- lapply(var_list, function(var) paste0(var)) |>
-                paste0(")")
-              pre.formula <- paste0(pre.formula, " +s(", add.formula)
+        temp <- unlist(temp)
+        if(all(temp == 1)){
+          pre.formula <- lapply(indexStr[[b]]$index.vars, function(var) paste0("s(", var, ")")) |>
+            paste(collapse = "+") 
+          pre.formula <- paste0(yvar, " ~", pre.formula)
+        }else{
+          var_list <- indexStr[[b]]$index.vars[ind_pos[[1]]]
+          if(length(var_list) > 1){
+            pre.formula <- lapply(var_list, function(var) paste0(var)) |>
+              paste(collapse = ",") |> 
+              paste0(")")
+            pre.formula <- paste0(yvar, " ~ g(", pre.formula)
+          }else{
+            pre.formula <- lapply(var_list, function(var) paste0(var)) |>
+              paste0(")")
+            pre.formula <- paste0(yvar, " ~ s(", pre.formula)
+          }
+          if(length(ind_pos) > 1){
+            for(j in 2:length(ind_pos)){
+              var_list <- indexStr[[b]]$index.vars[ind_pos[[j]]]
+              if(length(var_list) > 1){
+                add.formula <- lapply(var_list, function(var) paste0(var)) |>
+                  paste(collapse = ",") |> 
+                  paste0(")")
+                pre.formula <- paste0(pre.formula, " + g(", add.formula)
+              }else{
+                add.formula <- lapply(var_list, function(var) paste0(var)) |>
+                  paste0(")")
+                pre.formula <- paste0(pre.formula, " +s(", add.formula)
+              }
             }
           }
         }
@@ -239,18 +251,32 @@ bb_cvforecast <- function(object, data, #newdata,
             paste(collapse = "+") 
           pre.formula <- paste(pre.formula, "+", linear.formula)
         }
-        # Model fitting
-        model_list[[b]] <- cgaim::cgaim(formula = as.formula(pre.formula),
-                                        data = df_cat)
-        modelFrame <- model.frame(formula = as.formula(pre.formula), 
-                                  data = df_cat)
-        add <- df_cat |>
-          drop_na() |>
-          select({{ index_data }}, {{ key_data1 }})
-        model_list[[b]]$model <- bind_cols(add, modelFrame)
-        model_list[[b]]$model <- as_tsibble(model_list[[b]]$model,
-                                            index = index_data,
-                                            key = all_of(key_data1))
+        if(all(temp == 1)){
+          # Model fitting
+          model_list[[b]] <- mgcv::gam(formula = as.formula(pre.formula), 
+                                       method = "REML",
+                                       data = df_cat)
+          add <- df_cat |>
+            drop_na() |>
+            select({{ index_data }}, {{ key_data1 }})
+          model_list[[b]]$model <- bind_cols(add, model_list[[b]]$model)
+          model_list[[b]]$model <- as_tsibble(model_list[[b]]$model,
+                                              index = index_data,
+                                              key = all_of(key_data1))
+        }else{
+          # Model fitting
+          model_list[[b]] <- cgaim::cgaim(formula = as.formula(pre.formula),
+                                          data = df_cat)
+          modelFrame <- model.frame(formula = as.formula(pre.formula), 
+                                    data = df_cat)
+          add <- df_cat |>
+            drop_na() |>
+            select({{ index_data }}, {{ key_data1 }})
+          model_list[[b]]$model <- bind_cols(add, modelFrame)
+          model_list[[b]]$model <- as_tsibble(model_list[[b]]$model,
+                                              index = index_data,
+                                              key = all_of(key_data1))
+        }
       }else if("backward" %in% class(object)){
         # Model fitting
         model_list[[b]] <- mgcv::gam(formula = object$fit[[b]]$formula, 

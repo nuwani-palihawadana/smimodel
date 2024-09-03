@@ -308,7 +308,7 @@ bb_cvforecast <- function(object, data, #newdata,
         pre.formula <- object$fit[[b]]$terms
         attributes(pre.formula) <- NULL
         model_list[[b]] <- stats::ppr(formula = as.formula(pre.formula),
-                                      data = df_cat)
+                                      data = df_cat, nterms = object$fit[[b]]$mu)
         add <- df_cat |>
           drop_na() |>
           select({{ index_data }}, {{ key_data1 }})

@@ -871,6 +871,45 @@ avgCoverage <- function(object, level = 95, window = NULL, na.rm = FALSE) {
 }
 
 
+#' Calculate interval forecast width
+#'
+#' This is a wrapper for the function `conformalForecast::width()`.
+#' Calculates the mean width of prediction intervals on the validation set.
+#' If \code{window} is not \code{NULL}, a matrix of the rolling means of interval
+#' width is also returned. If \code{includemedian} is \code{TRUE},
+#' the information of the median interval width will be returned.
+#'
+#' @param object An object of class  \code{bb_cvforecast}.
+#' @param level Target confidence level for prediction intervals.
+#' @param includemedian If \code{TRUE}, the median interval width will also be returned.
+#' @param window If not \code{NULL}, the rolling mean (and rolling median if applicable)
+#' matrix for interval width will also be returned.
+#' @param na.rm A logical indicating whether \code{NA} values should be stripped
+#' before the rolling mean and rolling median computation proceeds.
+#'
+#' @return A list of class \code{"width"} with the following components:
+#' \item{width}{Forecast interval width as a multivariate time series, where the \eqn{h}th
+#' column holds the interval width for the forecast horizon \eqn{h}. The time index
+#' corresponds to the period for which the forecast is produced.}
+#' \item{mean}{Mean interval width across the validation set.}
+#' \item{rollmean}{If \code{window} is not NULL, a matrix of the rolling means
+#' of interval width will be returned.}
+#' \item{median}{Median interval width across the validation set.}
+#' \item{rollmedian}{If \code{window} is not NULL, a matrix of the rolling medians
+#' of interval width will be returned.}
+#' 
+#' @export
+avgWidth <- function(object, level = 95, includemedian = FALSE, window = NULL, 
+                     na.rm = FALSE) {
+  object$LOWER <- object$lower
+  object$UPPER <- object$upper
+  output <- width(object = object, level = level,
+                     includemedian = includemedian,
+                     window = window, na.rm = na.rm)
+  return(output)
+}
+
+
 #' Create lags or leads of a matrix
 #'
 #' This is a wrapper for the function `conformalForecast::lagmatrix()`.Find a

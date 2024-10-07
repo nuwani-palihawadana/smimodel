@@ -51,18 +51,20 @@ model_gam <- function(data, yvar, family = gaussian(), neighbour = 0, s.vars,
       num_key = as.numeric(factor(as.character({{ key11 }}), levels = key_unique))
     )
   # Constructing the formula
-  pre.formula <- paste0(yvar, " ~ ")
-  if (!is.null(s.basedim)) {
-    pre.formula <- paste0(
-      pre.formula, "+s(", paste0(s.vars), ',bs="cr",k=',
-      paste0(s.basedim), ")"
-    )
-  } else {
-    pre.formula <- paste0(pre.formula, "+s(", paste0(s.vars), ',bs="cr")')
+  if(!is.null(s.basedim)){
+    pre.formula <- lapply(s.vars, function(var) paste0("s(", var, ', bs="cr",k=', s.basedim, ")")) |>
+      paste(collapse = "+") 
+  }else{
+    pre.formula <- lapply(s.vars, function(var) paste0("s(", var, ', bs="cr")')) |>
+      paste(collapse = "+") 
   }
+  pre.formula <- paste(yvar, "~", pre.formula)
   if (!is.null(linear.vars)){
-    pre.formula <- paste0(pre.formula, "+", paste0(linear.vars))
+    linear.formula <- lapply(linear.vars, function(var) paste0(var)) |>
+      paste(collapse = "+")
+    pre.formula <- paste(pre.formula, "+", linear.formula)
   }
+
   # Model fitting
   gam_list <- vector(mode = "list", length = NROW(ref))
   for (i in seq_along(ref$key_num)){

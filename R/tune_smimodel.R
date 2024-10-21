@@ -115,8 +115,6 @@ tune_smimodel <- function(data, val.data, yvar, neighbour = 0,
   pred <- predict(object = smimodel$best, newdata = valData, recursive = recursive,
                   recursive_colRange = recursive_colRange)$.predict
   # MSE
-  smimodel_mse = MSE(residuals = (as.numeric(as.matrix(valData[,{{yvar}}], ncol = 1)) - pred))
-  # # In-sample MSE
-  # smimodel_mse <- fabletools::MSE(.resid = smimodel$best$gam$residuals)
+  smimodel_mse <- MSE(residuals = (as.numeric(as.matrix(valData[,{{yvar}}], ncol = 1)) - pred))
   return(smimodel_mse)
 }

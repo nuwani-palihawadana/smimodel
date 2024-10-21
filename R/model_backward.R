@@ -169,10 +169,7 @@ model_backward <- function(data, val.data, yvar,
     # Predictions
     pred <- predict_gam(object = model1, newdata = valData, recursive = recursive,
                     recursive_colRange = recursive_colRange)$.predict
-    # # Validation set MSE
-    # # Predictions
-    # pred <- predict(object = model1, newdata = df_cat_val, type = "response")
-    # MSE
+    # Validation set MSE
     mse1 = MSE(residuals = (as.numeric(as.matrix(valData[,{{yvar}}], ncol = 1)) - pred))
     mse_old <- mse1
     mseMinRatio <- 1
@@ -317,10 +314,7 @@ eliminate <- function(ind, train, val, yvar, family = gaussian(),
   # Predictions
   pred <- predict_gam(object = model1, newdata = valData, recursive = recursive,
                   recursive_colRange = recursive_colRange)$.predict
-  # # Validation set MSE
-  # # Predictions
-  # pred <- predict(object = model1, newdata = val, type = "response")
-  # MSE
+  # Validation set MSE
   mse1 = MSE(residuals = (as.numeric(as.matrix(valData[,{{yvar}}], ncol = 1)) - pred))
   return(mse1)
 }

@@ -3,8 +3,8 @@
 "_PACKAGE"
 
 #' @importFrom cgaim cgaim g s
-#' @importFrom conformalForecast coverage lagmatrix
-#' @importFrom dplyr arrange bind_cols bind_rows filter lag mutate mutate_at pull rename select
+#' @importFrom conformalForecast coverage lagmatrix width
+#' @importFrom dplyr arrange bind_cols bind_rows filter group_split lag mutate mutate_at pull rename row_number select 
 #' @importFrom future multisession plan
 #' @importFrom furrr future_map
 #' @importFrom generics augment

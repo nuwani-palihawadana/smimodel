@@ -18,6 +18,7 @@ bb_cvforecast(
   forward = TRUE,
   initial = 1,
   window = NULL,
+  roll.length = 1,
   recursive = FALSE,
   recursive_colNames = NULL,
   ...
@@ -27,10 +28,10 @@ bb_cvforecast(
 \item{object}{Fitted model object of class \code{smimodel}, \code{backward}, \code{gaimFit}
 or \code{pprFit}.}
 
-\item{data}{Data set. Must be a data set of class \code{tsibble}.(Make
-sure there are no additional date/time/date-time/yearmonth/POSIXct/POSIXt
-variables except for the \code{index} of the \code{tsibble}). If multiple models are
-fitted, the grouping variable should be the key of the \code{tsibble}.}
+\item{data}{Data set. Must be a data set of class \code{tsibble}.(Make sure there
+are no additional date/time/date-time/yearmonth/POSIXct/POSIXt variables
+except for the \code{index} of the \code{tsibble}). If multiple models are fitted,
+the grouping variable should be the key of the \code{tsibble}.}
 
 \item{yvar}{Name of the response variable as a character string.}
 
@@ -61,6 +62,9 @@ forecasting is performed.}
 
 \item{window}{Length of the rolling window. If \code{NULL}, a rolling window
 will not be used.}
+
+\item{roll.length}{Number of observations by which each rolling/expanding
+window should be rolled forward.}
 
 \item{recursive}{Whether to obtain recursive forecasts or not (default -
 FALSE).}

@@ -5,10 +5,10 @@
 #'
 #' @param object Fitted model object of class `smimodel`, `backward`, `gaimFit`
 #'   or `pprFit`.
-#' @param data Data set. Must be a data set of class `tsibble`.(Make
-#'   sure there are no additional date/time/date-time/yearmonth/POSIXct/POSIXt
-#'   variables except for the `index` of the `tsibble`). If multiple models are
-#'   fitted, the grouping variable should be the key of the `tsibble`.
+#' @param data Data set. Must be a data set of class `tsibble`.(Make sure there
+#'   are no additional date/time/date-time/yearmonth/POSIXct/POSIXt variables
+#'   except for the `index` of the `tsibble`). If multiple models are fitted,
+#'   the grouping variable should be the key of the `tsibble`.
 #' @param yvar Name of the response variable as a character string.
 #' @param neighbour If multiple models are fitted: Number of neighbours of each
 #'   key (i.e. grouping variable) to be considered in model fitting to handle
@@ -28,6 +28,8 @@
 #'   forecasting is performed.
 #' @param window Length of the rolling window. If \code{NULL}, a rolling window
 #'   will not be used.
+#' @param roll.length Number of observations by which each rolling/expanding
+#'   window should be rolled forward.
 #' @param recursive Whether to obtain recursive forecasts or not (default -
 #'   FALSE).
 #' @param recursive_colNames If `recursive = TRUE`, a character vector giving
@@ -35,15 +37,15 @@
 #' @param ... Other arguments not currently used.
 #'
 #' @export
-bb_cvforecast <- function(object, data, #newdata, 
-                          yvar, neighbour = 0, predictor.vars, 
-                          h = 1, season.period = 1, m = 1, 
-                          num.futures = 1000, level = c(80, 95), forward = TRUE, 
-                          initial = 1, window = NULL, 
-                          recursive = FALSE, recursive_colNames = NULL, ...) {
-  # Check input data 
+bb_cvforecast <- function(object, data,
+                              yvar, neighbour = 0, predictor.vars,
+                              h = 1, season.period = 1, m = 1,
+                              num.futures = 1000, level = c(80, 95), forward = TRUE,
+                              initial = 1, window = NULL, roll.length = 1,
+                              recursive = FALSE, recursive_colNames = NULL, ...) {
+  # Check input data
   if (!is_tsibble(data)) stop("data is not a tsibble.")
-  #if (!is_tsibble(newdata)) stop("newdata is not a tsibble.")
+  
   index_data <- index(data)
   key_data <- key(data)
   if (length(key(data)) == 0) {
@@ -51,17 +53,13 @@ bb_cvforecast <- function(object, data, #newdata,
       dplyr::mutate(dummy_key = rep(1, NROW(data))) |>
       tsibble::as_tsibble(index = index_data, key = dummy_key)
     key_data <- key(data)
-    # newdata <- newdata |>
-    #   dplyr::mutate(dummy_key = rep(1, NROW(newdata))) |>
-    #   tsibble::as_tsibble(index = index_data, key = dummy_key)
   }
   key_data1 <- key(data)[[1]]
-  data1 <- data |> 
-    as_tibble() |> 
+  data1 <- data |>
+    as_tibble() |>
     arrange({{index_data}})
   test.length <- forward * h
   y <- as.ts(data1[ , yvar][[1]][1:(NROW(data1) - test.length)])
-  #y <- as.ts(data1[ , yvar][[1]])
   n <- length(y)
   
   # Check confidence levels
@@ -85,17 +83,18 @@ bb_cvforecast <- function(object, data, #newdata,
     if (window == n && !forward)
       stop("window out of bounds")
   }
-  # forwardData <- bind_rows(data, newdata)
-  # forwardData <- forwardData |> 
-  #   as_tibble() |> 
-  #   arrange({{index_data}})
-  # xreg <- forwardData[ , c(as.character(index_data), as.character(key_data1), 
-  #                          predictor.vars)]
-  xreg <- data1[ , c(as.character(index_data), as.character(key_data1), 
-                           predictor.vars)]
+  
+  xreg <- data1[ , c(as.character(index_data), as.character(key_data1),
+                     predictor.vars)]
+  # Constructing a column to store time difference between to observations
+  xreg <- xreg |>
+    mutate(indexLag = lag({{index_data}}),
+           indexDiff = {{index_data}} - indexLag)
+  # Convert to a ts
   xreg <- ts(xreg,
              start = start(y),
              frequency = frequency(y))
+  
   if (nrow(xreg) < n)
     stop("xreg should be at least of the same size as y")
   if (nrow(xreg) < n + forward * h)
@@ -114,7 +113,7 @@ bb_cvforecast <- function(object, data, #newdata,
   N <- ifelse(forward, n + h, n + h - 1L)
   nlast <- ifelse(forward, n, n - 1L)
   nfirst <- ifelse(is.null(window), initial, max(window, initial))
-  indx <- seq(nfirst, nlast, by = 1L)
+  indx <- seq(nfirst, nlast, by = roll.length)
   fit_times <- length(indx)
   
   pf <- `colnames<-` (ts(matrix(NA_real_, nrow = N, ncol = h),
@@ -145,29 +144,51 @@ bb_cvforecast <- function(object, data, #newdata,
                           start = i + 1L,
                           end = i + h)
     suppressWarnings(train <- xreg_subset |>
-                       as_tibble() |> 
-                       arrange({{index_data}}) |> 
-                       mutate(!!yvar := as.numeric(y_subset)) |> 
-                       select(all_of(index_data), all_of(key_data1), all_of(yvar), all_of(predictor.vars)) |> 
+                       as_tibble() |>
+                       arrange({{index_data}}) |>
+                       mutate(!!yvar := as.numeric(y_subset)) |>
+                       select(all_of(index_data), all_of(key_data1), indexDiff, all_of(yvar), all_of(predictor.vars)) |>
                        as_tsibble(index = index_data, key = key_data1))
     suppressWarnings(test <- xreg_future |>
-                       as_tibble() |> 
-                       arrange({{index_data}}) |> 
-                       select(all_of(index_data), all_of(key_data1), all_of(predictor.vars)) |> 
+                       as_tibble() |>
+                       arrange({{index_data}}) |>
+                       select(all_of(index_data), all_of(key_data1), indexDiff, all_of(predictor.vars)) |>
                        as_tsibble(index = index_data, key = key_data1))
     if(recursive == TRUE){
       recursive_colRange <- suppressWarnings(which(colnames(test) %in% recursive_colNames))
       # Convert to a tibble
-      test <- test |> 
-        as_tibble() |> 
-        arrange({{index_data}})
-      ## Adjusting the test set data to remove future response lags
-      for(a in recursive_colRange){
-        test[(a - (recursive_colRange[1] - 2)):NROW(test), a] <- NA
-      }
-      # Convert back to a tsibble
       test <- test |>
-        as_tsibble(index = index_data, key = key_data1)
+        as_tibble() |>
+        arrange({{index_data}})
+      
+      # Identify times series with seasonal gaps
+      # Regular time difference
+      timediff <- as.numeric(names(table(test$indexDiff))[which.max(table(test$indexDiff))])
+      # Identify gap locations
+      idx <- which(test$indexDiff > timediff, arr.ind = TRUE)
+      
+      if(length(idx) == 0){
+        # Adjusting the test set data to remove future response lags
+        for(a in recursive_colRange){
+          test[(a - (recursive_colRange[1] - 2)):NROW(test), a] <- NA
+        }
+        # Convert back to a tsibble
+        test <- test |>
+          as_tsibble(index = index_data, key = key_data1)
+      }else{
+        # Split test set at gap locations and save splits as a list
+        test_list_temp <- test |>
+          mutate(row_idx = row_number(),
+                 grp = cumsum(row_idx %in% idx)) |>
+          group_split(grp)
+        # Remove future response lags from each list element appropriately
+        test_list <- test_list_temp |>
+          purrr::map(~ remove_lags(data = ., recursive_colRange = recursive_colRange))
+        test <- bind_rows(test_list)
+        # Convert each list element back to a tsibble
+        test <- test |>
+          as_tsibble(index = index_data, key = key_data1)
+      }
     }else{
       recursive_colRange <- NULL
     }
@@ -185,7 +206,7 @@ bb_cvforecast <- function(object, data, #newdata,
       indexStr <- vector(mode = "list", length = NROW(ref))
       model_list <- vector(mode = "list", length = NROW(ref))
     }else{
-      model_list <- vector(mode = "list", length = NROW(ref)) 
+      model_list <- vector(mode = "list", length = NROW(ref))
     }
     
     for (b in seq_along(ref$key_num)){
@@ -193,7 +214,7 @@ bb_cvforecast <- function(object, data, #newdata,
       df_cat <- train |>
         dplyr::filter((abs(num_key - ref$key_num[b]) <= neighbour) |
                         (abs(num_key - ref$key_num[b] + NROW(ref)) <= neighbour) |
-                        (abs(num_key - ref$key_num[b] - NROW(ref)) <= neighbour)) 
+                        (abs(num_key - ref$key_num[b] - NROW(ref)) <= neighbour))
       if ("smimodel" %in% class(object)){
         # Index structure for the relevant key
         for(d in 1:ncol(object$fit[[b]]$best$alpha)){
@@ -211,13 +232,13 @@ bb_cvforecast <- function(object, data, #newdata,
         temp <- unlist(temp)
         if(all(temp == 1)){
           pre.formula <- lapply(indexStr[[b]]$index.vars, function(var) paste0("s(", var, ")")) |>
-            paste(collapse = "+") 
+            paste(collapse = "+")
           pre.formula <- paste0(yvar, " ~", pre.formula)
         }else{
           var_list <- indexStr[[b]]$index.vars[ind_pos[[1]]]
           if(length(var_list) > 1){
             pre.formula <- lapply(var_list, function(var) paste0(var)) |>
-              paste(collapse = ",") |> 
+              paste(collapse = ",") |>
               paste0(")")
             pre.formula <- paste0(yvar, " ~ g(", pre.formula)
           }else{
@@ -226,11 +247,11 @@ bb_cvforecast <- function(object, data, #newdata,
             pre.formula <- paste0(yvar, " ~ s(", pre.formula)
           }
           if(length(ind_pos) > 1){
-            for(j in 2:length(ind_pos)){
-              var_list <- indexStr[[b]]$index.vars[ind_pos[[j]]]
+            for(g in 2:length(ind_pos)){
+              var_list <- indexStr[[b]]$index.vars[ind_pos[[g]]]
               if(length(var_list) > 1){
                 add.formula <- lapply(var_list, function(var) paste0(var)) |>
-                  paste(collapse = ",") |> 
+                  paste(collapse = ",") |>
                   paste0(")")
                 pre.formula <- paste0(pre.formula, " + g(", add.formula)
               }else{
@@ -243,17 +264,17 @@ bb_cvforecast <- function(object, data, #newdata,
         }
         if (!is.null(object$fit[[1]]$best$vars_s)){
           s.formula <- lapply(object$fit[[1]]$best$vars_s, function(var) paste0("s(", var, ")")) |>
-            paste(collapse = "+") 
+            paste(collapse = "+")
           pre.formula <- paste(pre.formula, "+", s.formula)
         }
         if (!is.null(object$fit[[1]]$best$vars_linear)){
           linear.formula <- lapply(object$fit[[1]]$best$vars_linear, function(var) paste0(var)) |>
-            paste(collapse = "+") 
+            paste(collapse = "+")
           pre.formula <- paste(pre.formula, "+", linear.formula)
         }
         if(all(temp == 1)){
           # Model fitting
-          model_list[[b]] <- mgcv::gam(formula = as.formula(pre.formula), 
+          model_list[[b]] <- mgcv::gam(formula = as.formula(pre.formula),
                                        method = "REML",
                                        data = df_cat)
           add <- df_cat |>
@@ -267,10 +288,10 @@ bb_cvforecast <- function(object, data, #newdata,
           # Model fitting
           model_list[[b]] <- cgaim::cgaim(formula = as.formula(pre.formula),
                                           data = df_cat)
-          modelFrame <- model.frame(formula = as.formula(pre.formula), 
+          modelFrame <- model.frame(formula = as.formula(pre.formula),
                                     data = df_cat)
           add <- df_cat |>
-            drop_na() |>
+            #drop_na() |>
             select({{ index_data }}, {{ key_data1 }})
           model_list[[b]]$model <- bind_cols(add, modelFrame)
           model_list[[b]]$model <- as_tsibble(model_list[[b]]$model,
@@ -279,8 +300,8 @@ bb_cvforecast <- function(object, data, #newdata,
         }
       }else if("backward" %in% class(object)){
         # Model fitting
-        model_list[[b]] <- mgcv::gam(formula = object$fit[[b]]$formula, 
-                                     family = object$fit[[b]]$family$family, 
+        model_list[[b]] <- mgcv::gam(formula = object$fit[[b]]$formula,
+                                     family = object$fit[[b]]$family$family,
                                      method = "REML",
                                      data = df_cat)
         add <- df_cat |>
@@ -295,10 +316,10 @@ bb_cvforecast <- function(object, data, #newdata,
         attributes(pre.formula) <- NULL
         model_list[[b]] <- cgaim::cgaim(formula = as.formula(pre.formula),
                                         data = df_cat)
-        modelFrame <- model.frame(formula = as.formula(pre.formula), 
+        modelFrame <- model.frame(formula = as.formula(pre.formula),
                                   data = df_cat)
         add <- df_cat |>
-          drop_na() |>
+          #drop_na() |>
           select({{ index_data }}, {{ key_data1 }})
         model_list[[b]]$model <- bind_cols(add, modelFrame)
         model_list[[b]]$model <- as_tsibble(model_list[[b]]$model,
@@ -334,10 +355,10 @@ bb_cvforecast <- function(object, data, #newdata,
       class(modelFit[[i]]) <- c("pprFit", "tbl_df", "tbl", "data.frame")
     }
     
-    # Obtain predictions on validation set
-    preds <- predict(object = modelFit[[i]], 
-                     newdata = test, 
-                     recursive = recursive, 
+    # Obtain predictions on test set
+    preds <- predict(object = modelFit[[i]],
+                     newdata = test,
+                     recursive = recursive,
                      recursive_colRange = recursive_colRange)
     # Store predictions
     pf[i, ] <- as.numeric(preds$.predict)
@@ -347,11 +368,11 @@ bb_cvforecast <- function(object, data, #newdata,
     res[i, 1:length(resids$.resid)] <- as.numeric(resids$.resid)
     # Possible futures through block bootstrapping on in-sample residuals
     pFutures[[i]] <- blockBootstrap(object = modelFit[[i]], newdata = test,
-                                              resids = na.omit(res[i, ]), preds = pf[i, ], 
-                                              season.period = season.period, m = m, 
-                                              num.futures = num.futures, 
-                                              recursive = recursive, 
-                                              recursive_colRange = recursive_colRange)
+                                    resids = na.omit(res[i, ]), preds = pf[i, ],
+                                    season.period = season.period, m = m,
+                                    num.futures = num.futures,
+                                    recursive = recursive,
+                                    recursive_colRange = recursive_colRange)
     # Prediction interval bounds
     lower_q <- (1 - (level/100))/2
     upper_q <- lower_q + (level/100)
@@ -386,6 +407,36 @@ bb_cvforecast <- function(object, data, #newdata,
                         window(start = time(up)[nfirst + 1L]))
   
   return(structure(out, class = "bb_cvforecast"))
+}
+utils::globalVariables(c("indexLag", "indexDiff", "row_idx", "grp"))
+
+
+#' Remove actual values from a data set for recursive forecasting
+#'
+#' Appropriately removes exisiting (actual) values from the specified column
+#' range (lagged response columns) of a given data set (typicall a test set for
+#' which recursive forecasting is required).
+#'
+#' @param data Data set from which the actual lagged values should be removed.
+#' @param recursive_colRange The range of column numbers in `data` from which
+#'   lagged values should be removed.
+#'
+#' @export
+remove_lags <- function(data, recursive_colRange){
+  if(NROW(data) > 1){
+    if(NROW(data) <= length(recursive_colRange)){
+      for(a in recursive_colRange[1:(NROW(data) - 1)]){
+        data[(a - (recursive_colRange[1] - 2)):NROW(data), a] <- NA
+      }
+    }else{
+      for(a in recursive_colRange){
+        data[(a - (recursive_colRange[1] - 2)):NROW(data), a] <- NA
+      }
+    }
+  }else{
+    data
+  }
+  return(data)
 }
 
 

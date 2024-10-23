@@ -215,6 +215,8 @@ bb_cvforecast <- function(object, data,
         dplyr::filter((abs(num_key - ref$key_num[b]) <= neighbour) |
                         (abs(num_key - ref$key_num[b] + NROW(ref)) <= neighbour) |
                         (abs(num_key - ref$key_num[b] - NROW(ref)) <= neighbour))
+      df_cat <- df_cat |>
+        drop_na()
       if ("smimodel" %in% class(object)){
         # Index structure for the relevant key
         for(d in 1:ncol(object$fit[[b]]$best$alpha)){
@@ -278,7 +280,7 @@ bb_cvforecast <- function(object, data,
                                        method = "REML",
                                        data = df_cat)
           add <- df_cat |>
-            drop_na() |>
+            #drop_na() |>
             select({{ index_data }}, {{ key_data1 }})
           model_list[[b]]$model <- bind_cols(add, model_list[[b]]$model)
           model_list[[b]]$model <- as_tsibble(model_list[[b]]$model,
@@ -305,7 +307,7 @@ bb_cvforecast <- function(object, data,
                                      method = "REML",
                                      data = df_cat)
         add <- df_cat |>
-          drop_na() |>
+          #drop_na() |>
           select({{ index_data }}, {{ key_data1 }})
         model_list[[b]]$model <- bind_cols(add, model_list[[b]]$model)
         model_list[[b]]$model <- as_tsibble(model_list[[b]]$model,
@@ -331,7 +333,7 @@ bb_cvforecast <- function(object, data,
         model_list[[b]] <- stats::ppr(formula = as.formula(pre.formula),
                                       data = df_cat, nterms = object$fit[[b]]$mu)
         add <- df_cat |>
-          drop_na() |>
+          #drop_na() |>
           select({{ index_data }}, {{ key_data1 }})
         model_list[[b]]$model <- bind_cols(add, model_list[[b]]$model)
         model_list[[b]]$model <- as_tsibble(model_list[[b]]$model,

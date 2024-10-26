@@ -7,10 +7,10 @@
 \method{autoplot}{smimodel}(object, model = 1, ...)
 }
 \arguments{
-\item{object}{A \code{smimodel} object returned from \code{model_smimodel()}.}
+\item{object}{A \code{smimodel} object.}
 
-\item{model}{An \code{integer} to indicate the smooths of which model (out of the
-set of multiple models fitted) to be plotted.}
+\item{model}{An \code{integer} to indicate the smooths of which model (out of
+the set of multiple models fitted) to be plotted.}
 
 \item{...}{Other arguments not currently used.}
 }
@@ -18,9 +18,7 @@ set of multiple models fitted) to be plotted.}
 Plot(s) of fitted spline(s).
 }
 \description{
-Plots the graphs of fitted spline(s) for a specified predictor variable, by
-fixing all the other predictor values. If a set of multiple models are
-fitted, plots individual graphs of fitted values of all the models in a
-single plot except for tensor smooths fitted in \code{model_distlag()}. out of the
-set of multiple models fitted)
+Plots the graphs of fitted spline(s). If a set of multiple models are fitted,
+plots graphs of fitted spline(s) of a specified model (in argument
+\code{model}) out of the set of multiple models fitted.
 }

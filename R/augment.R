@@ -1,10 +1,10 @@
-#' Augment function for class `smimodel`
+#' Augment function for class \code{smimodel}
 #'
-#' Generates residuals and fitted values of a fitted `smimodel` object.
+#' Generates residuals and fitted values of a fitted \code{smimodel} object.
 #'
-#' @param x A `smimodel` object.
+#' @param x A \code{smimodel} object.
 #' @param ... Other arguments not currently used.
-#'
+#' @return A \code{tibble}.
 #'
 #' @method augment smimodel
 #'
@@ -35,12 +35,13 @@ augment.smimodel <- function(x, ...) {
 utils::globalVariables(c("dummy_key", "num_key", "New", "Old"))
 
 
-#' Augment function for class `smimodelFit`
+#' Augment function for class \code{smimodelFit}
 #'
-#' Generates residuals and fitted values of a fitted `smimodelFit` object.
+#' Generates residuals and fitted values of a fitted \code{smimodelFit} object.
 #'
-#' @param x A `smimodelFit` object.
+#' @param x A \code{smimodelFit} object.
 #' @param ... Other arguments not currently used.
+#' @return A \code{tibble}.
 #'
 #' @method augment smimodelFit
 
@@ -55,12 +56,13 @@ augment.smimodelFit <- function(x, ...) {
 }
 
 
-#' Augment function for class `backward`
+#' Augment function for class \code{backward}
 #'
-#' Generates residuals and fitted values of a fitted `backward` object.
+#' Generates residuals and fitted values of a fitted \code{backward} object.
 #'
-#' @param x A `backward` object.
+#' @param x A \code{backward} object.
 #' @param ... Other arguments not currently used.
+#' @return A \code{tibble}.
 #'
 #' @method augment backward
 #'
@@ -90,12 +92,13 @@ augment.backward <- function(x, ...) {
 }
 
 
-#' Augment function for class `pprFit`
+#' Augment function for class \code{pprFit}
 #'
-#' Generates residuals and fitted values of a fitted `pprFit` object.
+#' Generates residuals and fitted values of a fitted \code{pprFit} object.
 #'
-#' @param x A `pprFit` object.
+#' @param x A \code{pprFit} object.
 #' @param ... Other arguments not currently used.
+#' @return A \code{tibble}.
 #'
 #' @method augment pprFit
 #'
@@ -125,12 +128,13 @@ augment.pprFit <- function(x, ...) {
 }
 
 
-#' Augment function for class `gaimFit`
+#' Augment function for class \code{gaimFit}
 #'
-#' Generates residuals and fitted values of a fitted `gaimFit` object.
+#' Generates residuals and fitted values of a fitted \code{gaimFit} object.
 #'
-#' @param x A `gaimFit` object.
+#' @param x A \code{gaimFit} object.
 #' @param ... Other arguments not currently used.
+#' @return A \code{tibble}.
 #'
 #' @method augment gaimFit
 #'
@@ -160,12 +164,13 @@ augment.gaimFit <- function(x, ...) {
 }
 
 
-#' Augment function for class `lmFit`
+#' Augment function for class \code{lmFit}
 #'
-#' Generates residuals and fitted values of a fitted `lmFit` object.
+#' Generates residuals and fitted values of a fitted \code{lmFit} object.
 #'
-#' @param x A `lmFit` object.
+#' @param x A \code{lmFit} object.
 #' @param ... Other arguments not currently used.
+#' @return A \code{tibble}.
 #'
 #' @method augment lmFit
 #'
@@ -195,12 +200,13 @@ augment.lmFit <- function(x, ...) {
 }
 
 
-#' Augment function for class `gamFit`
+#' Augment function for class \code{gamFit}
 #'
-#' Generates residuals and fitted values of a fitted `gamFit` object.
+#' Generates residuals and fitted values of a fitted \code{gamFit} object.
 #'
-#' @param x A `gamFit` object.
+#' @param x A \code{gamFit} object.
 #' @param ... Other arguments not currently used.
+#' @return A \code{tibble}.
 #'
 #' @method augment gamFit
 #'

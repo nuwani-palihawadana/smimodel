@@ -9,12 +9,13 @@ unscaling(object, scaledInfo)
 \arguments{
 \item{object}{A \code{smimodel} object.}
 
-\item{scaledInfo}{The list returned from a call of the function \code{scaling()}.
-(Relates to the argument \code{data} in the corresponding call of \code{smimodel()}.)}
+\item{scaledInfo}{The list returned from a call of the function
+\code{\link{scaling}}.}
 }
 \description{
 Transforms back the index coefficients to suit original-scale index variables
-if the same were standardised when estimating the \code{smimodel} (happens in
-\code{initialise = "ppr"} in \code{smimodel()}). Users are not expected to directly use
-this function; usually called within \code{smimodel()}.
+if the same were scaled when estimating the \code{smimodel} (happens in
+\code{initialise = "ppr"} in \code{\link{model_smimodel}} or
+\code{\link{greedy_smimodel}}). Users are not expected to directly use this
+function; usually called within \code{\link{smimodel.fit}}.
 }

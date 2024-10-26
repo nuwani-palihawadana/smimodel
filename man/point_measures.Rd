@@ -17,7 +17,8 @@ MAE(residuals, na.rm = TRUE, ...)
 point_measures
 }
 \arguments{
-\item{residuals}{A vector of residuals from either the validation or test data.}
+\item{residuals}{A vector of residuals from either the validation or test
+data.}
 
 \item{na.rm}{If \code{TRUE}, remove the missing values before calculating the
 accuracy measure.}

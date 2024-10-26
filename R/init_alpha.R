@@ -8,10 +8,18 @@
 #' @param index.ind An integer vector that assigns group index for each
 #'   predictor.
 #' @param init.type Type of initialisation for index coefficients.
-#'   ("penalisedReg" - Penalised linear regression; "reg" - Linear regression)
-#' @param lambda0 Penalty parameter for L0 penalty.
-#' @param lambda2 Penalty parameter for L2 penalty.
-#' @param M Big-M value used in MIP.
+#'   (\code{"penalisedReg"} - Penalised linear regression; \code{"reg"} - Linear
+#'   regression)
+#' @param lambda0 If \code{init.type = "penalisedReg"}, penalty parameter for L0
+#'   penalty.
+#' @param lambda2 If \code{init.type = "penalisedReg"}, penalty parameter for L2
+#'   penalty.
+#' @param M If \code{init.type = "penalisedReg"}, the big-M value used in the
+#'   MIP.
+#' @return A list containing the following components:
+#'   \item{alpha_init}{Normalised vector of index coefficients.}
+#' \item{alpha_nonNormalised}{Non-normalised (i.e. prior to normalising)
+#' vector of index coefficients.}
 
 init_alpha <- function(Y, X, index.ind, init.type = "penalisedReg", 
                        lambda0 = 1, lambda2 = 1, M = 10){

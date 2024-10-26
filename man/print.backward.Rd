@@ -7,8 +7,8 @@
 \method{print}{backward}(x, ...)
 }
 \arguments{
-\item{x}{A model object of class \code{backward} as produced by \code{model_backward()}
-function.}
+\item{x}{A model object of class \code{backward} as produced by
+\code{model_backward()} function.}
 
 \item{...}{Other arguments not currently used.}
 }

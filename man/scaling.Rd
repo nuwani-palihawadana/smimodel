@@ -13,6 +13,12 @@ scaling(data, index.vars)
 \item{index.vars}{A character vector of names of the predictor variables for
 which indices should be estimated.}
 }
+\value{
+A list containing the following components: \item{scaled_data}{The
+scaled data set of class \code{tibble}.} \item{scaled_info}{A named numeric
+vector of standard deviations of \code{index.vars} that were used to scale
+the corresponding columns of \code{data}.}
+}
 \description{
-Standardises the columns of the \code{data} corresponding to \code{index.vars}.
+Scales the columns of the \code{data} corresponding to \code{index.vars}.
 }

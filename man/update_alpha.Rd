@@ -54,6 +54,9 @@ non-convex quadratic constraints in Gurobi solver.}
 
 \item{verbose}{The option to print detailed solver output.}
 }
+\value{
+A vector of normalised index coefficients.
+}
 \description{
 Updates index coefficients by solving a mixed integer program.
 }

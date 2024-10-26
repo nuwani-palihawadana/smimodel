@@ -1,15 +1,20 @@
 #' Constructing index coefficient vectors with all predictors in each index
 #'
-#' Constructs vectors of coefficients for each index including a
-#' coefficient for all the predictors that are entering indices. i.e. if a
-#' coefficient is not provided for a particular predictor in a particular index,
-#' the function will replace the missing coefficient with a zero.
+#' Constructs vectors of coefficients for each index including a coefficient for
+#' all the predictors that are entering indices. i.e. if a coefficient is not
+#' provided for a particular predictor in a particular index, the function will
+#' replace the missing coefficient with a zero.
 #'
 #' @param num_pred Number of predictors.
 #' @param num_ind Number of indices.
-#' @param ind_pos A list of which the length = `num_ind` that indicates which
+#' @param ind_pos A list of length = \code{num_ind} that indicates which
 #'   predictors belong to which index.
 #' @param alpha A vector of index coefficients.
+#' @return A list containing the following components: \item{alpha_init_new}{A
+#'   numeric vector of index coefficients.} \item{index}{An integer vector that
+#'   assigns group indices for each predictor.} \item{index_positions}{A list of
+#'   length = \code{num_ind} that indicates which predictors belong to which
+#'   index.}
 
 allpred_index <- function(num_pred, num_ind, ind_pos, alpha){
   init_list <- vector(mode = "list", length = num_ind)

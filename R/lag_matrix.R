@@ -4,8 +4,8 @@
 #' form of a tibble.
 #'
 #' @param variable Variable to be lagged.
-#' @param n Number of lags. The default value is `n = 10`.
-#' @return A `tibble`.
+#' @param n Number of lags. The default value is \code{n = 10}.
+#' @return A \code{tibble}.
 #'
 #' @examples
 #' library(dplyr)

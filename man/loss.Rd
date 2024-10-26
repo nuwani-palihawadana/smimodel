@@ -2,7 +2,7 @@
 % Please edit documentation in R/loss.R
 \name{loss}
 \alias{loss}
-\title{Calculating the loss in MIP}
+\title{Calculating the loss of the MIP used to estimate a SMI model}
 \usage{
 loss(Y, Yhat, alpha, lambda0, lambda2)
 }
@@ -17,7 +17,10 @@ loss(Y, Yhat, alpha, lambda0, lambda2)
 
 \item{lambda2}{Penalty parameter for L2 penalty.}
 }
+\value{
+A \code{numeric}.
+}
 \description{
-Calculates the value of the objective function (loss function) of the
-corresponding mixed integer program.
+Calculates the value of the objective function (loss function) of the mixed
+integer program used to estimate a SMI model.
 }

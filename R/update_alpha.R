@@ -8,7 +8,7 @@
 #' @param num_ind Number of indices.
 #' @param index.ind An integer vector that assigns group index for each
 #'   predictor.
-#' @param dgz The `tibble` of derivatives of the estimated smooths from previous
+#' @param dgz The \code{tibble} of derivatives of the estimated smooths from previous
 #'   iteration.
 #' @param alpha_old Vector of index coefficients from previous iteration.
 #' @param lambda0 Penalty parameter for L0 penalty.
@@ -20,6 +20,7 @@
 #' @param NonConvex The strategy for handling non-convex quadratic objectives or
 #'   non-convex quadratic constraints in Gurobi solver.
 #' @param verbose The option to print detailed solver output.
+#' @return A vector of normalised index coefficients.
 
 update_alpha <- function(Y, X, num_pred, num_ind, index.ind, dgz, alpha_old, 
                          lambda0 = 1, lambda2 = 1, M = 10, TimeLimit = Inf,

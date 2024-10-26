@@ -11,14 +11,21 @@ allpred_index(num_pred, num_ind, ind_pos, alpha)
 
 \item{num_ind}{Number of indices.}
 
-\item{ind_pos}{A list of which the length = \code{num_ind} that indicates which
+\item{ind_pos}{A list of length = \code{num_ind} that indicates which
 predictors belong to which index.}
 
 \item{alpha}{A vector of index coefficients.}
 }
+\value{
+A list containing the following components: \item{alpha_init_new}{A
+numeric vector of index coefficients.} \item{index}{An integer vector that
+assigns group indices for each predictor.} \item{index_positions}{A list of
+length = \code{num_ind} that indicates which predictors belong to which
+index.}
+}
 \description{
-Constructs vectors of coefficients for each index including a
-coefficient for all the predictors that are entering indices. i.e. if a
-coefficient is not provided for a particular predictor in a particular index,
-the function will replace the missing coefficient with a zero.
+Constructs vectors of coefficients for each index including a coefficient for
+all the predictors that are entering indices. i.e. if a coefficient is not
+provided for a particular predictor in a particular index, the function will
+replace the missing coefficient with a zero.
 }

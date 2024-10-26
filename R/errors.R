@@ -14,9 +14,10 @@ MAE <- function(residuals, na.rm = TRUE, ...){
 
 #' Point estimate accuracy measures
 #'
-#' @param residuals A vector of residuals from either the validation or test data.
+#' @param residuals A vector of residuals from either the validation or test
+#'   data.
 #' @param na.rm If \code{TRUE}, remove the missing values before calculating the
-#' accuracy measure.
+#'   accuracy measure.
 #' @param ... Additional arguments for each measure.
 #'
 #' @export

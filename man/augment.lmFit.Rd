@@ -11,6 +11,9 @@
 
 \item{...}{Other arguments not currently used.}
 }
+\value{
+A \code{tibble}.
+}
 \description{
 Generates residuals and fitted values of a fitted \code{lmFit} object.
 }

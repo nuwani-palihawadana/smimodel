@@ -7,8 +7,8 @@
 \method{print}{gaimFit}(x, ...)
 }
 \arguments{
-\item{x}{A model object of class \code{gaimFit} as produced by \code{model_gaim()}
-function.}
+\item{x}{A model object of class \code{gaimFit} as produced by
+\code{model_gaim()} function.}
 
 \item{...}{Other arguments not currently used.}
 }

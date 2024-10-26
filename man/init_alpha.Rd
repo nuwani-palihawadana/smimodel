@@ -23,13 +23,23 @@ init_alpha(
 predictor.}
 
 \item{init.type}{Type of initialisation for index coefficients.
-("penalisedReg" - Penalised linear regression; "reg" - Linear regression)}
+(\code{"penalisedReg"} - Penalised linear regression; \code{"reg"} - Linear
+regression)}
 
-\item{lambda0}{Penalty parameter for L0 penalty.}
+\item{lambda0}{If \code{init.type = "penalisedReg"}, penalty parameter for L0
+penalty.}
 
-\item{lambda2}{Penalty parameter for L2 penalty.}
+\item{lambda2}{If \code{init.type = "penalisedReg"}, penalty parameter for L2
+penalty.}
 
-\item{M}{Big-M value used in MIP.}
+\item{M}{If \code{init.type = "penalisedReg"}, the big-M value used in the
+MIP.}
+}
+\value{
+A list containing the following components:
+\item{alpha_init}{Normalised vector of index coefficients.}
+\item{alpha_nonNormalised}{Non-normalised (i.e. prior to normalising)
+vector of index coefficients.}
 }
 \description{
 Initialises index coefficient vector through linear regression or penalised

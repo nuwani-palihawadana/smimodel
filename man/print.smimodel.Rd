@@ -7,8 +7,7 @@
 \method{print}{smimodel}(x, ...)
 }
 \arguments{
-\item{x}{A model object of class \code{smimodel} as produced by \code{model_smimodel()}
-function.}
+\item{x}{An object of class \code{smimodel}.}
 
 \item{...}{Other arguments not currently used.}
 }

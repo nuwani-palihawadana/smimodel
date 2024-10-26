@@ -1,9 +1,8 @@
-#' Printing a `smimodel` object
+#' Printing a \code{smimodel} object
 #'
-#' The default print method for a `smimodel` object.
+#' The default print method for a \code{smimodel} object.
 #'
-#' @param x A model object of class `smimodel` as produced by `model_smimodel()`
-#'   function.
+#' @param x An object of class \code{smimodel}.
 #' @param ... Other arguments not currently used.
 #'
 #' @method print smimodel
@@ -15,12 +14,11 @@ print.smimodel <- function(x, ...) {
 }
 
 
-#' Printing a `smimodelFit` object
+#' Printing a \code{smimodelFit} object
 #'
-#' The default print method for a `smimodelFit` object.
+#' The default print method for a \code{smimodelFit} object.
 #'
-#' @param x A model object of class `smimodelFit` as produced by
-#'   `new_smimodelFit()` or `update_smimodelFit()` functions.
+#' @param x An object of class \code{smimodelFit}.
 #' @param ... Other arguments not currently used.
 #'
 #' @method print smimodelFit
@@ -49,12 +47,12 @@ print.smimodelFit <- function(x, ...) {
 }
 
 
-#' Printing a `backward` object
+#' Printing a \code{backward} object
 #'
-#' The default print method for a `backward` object.
+#' The default print method for a \code{backward} object.
 #'
-#' @param x A model object of class `backward` as produced by `model_backward()`
-#'   function.
+#' @param x A model object of class \code{backward} as produced by
+#'   \code{model_backward()} function.
 #' @param ... Other arguments not currently used.
 #'
 #' @method print backward
@@ -66,12 +64,12 @@ print.backward <- function(x, ...) {
 }
 
 
-#' Printing a `pprFit` object
+#' Printing a \code{pprFit} object
 #'
-#' The default print method for a `pprFit` object.
+#' The default print method for a \code{pprFit} object.
 #'
-#' @param x A model object of class `pprFit` as produced by `model_ppr()`
-#'   function.
+#' @param x A model object of class \code{pprFit} as produced by
+#'   \code{model_ppr()} function.
 #' @param ... Other arguments not currently used.
 #'
 #' @method print pprFit
@@ -83,12 +81,12 @@ print.pprFit <- function(x, ...) {
 }
 
 
-#' Printing a `gaimFit` object
+#' Printing a \code{gaimFit} object
 #'
-#' The default print method for a `gaimFit` object.
+#' The default print method for a \code{gaimFit} object.
 #'
-#' @param x A model object of class `gaimFit` as produced by `model_gaim()`
-#'   function.
+#' @param x A model object of class \code{gaimFit} as produced by
+#'   \code{model_gaim()} function.
 #' @param ... Other arguments not currently used.
 #'
 #' @method print gaimFit

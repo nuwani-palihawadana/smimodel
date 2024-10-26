@@ -3,6 +3,7 @@
 #' Scales a coefficient vector of a particular index to have unit norm.
 #'
 #' @param alpha A vector of index coefficients.
+#' @return A \code{numeric} vector.
 
 normalise_alpha <- function (alpha) {
   anorm <- norm(matrix(alpha, ncol = 1))

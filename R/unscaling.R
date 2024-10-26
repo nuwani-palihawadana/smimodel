@@ -1,13 +1,14 @@
-#' Unscale a fitted `smimodel`
+#' Unscale a fitted \code{smimodel}
 #'
 #' Transforms back the index coefficients to suit original-scale index variables
-#' if the same were standardised when estimating the `smimodel` (happens in
-#' `initialise = "ppr"` in `smimodel()`). Users are not expected to directly use
-#' this function; usually called within `smimodel()`.
+#' if the same were scaled when estimating the \code{smimodel} (happens in
+#' \code{initialise = "ppr"} in \code{\link{model_smimodel}} or
+#' \code{\link{greedy_smimodel}}). Users are not expected to directly use this
+#' function; usually called within \code{\link{smimodel.fit}}.
 #'
-#' @param object A `smimodel` object.
-#' @param scaledInfo The list returned from a call of the function `scaling()`.
-#'   (Relates to the argument `data` in the corresponding call of `smimodel()`.)
+#' @param object A \code{smimodel} object.
+#' @param scaledInfo The list returned from a call of the function
+#'   \code{\link{scaling}}.
 
 unscaling <- function(object, scaledInfo){
   scaledInfo <- scaledInfo$scaled_info

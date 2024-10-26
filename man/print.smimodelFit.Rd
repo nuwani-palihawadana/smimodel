@@ -7,8 +7,7 @@
 \method{print}{smimodelFit}(x, ...)
 }
 \arguments{
-\item{x}{A model object of class \code{smimodelFit} as produced by
-\code{new_smimodelFit()} or \code{update_smimodelFit()} functions.}
+\item{x}{An object of class \code{smimodelFit}.}
 
 \item{...}{Other arguments not currently used.}
 }

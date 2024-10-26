@@ -9,6 +9,9 @@ normalise_alpha(alpha)
 \arguments{
 \item{alpha}{A vector of index coefficients.}
 }
+\value{
+A \code{numeric} vector.
+}
 \description{
 Scales a coefficient vector of a particular index to have unit norm.
 }

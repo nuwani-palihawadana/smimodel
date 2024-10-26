@@ -7,8 +7,8 @@
 \method{print}{pprFit}(x, ...)
 }
 \arguments{
-\item{x}{A model object of class \code{pprFit} as produced by \code{model_ppr()}
-function.}
+\item{x}{A model object of class \code{pprFit} as produced by
+\code{model_ppr()} function.}
 
 \item{...}{Other arguments not currently used.}
 }

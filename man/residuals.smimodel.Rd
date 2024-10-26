@@ -11,6 +11,9 @@
 
 \item{...}{Other arguments not currently used.}
 }
+\value{
+A \code{numeric} vector of residuals.
+}
 \description{
 Generates residuals from a fitted \code{smimodel} object.
 }

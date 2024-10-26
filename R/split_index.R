@@ -4,6 +4,10 @@
 #'
 #' @param num_pred Number of predictors.
 #' @param num_ind Number of indices.
+#' @return A list containing the following components: \item{index}{An integer
+#'   vector that assigns group indices for each predictor.}
+#'   \item{index_positions}{A list of length = \code{num_ind} that indicates
+#'   which predictors belong to which index.}
 
 split_index <- function(num_pred, num_ind){
   split_list <- numeric()

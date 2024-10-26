@@ -1,9 +1,10 @@
-#' Extract residuals from a fitted `smimodel`
+#' Extract residuals from a fitted \code{smimodel}
 #'
-#' Generates residuals from a fitted `smimodel` object.
+#' Generates residuals from a fitted \code{smimodel} object.
 #'
-#' @param object A `smimodel` object.
+#' @param object A \code{smimodel} object.
 #' @param ... Other arguments not currently used.
+#' @return A \code{numeric} vector of residuals.
 #'
 #' @method residuals smimodel
 #'

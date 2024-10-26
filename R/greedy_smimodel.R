@@ -2,7 +2,7 @@
 #'
 #' Performs a greedy search over a given grid of penalty parameter combinations
 #' (lambda0, lambda2), and fits SMI model(s) with best (lowest validation set
-#' MSE) penalty parameter combinations. If a grouping variable is used, penalty
+#' MSE) penalty parameter combination(s). If a grouping variable is used, penalty
 #' parameters are tuned separately for each individual model.
 #'
 #' @param data Training data set on which models will be trained. Should be a

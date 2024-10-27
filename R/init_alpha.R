@@ -5,7 +5,7 @@
 #'
 #' @param Y Column matrix of response.
 #' @param X Matrix of predictors entering indices.
-#' @param index.ind An integer vector that assigns group index for each
+#' @param index.ind An \code{integer} vector that assigns group index for each
 #'   predictor.
 #' @param init.type Type of initialisation for index coefficients.
 #'   (\code{"penalisedReg"} - Penalised linear regression; \code{"reg"} - Linear

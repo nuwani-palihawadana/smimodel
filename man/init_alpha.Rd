@@ -19,7 +19,7 @@ init_alpha(
 
 \item{X}{Matrix of predictors entering indices.}
 
-\item{index.ind}{An integer vector that assigns group index for each
+\item{index.ind}{An \code{integer} vector that assigns group index for each
 predictor.}
 
 \item{init.type}{Type of initialisation for index coefficients.

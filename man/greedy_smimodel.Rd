@@ -58,17 +58,17 @@ best model will be re-fitted for the combined data set \code{data +
 
 \item{neighbour}{If multiple models are fitted: Number of neighbours of each
 key (i.e. grouping variable) to be considered in model fitting to handle
-smoothing over the key. Should be an integer. If \code{neighbour = x},
-\code{x} number of keys before the key of interest and \code{x} number of
-keys after the key of interest are grouped together for model fitting. The
-default is \code{neighbour = 0} (i.e. no neighbours are considered for
+smoothing over the key. Should be an \code{integer}. If \code{neighbour =
+  x}, \code{x} number of keys before the key of interest and \code{x} number
+of keys after the key of interest are grouped together for model fitting.
+The default is \code{neighbour = 0} (i.e. no neighbours are considered for
 model fitting).}
 
 \item{family}{A description of the error distribution and link function to be
 used in the model (see \code{\link{glm}} and \code{\link{family}}).}
 
-\item{index.vars}{A character vector of names of the predictor variables for
-which indices should be estimated.}
+\item{index.vars}{A \code{character} vector of names of the predictor
+variables for which indices should be estimated.}
 
 \item{initialise}{The model structure with which the estimation process
 should be initialised. The default is \code{"ppr"}, where the initial model
@@ -86,35 +86,35 @@ number of indices and the placement of index variables among indices) and
 the initial index coefficients through \code{index.ind} and
 \code{index.coefs} arguments respectively.}
 
-\item{num_ind}{If \code{initialise = "ppr"} or \code{"multiple"}: an integer
-that specifies the number of indices to be used in the model(s). The
-default is \code{num_ind = 5}.}
+\item{num_ind}{If \code{initialise = "ppr"} or \code{"multiple"}: an
+\code{integer} that specifies the number of indices to be used in the
+model(s). The default is \code{num_ind = 5}.}
 
-\item{num_models}{If \code{initialise = "multiple"}: an integer that
+\item{num_models}{If \code{initialise = "multiple"}: an \code{integer} that
 specifies the number of starting models to be checked. The default is
 \code{num_models = 5}.}
 
 \item{seed}{If \code{initialise = "multiple"}: the seed to be set when
 generating random starting points.}
 
-\item{index.ind}{If \code{initialise = "userInput"}: an integer vector that
-assigns group index for each predictor in \code{index.vars}.}
+\item{index.ind}{If \code{initialise = "userInput"}: an \code{integer} vector
+that assigns group index for each predictor in \code{index.vars}.}
 
-\item{index.coefs}{If \code{initialise = "userInput"}: a numeric vector of
-index coefficients.}
+\item{index.coefs}{If \code{initialise = "userInput"}: a \code{numeric}
+vector of index coefficients.}
 
-\item{s.vars}{A character vector of names of the predictor variables for
-which splines should be fitted individually (rather than considering as a
+\item{s.vars}{A \code{character} vector of names of the predictor variables
+for which splines should be fitted individually (rather than considering as
 part of an index).}
 
-\item{linear.vars}{A character vector of names of the predictor variables
-that should be included linearly into the model.}
+\item{linear.vars}{A \code{character} vector of names of the predictor
+variables that should be included linearly into the model.}
 
-\item{lambda0_seq}{A numeric vector of candidate values for lambda0 (penalty
-parameter for L0 penalty).}
+\item{lambda0_seq}{A \code{numeric} vector of candidate values for lambda0
+(penalty parameter for L0 penalty).}
 
-\item{lambda2_seq}{A numeric vector of candidate values for lambda2 (penalty
-parameter for L2 penalty).}
+\item{lambda2_seq}{A \code{numeric} vector of candidate values for lambda2
+(penalty parameter for L2 penalty).}
 
 \item{lambda_step}{Step size between two adjacent values in
 \code{lambda0_seq} and \code{lambda2_seq}.}

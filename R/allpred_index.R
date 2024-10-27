@@ -11,10 +11,10 @@
 #'   predictors belong to which index.
 #' @param alpha A vector of index coefficients.
 #' @return A list containing the following components: \item{alpha_init_new}{A
-#'   numeric vector of index coefficients.} \item{index}{An integer vector that
-#'   assigns group indices for each predictor.} \item{index_positions}{A list of
-#'   length = \code{num_ind} that indicates which predictors belong to which
-#'   index.}
+#'   \code{numeric} vector of index coefficients.}
+#'   \item{index}{An \code{integer} vector that assigns group indices for each
+#'   predictor.} \item{index_positions}{A list of length = \code{num_ind} that
+#'   indicates which predictors belong to which index.}
 
 allpred_index <- function(num_pred, num_ind, ind_pos, alpha){
   init_list <- vector(mode = "list", length = num_ind)

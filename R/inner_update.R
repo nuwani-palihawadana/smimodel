@@ -1,24 +1,25 @@
 #' Updating index coefficients and non-linear functions iteratively
 #'
 #' Iteratively updates index coefficients and non-linear functions using mixed
-#' integer programming. (Used within `update_smimodelFit()`; users are not expected
-#' to directly call this function.)
+#' integer programming. (A helper function used within
+#' \code{update_smimodelFit()}; users are not expected to directly call this
+#' function.)
 #'
-#' @param x Fitted `gam`.
+#' @param x Fitted \code{gam}.
 #' @param data Training data set on which models will be trained. Should be a
-#'   `tsibble`.
+#'   \code{tsibble}.
 #' @param yvar Name of the response variable as a character string.
 #' @param family A description of the error distribution and link function to be
 #'   used in the model (see \code{\link{glm}} and \code{\link{family}}).
-#' @param index.vars A character vector of names of the predictor variables for
-#'   which indices should be estimated.
-#' @param s.vars A character vector of names of the predictor variables for
-#'   which splines should be fitted individually (rather than considering as a
-#'   part of an index considered in `index.vars`).
-#' @param linear.vars A character vector of names of the predictor variables
-#'   that should be included linearly into the model.
+#' @param index.vars A \code{character} vector of names of the predictor
+#'   variables for which indices should be estimated.
+#' @param s.vars A \code{character} vector of names of the predictor variables
+#'   for which splines should be fitted individually (rather than considering as
+#'   part of an index).
+#' @param linear.vars A \code{character} vector of names of the predictor
+#'   variables that should be included linearly into the model.
 #' @param num_ind Number of indices.
-#' @param dgz The `tibble` of derivatives of the estimated smooths.
+#' @param dgz The \code{tibble} of derivatives of the estimated smooths.
 #' @param alpha_old Current vector of index coefficients.
 #' @param lambda0 Penalty parameter for L0 penalty.
 #' @param lambda2 Penalty parameter for L2 penalty.
@@ -32,6 +33,15 @@
 #' @param NonConvex The strategy for handling non-convex quadratic objectives or
 #'   non-convex quadratic constraints in Gurobi solver.
 #' @param verbose The option to print detailed solver output.
+#' @return A list containing following elements: \item{best_alpha}{The vector of
+#'   best index coefficient estimates.} \item{min_loss}{Minimum value of the
+#'   objective function(loss).}
+#' \item{index.ind}{An \code{integer} vector that assigns group index for each
+#' predictor, corresponding to \code{best_alpha}.}
+#' \item{ind_pos}{A list that indicates which predictors belong to which index,
+#' corresponding to \code{best_alpha}.}
+#' \item{X_new}{A matrix of selected predictor variables, corresponding to
+#' \code{best_alpha}.}
 
 inner_update <- function(x, data, yvar, family = gaussian(), index.vars, 
                          s.vars, linear.vars, num_ind, dgz, alpha_old, 

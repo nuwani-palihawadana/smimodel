@@ -18,10 +18,10 @@ predictors belong to which index.}
 }
 \value{
 A list containing the following components: \item{alpha_init_new}{A
-numeric vector of index coefficients.} \item{index}{An integer vector that
-assigns group indices for each predictor.} \item{index_positions}{A list of
-length = \code{num_ind} that indicates which predictors belong to which
-index.}
+\code{numeric} vector of index coefficients.}
+\item{index}{An \code{integer} vector that assigns group indices for each
+predictor.} \item{index_positions}{A list of length = \code{num_ind} that
+indicates which predictors belong to which index.}
 }
 \description{
 Constructs vectors of coefficients for each index including a coefficient for

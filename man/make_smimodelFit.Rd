@@ -24,29 +24,49 @@ make_smimodelFit(
 
 \item{neighbour}{If multiple models are fitted: Number of neighbours of each
 key (i.e. grouping variable) to be considered in model fitting to handle
-smoothing over the key. Should be an integer. If \code{neighbour = x}, \code{x}
-number of keys before the key of interest and \code{x} number of keys after the
-key of interest are grouped together for model fitting.}
+smoothing over the key. Should be an \code{integer}. If \code{neighbour =
+  x}, \code{x} number of keys before the key of interest and \code{x} number
+of keys after the key of interest are grouped together for model fitting.
+The default is \code{neighbour = 0} (i.e. no neighbours are considered for
+model fitting).}
 
-\item{index.vars}{A character vector of names of the predictor variables for
-which are estimated.}
+\item{index.vars}{A \code{character} vector of names of the predictor
+variables for which indices are estimated.}
 
-\item{index.ind}{An integer vector that assigns group index for each
+\item{index.ind}{An \code{integer} vector that assigns group index for each
 predictor in \code{index.vars}.}
 
-\item{index.data}{A \code{tibble} including columns for the constructed indices.}
+\item{index.data}{A \code{tibble} including columns for the constructed
+indices.}
 
-\item{index.names}{A character vector of names of the constructed indices.}
+\item{index.names}{A \code{character} vector of names of the constructed
+indices.}
 
 \item{alpha}{A vector of index coefficients.}
 
-\item{s.vars}{A character vector of names of the predictor variables for
-which splines should be fitted individually (rather than considering as a
-part of an index considered in \code{index.vars}).}
+\item{s.vars}{A \code{character} vector of names of the predictor variables
+for which splines are fitted individually (rather than considering as part
+of an index).}
 
-\item{linear.vars}{A character vector of names of the predictor variables
-that are included linearly in the model.}
+\item{linear.vars}{A \code{character} vector of names of the predictor
+variables that are included linearly in the model.}
+}
+\value{
+An object of class \code{smimodelFit}, which is a list that contains
+following elements: \item{alpha}{A sparse matrix of index coefficients vectors.
+Each column of the matrix corresponds to the index coefficient vector of each
+index.} \item{derivatives}{A \code{tibble} of derivatives of the estimated
+smooths.} \item{var_y}{Name of the response variable.}
+\item{vars_index}{A \code{character} vector of names of the predictor
+variables for which indices are estimated.}
+\item{vars_s}{A \code{character} vector of names of the predictor variables
+for which splines are fitted individually.}
+\item{vars_linear}{A \code{character} vector of names of the predictor
+variables that are included linearly in the model.}
+\item{neighbour}{Number of neighbours of each key considered in model
+fitting.} \item{gam}{Fitted \code{gam}.}
 }
 \description{
-Converts a given object of class \code{gam} to an object of class \code{smimodelFit}.
+Converts a given object of class \code{gam} to an object of class
+\code{smimodelFit}.
 }

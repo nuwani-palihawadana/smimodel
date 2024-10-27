@@ -40,22 +40,29 @@ greedy.fit(
 )
 }
 \arguments{
-\item{data}{Training data set on which models will be trained. Should be a
-\code{tsibble}.}
+\item{data}{Training data set on which models will be trained. Must be a data
+set of class \code{tsibble}.(Make sure there are no additional
+\code{date/time/date-time/yearmonth/POSIXct/POSIXt} variables except for
+the \code{index} of the \code{tsibble}). If multiple models are fitted, the
+grouping variable should be the \code{key} of the \code{tsibble}. If a
+\code{key} is not specified, a dummy key with only one level will be
+created.}
 
 \item{val.data}{Validation data set. (The data set on which the penalty
 parameter selection will be performed.) Must be a data set of class
-\code{tsibble}. (Once the penalty parameter selection is completed, the best
-model will be re-fitted for the combined data set \code{data} + \code{val.data}.)}
+\code{tsibble}. (Once the penalty parameter selection is completed, the
+best model will be re-fitted for the combined data set \code{data +
+  val.data}.)}
 
 \item{yvar}{Name of the response variable as a character string.}
 
 \item{neighbour}{If multiple models are fitted: Number of neighbours of each
 key (i.e. grouping variable) to be considered in model fitting to handle
-smoothing over the key. Should be an integer. If \code{neighbour = x}, \code{x}
-number of keys before the key of interest and \code{x} number of keys after the
-key of interest are grouped together for model fitting. The default is \code{0}
-(i.e. no neighbours are considered for model fitting).}
+smoothing over the key. Should be an integer. If \code{neighbour = x},
+\code{x} number of keys before the key of interest and \code{x} number of
+keys after the key of interest are grouped together for model fitting. The
+default is \code{neighbour = 0} (i.e. no neighbours are considered for
+model fitting).}
 
 \item{family}{A description of the error distribution and link function to be
 used in the model (see \code{\link{glm}} and \code{\link{family}}).}
@@ -64,39 +71,41 @@ used in the model (see \code{\link{glm}} and \code{\link{family}}).}
 which indices should be estimated.}
 
 \item{initialise}{The model structure with which the estimation process
-should be initialised. The default is "ppr", where the initial model is
-derived from projection pursuit regression. The other options are
-"additive" - nonparametric additive model, "linear" - linear regression
-model (i.e. a special case single-index model, where the initial values of
-the index coefficients are obtained through a linear regression),
-"multiple" - multiple models are fitted starting with different initial
-models (number of indices = \code{num_ind}; \code{num_models} random instances of the
-model (i.e. the predictor assignment to indices and initial index
-coefficients are generated randomly) are considered), and the final optimal
-model with the lowest loss is returned, and "userInput" - user specifies
-the initial model structure (i.e. the number of indices and the placement
-of index variables among indices) and the initial index coefficients
-through \code{index.ind} and \code{index.coefs} arguments respectively.}
+should be initialised. The default is \code{"ppr"}, where the initial model
+is derived from projection pursuit regression. The other options are
+\code{"additive"} - nonparametric additive model, \code{"linear"} - linear
+regression model (i.e. a special case single-index model, where the initial
+values of the index coefficients are obtained through a linear regression),
+\code{"multiple"} - multiple models are fitted starting with different
+initial models (number of indices = \code{num_ind}; \code{num_models}
+random instances of the model (i.e. the predictor assignment to indices and
+initial index coefficients are generated randomly) are considered), and the
+final optimal model with the lowest loss is returned, and
+\code{"userInput"} - user specifies the initial model structure (i.e. the
+number of indices and the placement of index variables among indices) and
+the initial index coefficients through \code{index.ind} and
+\code{index.coefs} arguments respectively.}
 
-\item{num_ind}{If \verb{initialise = "ppr" or "multiple"}: an integer that
-specifies the number of indices to be used in the model(s). The default is
-5.}
+\item{num_ind}{If \code{initialise = "ppr"} or \code{"multiple"}: an integer
+that specifies the number of indices to be used in the model(s). The
+default is \code{num_ind = 5}.}
 
-\item{num_models}{If \code{initialise = "multiple"}: an integer that specifies the
-number of starting models to be checked. The default is 5.}
+\item{num_models}{If \code{initialise = "multiple"}: an integer that
+specifies the number of starting models to be checked. The default is
+\code{num_models = 5}.}
 
-\item{seed}{If \code{initialise = "multiple"}: the seed to be set when generating
-random starting points.}
+\item{seed}{If \code{initialise = "multiple"}: the seed to be set when
+generating random starting points.}
 
 \item{index.ind}{If \code{initialise = "userInput"}: an integer vector that
 assigns group index for each predictor in \code{index.vars}.}
 
-\item{index.coefs}{If \code{initialise = "userInput"}: a numeric vector of index
-coefficients.}
+\item{index.coefs}{If \code{initialise = "userInput"}: a numeric vector of
+index coefficients.}
 
 \item{s.vars}{A character vector of names of the predictor variables for
 which splines should be fitted individually (rather than considering as a
-part of an index considered in \code{index.vars}).}
+part of an index).}
 
 \item{linear.vars}{A character vector of names of the predictor variables
 that should be included linearly into the model.}
@@ -107,25 +116,25 @@ parameter for L0 penalty).}
 \item{lambda2_seq}{A numeric vector of candidate values for lambda2 (penalty
 parameter for L2 penalty).}
 
-\item{lambda_step}{Step size between two adjacent values in \code{lambda0_seq} and
-\code{lambda2_seq}.}
+\item{lambda_step}{Step size between two adjacent values in
+\code{lambda0_seq} and \code{lambda2_seq}.}
 
-\item{lambda0_start_seq}{A subset from \code{lambda0_seq} as candidate starting
-points for the greedy search.}
+\item{lambda0_start_seq}{A subset from \code{lambda0_seq} as candidate
+starting points for the greedy search.}
 
-\item{lambda2_start_seq}{A subset from \code{lambda2_seq} as candidate starting
-points for the greedy search.}
+\item{lambda2_start_seq}{A subset from \code{lambda2_seq} as candidate
+starting points for the greedy search.}
 
 \item{refit}{Whether to refit the model combining training and validation
-sets after parameter tuning. If \code{FALSE}, the final model will be estimated
-only on the training set.}
+sets after parameter tuning. If \code{FALSE}, the final model will be
+estimated only on the training set.}
 
 \item{M}{Big-M value used in MIP.}
 
 \item{max.iter}{Maximum number of MIP iterations performed to update index
 coefficients for a given model.}
 
-\item{tol}{Tolerance for loss.}
+\item{tol}{Tolerance for the objective function value (loss) of MIP.}
 
 \item{tolCoefs}{Tolerance for coefficients.}
 
@@ -139,16 +148,30 @@ non-convex quadratic constraints in Gurobi solver.}
 
 \item{verbose}{The option to print detailed solver output.}
 
-\item{parallel}{The option to use parallel processing in fitting \code{smimodel}s
+\item{parallel}{The option to use parallel processing in fitting SMI models
 for different penalty parameter combinations.}
 
 \item{workers}{If \code{parallel = TRUE}: Number of cores to use.}
 
 \item{recursive}{Whether to obtain recursive forecasts or not (default -
-FALSE).}
+\code{FALSE}).}
 
-\item{recursive_colRange}{If \code{recursive = TRUE}, The range of column numbers
-in \code{val.data} to be filled with forecasts.}
+\item{recursive_colRange}{If \code{recursive = TRUE}, the range of column
+numbers in \code{val.data} to be filled with forecasts.
+Recursive/autoregressive forecasting is required when the lags of the
+response variable itself are used as predictor variables into the model.
+Make sure such lagged variables are positioned together in increasing lag
+order (i.e. \code{lag_1, lag_2, ..., lag_m}, \code{lag_m =} maximum lag
+used) in \code{val.data}, with no break in the lagged variable sequence
+even if some of the intermediate lags are not used as predictors.}
+}
+\value{
+A list that contains three elements: \item{initial}{A list of
+information of the model initialisation. (For descriptions of the list
+elements see \code{\link{make_smimodelFit}}).} \item{best}{A list of
+information of the final optimised model. (For descriptions of the list
+elements see \code{\link{make_smimodelFit}}).} \item{best_lambdas}{Selected
+penalty parameter combination.}
 }
 \description{
 Function to perform a greedy search over a given grid of penalty parameter

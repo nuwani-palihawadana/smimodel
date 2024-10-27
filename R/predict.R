@@ -1,15 +1,22 @@
-#' Obtaining forecasts on a test set from a fitted `smimodel`
+#' Obtaining forecasts on a test set from a fitted \code{smimodel}
 #'
 #' Gives forecasts on a test set.
 #'
-#' @param object A `smimodel` object.
+#' @param object A \code{smimodel} object.
 #' @param newdata The set of new data on for which the forecasts are required
-#'   (i.e. test set; should be a `tsibble`).
+#'   (i.e. test set; should be a \code{tsibble}).
 #' @param recursive Whether to obtain recursive forecasts or not (default -
-#'   FALSE).
-#' @param recursive_colRange If `recursive = TRUE`, The range of column numbers
-#'   in `newdata` to be filled with forecasts.
+#'   \code{FALSE}).
+#' @param recursive_colRange If \code{recursive = TRUE}, the range of column
+#'   numbers in \code{newdata} to be filled with forecasts.
+#'   Recursive/autoregressive forecasting is required when the lags of the
+#'   response variable itself are used as predictor variables into the model.
+#'   Make sure such lagged variables are positioned together in increasing lag
+#'   order (i.e. \code{lag_1, lag_2, ..., lag_m}, \code{lag_m =} maximum lag
+#'   used) in \code{newdata}, with no break in the lagged variable sequence even
+#'   if some of the intermediate lags are not used as predictors.
 #' @param ... Other arguments not currently used.
+#' @return A \code{tsibble} with forecasts on test set.
 #'
 #' @method predict smimodel
 #'
@@ -138,18 +145,25 @@ predict.smimodel <- function(object, newdata, recursive = FALSE,
 }
 
 
-#' Obtaining forecasts on a test set from a `smimodelFit`
+#' Obtaining forecasts on a test set from a \code{smimodelFit}
 #'
 #' Gives forecasts on a test set.
 #'
-#' @param object A `smimodelFit` object.
+#' @param object A \code{smimodelFit} object.
 #' @param newdata The set of new data on for which the forecasts are required
-#'   (i.e. test set; should be a `tibble`).
+#'   (i.e. test set; should be a \code{tibble}).
 #' @param recursive Whether to obtain recursive forecasts or not (default -
-#'   FALSE).
-#' @param recursive_colRange If `recursive = TRUE`, The range of column numbers
-#'   in `newdata` to be filled with forecasts.
+#'   \code{FALSE}).
+#' @param recursive_colRange If \code{recursive = TRUE}, the range of column
+#'   numbers in \code{newdata} to be filled with forecasts.
+#'   Recursive/autoregressive forecasting is required when the lags of the
+#'   response variable itself are used as predictor variables into the model.
+#'   Make sure such lagged variables are positioned together in increasing lag
+#'   order (i.e. \code{lag_1, lag_2, ..., lag_m}, \code{lag_m =} maximum lag
+#'   used) in \code{newdata}, with no break in the lagged variable sequence even
+#'   if some of the intermediate lags are not used as predictors.
 #' @param ... Other arguments not currently used.
+#' @return A \code{tibble} with forecasts on test set.
 #'
 #' @method predict smimodelFit
 #' @export
@@ -249,18 +263,25 @@ predict.smimodelFit <- function(object, newdata, recursive = FALSE,
 }
 
 
-#' Obtaining forecasts on a test set from a fitted `backward`
+#' Obtaining forecasts on a test set from a fitted \code{backward}
 #'
 #' Gives forecasts on a test set.
 #'
-#' @param object A `backward` object.
+#' @param object A \code{backward} object.
 #' @param newdata The set of new data on for which the forecasts are required
-#'   (i.e. test set; should be a `tsibble`).
+#'   (i.e. test set; should be a \code{tsibble}).
 #' @param recursive Whether to obtain recursive forecasts or not (default -
-#'   FALSE).
-#' @param recursive_colRange If `recursive = TRUE`, The range of column numbers
-#'   in `newdata` to be filled with forecasts.
+#'   \code{FALSE}).
+#' @param recursive_colRange If \code{recursive = TRUE}, the range of column
+#'   numbers in \code{newdata} to be filled with forecasts.
+#'   Recursive/autoregressive forecasting is required when the lags of the
+#'   response variable itself are used as predictor variables into the model.
+#'   Make sure such lagged variables are positioned together in increasing lag
+#'   order (i.e. \code{lag_1, lag_2, ..., lag_m}, \code{lag_m =} maximum lag
+#'   used) in \code{newdata}, with no break in the lagged variable sequence even
+#'   if some of the intermediate lags are not used as predictors.
 #' @param ... Other arguments not currently used.
+#' @return A \code{tsibble} with forecasts on test set.
 #'
 #' @method predict backward
 #'
@@ -321,18 +342,25 @@ predict.backward <- function(object, newdata,
 }
 
 
-#' Obtaining forecasts on a test set from a fitted `pprFit`
+#' Obtaining forecasts on a test set from a fitted \code{pprFit}
 #'
 #' Gives forecasts on a test set.
 #'
-#' @param object A `pprFit` object.
+#' @param object A \code{pprFit} object.
 #' @param newdata The set of new data on for which the forecasts are required
-#'   (i.e. test set; should be a `tsibble`).
+#'   (i.e. test set; should be a \code{tsibble}).
 #' @param recursive Whether to obtain recursive forecasts or not (default -
-#'   FALSE).
-#' @param recursive_colRange If `recursive = TRUE`, The range of column numbers
-#'   in `newdata` to be filled with forecasts.
+#'   \code{FALSE}).
+#' @param recursive_colRange If \code{recursive = TRUE}, the range of column
+#'   numbers in \code{newdata} to be filled with forecasts.
+#'   Recursive/autoregressive forecasting is required when the lags of the
+#'   response variable itself are used as predictor variables into the model.
+#'   Make sure such lagged variables are positioned together in increasing lag
+#'   order (i.e. \code{lag_1, lag_2, ..., lag_m}, \code{lag_m =} maximum lag
+#'   used) in \code{newdata}, with no break in the lagged variable sequence even
+#'   if some of the intermediate lags are not used as predictors.
 #' @param ... Other arguments not currently used.
+#' @return A \code{tsibble} with forecasts on test set.
 #'
 #' @method predict pprFit
 #'
@@ -392,18 +420,25 @@ predict.pprFit <- function(object, newdata,
 }
 
 
-#' Obtaining forecasts on a test set from a fitted `gaimFit`
+#' Obtaining forecasts on a test set from a fitted \code{gaimFit}
 #'
 #' Gives forecasts on a test set.
 #'
-#' @param object A `gaimFit` object.
+#' @param object A \code{gaimFit} object.
 #' @param newdata The set of new data on for which the forecasts are required
-#'   (i.e. test set; should be a `tsibble`).
+#'   (i.e. test set; should be a \code{tsibble}).
 #' @param recursive Whether to obtain recursive forecasts or not (default -
-#'   FALSE).
-#' @param recursive_colRange If `recursive = TRUE`, The range of column numbers
-#'   in `newdata` to be filled with forecasts.
+#'   \code{FALSE}).
+#' @param recursive_colRange If \code{recursive = TRUE}, the range of column
+#'   numbers in \code{newdata} to be filled with forecasts.
+#'   Recursive/autoregressive forecasting is required when the lags of the
+#'   response variable itself are used as predictor variables into the model.
+#'   Make sure such lagged variables are positioned together in increasing lag
+#'   order (i.e. \code{lag_1, lag_2, ..., lag_m}, \code{lag_m =} maximum lag
+#'   used) in \code{newdata}, with no break in the lagged variable sequence even
+#'   if some of the intermediate lags are not used as predictors.
 #' @param ... Other arguments not currently used.
+#' @return A \code{tsibble} with forecasts on test set.
 #'
 #' @method predict gaimFit
 #'
@@ -463,18 +498,25 @@ predict.gaimFit <- function(object, newdata,
 }
 
 
-#' Obtaining forecasts on a test set from a fitted `lmFit`
+#' Obtaining forecasts on a test set from a fitted \code{lmFit}
 #'
 #' Gives forecasts on a test set.
 #'
-#' @param object A `lmFit` object.
+#' @param object A \code{lmFit} object.
 #' @param newdata The set of new data on for which the forecasts are required
-#'   (i.e. test set; should be a `tsibble`).
+#'   (i.e. test set; should be a \code{tsibble}).
 #' @param recursive Whether to obtain recursive forecasts or not (default -
-#'   FALSE).
-#' @param recursive_colRange If `recursive = TRUE`, The range of column numbers
-#'   in `newdata` to be filled with forecasts.
+#'   \code{FALSE}).
+#' @param recursive_colRange If \code{recursive = TRUE}, the range of column
+#'   numbers in \code{newdata} to be filled with forecasts.
+#'   Recursive/autoregressive forecasting is required when the lags of the
+#'   response variable itself are used as predictor variables into the model.
+#'   Make sure such lagged variables are positioned together in increasing lag
+#'   order (i.e. \code{lag_1, lag_2, ..., lag_m}, \code{lag_m =} maximum lag
+#'   used) in \code{newdata}, with no break in the lagged variable sequence even
+#'   if some of the intermediate lags are not used as predictors.
 #' @param ... Other arguments not currently used.
+#' @return A \code{tsibble} with forecasts on test set.
 #'
 #' @method predict lmFit
 #'
@@ -534,18 +576,25 @@ predict.lmFit <- function(object, newdata,
 }
 
 
-#' Obtaining forecasts on a test set from a fitted `gamFit`
+#' Obtaining forecasts on a test set from a fitted \code{gamFit}
 #'
 #' Gives forecasts on a test set.
 #'
-#' @param object A `gamFit` object.
+#' @param object A \code{gamFit} object.
 #' @param newdata The set of new data on for which the forecasts are required
-#'   (i.e. test set; should be a `tsibble`).
+#'   (i.e. test set; should be a \code{tsibble}).
 #' @param recursive Whether to obtain recursive forecasts or not (default -
-#'   FALSE).
-#' @param recursive_colRange If `recursive = TRUE`, The range of column numbers
-#'   in `newdata` to be filled with forecasts.
+#'   \code{FALSE}).
+#' @param recursive_colRange If \code{recursive = TRUE}, the range of column
+#'   numbers in \code{newdata} to be filled with forecasts.
+#'   Recursive/autoregressive forecasting is required when the lags of the
+#'   response variable itself are used as predictor variables into the model.
+#'   Make sure such lagged variables are positioned together in increasing lag
+#'   order (i.e. \code{lag_1, lag_2, ..., lag_m}, \code{lag_m =} maximum lag
+#'   used) in \code{newdata}, with no break in the lagged variable sequence even
+#'   if some of the intermediate lags are not used as predictors.
 #' @param ... Other arguments not currently used.
+#' @return A \code{tsibble} with forecasts on test set.
 #'
 #' @method predict gamFit
 #'
@@ -605,18 +654,25 @@ predict.gamFit <- function(object, newdata,
 }
 
 
-#' Obtaining recursive forecasts on a test set from a fitted `mgcv::gam`
+#' Obtaining recursive forecasts on a test set from a fitted \code{mgcv::gam}
 #'
 #' Gives recursive forecasts on a test set.
 #'
-#' @param object A `gam` object.
+#' @param object A \code{gam} object.
 #' @param newdata The set of new data on for which the forecasts are required
-#'   (i.e. test set; should be a `tibble`).
+#'   (i.e. test set; should be a \code{tibble}).
 #' @param recursive Whether to obtain recursive forecasts or not (default -
-#'   FALSE).
-#' @param recursive_colRange If `recursive = TRUE`, The range of column numbers
-#'   in `newdata` to be filled with forecasts.
+#'   \code{FALSE}).
+#' @param recursive_colRange If \code{recursive = TRUE}, the range of column
+#'   numbers in \code{newdata} to be filled with forecasts.
+#'   Recursive/autoregressive forecasting is required when the lags of the
+#'   response variable itself are used as predictor variables into the model.
+#'   Make sure such lagged variables are positioned together in increasing lag
+#'   order (i.e. \code{lag_1, lag_2, ..., lag_m}, \code{lag_m =} maximum lag
+#'   used) in \code{newdata}, with no break in the lagged variable sequence even
+#'   if some of the intermediate lags are not used as predictors.
 #' @param ... Other arguments not currently used.
+#' @return A \code{tibble} with forecasts on test set.
 
 predict_gam <- function(object, newdata, 
                           recursive = FALSE, recursive_colRange = NULL, ...){

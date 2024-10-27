@@ -2,73 +2,82 @@
 #'
 #' Performs a greedy search over a given grid of penalty parameter combinations
 #' (lambda0, lambda2), and fits SMI model(s) with best (lowest validation set
-#' MSE) penalty parameter combination(s). If a grouping variable is used, penalty
-#' parameters are tuned separately for each individual model.
+#' MSE) penalty parameter combination(s). If a grouping variable is used,
+#' penalty parameters are tuned separately for each individual model.
 #'
-#' @param data Training data set on which models will be trained. Should be a
-#'   `tsibble`.
+#' @param data Training data set on which models will be trained. Must be a data
+#'   set of class \code{tsibble}.(Make sure there are no additional
+#'   \code{date/time/date-time/yearmonth/POSIXct/POSIXt} variables except for
+#'   the \code{index} of the \code{tsibble}). If multiple models are fitted, the
+#'   grouping variable should be the \code{key} of the \code{tsibble}. If a
+#'   \code{key} is not specified, a dummy key with only one level will be
+#'   created.
 #' @param val.data Validation data set. (The data set on which the penalty
 #'   parameter selection will be performed.) Must be a data set of class
-#'   `tsibble`. (Once the penalty parameter selection is completed, the best
-#'   model will be re-fitted for the combined data set `data` + `val.data`.)
+#'   \code{tsibble}. (Once the penalty parameter selection is completed, the
+#'   best model will be re-fitted for the combined data set \code{data +
+#'   val.data}.)
 #' @param yvar Name of the response variable as a character string.
 #' @param neighbour If multiple models are fitted: Number of neighbours of each
 #'   key (i.e. grouping variable) to be considered in model fitting to handle
-#'   smoothing over the key. Should be an integer. If `neighbour = x`, `x`
-#'   number of keys before the key of interest and `x` number of keys after the
-#'   key of interest are grouped together for model fitting. The default is `0`
-#'   (i.e. no neighbours are considered for model fitting).
+#'   smoothing over the key. Should be an integer. If \code{neighbour = x},
+#'   \code{x} number of keys before the key of interest and \code{x} number of
+#'   keys after the key of interest are grouped together for model fitting. The
+#'   default is \code{neighbour = 0} (i.e. no neighbours are considered for
+#'   model fitting).
 #' @param family A description of the error distribution and link function to be
 #'   used in the model (see \code{\link{glm}} and \code{\link{family}}).
 #' @param index.vars A character vector of names of the predictor variables for
 #'   which indices should be estimated.
 #' @param initialise The model structure with which the estimation process
-#'   should be initialised. The default is "ppr", where the initial model is
-#'   derived from projection pursuit regression. The other options are
-#'   "additive" - nonparametric additive model, "linear" - linear regression
-#'   model (i.e. a special case single-index model, where the initial values of
-#'   the index coefficients are obtained through a linear regression),
-#'   "multiple" - multiple models are fitted starting with different initial
-#'   models (number of indices = `num_ind`; `num_models` random instances of the
-#'   model (i.e. the predictor assignment to indices and initial index
-#'   coefficients are generated randomly) are considered), and the final optimal
-#'   model with the lowest loss is returned, and "userInput" - user specifies
-#'   the initial model structure (i.e. the number of indices and the placement
-#'   of index variables among indices) and the initial index coefficients
-#'   through `index.ind` and `index.coefs` arguments respectively.
-#' @param num_ind If `initialise = "ppr" or "multiple"`: an integer that
-#'   specifies the number of indices to be used in the model(s). The default is
-#'   5.
-#' @param num_models If `initialise = "multiple"`: an integer that specifies the
-#'   number of starting models to be checked. The default is 5.
-#' @param seed If `initialise = "multiple"`: the seed to be set when generating
-#'   random starting points.
-#' @param index.ind If `initialise = "userInput"`: an integer vector that
-#'   assigns group index for each predictor in `index.vars`.
-#' @param index.coefs If `initialise = "userInput"`: a numeric vector of index
-#'   coefficients.
+#'   should be initialised. The default is \code{"ppr"}, where the initial model
+#'   is derived from projection pursuit regression. The other options are
+#'   \code{"additive"} - nonparametric additive model, \code{"linear"} - linear
+#'   regression model (i.e. a special case single-index model, where the initial
+#'   values of the index coefficients are obtained through a linear regression),
+#'   \code{"multiple"} - multiple models are fitted starting with different
+#'   initial models (number of indices = \code{num_ind}; \code{num_models}
+#'   random instances of the model (i.e. the predictor assignment to indices and
+#'   initial index coefficients are generated randomly) are considered), and the
+#'   final optimal model with the lowest loss is returned, and
+#'   \code{"userInput"} - user specifies the initial model structure (i.e. the
+#'   number of indices and the placement of index variables among indices) and
+#'   the initial index coefficients through \code{index.ind} and
+#'   \code{index.coefs} arguments respectively.
+#' @param num_ind If \code{initialise = "ppr"} or \code{"multiple"}: an integer
+#'   that specifies the number of indices to be used in the model(s). The
+#'   default is \code{num_ind = 5}.
+#' @param num_models If \code{initialise = "multiple"}: an integer that
+#'   specifies the number of starting models to be checked. The default is
+#'   \code{num_models = 5}.
+#' @param seed If \code{initialise = "multiple"}: the seed to be set when
+#'   generating random starting points.
+#' @param index.ind If \code{initialise = "userInput"}: an integer vector that
+#'   assigns group index for each predictor in \code{index.vars}.
+#' @param index.coefs If \code{initialise = "userInput"}: a numeric vector of
+#'   index coefficients.
 #' @param s.vars A character vector of names of the predictor variables for
 #'   which splines should be fitted individually (rather than considering as a
-#'   part of an index considered in `index.vars`).
+#'   part of an index).
 #' @param linear.vars A character vector of names of the predictor variables
 #'   that should be included linearly into the model.
 #' @param lambda0_seq A numeric vector of candidate values for lambda0 (penalty
 #'   parameter for L0 penalty).
 #' @param lambda2_seq A numeric vector of candidate values for lambda2 (penalty
 #'   parameter for L2 penalty).
-#' @param lambda_step Step size between two adjacent values in `lambda0_seq` and
-#'   `lambda2_seq`.
-#' @param lambda0_start_seq A subset from `lambda0_seq` as candidate starting
-#'   points for the greedy search.
-#' @param lambda2_start_seq A subset from `lambda2_seq` as candidate starting
-#'   points for the greedy search.
+#' @param lambda_step Step size between two adjacent values in
+#'   \code{lambda0_seq} and \code{lambda2_seq}.
+#' @param lambda0_start_seq A subset from \code{lambda0_seq} as candidate
+#'   starting points for the greedy search.
+#' @param lambda2_start_seq A subset from \code{lambda2_seq} as candidate
+#'   starting points for the greedy search.
 #' @param refit Whether to refit the model combining training and validation
-#'   sets after parameter tuning. If `FALSE`, the final model will be estimated
-#'   only on the training set.
+#'   sets after parameter tuning. If \code{FALSE}, the final model will be
+#'   estimated only on the training set.
 #' @param M Big-M value used in MIP.
 #' @param max.iter Maximum number of MIP iterations performed to update index
 #'   coefficients for a given model.
-#' @param tol Tolerance for loss.
+#' @param tol Tolerance for the objective function value (loss) of MIP.
 #' @param tolCoefs Tolerance for coefficients.
 #' @param TimeLimit A limit for the total time (in seconds) expended in a single
 #'   MIP iteration.
@@ -76,13 +85,30 @@
 #' @param NonConvex The strategy for handling non-convex quadratic objectives or
 #'   non-convex quadratic constraints in Gurobi solver.
 #' @param verbose The option to print detailed solver output.
-#' @param parallel The option to use parallel processing in fitting `smimodel`s
+#' @param parallel The option to use parallel processing in fitting SMI models
 #'   for different penalty parameter combinations.
-#' @param workers If `parallel = TRUE`: Number of cores to use.
+#' @param workers If \code{parallel = TRUE}: Number of cores to use.
 #' @param recursive Whether to obtain recursive forecasts or not (default -
-#'   FALSE).
-#' @param recursive_colRange If `recursive = TRUE`, The range of column numbers
-#'   in `val.data` to be filled with forecasts.
+#'   \code{FALSE}).
+#' @param recursive_colRange If \code{recursive = TRUE}, the range of column
+#'   numbers in \code{val.data} to be filled with forecasts.
+#'   Recursive/autoregressive forecasting is required when the lags of the
+#'   response variable itself are used as predictor variables into the model.
+#'   Make sure such lagged variables are positioned together in increasing lag
+#'   order (i.e. \code{lag_1, lag_2, ..., lag_m}, \code{lag_m =} maximum lag
+#'   used) in \code{val.data}, with no break in the lagged variable sequence
+#'   even if some of the intermediate lags are not used as predictors.
+#' @return  An object of class \code{smimodel}. This is a \code{tibble} with two
+#'   columns: \item{key}{The level of the grouping variable (i.e. key of the
+#'   training data set).} \item{fit}{Information of the fitted model
+#'   corresponding to the \code{key}.}
+#'   The column \code{fit} contains a list with three elements: \item{initial}{A
+#'   list of information of the model initialisation. (For descriptions of the
+#'   list elements see \code{\link{make_smimodelFit}}).} \item{best}{A list of
+#'   information of the final optimised model. (For descriptions of the list
+#'   elements see \code{\link{make_smimodelFit}}).} \item{best_lambdas}{Selected
+#'   penalty parameter combination.} The number of rows of the \code{tibble}
+#'   equals to the number of levels in the grouping variable.
 #'
 #' @examples
 #' library(dplyr)
@@ -90,6 +116,8 @@
 #' library(tibble)
 #' library(tidyr)
 #' library(tsibble)
+#'
+#' # Simulate data
 #' n = 1205
 #' set.seed(123)
 #' sim_data <- tibble(x_lag_000 = runif(n)) |>
@@ -106,12 +134,15 @@
 #'   select(inddd, y1, starts_with("x_lag")) |>
 #'   # Make the data set a `tsibble`
 #'   as_tsibble(index = inddd)
+#'
 #' # Training set
 #' sim_train <- sim_data[1:1000, ]
 #' # Validation set
 #' sim_val <- sim_data[1001:1200, ]
+#'
 #' # Index variables
 #' index.vars <- colnames(sim_data)[3:8]
+#'
 #' # Penalty parameter values to search
 #' # L0 penalty
 #' lambda0 = seq(1, 12, by = 1)
@@ -119,12 +150,14 @@
 #' lambda2 = seq(0, 12, by = 1)
 #' # Full grid
 #' grid1 <- expand.grid(lambda0, lambda2)
+#'
 #' # Starting point options
 #' starting <- grid1[c(1, 6, 12, 73, 78, 84, 145, 150, 156), ]
 #' # L0 penalty
 #' lambda0_start = as.numeric(unique(unlist(starting[1])))
 #' # L2 penalty
 #' lambda2_start = as.numeric(unique(unlist(starting[2])))
+#'
 #' # Model fitting
 #' smi_greedy <- greedy_smimodel(data = sim_train,
 #'                               val.data = sim_val,
@@ -136,7 +169,19 @@
 #'                               lambda_step = 1,
 #'                               lambda0_start_seq = lambda0_start,
 #'                               lambda2_start_seq = lambda2_start)
-#' smi_greedy$fit[[1]]
+#'
+#' # Best (optimised) fitted model
+#' smi_greedy$fit[[1]]$best
+#'
+#' # Selected penalty parameter combination
+#' smi_greedy$fit[[1]]$best_lambdas
+#'
+#' @references Palihawadana, N.K., Hyndman, R.J. & Wang, X. (2024). Sparse
+#'   Multiple Index Models for High-Dimensional Nonparametric Forecasting.
+#'   \url{https://www.monash.edu/business/ebs/research/publications/ebs/2024/wp16-2024.pdf}.
+#'
+#' @seealso \code{\link{model_smimodel}}
+#'
 #' @export
 greedy_smimodel <- function(data, val.data, yvar, neighbour = 0, 
                             family = gaussian(), index.vars, 

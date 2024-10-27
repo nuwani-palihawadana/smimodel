@@ -13,12 +13,21 @@
 (i.e. test set; should be a \code{tibble}).}
 
 \item{recursive}{Whether to obtain recursive forecasts or not (default -
-FALSE).}
+\code{FALSE}).}
 
-\item{recursive_colRange}{If \code{recursive = TRUE}, The range of column numbers
-in \code{newdata} to be filled with forecasts.}
+\item{recursive_colRange}{If \code{recursive = TRUE}, the range of column
+numbers in \code{newdata} to be filled with forecasts.
+Recursive/autoregressive forecasting is required when the lags of the
+response variable itself are used as predictor variables into the model.
+Make sure such lagged variables are positioned together in increasing lag
+order (i.e. \code{lag_1, lag_2, ..., lag_m}, \code{lag_m =} maximum lag
+used) in \code{newdata}, with no break in the lagged variable sequence even
+if some of the intermediate lags are not used as predictors.}
 
 \item{...}{Other arguments not currently used.}
+}
+\value{
+A \code{tibble} with forecasts on test set.
 }
 \description{
 Gives forecasts on a test set.

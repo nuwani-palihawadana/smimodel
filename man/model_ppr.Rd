@@ -8,38 +8,62 @@ model_ppr(data, yvar, neighbour = 0, index.vars, num_ind = 5, ...)
 }
 \arguments{
 \item{data}{Training data set on which models will be trained. Must be a data
-set of class \code{tsibble}.(Make sure there are no additional
-date/time/date-time/yearmonth/POSIXct/POSIXt variables except for the
-\code{index} of the \code{tsibble}). If multiple models are fitted, the grouping
-variable should be the key of the \code{tsibble}.}
+set of class \code{tsibble}.(Make sure there are no additional date or time
+related variables except for the \code{index} of the \code{tsibble}). If
+multiple models are fitted, the grouping variable should be the \code{key}
+of the \code{tsibble}. If a \code{key} is not specified, a dummy key with
+only one level will be created.}
 
 \item{yvar}{Name of the response variable as a character string.}
 
 \item{neighbour}{If multiple models are fitted: Number of neighbours of each
 key (i.e. grouping variable) to be considered in model fitting to handle
-smoothing over the key. Should be an integer. If \code{neighbour = x}, \code{x}
-number of keys before the key of interest and \code{x} number of keys after the
-key of interest are grouped together for model fitting. The default is \code{0}
-(i.e. no neighbours are considered for model fitting).}
+smoothing over the key. Should be an \code{integer}. If \code{neighbour =
+  x}, \code{x} number of keys before the key of interest and \code{x} number
+of keys after the key of interest are grouped together for model fitting.
+The default is \code{neighbour = 0} (i.e. no neighbours are considered for
+model fitting).}
 
-\item{index.vars}{A character vector of names of the predictor variables for
-which indices should be estimated.}
+\item{index.vars}{A \code{character} vector of names of the predictor
+variables for which indices should be estimated.}
 
-\item{num_ind}{An integer that specifies the number of indices to be used in
-the model(s). (Corresponds to \code{nterms} in \code{stats::ppr()}.)}
+\item{num_ind}{An \code{integer} that specifies the number of indices to be
+used in the model(s). (Corresponds to \code{nterms} in
+\code{stats::ppr()}.)}
 
 \item{...}{Other arguments not currently used. (For more information on other
 arguments that can be passed, refer \code{stats::ppr()}.)}
 }
+\value{
+An object of class \code{pprFit}. This is a \code{tibble} with two
+columns: \item{key}{The level of the grouping variable (i.e. key of the
+training data set).} \item{fit}{Information of the fitted model
+corresponding to the \code{key}.} Each row of the column \code{fit} is an
+object of class \code{c("ppr.form", "ppr")}. For details refer
+\code{stats::ppr()}.
+}
 \description{
-A wrapper for \code{stats::ppr()} enabling multiple PPR models based on a grouping
-variable.
+A wrapper for \code{stats::ppr()} enabling multiple PPR models based on a
+grouping variable.
+}
+\details{
+A Projection Pursuit Regression (PPR) model (Friedman & Stuetzle
+(1981)) is given by
+\deqn{y_{i} = \sum_{j=1}^{p} {g_{j}(\bm{\alpha}_{j}^{T}\bm{x}_{i})} +
+\varepsilon_{i}, \quad i = 1, \dots, n,} where \eqn{y_{i}} is the response,
+\eqn{\bm{x}_{i}} is the \eqn{q}-dimensional predictor vector,
+\eqn{\bm{\alpha}_{j} = ( \alpha_{j1}, \dots, \alpha_{jp} )^{T}}, \eqn{j = 1,
+\dots, p} are \eqn{q}-dimensional projection vectors (or vectors of "index
+coefficients"), \eqn{g_{j}}'s are unknown nonlinear functions, and
+\eqn{\varepsilon_{i}} is the random error.
 }
 \examples{
 library(dplyr)
 library(tibble)
 library(tidyr)
 library(tsibble)
+
+# Simulate data
 n = 1005
 set.seed(123)
 sim_data <- tibble(x_lag_000 = runif(n)) |>
@@ -56,12 +80,25 @@ sim_data <- tibble(x_lag_000 = runif(n)) |>
   select(inddd, y1, starts_with("x_lag")) |>
   # Make the data set a `tsibble`
   as_tsibble(index = inddd)
+
 # Index variables
 index.vars <- colnames(sim_data)[3:8]
+
 # Model fitting
 pprModel <- model_ppr(data = sim_data,
                       yvar = "y1",
                       index.vars = index.vars)
+
+# Fitted model
 pprModel$fit[[1]]
 
+}
+\references{
+Friedman, J. H. & Stuetzle, W. (1981). Projection pursuit
+regression. \emph{Journal of the American Statistical Association}, 76, 817–823.
+\href{https://www.tandfonline.com/doi/abs/10.1080/01621459.1981.10477729}{doi:10.2307/2287576}.
+}
+\seealso{
+\code{\link{model_smimodel}}, \code{\link{model_backward}},
+\code{\link{model_gaim}}, \code{\link{model_gam}}, \code{\link{model_lm}}
 }

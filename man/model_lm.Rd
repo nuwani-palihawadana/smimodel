@@ -74,3 +74,7 @@ lmModel <- model_lm(data = sim_data,
 lmModel$fit[[1]]
 
 }
+\seealso{
+\code{\link{model_smimodel}}, \code{\link{model_backward}},
+\code{\link{model_gaim}}, \code{\link{model_ppr}}, \code{\link{model_gam}}
+}

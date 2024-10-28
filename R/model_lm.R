@@ -25,6 +25,9 @@
 #'   corresponding to the \code{key}.} Each row of the column \code{fit} is
 #'   an object of class \code{lm}. For details refer \code{stats::lm}.
 #'
+#' @seealso \code{\link{model_smimodel}}, \code{\link{model_backward}},
+#'   \code{\link{model_gaim}}, \code{\link{model_ppr}}, \code{\link{model_gam}}
+#'
 #' @examples
 #' library(dplyr)
 #' library(tibble)

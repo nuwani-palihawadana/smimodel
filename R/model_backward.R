@@ -65,6 +65,9 @@
 #'   on a Semi-Parametric Additive Model. *IEEE Transactions on Power Systems*,
 #'   27(1), 134-141. \url{http://doi.org/10.1109/TPWRS.2011.2162082}
 #'
+#' @seealso \code{\link{model_smimodel}}, \code{\link{model_gaim}},
+#'   \code{\link{model_ppr}}, \code{\link{model_gam}}, \code{\link{model_lm}}
+#'
 #' @examples
 #' library(dplyr)
 #' library(tibble)
@@ -94,7 +97,7 @@
 #' # Validation set
 #' sim_val <- sim_data[1001:1200, ]
 #'
-#' # Smooth variables
+#' # Predictors taken as non-linear variables
 #' s.vars <- colnames(sim_data)[3:8]
 #'
 #' # Model fitting

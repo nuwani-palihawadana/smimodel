@@ -15,12 +15,12 @@ models in a high-dimensional context.
 The package also includes functions to fit some benchmark comparison
 methods namely nonparametric additive model with backward elimination,
 group-wise additive index model and projection pursuit regression. These
-functions have a similar syntax and output format to `model_smimodel()`
-for convenient usage and interchangeability.
+functions are designed to have a similar syntax and output format to
+`model_smimodel()`, for convenient usage and interchangeability.
 
-For detailed information regarding the SMI Modelling algorithm refer
-<https://github.com/nuwani-palihawadana/smimodel_paper/blob/main/paper/smimodel.pdf>
-.
+For detailed information regarding the SMI Modelling algorithm refer the
+related working paper at
+<https://www.monash.edu/business/ebs/research/publications/ebs/2024/wp16-2024.pdf>.
 
 ## Installation
 
@@ -62,6 +62,7 @@ sim_data <- tibble(x_lag_000 = runif(n)) %>%
   select(inddd, y1, starts_with("x_lag")) %>%
   # Make the data set a `tsibble`
   as_tsibble(index = inddd)
+
 # Training set
 sim_train <- sim_data[1:1000, ]
 # Test set

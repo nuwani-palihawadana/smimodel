@@ -15,8 +15,8 @@ models in a high-dimensional context.
 The package also includes functions to fit some benchmark comparison
 methods namely nonparametric additive model with backward elimination,
 group-wise additive index model and projection pursuit regression. These
-functions are designed to have a similar syntax and output format to
-`model_smimodel()`, for convenient usage and interchangeability.
+functions are designed to have a similar syntax and output format for
+convenient usage and interchangeability.
 
 For detailed information regarding the SMI Modelling algorithm refer the
 related working paper at

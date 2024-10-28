@@ -4,46 +4,74 @@
 #' through a backward elimination procedure as proposed by Fan and Hyndman
 #' (2012).
 #'
-#' @param data The data set on which the model(s) will be trained. Must be a
-#'   data set of class `tsibble`.
-#' @param val.data Validation data set. (The data set on which the penalty
-#'   parameter selection will be performed.) Must be a data set of class
-#'   `tsibble`. (Once the penalty parameter selection is completed, the best
-#'   model will be re-fitted for the combined data set `data` + `val.data`.)
+#' @param data Training data set on which models will be trained. Must be a data
+#'   set of class \code{tsibble}.(Make sure there are no additional date or time
+#'   related variables except for the \code{index} of the \code{tsibble}). If
+#'   multiple models are fitted, the grouping variable should be the \code{key}
+#'   of the \code{tsibble}. If a \code{key} is not specified, a dummy key with
+#'   only one level will be created.
+#' @param val.data Validation data set. (The data set on which the model
+#'   selection will be performed.) Must be a data set of class \code{tsibble}.
+#'   (Once the model selection is completed, the
+#'   best model will be re-fitted for the combined data set \code{data +
+#'   val.data}.)
 #' @param yvar Name of the response variable as a character string.
-#' @param family A description of the error distribution and link function to be
-#'   used in the model (see \code{\link{glm}} and \code{\link{family}}).
 #' @param neighbour If multiple models are fitted: Number of neighbours of each
 #'   key (i.e. grouping variable) to be considered in model fitting to handle
-#'   smoothing over the key. Should be an integer. If `neighbour = x`, `x`
-#'   number of keys before the key of interest and `x` number of keys after the
-#'   key of interest are grouped together for model fitting. The default is `0`
-#'   (i.e. no neighbours are considered for model fitting).
-#' @param s.vars A character vector of names of the predictor variables for
-#'   which splines should be fitted (i.e. non-linear predictors). (default:
-#'   NULL)
+#'   smoothing over the key. Should be an \code{integer}. If \code{neighbour =
+#'   x}, \code{x} number of keys before the key of interest and \code{x} number
+#'   of keys after the key of interest are grouped together for model fitting.
+#'   The default is \code{neighbour = 0} (i.e. no neighbours are considered for
+#'   model fitting).
+#' @param family A description of the error distribution and link function to be
+#'   used in the model (see \code{\link{glm}} and \code{\link{family}}).
+#' @param s.vars A \code{character} vector of names of the predictor variables
+#'   for which splines should be fitted (i.e. non-linear predictors).
 #' @param s.basedim Dimension of the bases used to represent the smooth terms
-#'   corresponding to `s.vars`. (For more information refer `mgcv::s()`.)
-#'   (default: NULL)
-#' @param linear.vars A character vector of names of the predictor variables
-#'   that should be included linearly into the model (i.e. linear predictors).
-#'   (default: NULL)
-#' @param tol Tolerance for the ratio of relative change in MSE, used in model
-#'   selection. (default: 0.001)
+#'   corresponding to \code{s.vars}. (For more information refer
+#'   \code{mgcv::s()}.)
+#' @param linear.vars A \code{character} vector of names of the predictor
+#'   variables that should be included linearly into the model (i.e. linear
+#'   predictors).
+#' @param tol Tolerance for the ratio of relative change in validation set MSE,
+#'   used in model selection.
 #' @param parallel Whether to use parallel computing in model selection or not.
-#'   (default: FALSE)
-#' @param workers If `parallel = TRUE`, number of workers to use. (default:
-#'   NULL)
+#' @param workers If \code{parallel = TRUE}, number of workers to use.
 #' @param recursive Whether to obtain recursive forecasts or not (default -
-#'   FALSE).
-#' @param recursive_colRange If `recursive = TRUE`, The range of column numbers
-#'   in `val.data` to be filled with forecasts.
-#' 
+#'   \code{FALSE}).
+#' @param recursive_colRange If \code{recursive = TRUE}, the range of column
+#'   numbers in \code{val.data} to be filled with forecasts.
+#'   Recursive/autoregressive forecasting is required when the lags of the
+#'   response variable itself are used as predictor variables into the model.
+#'   Make sure such lagged variables are positioned together in increasing lag
+#'   order (i.e. \code{lag_1, lag_2, ..., lag_m}, \code{lag_m =} maximum lag
+#'   used) in \code{val.data}, with no break in the lagged variable sequence
+#'   even if some of the intermediate lags are not used as predictors.
+#' @return An object of class \code{backward}. This is a \code{tibble} with two
+#'   columns: \item{key}{The level of the grouping variable (i.e. key of the
+#'   training data set).} \item{fit}{Information of the fitted model
+#'   corresponding to the \code{key}.} Each row of the column \code{fit} is an
+#'   object of class \code{gam}. For details refer \code{mgcv::gamObject}.
+#'
+#' @details This function fits a nonparametric additive model formulated through
+#'   Backward Elimination, as proposed by Fan and Hyndman (2012). The process
+#'   starts with all predictors included in an additive model, and predictors
+#'   are progressively omitted until the best model is obtained based on the
+#'   validation set. Once the best model is obtained, the final model is
+#'   re-fitted for the data set combining training and validation sets. For more
+#'   details see reference.
+#'
+#' @references Fan, S. & Hyndman, R.J. (2012). Short-Term Load Forecasting Based
+#'   on a Semi-Parametric Additive Model. *IEEE Transactions on Power Systems*,
+#'   27(1), 134-141. \url{http://doi.org/10.1109/TPWRS.2011.2162082}
+#'
 #' @examples
 #' library(dplyr)
 #' library(tibble)
 #' library(tidyr)
 #' library(tsibble)
+#'
+#' # Simulate data
 #' n = 1205
 #' set.seed(123)
 #' sim_data <- tibble(x_lag_000 = runif(n)) |>
@@ -60,26 +88,26 @@
 #'   select(inddd, y1, starts_with("x_lag")) |>
 #'   # Make the data set a `tsibble`
 #'   as_tsibble(index = inddd)
+#'
 #' # Training set
 #' sim_train <- sim_data[1:1000, ]
 #' # Validation set
 #' sim_val <- sim_data[1001:1200, ]
+#'
 #' # Smooth variables
 #' s.vars <- colnames(sim_data)[3:8]
+#'
 #' # Model fitting
 #' backwardModel <- model_backward(data = sim_train,
 #'                                 val.data = sim_val,
 #'                                 yvar = "y1",
 #'                                 s.vars = s.vars)
+#' # Fitted model
 #' backwardModel$fit[[1]]
-#'
-#' @references Fan, S. & Hyndman, R.J. (2012). Short-Term Load Forecasting Based
-#'   on a Semi-Parametric Additive Model. *IEEE Transactions on Power Systems*,
-#'   27(1), 134-141. \url{http://doi.org/10.1109/TPWRS.2011.2162082}
 #'
 #' @export
 model_backward <- function(data, val.data, yvar, 
-                           family = gaussian(), neighbour = 0, 
+                           neighbour = 0, family = gaussian(), 
                            s.vars = NULL, s.basedim = NULL, 
                            linear.vars = NULL,  tol = 0.001, 
                            parallel = FALSE, workers = NULL,
@@ -242,36 +270,43 @@ utils::globalVariables(c("...1", "...2"))
 
 
 
-#' Function to eliminate a specified variable and fit a nonparametric additive
-#' model with remaining variables
+#' Eliminate a variable and fit a nonparametric additive model
 #'
-#' This is an internal function of the package `smimodel`, and designed to be
-#' called from `model_backward()`.
+#' Eliminates a specified variable and fits a nonparametric additive model with
+#' remaining variables, and returns validation set MSE. This is an internal
+#' function of the package, and designed to be called from
+#' \code{\link{model_backward}}.
 #'
-#' @param ind An integer corresponding to the position of the predictor variable
-#'   to be eliminated when fitting the model. (i.e. the function will combine
-#'   `s.vars` and `linear.vars` in a single vector and eliminate the element
-#'   corresponding to `ind`.)
+#' @param ind An \code{integer} corresponding to the position of the predictor
+#'   variable to be eliminated when fitting the model. (i.e. the function will
+#'   combine \code{s.vars} and \code{linear.vars} in a single vector and
+#'   eliminate the element corresponding to \code{ind}.)
 #' @param train The data set on which the model(s) will be trained. Must be a
-#'   data set of class `tsibble`.
-#' @param val Validation data set. (The data set on which the model
-#'   selection will be performed.) Must be a data set of class `tsibble`.
+#'   data set of class \code{tsibble}.
+#' @param val Validation data set. (The data set on which the model selection
+#'   will be performed.) Must be a data set of class \code{tsibble}.
 #' @param yvar Name of the response variable as a character string.
 #' @param family A description of the error distribution and link function to be
-#'   used in the model (see `glm` and `family`).
-#' @param s.vars A character vector of names of the predictor variables for
-#'   which splines should be fitted (i.e. non-linear predictors). (default:
-#'   NULL)
+#'   used in the model (see \code{\link{glm}} and \code{\link{family}}).
+#' @param s.vars A \code{character} vector of names of the predictor variables
+#'   for which splines should be fitted (i.e. non-linear predictors).
 #' @param s.basedim Dimension of the bases used to represent the smooth terms
-#'   corresponding to `s.vars`. (For more information refer `mgcv::s()`.)
-#'   (default: NULL)
-#' @param linear.vars A character vector of names of the predictor variables
-#'   that should be included linearly into the model (i.e. linear predictors).
-#'   (default: NULL)
+#'   corresponding to \code{s.vars}. (For more information refer
+#'   \code{mgcv::s()}.)
+#' @param linear.vars A \code{character} vector of names of the predictor
+#'   variables that should be included linearly into the model (i.e. linear
+#'   predictors).
 #' @param recursive Whether to obtain recursive forecasts or not (default -
-#'   FALSE).
-#' @param recursive_colRange If `recursive = TRUE`, The range of column numbers
-#'   in `val.data` to be filled with forecasts.
+#'   \code{FALSE}).
+#' @param recursive_colRange If \code{recursive = TRUE}, the range of column
+#'   numbers in \code{val.data} to be filled with forecasts.
+#'   Recursive/autoregressive forecasting is required when the lags of the
+#'   response variable itself are used as predictor variables into the model.
+#'   Make sure such lagged variables are positioned together in increasing lag
+#'   order (i.e. \code{lag_1, lag_2, ..., lag_m}, \code{lag_m =} maximum lag
+#'   used) in \code{val.data}, with no break in the lagged variable sequence
+#'   even if some of the intermediate lags are not used as predictors.
+#' @return A \code{numeric}.
 
 eliminate <- function(ind, train, val, yvar, family = gaussian(), 
                       s.vars = NULL, s.basedim = NULL, 

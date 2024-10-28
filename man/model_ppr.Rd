@@ -63,4 +63,5 @@ pprModel <- model_ppr(data = sim_data,
                       yvar = "y1",
                       index.vars = index.vars)
 pprModel$fit[[1]]
+
 }

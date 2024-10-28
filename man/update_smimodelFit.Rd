@@ -23,8 +23,12 @@ update_smimodelFit(
 \arguments{
 \item{object}{A \code{smimodelFit} object.}
 
-\item{data}{Training data set on which models will be trained. Should be a
-\code{tsibble}.}
+\item{data}{Training data set on which models will be trained. Must be a data
+set of class \code{tsibble}.(Make sure there are no additional date or time
+related variables except for the \code{index} of the \code{tsibble}). If
+multiple models are fitted, the grouping variable should be the \code{key}
+of the \code{tsibble}. If a \code{key} is not specified, a dummy key with
+only one level will be created.}
 
 \item{lambda0}{Penalty parameter for L0 penalty.}
 
@@ -35,7 +39,7 @@ update_smimodelFit(
 \item{max.iter}{Maximum number of MIP iterations performed to update index
 coefficients for a given model.}
 
-\item{tol}{Tolerance for loss.}
+\item{tol}{Tolerance for the objective function value (loss) of MIP.}
 
 \item{tolCoefs}{Tolerance for coefficients.}
 
@@ -50,6 +54,10 @@ non-convex quadratic constraints in Gurobi solver.}
 \item{verbose}{The option to print detailed solver output.}
 
 \item{...}{Other arguments not currently used.}
+}
+\value{
+A list of optimised model information. For descriptions of the list
+elements see \code{\link{make_smimodelFit}}).
 }
 \description{
 Optimises and updates a given \code{smimodelFit}.

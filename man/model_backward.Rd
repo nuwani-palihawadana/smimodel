@@ -8,8 +8,8 @@ model_backward(
   data,
   val.data,
   yvar,
-  family = gaussian(),
   neighbour = 0,
+  family = gaussian(),
   s.vars = NULL,
   s.basedim = NULL,
   linear.vars = NULL,
@@ -21,63 +21,90 @@ model_backward(
 )
 }
 \arguments{
-\item{data}{The data set on which the model(s) will be trained. Must be a
-data set of class \code{tsibble}.}
+\item{data}{Training data set on which models will be trained. Must be a data
+set of class \code{tsibble}.(Make sure there are no additional date or time
+related variables except for the \code{index} of the \code{tsibble}). If
+multiple models are fitted, the grouping variable should be the \code{key}
+of the \code{tsibble}. If a \code{key} is not specified, a dummy key with
+only one level will be created.}
 
-\item{val.data}{Validation data set. (The data set on which the penalty
-parameter selection will be performed.) Must be a data set of class
-\code{tsibble}. (Once the penalty parameter selection is completed, the best
-model will be re-fitted for the combined data set \code{data} + \code{val.data}.)}
+\item{val.data}{Validation data set. (The data set on which the model
+selection will be performed.) Must be a data set of class \code{tsibble}.
+(Once the model selection is completed, the
+best model will be re-fitted for the combined data set \code{data +
+  val.data}.)}
 
 \item{yvar}{Name of the response variable as a character string.}
+
+\item{neighbour}{If multiple models are fitted: Number of neighbours of each
+key (i.e. grouping variable) to be considered in model fitting to handle
+smoothing over the key. Should be an \code{integer}. If \code{neighbour =
+  x}, \code{x} number of keys before the key of interest and \code{x} number
+of keys after the key of interest are grouped together for model fitting.
+The default is \code{neighbour = 0} (i.e. no neighbours are considered for
+model fitting).}
 
 \item{family}{A description of the error distribution and link function to be
 used in the model (see \code{\link{glm}} and \code{\link{family}}).}
 
-\item{neighbour}{If multiple models are fitted: Number of neighbours of each
-key (i.e. grouping variable) to be considered in model fitting to handle
-smoothing over the key. Should be an integer. If \code{neighbour = x}, \code{x}
-number of keys before the key of interest and \code{x} number of keys after the
-key of interest are grouped together for model fitting. The default is \code{0}
-(i.e. no neighbours are considered for model fitting).}
-
-\item{s.vars}{A character vector of names of the predictor variables for
-which splines should be fitted (i.e. non-linear predictors). (default:
-NULL)}
+\item{s.vars}{A \code{character} vector of names of the predictor variables
+for which splines should be fitted (i.e. non-linear predictors).}
 
 \item{s.basedim}{Dimension of the bases used to represent the smooth terms
-corresponding to \code{s.vars}. (For more information refer \code{mgcv::s()}.)
-(default: NULL)}
+corresponding to \code{s.vars}. (For more information refer
+\code{mgcv::s()}.)}
 
-\item{linear.vars}{A character vector of names of the predictor variables
-that should be included linearly into the model (i.e. linear predictors).
-(default: NULL)}
+\item{linear.vars}{A \code{character} vector of names of the predictor
+variables that should be included linearly into the model (i.e. linear
+predictors).}
 
-\item{tol}{Tolerance for the ratio of relative change in MSE, used in model
-selection. (default: 0.001)}
+\item{tol}{Tolerance for the ratio of relative change in validation set MSE,
+used in model selection.}
 
-\item{parallel}{Whether to use parallel computing in model selection or not.
-(default: FALSE)}
+\item{parallel}{Whether to use parallel computing in model selection or not.}
 
-\item{workers}{If \code{parallel = TRUE}, number of workers to use. (default:
-NULL)}
+\item{workers}{If \code{parallel = TRUE}, number of workers to use.}
 
 \item{recursive}{Whether to obtain recursive forecasts or not (default -
-FALSE).}
+\code{FALSE}).}
 
-\item{recursive_colRange}{If \code{recursive = TRUE}, The range of column numbers
-in \code{val.data} to be filled with forecasts.}
+\item{recursive_colRange}{If \code{recursive = TRUE}, the range of column
+numbers in \code{val.data} to be filled with forecasts.
+Recursive/autoregressive forecasting is required when the lags of the
+response variable itself are used as predictor variables into the model.
+Make sure such lagged variables are positioned together in increasing lag
+order (i.e. \code{lag_1, lag_2, ..., lag_m}, \code{lag_m =} maximum lag
+used) in \code{val.data}, with no break in the lagged variable sequence
+even if some of the intermediate lags are not used as predictors.}
+}
+\value{
+An object of class \code{backward}. This is a \code{tibble} with two
+columns: \item{key}{The level of the grouping variable (i.e. key of the
+training data set).} \item{fit}{Information of the fitted model
+corresponding to the \code{key}.} Each row of the column \code{fit} is an
+object of class \code{gam}. For details refer \code{mgcv::gamObject}.
 }
 \description{
 Fits a nonparametric additive model, with simultaneous variable selection
 through a backward elimination procedure as proposed by Fan and Hyndman
 (2012).
 }
+\details{
+This function fits a nonparametric additive model formulated through
+Backward Elimination, as proposed by Fan and Hyndman (2012). The process
+starts with all predictors included in an additive model, and predictors
+are progressively omitted until the best model is obtained based on the
+validation set. Once the best model is obtained, the final model is
+re-fitted for the data set combining training and validation sets. For more
+details see reference.
+}
 \examples{
 library(dplyr)
 library(tibble)
 library(tidyr)
 library(tsibble)
+
+# Simulate data
 n = 1205
 set.seed(123)
 sim_data <- tibble(x_lag_000 = runif(n)) |>
@@ -94,17 +121,21 @@ sim_data <- tibble(x_lag_000 = runif(n)) |>
   select(inddd, y1, starts_with("x_lag")) |>
   # Make the data set a `tsibble`
   as_tsibble(index = inddd)
+
 # Training set
 sim_train <- sim_data[1:1000, ]
 # Validation set
 sim_val <- sim_data[1001:1200, ]
+
 # Smooth variables
 s.vars <- colnames(sim_data)[3:8]
+
 # Model fitting
 backwardModel <- model_backward(data = sim_train,
                                 val.data = sim_val,
                                 yvar = "y1",
                                 s.vars = s.vars)
+# Fitted model
 backwardModel$fit[[1]]
 
 }

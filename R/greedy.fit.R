@@ -3,15 +3,14 @@
 #' Function to perform a greedy search over a given grid of penalty parameter
 #' combinations (lambda0, lambda2), and fits a single SMI model with the best
 #' (lowest validation set MSE) penalty parameter combination. This is a helper
-#' function designed to be called from \code{greedy_smimodel()}.
+#' function designed to be called from \code{\link{greedy_smimodel}}.
 #'
 #' @param data Training data set on which models will be trained. Must be a data
-#'   set of class \code{tsibble}.(Make sure there are no additional
-#'   \code{date/time/date-time/yearmonth/POSIXct/POSIXt} variables except for
-#'   the \code{index} of the \code{tsibble}). If multiple models are fitted, the
-#'   grouping variable should be the \code{key} of the \code{tsibble}. If a
-#'   \code{key} is not specified, a dummy key with only one level will be
-#'   created.
+#'   set of class \code{tsibble}.(Make sure there are no additional date or time
+#'   related variables except for the \code{index} of the \code{tsibble}). If
+#'   multiple models are fitted, the grouping variable should be the \code{key}
+#'   of the \code{tsibble}. If a \code{key} is not specified, a dummy key with
+#'   only one level will be created.
 #' @param val.data Validation data set. (The data set on which the penalty
 #'   parameter selection will be performed.) Must be a data set of class
 #'   \code{tsibble}. (Once the penalty parameter selection is completed, the

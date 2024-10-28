@@ -18,23 +18,28 @@ new_smimodelFit(
 )
 }
 \arguments{
-\item{data}{Training data set on which models will be trained. Should be a
-\code{tsibble}.}
+\item{data}{Training data set on which models will be trained. Must be a data
+set of class \code{tsibble}.(Make sure there are no additional date or time
+related variables except for the \code{index} of the \code{tsibble}). If
+multiple models are fitted, the grouping variable should be the \code{key}
+of the \code{tsibble}. If a \code{key} is not specified, a dummy key with
+only one level will be created.}
 
 \item{yvar}{Name of the response variable as a character string.}
 
 \item{neighbour}{If multiple models are fitted: Number of neighbours of each
 key (i.e. grouping variable) to be considered in model fitting to handle
-smoothing over the key. Should be an integer. If \code{neighbour = x}, \code{x}
-number of keys before the key of interest and \code{x} number of keys after the
-key of interest are grouped together for model fitting. The default is \code{0}
-(i.e. no neighbours are considered for model fitting).}
+smoothing over the key. Should be an \code{integer}. If \code{neighbour =
+  x}, \code{x} number of keys before the key of interest and \code{x} number
+of keys after the key of interest are grouped together for model fitting.
+The default is \code{neighbour = 0} (i.e. no neighbours are considered for
+model fitting).}
 
 \item{family}{A description of the error distribution and link function to be
 used in the model (see \code{\link{glm}} and \code{\link{family}}).}
 
-\item{index.vars}{A character vector of names of the predictor variables for
-which indices should be estimated.}
+\item{index.vars}{A \code{character} vector of names of the predictor
+variables for which indices should be estimated.}
 
 \item{initialise}{The model structure with which the estimation process
 should be initialised. The default is "additive", where the initial model
@@ -46,20 +51,24 @@ regression), and "userInput" - user specifies the initial model structure
 indices) and the initial index coefficients through \code{index.ind} and
 \code{index.coefs} arguments respectively.}
 
-\item{index.ind}{If \code{initialise = "userInput"}: an integer vector that
-assigns group index for each predictor in \code{index.vars}.}
+\item{index.ind}{If \code{initialise = "userInput"}: an \code{integer} vector
+that assigns group index for each predictor in \code{index.vars}.}
 
-\item{index.coefs}{If \code{initialise = "userInput"}: a numeric vector of index
-coefficients.}
+\item{index.coefs}{If \code{initialise = "userInput"}: a \code{numeric}
+vector of index coefficients.}
 
-\item{s.vars}{A character vector of names of the predictor variables for
-which splines should be fitted individually (rather than considering as a
-part of an index considered in \code{index.vars}).}
+\item{s.vars}{A \code{character} vector of names of the predictor variables
+for which splines should be fitted individually (rather than considering as
+part of an index).}
 
-\item{linear.vars}{A character vector of names of the predictor variables
-that should be included linearly into the model.}
+\item{linear.vars}{A \code{character} vector of names of the predictor
+variables that should be included linearly into the model.}
+}
+\value{
+A list of initial model information. For descriptions of the list
+elements see \code{\link{make_smimodelFit}}).
 }
 \description{
-Constructs an object of class \code{smimodelFit} using the information passed to
-arguments.
+Constructs an object of class \code{smimodelFit} using the information passed
+to arguments.
 }

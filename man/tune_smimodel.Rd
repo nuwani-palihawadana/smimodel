@@ -2,7 +2,7 @@
 % Please edit documentation in R/tune_smimodel.R
 \name{tune_smimodel}
 \alias{tune_smimodel}
-\title{Sparse Multiple Index (SMI) model with a given penalty parameter combination}
+\title{SMI model with a given penalty parameter combination}
 \usage{
 tune_smimodel(
   data,
@@ -33,75 +33,84 @@ tune_smimodel(
 )
 }
 \arguments{
-\item{data}{Training data set on which models will be trained. Should be a
-\code{tibble}.}
+\item{data}{Training data set on which models will be trained. Must be a data
+set of class \code{tsibble}.(Make sure there are no additional date or time
+related variables except for the \code{index} of the \code{tsibble}). If
+multiple models are fitted, the grouping variable should be the \code{key}
+of the \code{tsibble}. If a \code{key} is not specified, a dummy key with
+only one level will be created.}
 
 \item{val.data}{Validation data set. (The data set on which the penalty
 parameter selection will be performed.) Must be a data set of class
-\code{tsibble}.}
+\code{tsibble}. (Once the penalty parameter selection is completed, the
+best model will be re-fitted for the combined data set \code{data +
+  val.data}.)}
 
 \item{yvar}{Name of the response variable as a character string.}
 
 \item{neighbour}{If multiple models are fitted: Number of neighbours of each
 key (i.e. grouping variable) to be considered in model fitting to handle
-smoothing over the key. Should be an integer. If \code{neighbour = x}, \code{x}
-number of keys before the key of interest and \code{x} number of keys after the
-key of interest are grouped together for model fitting. The default is \code{0}
-(i.e. no neighbours are considered for model fitting).}
+smoothing over the key. Should be an \code{integer}. If \code{neighbour =
+  x}, \code{x} number of keys before the key of interest and \code{x} number
+of keys after the key of interest are grouped together for model fitting.
+The default is \code{neighbour = 0} (i.e. no neighbours are considered for
+model fitting).}
 
 \item{family}{A description of the error distribution and link function to be
 used in the model (see \code{\link{glm}} and \code{\link{family}}).}
 
-\item{index.vars}{A character vector of names of the predictor variables for
-which indices should be estimated.}
+\item{index.vars}{A \code{character} vector of names of the predictor
+variables for which indices should be estimated.}
 
 \item{initialise}{The model structure with which the estimation process
-should be initialised. The default is "ppr", where the initial model is
-derived from projection pursuit regression. The other options are
-"additive" - nonparametric additive model, "linear" - linear regression
-model (i.e. a special case single-index model, where the initial values of
-the index coefficients are obtained through a linear regression),
-"multiple" - multiple models are fitted starting with different initial
-models (number of indices = \code{num_ind}; \code{num_models} random instances of the
-model (i.e. the predictor assignment to indices and initial index
-coefficients are generated randomly) are considered), and the final optimal
-model with the lowest loss is returned, and "userInput" - user specifies
-the initial model structure (i.e. the number of indices and the placement
-of index variables among indices) and the initial index coefficients
-through \code{index.ind} and \code{index.coefs} arguments respectively.}
+should be initialised. The default is \code{"ppr"}, where the initial model
+is derived from projection pursuit regression. The other options are
+\code{"additive"} - nonparametric additive model, \code{"linear"} - linear
+regression model (i.e. a special case single-index model, where the initial
+values of the index coefficients are obtained through a linear regression),
+\code{"multiple"} - multiple models are fitted starting with different
+initial models (number of indices = \code{num_ind}; \code{num_models}
+random instances of the model (i.e. the predictor assignment to indices and
+initial index coefficients are generated randomly) are considered), and the
+final optimal model with the lowest loss is returned, and
+\code{"userInput"} - user specifies the initial model structure (i.e. the
+number of indices and the placement of index variables among indices) and
+the initial index coefficients through \code{index.ind} and
+\code{index.coefs} arguments respectively.}
 
-\item{num_ind}{If \verb{initialise = "ppr" or "multiple"}: an integer that
-specifies the number of indices to be used in the model(s). The default is
-5.}
+\item{num_ind}{If \code{initialise = "ppr"} or \code{"multiple"}: an
+\code{integer} that specifies the number of indices to be used in the
+model(s). The default is \code{num_ind = 5}.}
 
-\item{num_models}{If \code{initialise = "multiple"}: an integer that specifies the
-number of starting models to be checked. The default is 5.}
+\item{num_models}{If \code{initialise = "multiple"}: an \code{integer} that
+specifies the number of starting models to be checked. The default is
+\code{num_models = 5}.}
 
-\item{seed}{If \code{initialise = "multiple"}: the seed to be set when generating
-random starting points.}
+\item{seed}{If \code{initialise = "multiple"}: the seed to be set when
+generating random starting points.}
 
-\item{index.ind}{If \code{initialise = "userInput"}: an integer vector that
-assigns group index for each predictor in \code{index.vars}.}
+\item{index.ind}{If \code{initialise = "userInput"}: an \code{integer} vector
+that assigns group index for each predictor in \code{index.vars}.}
 
-\item{index.coefs}{If \code{initialise = "userInput"}: a numeric vector of index
-coefficients.}
+\item{index.coefs}{If \code{initialise = "userInput"}: a \code{numeric}
+vector of index coefficients.}
 
-\item{s.vars}{A character vector of names of the predictor variables for
-which splines should be fitted individually (rather than considering as a
-part of an index considered in \code{index.vars}).}
+\item{s.vars}{A \code{character} vector of names of the predictor variables
+for which splines should be fitted individually (rather than considering as
+part of an index).}
 
-\item{linear.vars}{A character vector of names of the predictor variables
-that should be included linearly into the model.}
+\item{linear.vars}{A \code{character} vector of names of the predictor
+variables that should be included linearly into the model.}
 
-\item{lambda.comb}{A numeric vector (of length two) indicating the values for
-the two penalty parameters lambda0 and lambda2.}
+\item{lambda.comb}{A \code{numeric} vector (of length two) indicating the
+values for the two penalty parameters lambda0 and lambda2.}
 
 \item{M}{Big-M value used in MIP.}
 
 \item{max.iter}{Maximum number of MIP iterations performed to update index
 coefficients for a given model.}
 
-\item{tol}{Tolerance for loss.}
+\item{tol}{Tolerance for the objective function value (loss) of MIP.}
 
 \item{tolCoefs}{Tolerance for coefficients.}
 
@@ -116,14 +125,23 @@ non-convex quadratic constraints in Gurobi solver.}
 \item{verbose}{The option to print detailed solver output.}
 
 \item{recursive}{Whether to obtain recursive forecasts or not (default -
-FALSE).}
+\code{FALSE}).}
 
-\item{recursive_colRange}{If \code{recursive = TRUE}, The range of column numbers
-in \code{val.data} to be filled with forecasts.}
+\item{recursive_colRange}{If \code{recursive = TRUE}, the range of column
+numbers in \code{val.data} to be filled with forecasts.
+Recursive/autoregressive forecasting is required when the lags of the
+response variable itself are used as predictor variables into the model.
+Make sure such lagged variables are positioned together in increasing lag
+order (i.e. \code{lag_1, lag_2, ..., lag_m}, \code{lag_m =} maximum lag
+used) in \code{val.data}, with no break in the lagged variable sequence
+even if some of the intermediate lags are not used as predictors.}
+}
+\value{
+A \code{numeric}.
 }
 \description{
 Fits a nonparametric multiple index model to the data for a given combination
 of the penalty parameters (lambda0, lambda2), and returns the validation set
-mean squared error (MSE). (Used within \code{greedy.fit()}; users are not expected
-to use this function directly.)
+mean squared error (MSE). (Used within \code{\link{greedy.fit}}; users are
+not expected to use this function directly.)
 }

@@ -88,6 +88,6 @@ corresponding to \code{best_alpha}.}
 \description{
 Iteratively updates index coefficients and non-linear functions using mixed
 integer programming. (A helper function used within
-\code{update_smimodelFit()}; users are not expected to directly call this
-function.)
+\code{\link{update_smimodelFit}}; users are not expected to directly call
+this function.)
 }

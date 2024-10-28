@@ -41,12 +41,11 @@ greedy_smimodel(
 }
 \arguments{
 \item{data}{Training data set on which models will be trained. Must be a data
-set of class \code{tsibble}.(Make sure there are no additional
-\code{date/time/date-time/yearmonth/POSIXct/POSIXt} variables except for
-the \code{index} of the \code{tsibble}). If multiple models are fitted, the
-grouping variable should be the \code{key} of the \code{tsibble}. If a
-\code{key} is not specified, a dummy key with only one level will be
-created.}
+set of class \code{tsibble}.(Make sure there are no additional date or time
+related variables except for the \code{index} of the \code{tsibble}). If
+multiple models are fitted, the grouping variable should be the \code{key}
+of the \code{tsibble}. If a \code{key} is not specified, a dummy key with
+only one level will be created.}
 
 \item{val.data}{Validation data set. (The data set on which the penalty
 parameter selection will be performed.) Must be a data set of class
@@ -170,13 +169,14 @@ An object of class \code{smimodel}. This is a \code{tibble} with two
 columns: \item{key}{The level of the grouping variable (i.e. key of the
 training data set).} \item{fit}{Information of the fitted model
 corresponding to the \code{key}.}
-The column \code{fit} contains a list with three elements: \item{initial}{A
-list of information of the model initialisation. (For descriptions of the
-list elements see \code{\link{make_smimodelFit}}).} \item{best}{A list of
-information of the final optimised model. (For descriptions of the list
-elements see \code{\link{make_smimodelFit}}).} \item{best_lambdas}{Selected
-penalty parameter combination.} The number of rows of the \code{tibble}
-equals to the number of levels in the grouping variable.
+Each row of the column \code{fit} contains a list with three elements:
+\item{initial}{A list of information of the model initialisation. (For
+descriptions of the list elements see \code{\link{make_smimodelFit}}).}
+\item{best}{A list of information of the final optimised model. (For
+descriptions of the list elements see \code{\link{make_smimodelFit}}).}
+\item{best_lambdas}{Selected penalty parameter combination.} The number of
+rows of the \code{tibble} equals to the number of levels in the grouping
+variable.
 }
 \description{
 Performs a greedy search over a given grid of penalty parameter combinations

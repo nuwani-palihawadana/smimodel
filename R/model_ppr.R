@@ -50,6 +50,7 @@
 #'                       yvar = "y1",
 #'                       index.vars = index.vars)
 #' pprModel$fit[[1]]
+#' 
 #' @export
 model_ppr <- function(data, yvar, neighbour = 0, index.vars, num_ind = 5, ...){
   stopifnot(tsibble::is_tsibble(data))

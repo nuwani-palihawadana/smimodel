@@ -1,16 +1,20 @@
-#' Updating a `smimodelFit`
+#' Updating a \code{smimodelFit}
 #'
-#' Optimises and updates a given `smimodelFit`.
+#' Optimises and updates a given \code{smimodelFit}.
 #'
-#' @param object A `smimodelFit` object.
-#' @param data Training data set on which models will be trained. Should be a
-#'   `tsibble`.
+#' @param object A \code{smimodelFit} object.
+#' @param data Training data set on which models will be trained. Must be a data
+#'   set of class \code{tsibble}.(Make sure there are no additional date or time
+#'   related variables except for the \code{index} of the \code{tsibble}). If
+#'   multiple models are fitted, the grouping variable should be the \code{key}
+#'   of the \code{tsibble}. If a \code{key} is not specified, a dummy key with
+#'   only one level will be created.
 #' @param lambda0 Penalty parameter for L0 penalty.
 #' @param lambda2 Penalty parameter for L2 penalty.
 #' @param M Big-M value used in MIP.
 #' @param max.iter Maximum number of MIP iterations performed to update index
 #'   coefficients for a given model.
-#' @param tol Tolerance for loss.
+#' @param tol Tolerance for the objective function value (loss) of MIP.
 #' @param tolCoefs Tolerance for coefficients.
 #' @param TimeLimit A limit for the total time (in seconds) expended in a single
 #'   MIP iteration.
@@ -19,6 +23,8 @@
 #'   non-convex quadratic constraints in Gurobi solver.
 #' @param verbose The option to print detailed solver output.
 #' @param ... Other arguments not currently used.
+#' @return  A list of optimised model information. For descriptions of the list
+#'   elements see \code{\link{make_smimodelFit}}).
 
 update_smimodelFit <- function(object, data, lambda0 = 1, lambda2 = 1, 
                             M = 10, max.iter = 50, 

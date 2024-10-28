@@ -8,26 +8,69 @@ model_lm(data, yvar, neighbour = 0, linear.vars, ...)
 }
 \arguments{
 \item{data}{Training data set on which models will be trained. Must be a data
-set of class \code{tsibble}.(Make sure there are no additional
-date/time/date-time/yearmonth/POSIXct/POSIXt variables except for the
-\code{index} of the \code{tsibble}). If multiple models are fitted, the grouping
-variable should be the key of the \code{tsibble}.}
+set of class \code{tsibble}.(Make sure there are no additional date or time
+related variables except for the \code{index} of the \code{tsibble}). If
+multiple models are fitted, the grouping variable should be the \code{key}
+of the \code{tsibble}. If a \code{key} is not specified, a dummy key with
+only one level will be created.}
 
 \item{yvar}{Name of the response variable as a character string.}
 
 \item{neighbour}{If multiple models are fitted: Number of neighbours of each
 key (i.e. grouping variable) to be considered in model fitting to handle
-smoothing over the key. Should be an integer. If \code{neighbour = x}, \code{x}
-number of keys before the key of interest and \code{x} number of keys after the
-key of interest are grouped together for model fitting. The default is \code{0}
-(i.e. no neighbours are considered for model fitting).}
+smoothing over the key. Should be an \code{integer}. If \code{neighbour =
+  x}, \code{x} number of keys before the key of interest and \code{x} number
+of keys after the key of interest are grouped together for model fitting.
+The default is \code{neighbour = 0} (i.e. no neighbours are considered for
+model fitting).}
 
-\item{linear.vars}{A character vector of names of the predictor variables
-that should be included linearly into the model.}
+\item{linear.vars}{A character vector of names of the predictor variables.}
 
 \item{...}{Other arguments not currently used.}
 }
+\value{
+An object of class \code{lmFit}. This is a \code{tibble} with two
+columns: \item{key}{The level of the grouping variable (i.e. key of the
+training data set).} \item{fit}{Information of the fitted model
+corresponding to the \code{key}.} Each row of the column \code{fit} is
+an object of class \code{lm}. For details refer \code{stats::lm}.
+}
 \description{
-A wrapper for \code{stats::lm()} enabling multiple linear models based on a grouping
-variable.
+A wrapper for \code{\link{lm}} enabling multiple linear models based on a
+grouping variable.
+}
+\examples{
+library(dplyr)
+library(tibble)
+library(tidyr)
+library(tsibble)
+
+# Simulate data
+n = 1005
+set.seed(123)
+sim_data <- tibble(x_lag_000 = runif(n)) |>
+  mutate(
+    # Add x_lags
+    x_lag = lag_matrix(x_lag_000, 5)) |>
+  unpack(x_lag, names_sep = "_") |>
+  mutate(
+    # Response variable
+    y1 = (0.9*x_lag_000 + 0.6*x_lag_001 + 0.45*x_lag_003)^3 + rnorm(n, sd = 0.1),
+    # Add an index to the data set
+    inddd = seq(1, n)) |>
+  drop_na() |>
+  select(inddd, y1, starts_with("x_lag")) |>
+  # Make the data set a `tsibble`
+  as_tsibble(index = inddd)
+
+# Predictor variables
+linear.vars <- colnames(sim_data)[3:8]
+
+# Model fitting
+lmModel <- model_lm(data = sim_data,
+                    yvar = "y1",
+                    linear.vars = linear.vars)
+# Fitted model
+lmModel$fit[[1]]
+
 }

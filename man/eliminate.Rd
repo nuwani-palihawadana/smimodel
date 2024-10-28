@@ -2,8 +2,7 @@
 % Please edit documentation in R/model_backward.R
 \name{eliminate}
 \alias{eliminate}
-\title{Function to eliminate a specified variable and fit a nonparametric additive
-model with remaining variables}
+\title{Eliminate a variable and fit a nonparametric additive model}
 \usage{
 eliminate(
   ind,
@@ -19,41 +18,51 @@ eliminate(
 )
 }
 \arguments{
-\item{ind}{An integer corresponding to the position of the predictor variable
-to be eliminated when fitting the model. (i.e. the function will combine
-\code{s.vars} and \code{linear.vars} in a single vector and eliminate the element
-corresponding to \code{ind}.)}
+\item{ind}{An \code{integer} corresponding to the position of the predictor
+variable to be eliminated when fitting the model. (i.e. the function will
+combine \code{s.vars} and \code{linear.vars} in a single vector and
+eliminate the element corresponding to \code{ind}.)}
 
 \item{train}{The data set on which the model(s) will be trained. Must be a
 data set of class \code{tsibble}.}
 
-\item{val}{Validation data set. (The data set on which the model
-selection will be performed.) Must be a data set of class \code{tsibble}.}
+\item{val}{Validation data set. (The data set on which the model selection
+will be performed.) Must be a data set of class \code{tsibble}.}
 
 \item{yvar}{Name of the response variable as a character string.}
 
 \item{family}{A description of the error distribution and link function to be
-used in the model (see \code{glm} and \code{family}).}
+used in the model (see \code{\link{glm}} and \code{\link{family}}).}
 
-\item{s.vars}{A character vector of names of the predictor variables for
-which splines should be fitted (i.e. non-linear predictors). (default:
-NULL)}
+\item{s.vars}{A \code{character} vector of names of the predictor variables
+for which splines should be fitted (i.e. non-linear predictors).}
 
 \item{s.basedim}{Dimension of the bases used to represent the smooth terms
-corresponding to \code{s.vars}. (For more information refer \code{mgcv::s()}.)
-(default: NULL)}
+corresponding to \code{s.vars}. (For more information refer
+\code{mgcv::s()}.)}
 
-\item{linear.vars}{A character vector of names of the predictor variables
-that should be included linearly into the model (i.e. linear predictors).
-(default: NULL)}
+\item{linear.vars}{A \code{character} vector of names of the predictor
+variables that should be included linearly into the model (i.e. linear
+predictors).}
 
 \item{recursive}{Whether to obtain recursive forecasts or not (default -
-FALSE).}
+\code{FALSE}).}
 
-\item{recursive_colRange}{If \code{recursive = TRUE}, The range of column numbers
-in \code{val.data} to be filled with forecasts.}
+\item{recursive_colRange}{If \code{recursive = TRUE}, the range of column
+numbers in \code{val.data} to be filled with forecasts.
+Recursive/autoregressive forecasting is required when the lags of the
+response variable itself are used as predictor variables into the model.
+Make sure such lagged variables are positioned together in increasing lag
+order (i.e. \code{lag_1, lag_2, ..., lag_m}, \code{lag_m =} maximum lag
+used) in \code{val.data}, with no break in the lagged variable sequence
+even if some of the intermediate lags are not used as predictors.}
+}
+\value{
+A \code{numeric}.
 }
 \description{
-This is an internal function of the package \code{smimodel}, and designed to be
-called from \code{model_backward()}.
+Eliminates a specified variable and fits a nonparametric additive model with
+remaining variables, and returns validation set MSE. This is an internal
+function of the package, and designed to be called from
+\code{\link{model_backward}}.
 }

@@ -70,7 +70,7 @@
 #' # Model fitting
 #' gamModel <- model_gam(data = sim_data,
 #'                       yvar = "y1",
-#'                       s.vars = index.vars,
+#'                       s.vars = s.vars,
 #'                       linear.vars = linear.vars)
 #'
 #' # Fitted model

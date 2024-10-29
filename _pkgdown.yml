@@ -2,3 +2,96 @@ url: ~
 template:
   bootstrap: 5
 
+reference:
+- title: Estimating SMI model
+  desc: >
+    Functions to estimate a SMI model with or without penalty parameter tuning.
+  contents:
+  - model_smimodel
+  - greedy_smimodel
+  
+- title: Estimating other benchmark models
+  desc: >
+    Functions to fit some benchmark comparison methods.
+  contents:
+  - model_backward
+  - model_gaim
+  - model_ppr
+  - model_gam
+  - model_lm
+  
+- title: Augment methods
+  desc: >
+    Obtain residuals and fitted values of the fitted models.
+  contents:
+  - augment.smimodel
+  - augment.backward
+  - augment.gaimFit 
+  - augment.pprFit
+  - augment.gamFit 
+  - augment.lmFit
+  
+- title: Predict methods
+  desc: >
+    Obtain residuals and fitted values of the fitted models.
+  contents:
+  - predict.smimodel
+  - predict.backward
+  - predict.gaimFit 
+  - predict.pprFit
+  - predict.gamFit 
+  - predict.lmFit
+  
+- title: Point estimate accuracy measures
+  desc: >
+    Calculate point estimate accuracy measures.
+  contents:
+  - MSE
+  - MAE
+  
+- title: Other user-facing functions
+  desc: >
+    Other exported functions that can be called by users.
+  contents:
+  - autoplot.smimodel
+  - residuals.smimodel
+  - lag_matrix
+  - print.smimodel
+  - print.smimodelFit
+  - print.backward
+  - print.gaimFit
+  - print.pprFit
+  - forecast.backward
+  - forecast.gaimFit
+  - forecast.pprFit
+  - forecast.gamFit
+  
+- title: Other non-user-facing functions
+  desc: >
+    Other internal functions that are not exported.
+  contents:
+  - smimodel.fit
+  - new_smimodelFit
+  - update_smimodelFit
+  - make_smimodelFit
+  - inner_update
+  - init_alpha
+  - update_alpha
+  - greedy.fit
+  - tune_smimodel
+  - normalise_alpha
+  - loss
+  - allpred_index
+  - split_index
+  - scaling 
+  - unscaling
+  - augment.smimodelFit
+  - predict.smimodelFit
+  - predict_gam
+  - eliminate
+  
+- title: Package metadata
+  desc: >
+    Package information.
+  contents:
+  - smimodel-package

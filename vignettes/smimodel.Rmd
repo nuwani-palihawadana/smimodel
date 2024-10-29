@@ -16,9 +16,24 @@ knitr::opts_chunk$set(
 )
 ```
 
-The *smimodel* package provides functions to estimate **Sparse Multiple Index (SMI) Models** for high-dimensional nonparametric forecasting, which can be used with tidy temporal data in the `tsibble` format. (For detailed information regarding the SMI model and the estimation algorithm refer https://github.com/nuwani-palihawadana/smimodel_paper/blob/main/paper/smimodel.pdf .)
+## What is smimodel?
+
+The *smimodel* package provides functions to estimate **Sparse Multiple Index (SMI) Models** for nonparametric forecasting or prediction. To support time series forecasting, the package functions are mainly build upon tidy temporal data in the `tsibble` format. However, the SMI model formulation is very general and does not exclusively depend on any temporal features. Hence, the model can be used more widely -- even with non-temporal cross-sectional data. (In such case, a numeric `index` (instead of a date or time related variable) can be used when constructing the `tsibble`.)
+
+The SMI Modelling algorithm (i.e. the estimation algorithm of SMI model) that we implement here, simultaneously performs automatic predictor selection ("sparse") and predictor grouping, which is especially useful in obtaining a parsimonious model in high-dimensional contexts. For detailed information regarding the SMI model and the estimation algorithm refer the related working paper at https://www.monash.edu/business/ebs/research/publications/ebs/2024/wp16-2024.pdf.
+
+## How to use smimodel?
+
+Here we present a simple example to illustrate *smimodel* functionalities. Here, we use randomly simualted data (if we treat as time series data for the purpose of this illustration). 
+
+(Note: Since the SMI model estimation algorithm works with very limited amount of prior information, and handles automatic predictor selection and predictor grouping, the computational time for model estimation increases as the number of predictors and the number of indices increase. Therefore, we use a small simulated data set here as the example to reduce computational cost.)
+
+### Data simulation
+
+Suppose we are interested in forecasting a response variable $y$, which is an additive function of two nonlinear components involving five predictor variables $x\_000, x\_001, x\_002, x\_003$ and $x\_005$ plus a normally distributed white noise component. Here, the variables $x\_001, x\_002, x\_003$ and $x\_005$ correspond to the first, second, third and fifth lags of $x\_000$ respectively. 
 
 ```{r setup}
+## Load required packages 
 library(smimodel)
 library(dplyr)
 library(ROI)
@@ -27,14 +42,16 @@ library(tidyr)
 library(tsibble)
 ```
 
-## Data simulation
-
-Suppose we are interested in forecasting a time series $y_{1}$, which is a nonlinear function of three predictor variables $x\_000, x\_001$ and $x\_003$ plus a normally distributed white noise component. Here, the variables $x\_001$ and $x\_003$ are the first and third lags of $x\_000$ respectively. 
-
 ```{r data}
-n = 1205 # length of the time series
+## Simulate data
+
+# Length of the time series
+n = 1405 
+
+# Set a seed for reproduciblity
 set.seed(123)
-# Data
+
+# Generate data
 sim_data <- tibble(x_000 = runif(n)) %>%
   mutate(
     # Add x_lags
@@ -42,115 +59,205 @@ sim_data <- tibble(x_000 = runif(n)) %>%
   unpack(x, names_sep = "_") %>%
   mutate(
     # Response variable
-    y1 = (0.9*x_000 + 0.6*x_001 + 0.45*x_003)^3 + rnorm(n, sd = 0.1),
+    y = (0.9*x_000 + 0.6*x_001 + 0.45*x_003)^3 + 
+      (0.35*x_002 + 0.7*x_005)^2 + rnorm(n, sd = 0.1),
     # Add an index to the data set
     inddd = seq(1, n)) %>%
   drop_na() %>%
-  select(inddd, y1, starts_with("x_")) %>%
+  select(inddd, y, starts_with("x_")) %>%
   # Make the data set a `tsibble`
   as_tsibble(index = inddd)
 ```
 
-Note that here we create an additional variable `inddd` to serve as the `index` of the data set, when we convert the data set into an object of class `tsibble`. 
+Note that here we create an additional `numeric` variable `inddd` to serve as the `index` of the data set, when we convert the data set into an object of class `tsibble`. 
 
-Next, we split the data into train, validation and test sets so that the models can be estimated using the train data set, parameter tuning (if we are tuning for the penalty parameters of the SMI model) and model selection (benchmark method - nonparametric additive model with backward elimination) can be performed using the validation set, and the fitted models can be evaluated on the forecasts obtained for the test set, which is not used for model estimation. 
+Next, we split the data into training and test sets so that the models can be estimated using the training data set, and the fitted models can be evaluated on the predictions obtained for the test set, which is not used for model estimation. 
 
-```{r datasplit}
-# Train set
-sim_train <- sim_data[1:1000, ]
+```{r datasplit1}
+## Data Split
+
+# Training set
+sim_train <- sim_data[1:1200, ]
 
 # Test set
-sim_test <- sim_data[1001:1200, ]
+sim_test <- sim_data[1201:1400, ]
+
+# Here, we sequentially split the data as we assume time series data. 
 ```
 
-## SMI model
+### SMI model estimation
 
-We first train SMI models on the train set using three different initialisation options "PPR", "Additive" and "Linear" for comparison purposes. 
+We first train SMI models on the training set using three different initialisation options "ppr", "additive" and "linear" for comparison purposes. Please refer to package documentation/working paper for more information regarding available initialisation options.
 
-(Note: The choice of the initialisation might depend on the data and application. Thus, users are encouraged to follow a trial-and-error procedure to determine the most suitable initial model for a given application.)
+(Note: The choice of the initialisation largely depends on the data and application. Thus, users are encouraged to follow a trial-and-error procedure to determine the most suitable initial model for a given application.)
 
-Here, we assume that we do not have any prior knowledge about the construction of the response variable $y_{1}$. Hence, we input $x\_000$ and its first five lags as our predictor variables into the estimation algorithm, as predictors which are entering indices. 
+Here, we assume that we do not have any prior knowledge about the construction of the response variable $y$. Hence, we input $x\_000$ and its first five lags as our predictor variables into the estimation algorithm, as predictors which are entering indices. 
 
 ```{r indexvar}
-# Index variables
+## Index variables
 index.vars <- colnames(sim_data)[3:8]
 ```
 
+#### SMI model with "ppr" initialisation:
 ```{r smimodelppr, message=FALSE}
-# SMI model with "PPR" initialisation
+## SMI model with "PPR" initialisation
 smimodel_ppr <- model_smimodel(data = sim_train,
-                               yvar = "y1",
+                               yvar = "y",
                                index.vars = index.vars,
                                initialise = "ppr")
+```
+
+```{r bestppr}
 # Fitted optimal SMI model
 smimodel_ppr$fit[[1]]$best
+```
+
+```{r alphappr}
 # Estimated index structure
 smimodel_ppr$fit[[1]]$best$alpha
 ```
 
+#### SMI model with "additive" initialisation:
 ```{r smimodeladditive, message=FALSE}
-# SMI model with "Additive" initialisation
+## SMI model with "Additive" initialisation
 smimodel_additive <- model_smimodel(data = sim_train,
-                                    yvar = "y1",
+                                    yvar = "y",
                                     index.vars = index.vars,
                                     initialise = "additive")
+```
+
+```{r bestadditive}
 # Fitted optimal SMI model
 smimodel_additive$fit[[1]]$best
+```
+
+```{r alphaadditive}
 # Estimated index structure
 smimodel_additive$fit[[1]]$best$alpha
 ```
 
+#### SMI model with "linear" initialisation:
 ```{r smimodellinear, message=FALSE}
-# SMI model with "Linear" initialisation
+## SMI model with "Linear" initialisation
 smimodel_linear <- model_smimodel(data = sim_train,
-                                  yvar = "y1",
+                                  yvar = "y",
                                   index.vars = index.vars,
                                   initialise = "linear")
+```
+
+```{r bestlinear}
 # Fitted optimal SMI model
 smimodel_linear$fit[[1]]$best
+```
+
+```{r alphalinear}
 # Estimated index structure
 smimodel_linear$fit[[1]]$best$alpha
 ```
 
-Notice that in this case, the SMI models fitted with all three initialisation options have correctly identified the index structure of the response $y_{1}$ by estimating only one linear combination (i.e. index), while dropping out the irrelevant predictors $x\_002, x\_004$ and $x\_005$.
 
-Here, all the SMI models were fitted using the default penalty parameter values $\lambda_{0} = 1$ and $\lambda_{2} = 1$. To fit a SMI model with simultaneous parameter tuning, we can use the function `greedy_smimodel()`, which performs a greedy search over a given grid of penalty parameter combinations ($\lambda_{0}$, $\lambda_{2}$), and fits the SMI model using the best (lowest validation set MSE) penalty parameter combination. In this case, we need to provide a validation set, which is separate from the train data set. 
+In this case, the SMI models fitted with "ppr" and "additive" initialisation options have correctly identified the index structure of the response $y$ by estimating two linear combinations (i.e. indices), while dropping out the irrelevant predictor $x\_004$. While correctly identifying $x\_004$ as an irrelevant predictor variable, the SMI model estimated with "linear" intialisation however, has not correctly identified the index structure of the model -- has estimated only a single index instead of the two indices. 
 
-## Visualisation of estimated smooths
+Thus, as mentioned earlier, the final estimated model can change depending on the initialisation option chosen. Hence, the users are encouraged to experiment with different available initialisation options when choosing the best fit for the data/application of interest. (In a real-world problem (where the true model is unknown), it will be useful to fit SMI models with different initialisation options, and see which option gives the best forecasting/prediction accuracy.)
+
+### Visualisation of estimated smooths
 
 Once you fit a SMI model, the partial effects of the estimated smooths corresponding to the estimated indices can be plotted using the `autoplot` method as below. 
 
 ```{r autoplot, message=FALSE}
-# Plot estimated smooths
+## Plot estimated smooths of the SMI model with "ppr" initialisation
 autoplot(object = smimodel_ppr)
 ```
 
-## Residuals and fitted values
+### Residuals and fitted values
 
 We can use the `augment` method to obtain the residuals and the fitted values from an estimated SMI model.
 
 ```{r augment, message=FALSE}
-# Obtain residuals and fitted values
+## Obtain residuals and fitted values
 augment(x = smimodel_ppr)
 ```
 
-## Forecasts on a test set
+### Forecasts on a test set
 
-Based on an estimated SMI model, we obtain forecasts on a test set as below, using the `predict` method.
+Based on an estimated SMI model, we obtain forecasts/predictions on a test set as below, using the `predict` method.
 
 ```{r predict, message=FALSE}
-# Obtain forecasts on the test set
+## Obtain forecasts on the test set
 preds = predict(object = smimodel_ppr, newdata = sim_test)
 preds$.predict
 ```
 
-Once we obtain forecasts, we can evaluate the forecasting performance of the estimated SMI model by calculating forecast error measurements as desired.
+Once we obtain forecasts/predictions, we can evaluate the forecasting/predictive performance of the estimated SMI model by calculating forecast/prediction error measurements as desired.
 
 ```{r forecasterror, message=FALSE}
-# Calculate test set MSE and MAE
-MSE_SMI_ppr = MSE(residuals = (preds$y1 - preds$.predict))
+## Calculate test set MSE and MAE
+MSE_SMI_ppr = MSE(residuals = (preds$y - preds$.predict))
 MSE_SMI_ppr
-MAE_SMI_ppr = MAE(residuals = (preds$y1 - preds$.predict))
+MAE_SMI_ppr = MAE(residuals = (preds$y - preds$.predict))
 MAE_SMI_ppr
 ```
 
+### Tuning for penalty parameters
+
+The estimation of a SMI model involves solving an optimaisation problem, where the sum of squared errors of the model plus two penalty terms (an L0 penalty and an L2 (ridge) penalty) is minimised subject to a set of constraints (please refer the working paper for details). Thus, two penalty parameters $\lambda_{0}$ and $\lambda_{2}$ corresponding to the L0 and L2 penalties respectively should be chosen when estimating a SMI model. 
+
+In the previous example, all the SMI models were fitted using the default penalty parameter values provided in the function: $\lambda_{0} = 1$ and $\lambda_{2} = 1$. To fit a SMI model with simultaneous parameter tuning, we can use the function `greedy_smimodel()`, which performs a greedy search over a given grid of penalty parameter combinations ($\lambda_{0}$, $\lambda_{2}$), and fits the SMI model using the best (lowest validation set MSE) penalty parameter combination. In this case, we need to provide a validation set, which is separate from the training data set. 
+
+Therefore, let's split our original training set in the above example into two parts again to obtain a validation set. 
+
+```{r datasplit2}
+# New training set
+sim_train_new <- sim_data[1:1000, ]
+
+# Validation set
+sim_val_new <- sim_data[1001:1200, ]
+```
+
+Now, we have to provide a grid of values for the penalty parameters, and a set of starting points for the search, using  which the greedy search for a best parameter combination will be performed. 
+
+```{r grid}
+## Construct grid and starting points
+
+# L0 penalty parameter
+lambda0 = seq(1, 12, by = 1)
+# L2 penalty parameter
+lambda2 = seq(0, 12, by = 1)
+# Full grid
+grid1 <- expand.grid(lambda0, lambda2)
+
+# Starting point options
+starting <- grid1[c(1, 6, 12, 73, 78, 84, 145, 150, 156), ]
+# L0 penalty parameter starting points
+lambda0_start = as.numeric(unique(unlist(starting[1])))
+# L2 penalty parameter starting points
+lambda2_start = as.numeric(unique(unlist(starting[2])))
+```
+
+Next, we can estimate the SMI model with simultaneous penalty parameter tuning as follows. Here, we use the initialisation option "ppr" just to demonstrate the functionality. 
+
+```{r tunelambda}
+## Estimating SMI model with penalty parameter tuning
+smimodel_ppr_tune <- greedy_smimodel(data = sim_train_new, 
+                                     val.data = sim_val_new,
+                                     yvar = "y",
+                                     index.vars = index.vars,
+                                     initialise = "ppr",
+                                     lambda0_seq = lambda0,
+                                     lambda2_seq = lambda2,
+                                     lambda_step = 1,
+                                     lambda0_start_seq = lambda0_start,
+                                     lambda2_start_seq = lambda2_start)
+```
+
+```{r tunemodel}
+# Fitted optimal SMI model
+smimodel_ppr_tune$fit[[1]]$best
+```
+
+```{r}
+## Selected penalty parameter combination
+smimodel_ppr_tune$fit[[1]]$best_lambdas
+```
+
+Here the selected penalty parameter combination is $(\lambda_{0}, \lambda_{2}) = (1, 3)$. 

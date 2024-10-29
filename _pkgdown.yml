@@ -1,17 +1,15 @@
-url: ~
+url: https://nuwani-palihawadana.github.io/smimodel/
 template:
   bootstrap: 5
-
 reference:
 - title: Estimating SMI model
-  desc: >
+  desc: |
     Functions to estimate a SMI model with or without penalty parameter tuning.
   contents:
   - model_smimodel
   - greedy_smimodel
-  
 - title: Estimating other benchmark models
-  desc: >
+  desc: |
     Functions to fit some benchmark comparison methods.
   contents:
   - model_backward
@@ -19,38 +17,34 @@ reference:
   - model_ppr
   - model_gam
   - model_lm
-  
 - title: Augment methods
-  desc: >
+  desc: |
     Obtain residuals and fitted values of the fitted models.
   contents:
   - augment.smimodel
   - augment.backward
-  - augment.gaimFit 
+  - augment.gaimFit
   - augment.pprFit
-  - augment.gamFit 
+  - augment.gamFit
   - augment.lmFit
-  
 - title: Predict methods
-  desc: >
+  desc: |
     Obtain residuals and fitted values of the fitted models.
   contents:
   - predict.smimodel
   - predict.backward
-  - predict.gaimFit 
+  - predict.gaimFit
   - predict.pprFit
-  - predict.gamFit 
+  - predict.gamFit
   - predict.lmFit
-  
 - title: Point estimate accuracy measures
-  desc: >
+  desc: |
     Calculate point estimate accuracy measures.
   contents:
   - MSE
   - MAE
-  
 - title: Other user-facing functions
-  desc: >
+  desc: |
     Other exported functions that can be called by users.
   contents:
   - autoplot.smimodel
@@ -65,9 +59,8 @@ reference:
   - forecast.gaimFit
   - forecast.pprFit
   - forecast.gamFit
-  
 - title: Other non-user-facing functions
-  desc: >
+  desc: |
     Other internal functions that are not exported.
   contents:
   - smimodel.fit
@@ -83,15 +76,14 @@ reference:
   - loss
   - allpred_index
   - split_index
-  - scaling 
+  - scaling
   - unscaling
   - augment.smimodelFit
   - predict.smimodelFit
   - predict_gam
   - eliminate
-  
 - title: Package metadata
-  desc: >
+  desc: |
     Package information.
-  contents:
-  - smimodel-package
+  contents: smimodel-package
+

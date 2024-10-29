@@ -185,6 +185,7 @@ MSE) penalty parameter combination(s). If a grouping variable is used,
 penalty parameters are tuned separately for each individual model.
 }
 \examples{
+\dontrun{
 library(dplyr)
 library(ROI)
 library(tibble)
@@ -249,6 +250,7 @@ smi_greedy$fit[[1]]$best
 
 # Selected penalty parameter combination
 smi_greedy$fit[[1]]$best_lambdas
+}
 
 }
 \references{

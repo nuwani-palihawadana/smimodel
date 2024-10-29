@@ -117,6 +117,7 @@
 #' @seealso \code{\link{model_smimodel}}
 #'
 #' @examples
+#' \dontrun{
 #' library(dplyr)
 #' library(ROI)
 #' library(tibble)
@@ -181,6 +182,7 @@
 #'
 #' # Selected penalty parameter combination
 #' smi_greedy$fit[[1]]$best_lambdas
+#' }
 #'
 #' @export
 greedy_smimodel <- function(data, val.data, yvar, neighbour = 0, 

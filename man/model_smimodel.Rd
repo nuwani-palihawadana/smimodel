@@ -162,6 +162,7 @@ are assumed (i.e. no predictor enters more than one index). For algorithmic
 details see reference.
 }
 \examples{
+\dontrun{
 library(dplyr)
 library(ROI)
 library(tibble)
@@ -197,6 +198,7 @@ smimodel_ppr <- model_smimodel(data = sim_data,
 
 # Best (optimised) fitted model
 smimodel_ppr$fit[[1]]$best
+}
 
 }
 \references{

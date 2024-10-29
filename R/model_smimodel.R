@@ -111,6 +111,7 @@
 #' @seealso \code{\link{greedy_smimodel}}
 #'
 #' @examples
+#' \dontrun{
 #' library(dplyr)
 #' library(ROI)
 #' library(tibble)
@@ -146,6 +147,7 @@
 #'
 #' # Best (optimised) fitted model
 #' smimodel_ppr$fit[[1]]$best
+#' }
 #'
 #' @export
 model_smimodel <- function(data, yvar, neighbour = 0, family = gaussian(), 

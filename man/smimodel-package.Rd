@@ -14,6 +14,7 @@ A general algorithm for estimating Sparse Multiple Index Models for high-dimensi
 Useful links:
 \itemize{
   \item \url{https://github.com/nuwani-palihawadana/smimodel}
+  \item \url{https://nuwani-palihawadana.github.io/smimodel/}
   \item Report bugs at \url{https://github.com/nuwani-palihawadana/smimodel/issues}
 }
 

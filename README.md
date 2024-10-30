@@ -73,7 +73,7 @@ For step-by-step instructions on software installation and license
 activation process, go to [this
 link](https://support.gurobi.com/hc/en-us/articles/14799677517585-Getting-Started-with-Gurobi-Optimizer).
 Note that the procedure for installing Gurobi depends on the operating
-system that your using in your local machine. The platform-specific
+system that you are using in your local machine. The platform-specific
 instructions can be found
 [here](https://support.gurobi.com/hc/en-us/articles/4534161999889-How-do-I-install-Gurobi-Optimizer).
 

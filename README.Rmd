@@ -37,7 +37,7 @@ remotes::install_github("nuwani-palihawadana/smimodel")
 
 The estimation of SMI model is based on an iterative procedure that is developed using mixed integer programming to solve an $\ell_{0}$-regularised nonlinear least squares optimisation problem with linear constraints. We use the commercial MIP solver [***Gurobi*** ](https://www.gurobi.com/) to solve the mixed integer quadratic programs related to the proposed SMI Modelling algorithm. 
 
-Hence, users of *smimodel* are required to have an active installation of Gurobi in their local machines. Since Gurobi is a commercial software, the users need to obtain a license for Gurobi before they can install/use it. Please refer to the vignette *"Gurobi installation help"* for installation help. 
+Hence, users of *smimodel* are required to have an active installation of Gurobi in their local machines. Since Gurobi is a commercial software, the users need to obtain a license for Gurobi before they can install/use it. Please refer to the vignette *"Gurobi installation help"*. 
 
 ## Example
 

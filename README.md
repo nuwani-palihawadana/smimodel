@@ -45,7 +45,7 @@ Hence, users of *smimodel* are required to have an active installation
 of Gurobi in their local machines. Since Gurobi is a commercial
 software, the users need to obtain a license for Gurobi before they can
 install/use it. Please refer to the vignette *“Gurobi installation
-help”* for installation help.
+help”*.
 
 ## Example
 

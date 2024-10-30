@@ -24,7 +24,7 @@ The SMI Modelling algorithm (i.e. the estimation algorithm of SMI model) that we
 
 ## How to use smimodel?
 
-Here we present a simple example to illustrate *smimodel* functionalities. Here, we use randomly simualted data (if we treat as time series data for the purpose of this illustration). 
+Here we present a simple example to illustrate *smimodel* functionalities. We use randomly simualted data, which we treat as time series data for the purpose of this illustration. 
 
 (Note: Since the SMI model estimation algorithm works with very limited amount of prior information, and handles automatic predictor selection and predictor grouping, the computational time for model estimation increases as the number of predictors and the number of indices increase. Therefore, we use a small simulated data set here as the example to reduce computational cost.)
 

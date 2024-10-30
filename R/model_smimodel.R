@@ -162,9 +162,8 @@ model_smimodel <- function(data, yvar, neighbour = 0, family = gaussian(),
                            TimeLimit = Inf, MIPGap = 1e-4, 
                            NonConvex = -1, verbose = FALSE){
   
-  # Check for gurobi package installation
-  checkGurobi <- requireNamespace("gurobi")
-  if(checkGurobi == FALSE) stop("R package 'gurobi' is not installed. 
+  # Message for gurobi installation
+  message("Do you have Gurobi solver installed? 
   Make sure you have an active installation of Gurobi solver (https://www.gurobi.com/) 
   in your local machine before using this function. 
   Refer 'Gurobi installation help' in vignettes for installation help.")

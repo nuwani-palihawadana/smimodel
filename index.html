@@ -70,9 +70,32 @@
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># install.packages("remotes")</span></span>
 <span><span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"nuwani-palihawadana/smimodel"</span><span class="op">)</span></span></code></pre></div>
-<p><strong><em>Important:</em></strong></p>
-<p>The estimation of SMI model is based on an iterative procedure that is developed using mixed integer programming to solve an <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mo>ℓ</mo><mn>0</mn></msub><annotation encoding="application/x-tex">\ell_{0}</annotation></semantics></math>-regularised nonlinear least squares optimisation problem with linear constraints. We use the commercial MIP solver <a href="https://www.gurobi.com/" class="external-link"><strong><em>Gurobi</em></strong></a> to solve the mixed integer quadratic programs related to the proposed SMI Modelling algorithm.</p>
-<p>Hence, users of <em>smimodel</em> are required to have an active installation of Gurobi in their local machines. Since Gurobi is a commercial software, the users need to obtain a license for Gurobi before they can install/use it. Please refer to the vignette <em>“Gurobi installation help”</em>.</p>
+</div>
+<div class="section level2">
+<h2 id="other-required-software">Other Required Software<a class="anchor" aria-label="anchor" href="#other-required-software"></a>
+</h2>
+<div class="section level3">
+<h3 id="gurobi-solver">Gurobi Solver<a class="anchor" aria-label="anchor" href="#gurobi-solver"></a>
+</h3>
+<p>The estimation of SMI model is based on an iterative procedure that is developed using Mixed Integer Programming (MIP) to solve an L0 and L2-regularised nonlinear least squares optimisation problem with linear constraints. We use the commercial MIP solver <a href="https://www.gurobi.com/" class="external-link"><em>Gurobi</em></a> to solve the mixed integer programs, as it is the fastest and the most powerful MIP solver currently available. Hence, the users of <em>smimodel</em> are required to have an active installation of Gurobi in their local machines.</p>
+<div class="section level4">
+<h4 id="license">License<a class="anchor" aria-label="anchor" href="#license"></a>
+</h4>
+<p>Since Gurobi is a commercial software, the users need to obtain a <a href="https://support.gurobi.com/hc/en-us/articles/12684663118993-How-do-I-obtain-a-Gurobi-license" class="external-link">license for Gurobi</a> before they can install/use it.</p>
+<p>Gurobi provides free license for academics affiliated with recognised educational institutions. Hence, if you are an academic, you can register for a free account with your verified institutional email, and then request a <a href="https://www.gurobi.com/academia/academic-program-and-licenses/" class="external-link">free academic license</a>. If you are not affiliated with a recognised educational institution, you might need to purchase a license for long term use. However, you can obtain a <a href="https://www.gurobi.com/downloads/request-an-evaluation-license/" class="external-link">free 30-day trial by requesting for an evaluation license</a>.</p>
+</div>
+<div class="section level4">
+<h4 id="installation-1">Installation<a class="anchor" aria-label="anchor" href="#installation-1"></a>
+</h4>
+<p>Fortunately, Gurobi provides <a href="https://docs.gurobi.com/current/" class="external-link">comprehensive documentation</a> regarding installation as well as usage, and provides active support at the <a href="https://support.gurobi.com/hc/en-us" class="external-link">Gurobi Help Center</a>.</p>
+<p>For step-by-step instructions on software installation and license activation process, go to <a href="https://support.gurobi.com/hc/en-us/articles/14799677517585-Getting-Started-with-Gurobi-Optimizer" class="external-link">this link</a>. Note that the procedure for installing Gurobi depends on the operating system that your using in your local machine. The platform-specific instructions can be found <a href="https://support.gurobi.com/hc/en-us/articles/4534161999889-How-do-I-install-Gurobi-Optimizer" class="external-link">here</a>.</p>
+</div>
+</div>
+<div class="section level3">
+<h3 id="r-package-gurobi">R Package “gurobi”<a class="anchor" aria-label="anchor" href="#r-package-gurobi"></a>
+</h3>
+<p>Once Gurobi solver is installed in your local machine, next you need to install the Gurobi R interface through “gurobi” R package, to use gurobi within R. This package is not available on CRAN, and is exclusively distributed with the Gurobi software suite. The instructions on how to install the gurobi R package are provided <a href="https://support.gurobi.com/hc/en-us/articles/14462206790033-How-do-I-install-Gurobi-for-R" class="external-link">here</a>.</p>
+</div>
 </div>
 <div class="section level2">
 <h2 id="example">Example<a class="anchor" aria-label="anchor" href="#example"></a>
@@ -147,7 +170,7 @@
 <span><span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span>object <span class="op">=</span> <span class="va">smimodel_ppr</span>, newdata <span class="op">=</span> <span class="va">sim_test</span><span class="op">)</span><span class="op">$</span><span class="va">.predict</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="license">License<a class="anchor" aria-label="anchor" href="#license"></a>
+<h2 id="license-1">License<a class="anchor" aria-label="anchor" href="#license-1"></a>
 </h2>
 <p>This package is free and open source software, licensed under GPL-3.</p>
 </div>

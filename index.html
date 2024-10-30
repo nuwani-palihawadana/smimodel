@@ -70,6 +70,9 @@
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># install.packages("remotes")</span></span>
 <span><span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"nuwani-palihawadana/smimodel"</span><span class="op">)</span></span></code></pre></div>
+<p><strong><em>Important:</em></strong></p>
+<p>The estimation of SMI model is based on an iterative procedure that is developed using mixed integer programming to solve an <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mo>ℓ</mo><mn>0</mn></msub><annotation encoding="application/x-tex">\ell_{0}</annotation></semantics></math>-regularised nonlinear least squares optimisation problem with linear constraints. We use the commercial MIP solver <a href="https://www.gurobi.com/" class="external-link"><strong><em>Gurobi</em></strong></a> to solve the mixed integer quadratic programs related to the proposed SMI Modelling algorithm.</p>
+<p>Hence, users of <em>smimodel</em> are required to have an active installation of Gurobi in their local machines. Since Gurobi is a commercial software, the users need to obtain a license for Gurobi before they can install/use it. Please refer to the vignette <em>“Gurobi installation help”</em> for installation help.</p>
 </div>
 <div class="section level2">
 <h2 id="example">Example<a class="anchor" aria-label="anchor" href="#example"></a>

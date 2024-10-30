@@ -43,6 +43,7 @@ Imports:
     tidyr,
     tsibble
 Suggests:
+    gurobi,
     knitr,
     lubridate,
     rmarkdown,

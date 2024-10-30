@@ -199,8 +199,18 @@ greedy_smimodel <- function(data, val.data, yvar, neighbour = 0,
                             TimeLimit = Inf, MIPGap = 1e-4, NonConvex = -1, 
                             verbose = FALSE, parallel = FALSE, workers = NULL,
                             recursive = FALSE, recursive_colRange = NULL){
+  
+  # Check for gurobi package installation
+  checkGurobi <- requireNamespace("gurobi")
+  if(checkGurobi == FALSE) stop("R package 'gurobi' is not installed. 
+  Make sure you have an active installation of Gurobi solver (https://www.gurobi.com/) 
+  in your local machine before using this function. 
+  Refer 'Gurobi installation help' in vignettes for installation help.")
+  
+  # Check for `tsibble`
   stopifnot(tsibble::is_tsibble(data))
   stopifnot(tsibble::is_tsibble(val.data))
+  
   initialise <- match.arg(initialise)
   # Data Preparation
   data1 <- data

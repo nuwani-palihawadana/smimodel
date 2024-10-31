@@ -22,10 +22,9 @@ Useful links:
 \author{
 \strong{Maintainer}: Nuwani Palihawadana \email{Nuwani.KodikaraPalihawadana@monash.edu} (\href{https://orcid.org/0009-0008-6395-7797}{ORCID})
 
-Authors:
+Other contributors:
 \itemize{
-  \item Rob Hyndman \email{Rob.Hyndman@monash.edu} (\href{https://orcid.org/0000-0002-2140-5352}{ORCID})
-  \item Xiaoqian Wang \email{Xiaoqian.Wang@monash.edu} (\href{https://orcid.org/0000-0003-4827-496X}{ORCID})
+  \item Xiaoqian Wang \email{Xiaoqian.Wang@monash.edu} (\href{https://orcid.org/0000-0003-4827-496X}{ORCID}) [contributor]
 }
 
 }

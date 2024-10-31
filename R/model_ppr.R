@@ -33,13 +33,13 @@
 #'
 #' @details A Projection Pursuit Regression (PPR) model (Friedman & Stuetzle
 #'   (1981)) is given by
-#' \deqn{y_{i} = \sum_{j=1}^{p} {g_{j}(\bm{\alpha}_{j}^{T}\bm{x}_{i})} +
+#' \deqn{y_{i} = \sum_{j=1}^{p} {g_{j}(\boldsymbol{\alpha}_{j}^{T}\boldsymbol{x}_{i})} +
 #' \varepsilon_{i}, \quad i = 1, \dots, n,} where \eqn{y_{i}} is the response,
-#'   \eqn{\bm{x}_{i}} is the \eqn{q}-dimensional predictor vector,
-#' \eqn{\bm{\alpha}_{j} = ( \alpha_{j1}, \dots, \alpha_{jp} )^{T}}, \eqn{j = 1,
-#' \dots, p} are \eqn{q}-dimensional projection vectors (or vectors of "index
-#'   coefficients"), \eqn{g_{j}}'s are unknown nonlinear functions, and
-#'   \eqn{\varepsilon_{i}} is the random error.
+#'   \eqn{\boldsymbol{x}_{i}} is the \eqn{q}-dimensional predictor vector,
+#'   \eqn{\boldsymbol{\alpha}_{j} = ( \alpha_{j1}, \dots, \alpha_{jp} )^{T}},
+#'   \eqn{j = 1, \dots, p} are \eqn{q}-dimensional projection vectors (or
+#'   vectors of "index coefficients"), \eqn{g_{j}}'s are unknown nonlinear
+#'   functions, and \eqn{\varepsilon_{i}} is the random error.
 #'
 #' @references Friedman, J. H. & Stuetzle, W. (1981). Projection pursuit
 #'   regression. *Journal of the American Statistical Association*, 76, 817–823.

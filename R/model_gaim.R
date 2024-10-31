@@ -37,14 +37,14 @@
 #'   object of class \code{cgaim}. For details refer \code{cgaim::cgaim()}.
 #'
 #' @details Group-wise Additive Index Model (GAIM) can be written in the form
-#' \deqn{y_{i} = \sum_{j = 1}^{p} g_{j}(\bm{\alpha}_{j}^{T}\bm{x}_{ij}) +
+#' \deqn{y_{i} = \sum_{j = 1}^{p} g_{j}(\boldsymbol{\alpha}_{j}^{T}\boldsymbol{x}_{ij}) +
 #' \varepsilon_{i}, \quad i = 1, \dots, n,} where \eqn{y_{i}} is the univariate
-#'   response, \eqn{\bm{x}_{ij} \in \mathbb{R}^{l{j}}}, \eqn{j = 1, \dots, p}
-#'   are pre-specified non-overlapping subsets of \eqn{\bm{x}_{i}}, and
-#'   \eqn{\bm{\alpha}_j} are the corresponding index coefficients, \eqn{g_{j}}
-#'   is an unknown (possibly nonlinear) component function, and
-#'   \eqn{\varepsilon_{i}} is the random error, which is independent of
-#'   \eqn{\bm{x}_{i}}.
+#'   response, \eqn{\boldsymbol{x}_{ij} \in \mathbb{R}^{l{j}}}, \eqn{j = 1,
+#'   \dots, p} are pre-specified non-overlapping subsets of
+#'   \eqn{\boldsymbol{x}_{i}}, and \eqn{\boldsymbol{\alpha}_j} are the
+#'   corresponding index coefficients, \eqn{g_{j}} is an unknown (possibly
+#'   nonlinear) component function, and \eqn{\varepsilon_{i}} is the random
+#'   error, which is independent of \eqn{\boldsymbol{x}_{i}}.
 #'
 #' @seealso \code{\link{model_smimodel}}, \code{\link{model_backward}},
 #'   \code{\link{model_ppr}}, \code{\link{model_gam}}, \code{\link{model_lm}}

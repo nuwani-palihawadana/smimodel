@@ -78,30 +78,31 @@
 #'   descriptions of the list elements see \code{\link{make_smimodelFit}}).}
 #'
 #' @details Sparse Multiple Index (SMI) model is a semi-parametric model that
-#'   can be
-#' written as \deqn{y_{i} = \beta_{0} +
-#' \sum_{j = 1}^{p}g_{j}(\bm{\alpha}_{j}^{T}\bm{x}_{ij}) +
-#' \sum_{k = 1}^{d}f_{k}(w_{ik}) + \bm{\theta}^{T}\bm{u}_{i} + \varepsilon_{i},
-#' \quad i = 1, \dots, n,} where \eqn{y_{i}} is the univariate response,
-#' \eqn{\beta_{0}} is the model intercept, \eqn{\bm{x}_{ij} \in
+#'   can be written as \deqn{y_{i} = \beta_{0} +
+#' \sum_{j = 1}^{p}g_{j}(\boldsymbol{\alpha}_{j}^{T}\boldsymbol{x}_{ij}) +
+#' \sum_{k = 1}^{d}f_{k}(w_{ik}) + \boldsymbol{\theta}^{T}\boldsymbol{u}_{i} +
+#' \varepsilon_{i}, \quad i = 1, \dots, n,} where \eqn{y_{i}} is the univariate
+#' response, \eqn{\beta_{0}} is the model intercept, \eqn{\boldsymbol{x}_{ij} \in
 #' \mathbb{R}^{l_{j}}}, \eqn{j = 1, \dots, p} are \eqn{p} subsets of predictors
-#'   entering indices, \eqn{\bm{\alpha}_{j}} is a vector of index coefficients
-#'   corresponding to the index \eqn{h_{ij} = \bm{\alpha}_{j}^{T}\bm{x}_{ij}},
-#'   and \eqn{g_{j}} is a smooth nonlinear function (estimated by a penalised
-#'   cubic regression spline). The model also allows for predictors that do not
-#'   enter any indices, including covariates \eqn{w_{ik}} that relate to the
-#'   response through nonlinear functions \eqn{f_{k}}, \eqn{k = 1, \dots, d},
-#'   and linear covariates \eqn{\bm{u}_{i}}.
+#'   entering indices, \eqn{\boldsymbol{\alpha}_{j}} is a vector of index
+#'   coefficients corresponding to the index \eqn{h_{ij} =
+#'   \boldsymbol{\alpha}_{j}^{T}\boldsymbol{x}_{ij}}, and \eqn{g_{j}} is a
+#'   smooth nonlinear function (estimated by a penalised cubic regression
+#'   spline). The model also allows for predictors that do not enter any
+#'   indices, including covariates \eqn{w_{ik}} that relate to the response
+#'   through nonlinear functions \eqn{f_{k}}, \eqn{k = 1, \dots, d}, and linear
+#'   covariates \eqn{\boldsymbol{u}_{i}}.
 #'
 #'   In the model formulation related to this implementation, both the number of
 #'   indices \eqn{p} and the predictor grouping among indices are assumed to be
 #'   unknown prior to model estimation. Suppose we observe \eqn{y_1,\dots,y_n},
-#'   along with a set of potential predictors, \eqn{\bm{x}_1,\dots,\bm{x}_n},
-#'   with each vector \eqn{\bm{x}_i} containing \eqn{q} predictors. This
-#'   function implements algorithmic variable selection for index variables
-#'   (i.e. predictors entering indices) of the SMI model by allowing for zero
-#'   index coefficients for predictors. Non-overlapping predictors among indices
-#'   are assumed (i.e. no predictor enters more than one index). For algorithmic
+#'   along with a set of potential predictors,
+#'   \eqn{\boldsymbol{x}_1,\dots,\boldsymbol{x}_n}, with each vector
+#'   \eqn{\boldsymbol{x}_i} containing \eqn{q} predictors. This function
+#'   implements algorithmic variable selection for index variables (i.e.
+#'   predictors entering indices) of the SMI model by allowing for zero index
+#'   coefficients for predictors. Non-overlapping predictors among indices are
+#'   assumed (i.e. no predictor enters more than one index). For algorithmic
 #'   details see reference.
 #'
 #' @references Palihawadana, N.K., Hyndman, R.J. & Wang, X. (2024). Sparse

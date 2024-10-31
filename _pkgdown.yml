@@ -1,6 +1,7 @@
 url: https://nuwani-palihawadana.github.io/smimodel/
 template:
   bootstrap: 5
+  math-rendering: katex
 reference:
 - title: Estimating SMI model
   desc: |

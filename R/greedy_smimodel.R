@@ -204,7 +204,7 @@ greedy_smimodel <- function(data, val.data, yvar, neighbour = 0,
   message("Do you have Gurobi solver installed? 
   Make sure you have an active installation of Gurobi solver (https://www.gurobi.com/) 
   in your local machine before using this function. 
-  Refer 'Gurobi installation help' in vignettes for installation help.")
+  Refer the section 'Other Required Software' in the README for installation help.")
   
   # Check for `tsibble`
   stopifnot(tsibble::is_tsibble(data))

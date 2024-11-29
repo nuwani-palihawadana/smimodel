@@ -7,7 +7,8 @@
 prep_newdata(newdata, recursive_colRange)
 }
 \arguments{
-\item{newdata}{Data set to be prepared. Can be a \code{tibble} or a \code{tsibble}.}
+\item{newdata}{Data set to be prepared. Can be a \code{tibble} or a
+\code{tsibble}.}
 
 \item{recursive_colRange}{The range of column numbers (lagged response
 columns) in \code{newdata} from which existing values should be removed.
@@ -15,6 +16,9 @@ Make sure such columns are positioned together in increasing lag order
 (i.e. \code{lag_1, lag_2, ..., lag_m}, \code{lag_m =} maximum lag used) in
 \code{newdata}, with no break in the lagged variable sequence even if some
 of the intermediate lags are not used as predictors.}
+}
+\value{
+A \code{tibble}.
 }
 \description{
 Prepare a test data for recursive forecasting by appropriately removing

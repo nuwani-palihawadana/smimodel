@@ -7,10 +7,14 @@
 remove_lags(data, recursive_colRange)
 }
 \arguments{
-\item{data}{Data set from which the actual lagged values should be removed.}
+\item{data}{Data set (a \code{tibble}) from which the actual lagged values
+should be removed.}
 
-\item{recursive_colRange}{The range of column numbers in \code{data} from which
-lagged values should be removed.}
+\item{recursive_colRange}{The range of column numbers in \code{data} from
+which lagged values should be removed.}
+}
+\value{
+A \code{tibble}.
 }
 \description{
 Appropriately removes exisiting (actual) values from the specified column

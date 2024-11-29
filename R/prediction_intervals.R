@@ -1,21 +1,25 @@
-#' Conformal bootstrap prediction intervals through cross-validation
+#' Conformal bootstrap prediction intervals through time series cross-validation
+#' forecasting
 #'
 #' Compute prediction intervals by applying the conformal bootstrap method to
 #' subsets of time series data using a rolling forecast origin.
 #'
-#' @param object Fitted model object of class `smimodel`, `backward`, `gaimFit`
-#'   or `pprFit`.
-#' @param data Data set. Must be a data set of class `tsibble`.(Make sure there
-#'   are no additional date/time/date-time/yearmonth/POSIXct/POSIXt variables
-#'   except for the `index` of the `tsibble`). If multiple models are fitted,
-#'   the grouping variable should be the key of the `tsibble`.
+#' @param object Fitted model object of class \code{smimodel}, \code{backward},
+#'   \code{gaimFit} or \code{pprFit}.
+#' @param data Data set. Must be a data set of class \code{tsibble}.(Make sure
+#'   there are no additional date or time related variables except for the
+#'   \code{index} of the \code{tsibble}). If multiple models are fitted, the
+#'   grouping variable should be the \code{key} of the \code{tsibble}. If a
+#'   \code{key} is not specified, a dummy key with only one level will be
+#'   created.
 #' @param yvar Name of the response variable as a character string.
 #' @param neighbour If multiple models are fitted: Number of neighbours of each
 #'   key (i.e. grouping variable) to be considered in model fitting to handle
-#'   smoothing over the key. Should be an integer. If `neighbour = x`, `x`
-#'   number of keys before the key of interest and `x` number of keys after the
-#'   key of interest are grouped together for model fitting. The default is `0`
-#'   (i.e. no neighbours are considered for model fitting).
+#'   smoothing over the key. Should be an \code{integer}. If \code{neighbour =
+#'   x}, \code{x} number of keys before the key of interest and \code{x} number
+#'   of keys after the key of interest are grouped together for model fitting.
+#'   The default is \code{neighbour = 0} (i.e. no neighbours are considered for
+#'   model fitting).
 #' @param predictor.vars A character vector of names of the predictor variables.
 #' @param h Forecast horizon.
 #' @param ncal Length of a calibration window.
@@ -31,10 +35,18 @@
 #' @param roll.length Number of observations by which each rolling/expanding
 #'   window should be rolled forward.
 #' @param recursive Whether to obtain recursive forecasts or not (default -
-#'   FALSE).
-#' @param recursive_colNames If `recursive = TRUE`, a character vector giving
-#'   the names of the columns in test data to be filled with forecasts.
+#'   \code{FALSE}).
+#' @param recursive_colNames If \code{recursive = TRUE}, a character vector
+#'   giving the names of the columns in test data to be filled with forecasts.
+#'   Recursive/autoregressive forecasting is required when the lags of the
+#'   response variable itself are used as predictor variables into the model.
+#'   Make sure such lagged variables are positioned together in increasing lag
+#'   order (i.e. \code{lag_1, lag_2, ..., lag_m}, \code{lag_m =} maximum lag
+#'   used) in \code{data}, with no break in the lagged variable sequence even if
+#'   some of the intermediate lags are not used as predictors.
 #' @param ... Other arguments not currently used.
+#'
+#' @seealso \code{\link{bb_cvforecast}}
 #'
 #' @export
 cb_cvforecast <- function(object, data, yvar, neighbour = 0, predictor.vars,
@@ -380,28 +392,32 @@ cb_cvforecast <- function(object, data, yvar, neighbour = 0, predictor.vars,
 }
 
 
-#' Single season block bootstrap prediction intervals through cross-validation
+#' Single season block bootstrap prediction intervals through time series
+#' cross-validation forecasting
 #'
 #' Compute prediction intervals by applying the single season block bootstrap
 #' method to subsets of time series data using a rolling forecast origin.
 #'
-#' @param object Fitted model object of class `smimodel`, `backward`, `gaimFit`
-#'   or `pprFit`.
-#' @param data Data set. Must be a data set of class `tsibble`.(Make sure there
-#'   are no additional date/time/date-time/yearmonth/POSIXct/POSIXt variables
-#'   except for the `index` of the `tsibble`). If multiple models are fitted,
-#'   the grouping variable should be the key of the `tsibble`.
+#' @param object Fitted model object of class \code{smimodel}, \code{backward},
+#'   \code{gaimFit} or \code{pprFit}.
+#' @param data Data set. Must be a data set of class \code{tsibble}.(Make sure
+#'   there are no additional date or time related variables except for the
+#'   \code{index} of the \code{tsibble}). If multiple models are fitted, the
+#'   grouping variable should be the \code{key} of the \code{tsibble}. If a
+#'   \code{key} is not specified, a dummy key with only one level will be
+#'   created.
 #' @param yvar Name of the response variable as a character string.
 #' @param neighbour If multiple models are fitted: Number of neighbours of each
 #'   key (i.e. grouping variable) to be considered in model fitting to handle
-#'   smoothing over the key. Should be an integer. If `neighbour = x`, `x`
-#'   number of keys before the key of interest and `x` number of keys after the
-#'   key of interest are grouped together for model fitting. The default is `0`
-#'   (i.e. no neighbours are considered for model fitting).
+#'   smoothing over the key. Should be an \code{integer}. If \code{neighbour =
+#'   x}, \code{x} number of keys before the key of interest and \code{x} number
+#'   of keys after the key of interest are grouped together for model fitting.
+#'   The default is \code{neighbour = 0} (i.e. no neighbours are considered for
+#'   model fitting).
 #' @param predictor.vars A character vector of names of the predictor variables.
 #' @param h Forecast horizon.
 #' @param season.period Length of the seasonal period.
-#' @param m Multiplier. (Block size = `season.period` * `m`)
+#' @param m Multiplier. (Block size = \code{NULLseason.period * m})
 #' @param num.futures Number of possible future sample paths to be generated.
 #' @param level Confidence level for prediction intervals.
 #' @param forward If \code{TRUE}, the final forecast origin for forecasting is
@@ -413,10 +429,18 @@ cb_cvforecast <- function(object, data, yvar, neighbour = 0, predictor.vars,
 #' @param roll.length Number of observations by which each rolling/expanding
 #'   window should be rolled forward.
 #' @param recursive Whether to obtain recursive forecasts or not (default -
-#'   FALSE).
-#' @param recursive_colNames If `recursive = TRUE`, a character vector giving
-#'   the names of the columns in test data to be filled with forecasts.
+#'   \code{FALSE}).
+#' @param recursive_colNames If \code{recursive = TRUE}, a character vector
+#'   giving the names of the columns in test data to be filled with forecasts.
+#'   Recursive/autoregressive forecasting is required when the lags of the
+#'   response variable itself are used as predictor variables into the model.
+#'   Make sure such lagged variables are positioned together in increasing lag
+#'   order (i.e. \code{lag_1, lag_2, ..., lag_m}, \code{lag_m =} maximum lag
+#'   used) in \code{data}, with no break in the lagged variable sequence even if
+#'   some of the intermediate lags are not used as predictors.
 #' @param ... Other arguments not currently used.
+#'
+#' @seealso \code{\link{cb_cvforecast}}
 #'
 #' @export
 bb_cvforecast <- function(object, data,
@@ -737,13 +761,15 @@ utils::globalVariables(c("indexLag", "indexDiff", "row_idx", "grp"))
 #' exisiting (actual) values from a specified range of columns (lagged response
 #' columns) of the data set. Handles seasonal data with gaps.
 #'
-#' @param newdata Data set to be prepared. Can be a \code{tibble} or a \code{tsibble}.
+#' @param newdata Data set to be prepared. Can be a \code{tibble} or a
+#'   \code{tsibble}.
 #' @param recursive_colRange The range of column numbers (lagged response
 #'   columns) in \code{newdata} from which existing values should be removed.
 #'   Make sure such columns are positioned together in increasing lag order
 #'   (i.e. \code{lag_1, lag_2, ..., lag_m}, \code{lag_m =} maximum lag used) in
 #'   \code{newdata}, with no break in the lagged variable sequence even if some
 #'   of the intermediate lags are not used as predictors.
+#' @return A \code{tibble}.
 prep_newdata <- function(newdata, recursive_colRange){
   if(is_tsibble(newdata)){
     # Index
@@ -786,9 +812,11 @@ prep_newdata <- function(newdata, recursive_colRange){
 #' range (lagged response columns) of a given data set (typicall a test set for
 #' which recursive forecasting is required).
 #'
-#' @param data Data set from which the actual lagged values should be removed.
-#' @param recursive_colRange The range of column numbers in `data` from which
-#'   lagged values should be removed.
+#' @param data Data set (a \code{tibble}) from which the actual lagged values
+#'   should be removed.
+#' @param recursive_colRange The range of column numbers in \code{data} from
+#'   which lagged values should be removed.
+#' @return A \code{tibble}.
 remove_lags <- function(data, recursive_colRange){
   if(NROW(data) > 1){
     if(NROW(data) <= length(recursive_colRange)){
@@ -813,17 +841,18 @@ remove_lags <- function(data, recursive_colRange){
 #' bootstrap method.
 #'
 #' @param object Fitted model object.
-#' @param newdata Test data set. Must be a data set of class `tsibble`.
+#' @param newdata Test data set. Must be a data set of class \code{tsibble}.
 #' @param resids In-sample residuals from the fitted model.
 #' @param preds Predictions for the test set (i.e. data for the forecast
 #'   horizon).
 #' @param season.period Length of the seasonal period.
-#' @param m Multiplier. (Block size = `season.period` * `m`)
+#' @param m Multiplier. (Block size = \code{season.period * m})
 #' @param num.futures Number of possible future sample paths to be generated.
 #' @param recursive Whether to obtain recursive forecasts or not (default -
 #'   FALSE).
-#' @param recursive_colRange If `recursive = TRUE`, The range of column numbers
-#'   in test data to be filled with forecasts.
+#' @param recursive_colRange If \code{recursive = TRUE}, The range of column
+#'   numbers in test data to be filled with forecasts.
+#' @return A matrix of simulated future sample paths.
 blockBootstrap <- function(object, newdata, resids, preds, season.period = 1,
                            m = 1, num.futures = 1000,
                            recursive = FALSE, recursive_colRange = NULL){
@@ -867,8 +896,9 @@ blockBootstrap <- function(object, newdata, resids, preds, season.period = 1,
 #'
 #' @param x A series of residuals from which bootstrap series to be generated.
 #' @param season.period Length of the seasonal period.
-#' @param m Multiplier. (Block size = `season.period` * `m`)
+#' @param m Multiplier. (Block size = \code{season.period * m})
 #' @param num.bootstrap Number of bootstrap series to be generated.
+#' @return A matrix of bootstrapped series.
 residBootstrap <- function(x, season.period = 1, m = 1, num.bootstrap = 1000){
   bootstraps <- vector(mode = "list", length = num.bootstrap)
   for(i in 1:num.bootstrap){
@@ -887,7 +917,8 @@ residBootstrap <- function(x, season.period = 1, m = 1, num.bootstrap = 1000){
 #'
 #' @param x A series of residuals from which bootstrap series to be generated.
 #' @param season.period Length of the seasonal period.
-#' @param m Multiplier. (Block size = `season.period` * `m`)
+#' @param m Multiplier. (Block size = \code{season.period * m})
+#' @return A \code{numeric} vector.
 seasonBootstrap <- function(x, season.period = 1, m = 1){
   n <- length(x)
   # Block size
@@ -908,6 +939,7 @@ seasonBootstrap <- function(x, season.period = 1, m = 1){
 #'
 #' @param series A series from which a block should be sampled.
 #' @param block.size Size of the block to be sampled.
+#' @return A \code{numeric} vector.
 randomBlock <- function(series, block.size){
   start_ind <- sample(seq(length(series) - block.size + 1), 1)
   block <- series[start_ind:(start_ind + block.size -1)]
@@ -915,17 +947,22 @@ randomBlock <- function(series, block.size){
 }
 
 
-#' Possible future sample paths (multi-step) from `smimodel` residuals
+#' Possible future sample paths (multi-step) from \code{smimodel} residuals
 #'
 #' Generates possible future sample paths (multi-step) using residuals of a
-#' fitted `smimodel` through recursive forecasting.
+#' fitted \code{smimodel} through recursive forecasting.
 #'
-#' @param object A `smimodel` object.
+#' @param object A \code{smimodel} object.
 #' @param newdata The set of new data on for which the forecasts are required
-#'   (i.e. test set; should be a `tsibble`).
+#'   (i.e. test set; should be a \code{tsibble}).
 #' @param bootstraps Generated matrix of bootstrapped residual series.
-#' @param recursive_colRange The range of column numbers in `newdata` to be
+#' @param recursive_colRange The range of column numbers in \code{newdata} to be
 #'   filled with forecasts.
+#' @return A list containing the following components: \item{firstFuture}{A
+#'   \code{numeric} vector of 1-step-ahead simulated futures.}
+#'   \item{future_cols}{A list of multi-steps-ahead simulated futures, where
+#'   each list element corresponds to each 1-step-ahead simulated future in
+#'   \code{firstFuture}.} 
 possibleFutures_smimodel <- function(object, newdata, bootstraps,
                                      recursive_colRange){
   index_n <- index(newdata)
@@ -1098,13 +1135,18 @@ possibleFutures_smimodel <- function(object, newdata, bootstraps,
 #' Generates possible future sample paths (multi-step) using residuals of a
 #' fitted benchmark model through recursive forecasting.
 #'
-#' @param object A fitted model object of the class `backward`, `pprFit`, or
-#'   `gaimFit`.
+#' @param object A fitted model object of the class \code{backward},
+#'   \code{pprFit}, or \code{gaimFit}.
 #' @param newdata The set of new data on for which the forecasts are required
-#'   (i.e. test set; should be a `tsibble`).
+#'   (i.e. test set; should be a \code{tsibble}).
 #' @param bootstraps Generated matrix of bootstrapped residual series.
-#' @param recursive_colRange The range of column numbers in `newdata` to be
+#' @param recursive_colRange The range of column numbers in \code{newdata} to be
 #'   filled with forecasts.
+#' @return A list containing the following components: \item{firstFuture}{A
+#'   \code{numeric} vector of 1-step-ahead simulated futures.}
+#'   \item{future_cols}{A list of multi-steps-ahead simulated futures, where
+#'   each list element corresponds to each 1-step-ahead simulated future in
+#'   \code{firstFuture}.}  
 possibleFutures_benchmark <- function(object, newdata, bootstraps,
                                       recursive_colRange){
   index_n <- index(newdata)
@@ -1205,7 +1247,7 @@ possibleFutures_benchmark <- function(object, newdata, bootstraps,
 
 #' Calculate interval forecast coverage
 #'
-#' This is a wrapper for the function `conformalForecast::coverage()`.
+#' This is a wrapper for the function \code{conformalForecast::coverage}.
 #' Calculates the mean coverage and the ifinn matrix for prediction intervals on
 #' validation set. If \code{window} is not \code{NULL}, a matrix of the rolling
 #' means of interval forecast coverage is also returned.
@@ -1214,16 +1256,16 @@ possibleFutures_benchmark <- function(object, newdata, bootstraps,
 #' @param level Target confidence level for prediction intervals.
 #' @param window If not \code{NULL}, the rolling mean matrix for coverage is
 #'   also returned.
-#' @param na.rm A logical indicating whether \code{NA} values should be stripped
-#'   before the rolling mean computation proceeds.
+#' @param na.rm A \code{logical} indicating whether \code{NA} values should be
+#'   stripped before the rolling mean computation proceeds.
 #'
 #' @return A list of class \code{coverage} with the following components:
 #'   \item{mean}{Mean coverage across the validation set.}
-#' \item{ifinn}{A indicator matrix as a multivariate time series, where the \eqn{h}th column
-#' holds the coverage for forecast horizon \eqn{h}. The time index
-#' corresponds to the period for which the forecast is produced.}
-#' \item{rollmean}{If \code{window} is not NULL, a matrix of the rolling means
-#' of interval forecast coverage will be returned.}
+#' \item{ifinn}{A indicator matrix as a multivariate time series, where the
+#' \eqn{h}th column holds the coverage for forecast horizon \eqn{h}. The time
+#' index corresponds to the period for which the forecast is produced.}
+#' \item{rollmean}{If \code{window} is not \code{NULL}, a matrix of the rolling
+#' means of interval forecast coverage will be returned.}
 #'
 #' @export
 avgCoverage <- function(object, level = 95, window = NULL, na.rm = FALSE) {
@@ -1237,30 +1279,31 @@ avgCoverage <- function(object, level = 95, window = NULL, na.rm = FALSE) {
 
 #' Calculate interval forecast width
 #'
-#' This is a wrapper for the function `conformalForecast::width()`.
-#' Calculates the mean width of prediction intervals on the validation set.
-#' If \code{window} is not \code{NULL}, a matrix of the rolling means of interval
-#' width is also returned. If \code{includemedian} is \code{TRUE},
-#' the information of the median interval width will be returned.
+#' This is a wrapper for the function \code{conformalForecast::width}.
+#' Calculates the mean width of prediction intervals on the validation set. If
+#' \code{window} is not \code{NULL}, a matrix of the rolling means of interval
+#' width is also returned. If \code{includemedian} is \code{TRUE}, the
+#' information of the median interval width will be returned.
 #'
 #' @param object An object of class  \code{bb_cvforecast}.
 #' @param level Target confidence level for prediction intervals.
-#' @param includemedian If \code{TRUE}, the median interval width will also be returned.
-#' @param window If not \code{NULL}, the rolling mean (and rolling median if applicable)
-#' matrix for interval width will also be returned.
+#' @param includemedian If \code{TRUE}, the median interval width will also be
+#'   returned.
+#' @param window If not \code{NULL}, the rolling mean (and rolling median if
+#'   applicable) matrix for interval width will also be returned.
 #' @param na.rm A logical indicating whether \code{NA} values should be stripped
-#' before the rolling mean and rolling median computation proceeds.
+#'   before the rolling mean and rolling median computation proceeds.
 #'
-#' @return A list of class \code{"width"} with the following components:
-#' \item{width}{Forecast interval width as a multivariate time series, where the \eqn{h}th
-#' column holds the interval width for the forecast horizon \eqn{h}. The time index
-#' corresponds to the period for which the forecast is produced.}
-#' \item{mean}{Mean interval width across the validation set.}
-#' \item{rollmean}{If \code{window} is not NULL, a matrix of the rolling means
-#' of interval width will be returned.}
-#' \item{median}{Median interval width across the validation set.}
-#' \item{rollmedian}{If \code{window} is not NULL, a matrix of the rolling medians
-#' of interval width will be returned.}
+#' @return A list of class \code{width} with the following components:
+#' \item{width}{Forecast interval width as a multivariate time series, where the
+#'  \eqn{h}th column holds the interval width for the forecast horizon \eqn{h}.
+#'  The time index corresponds to the period for which the forecast is
+#'  produced.} \item{mean}{Mean interval width across the validation set.}
+#' \item{rollmean}{If \code{window} is not \code{NULL}, a matrix of the rolling
+#' means of interval width will be returned.} \item{median}{Median interval
+#' width across the validation set.} \item{rollmedian}{If \code{window} is not
+#' \code{NULL}, a matrix of the rolling medians of interval width will be
+#' returned.}
 #'
 #' @export
 avgWidth <- function(object, level = 95, includemedian = FALSE, window = NULL,
@@ -1276,7 +1319,7 @@ avgWidth <- function(object, level = 95, includemedian = FALSE, window = NULL,
 
 #' Create lags or leads of a matrix
 #'
-#' This is a wrapper for the function `conformalForecast::lagmatrix()`.Find a
+#' This is a wrapper for the function \code{conformalForecast::lagmatrix}.Find a
 #' shifted version of a matrix, adjusting the time base backward (lagged) or
 #' forward (leading) by a specified number of observations for each column.
 #'

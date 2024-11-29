@@ -11,6 +11,9 @@ randomBlock(series, block.size)
 
 \item{block.size}{Size of the block to be sampled.}
 }
+\value{
+A \code{numeric} vector.
+}
 \description{
 Samples a block of specified size from a given series starting form a random
 point in the series.

@@ -16,7 +16,7 @@ a length equal to the number of columns of \code{x}.}
 A matrix with the same class and size as \code{x}.
 }
 \description{
-This is a wrapper for the function \code{conformalForecast::lagmatrix()}.Find a
+This is a wrapper for the function \code{conformalForecast::lagmatrix}.Find a
 shifted version of a matrix, adjusting the time base backward (lagged) or
 forward (leading) by a specified number of observations for each column.
 }

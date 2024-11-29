@@ -17,6 +17,13 @@ possibleFutures_smimodel(object, newdata, bootstraps, recursive_colRange)
 \item{recursive_colRange}{The range of column numbers in \code{newdata} to be
 filled with forecasts.}
 }
+\value{
+A list containing the following components: \item{firstFuture}{A
+\code{numeric} vector of 1-step-ahead simulated futures.}
+\item{future_cols}{A list of multi-steps-ahead simulated futures, where
+each list element corresponds to each 1-step-ahead simulated future in
+\code{firstFuture}.}
+}
 \description{
 Generates possible future sample paths (multi-step) using residuals of a
 fitted \code{smimodel} through recursive forecasting.

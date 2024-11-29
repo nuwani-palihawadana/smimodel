@@ -2,7 +2,8 @@
 % Please edit documentation in R/prediction_intervals.R
 \name{cb_cvforecast}
 \alias{cb_cvforecast}
-\title{Conformal bootstrap prediction intervals through cross-validation}
+\title{Conformal bootstrap prediction intervals through time series cross-validation
+forecasting}
 \usage{
 cb_cvforecast(
   object,
@@ -24,22 +25,25 @@ cb_cvforecast(
 )
 }
 \arguments{
-\item{object}{Fitted model object of class \code{smimodel}, \code{backward}, \code{gaimFit}
-or \code{pprFit}.}
+\item{object}{Fitted model object of class \code{smimodel}, \code{backward},
+\code{gaimFit} or \code{pprFit}.}
 
-\item{data}{Data set. Must be a data set of class \code{tsibble}.(Make sure there
-are no additional date/time/date-time/yearmonth/POSIXct/POSIXt variables
-except for the \code{index} of the \code{tsibble}). If multiple models are fitted,
-the grouping variable should be the key of the \code{tsibble}.}
+\item{data}{Data set. Must be a data set of class \code{tsibble}.(Make sure
+there are no additional date or time related variables except for the
+\code{index} of the \code{tsibble}). If multiple models are fitted, the
+grouping variable should be the \code{key} of the \code{tsibble}. If a
+\code{key} is not specified, a dummy key with only one level will be
+created.}
 
 \item{yvar}{Name of the response variable as a character string.}
 
 \item{neighbour}{If multiple models are fitted: Number of neighbours of each
 key (i.e. grouping variable) to be considered in model fitting to handle
-smoothing over the key. Should be an integer. If \code{neighbour = x}, \code{x}
-number of keys before the key of interest and \code{x} number of keys after the
-key of interest are grouped together for model fitting. The default is \code{0}
-(i.e. no neighbours are considered for model fitting).}
+smoothing over the key. Should be an \code{integer}. If \code{neighbour =
+  x}, \code{x} number of keys before the key of interest and \code{x} number
+of keys after the key of interest are grouped together for model fitting.
+The default is \code{neighbour = 0} (i.e. no neighbours are considered for
+model fitting).}
 
 \item{predictor.vars}{A character vector of names of the predictor variables.}
 
@@ -65,14 +69,23 @@ will not be used.}
 window should be rolled forward.}
 
 \item{recursive}{Whether to obtain recursive forecasts or not (default -
-FALSE).}
+\code{FALSE}).}
 
-\item{recursive_colNames}{If \code{recursive = TRUE}, a character vector giving
-the names of the columns in test data to be filled with forecasts.}
+\item{recursive_colNames}{If \code{recursive = TRUE}, a character vector
+giving the names of the columns in test data to be filled with forecasts.
+Recursive/autoregressive forecasting is required when the lags of the
+response variable itself are used as predictor variables into the model.
+Make sure such lagged variables are positioned together in increasing lag
+order (i.e. \code{lag_1, lag_2, ..., lag_m}, \code{lag_m =} maximum lag
+used) in \code{data}, with no break in the lagged variable sequence even if
+some of the intermediate lags are not used as predictors.}
 
 \item{...}{Other arguments not currently used.}
 }
 \description{
 Compute prediction intervals by applying the conformal bootstrap method to
 subsets of time series data using a rolling forecast origin.
+}
+\seealso{
+\code{\link{bb_cvforecast}}
 }

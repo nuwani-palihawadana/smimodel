@@ -28,15 +28,18 @@ horizon).}
 
 \item{season.period}{Length of the seasonal period.}
 
-\item{m}{Multiplier. (Block size = \code{season.period} * \code{m})}
+\item{m}{Multiplier. (Block size = \code{season.period * m})}
 
 \item{num.futures}{Number of possible future sample paths to be generated.}
 
 \item{recursive}{Whether to obtain recursive forecasts or not (default -
 FALSE).}
 
-\item{recursive_colRange}{If \code{recursive = TRUE}, The range of column numbers
-in test data to be filled with forecasts.}
+\item{recursive_colRange}{If \code{recursive = TRUE}, The range of column
+numbers in test data to be filled with forecasts.}
+}
+\value{
+A matrix of simulated future sample paths.
 }
 \description{
 Gerenates possible future sample paths by applying the single season block

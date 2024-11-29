@@ -11,7 +11,10 @@ seasonBootstrap(x, season.period = 1, m = 1)
 
 \item{season.period}{Length of the seasonal period.}
 
-\item{m}{Multiplier. (Block size = \code{season.period} * \code{m})}
+\item{m}{Multiplier. (Block size = \code{season.period * m})}
+}
+\value{
+A \code{numeric} vector.
 }
 \description{
 Generates a single replication of single season block bootstrap series.

@@ -14,20 +14,20 @@ avgCoverage(object, level = 95, window = NULL, na.rm = FALSE)
 \item{window}{If not \code{NULL}, the rolling mean matrix for coverage is
 also returned.}
 
-\item{na.rm}{A logical indicating whether \code{NA} values should be stripped
-before the rolling mean computation proceeds.}
+\item{na.rm}{A \code{logical} indicating whether \code{NA} values should be
+stripped before the rolling mean computation proceeds.}
 }
 \value{
 A list of class \code{coverage} with the following components:
 \item{mean}{Mean coverage across the validation set.}
-\item{ifinn}{A indicator matrix as a multivariate time series, where the \eqn{h}th column
-holds the coverage for forecast horizon \eqn{h}. The time index
-corresponds to the period for which the forecast is produced.}
-\item{rollmean}{If \code{window} is not NULL, a matrix of the rolling means
-of interval forecast coverage will be returned.}
+\item{ifinn}{A indicator matrix as a multivariate time series, where the
+\eqn{h}th column holds the coverage for forecast horizon \eqn{h}. The time
+index corresponds to the period for which the forecast is produced.}
+\item{rollmean}{If \code{window} is not \code{NULL}, a matrix of the rolling
+means of interval forecast coverage will be returned.}
 }
 \description{
-This is a wrapper for the function \code{conformalForecast::coverage()}.
+This is a wrapper for the function \code{conformalForecast::coverage}.
 Calculates the mean coverage and the ifinn matrix for prediction intervals on
 validation set. If \code{window} is not \code{NULL}, a matrix of the rolling
 means of interval forecast coverage is also returned.

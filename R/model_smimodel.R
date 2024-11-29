@@ -1502,9 +1502,9 @@ normalise_alpha <- function (alpha) {
 #' @param index.vars A character vector of names of the predictor variables for
 #'   which indices should be estimated.
 #' @return A list containing the following components: \item{scaled_data}{The
-#'   scaled data set of class \code{tibble}.} \item{scaled_info}{A named numeric
-#'   vector of standard deviations of \code{index.vars} that were used to scale
-#'   the corresponding columns of \code{data}.}
+#'   scaled data set of class \code{tibble}.} \item{scaled_info}{A named
+#'   \code{numeric} vector of standard deviations of \code{index.vars} that were
+#'   used to scale the corresponding columns of \code{data}.}
 scaling <- function(data, index.vars){
   scaleData <- scale(data[ , index.vars], center = FALSE, 
                      scale = apply(data[ , index.vars], 2, sd, na.rm = TRUE))
@@ -1528,6 +1528,7 @@ scaling <- function(data, index.vars){
 #' @param object A \code{smimodel} object.
 #' @param scaledInfo The list returned from a call of the function
 #'   \code{\link{scaling}}.
+#' @return A \code{smimodel} object.
 unscaling <- function(object, scaledInfo){
   scaledInfo <- scaledInfo$scaled_info
   list_index <- object$alpha
@@ -1589,8 +1590,8 @@ allpred_index <- function(num_pred, num_ind, ind_pos, alpha){
 #'
 #' @param num_pred Number of predictors.
 #' @param num_ind Number of indices.
-#' @return A list containing the following components: \item{index}{An integer
-#'   vector that assigns group indices for each predictor.}
+#' @return A list containing the following components: \item{index}{An
+#'   \code{integer} vector that assigns group indices for each predictor.}
 #'   \item{index_positions}{A list of length = \code{num_ind} that indicates
 #'   which predictors belong to which index.}
 split_index <- function(num_pred, num_ind){

@@ -15,9 +15,9 @@ which indices should be estimated.}
 }
 \value{
 A list containing the following components: \item{scaled_data}{The
-scaled data set of class \code{tibble}.} \item{scaled_info}{A named numeric
-vector of standard deviations of \code{index.vars} that were used to scale
-the corresponding columns of \code{data}.}
+scaled data set of class \code{tibble}.} \item{scaled_info}{A named
+\code{numeric} vector of standard deviations of \code{index.vars} that were
+used to scale the corresponding columns of \code{data}.}
 }
 \description{
 Scales the columns of the \code{data} corresponding to \code{index.vars}.

@@ -11,9 +11,12 @@ residBootstrap(x, season.period = 1, m = 1, num.bootstrap = 1000)
 
 \item{season.period}{Length of the seasonal period.}
 
-\item{m}{Multiplier. (Block size = \code{season.period} * \code{m})}
+\item{m}{Multiplier. (Block size = \code{season.period * m})}
 
 \item{num.bootstrap}{Number of bootstrap series to be generated.}
+}
+\value{
+A matrix of bootstrapped series.
 }
 \description{
 Generates multiple replications of single season block bootstrap series.

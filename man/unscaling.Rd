@@ -12,6 +12,9 @@ unscaling(object, scaledInfo)
 \item{scaledInfo}{The list returned from a call of the function
 \code{\link{scaling}}.}
 }
+\value{
+A \code{smimodel} object.
+}
 \description{
 Transforms back the index coefficients to suit original-scale index variables
 if the same were scaled when estimating the \code{smimodel} (happens in

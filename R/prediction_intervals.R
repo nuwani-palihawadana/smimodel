@@ -737,7 +737,7 @@ utils::globalVariables(c("indexLag", "indexDiff", "row_idx", "grp"))
 #' exisiting (actual) values from a specified range of columns (lagged response
 #' columns) of the data set. Handles seasonal data with gaps.
 #'
-#' @param newdata Data set to be prepared. Should be a \code{tsibble}.
+#' @param newdata Data set to be prepared. Can be a \code{tibble} or a \code{tsibble}.
 #' @param recursive_colRange The range of column numbers (lagged response
 #'   columns) in \code{newdata} from which existing values should be removed.
 #'   Make sure such columns are positioned together in increasing lag order
@@ -745,12 +745,14 @@ utils::globalVariables(c("indexLag", "indexDiff", "row_idx", "grp"))
 #'   \code{newdata}, with no break in the lagged variable sequence even if some
 #'   of the intermediate lags are not used as predictors.
 prep_newdata <- function(newdata, recursive_colRange){
-  # Index
-  index_data <- index(newdata)
-  # Convert to a tibble
-  newdata <- newdata |>
-    tibble::as_tibble() |>
-    dplyr::arrange({{index_data}})
+  if(is_tsibble(newdata)){
+    # Index
+    index_data <- index(newdata)
+    # Convert to a tibble
+    newdata <- newdata |>
+      tibble::as_tibble() |>
+      dplyr::arrange({{index_data}})
+  }
   # Constructing a column to store time difference between two observations
   newdata <- newdata |>
     mutate(indexLag = lag({{index_data}}),

@@ -1,20 +1,27 @@
-#' Obtaining forecasts on a test set from a fitted `smimodel`
+#' Obtaining forecasts on a test set from a fitted \code{smimodel}
 #'
 #' Gives forecasts on a test set.
 #'
-#' @param object A `smimodel` object.
+#' @param object A \code{smimodel} object.
 #' @param newdata The set of new data on for which the forecasts are required
-#'   (i.e. test set; should be a `tsibble`).
+#'   (i.e. test set; should be a \code{tsibble}).
 #' @param recursive Whether to obtain recursive forecasts or not (default -
-#'   FALSE).
-#' @param recursive_colRange If `recursive = TRUE`, The range of column numbers
-#'   in `newdata` to be filled with forecasts.
+#'   \code{FALSE}).
+#' @param recursive_colRange If \code{recursive = TRUE}, the range of column
+#'   numbers in \code{newdata} to be filled with forecasts.
+#'   Recursive/autoregressive forecasting is required when the lags of the
+#'   response variable itself are used as predictor variables into the model.
+#'   Make sure such lagged variables are positioned together in increasing lag
+#'   order (i.e. \code{lag_1, lag_2, ..., lag_m}, \code{lag_m =} maximum lag
+#'   used) in \code{newdata}, with no break in the lagged variable sequence even
+#'   if some of the intermediate lags are not used as predictors.
 #' @param ... Other arguments not currently used.
+#' @return A \code{tsibble} with forecasts on test set.
 #'
 #' @method predict smimodel
 #'
 #' @export
-predict.smimodel <- function(object, newdata, recursive = FALSE, 
+predict.smimodel <- function(object, newdata, recursive = FALSE,
                              recursive_colRange = NULL, ...) {
   if (!tsibble::is_tsibble(newdata)) stop("newdata is not a tsibble.")
   index_n <- index(newdata)
@@ -28,9 +35,9 @@ predict.smimodel <- function(object, newdata, recursive = FALSE,
   key11 <- key(newdata)[[1]]
   predict_fn <- mgcv::predict.gam
   if(recursive == TRUE){
-    newdata <- newdata |>
-      tibble::as_tibble() |>
-      dplyr::arrange({{index_n}})
+    # Prepare newdata for recursive forecasting
+    newdata <- prep_newdata(newdata = newdata, recursive_colRange = recursive_colRange)
+    # Recursive forecasting
     predictions =  vector(mode = "list", length = NROW(newdata))
     data_list <- vector(mode = "list", length = NROW(newdata))
     for(m in 1:(NROW(newdata) - 1)){
@@ -96,7 +103,7 @@ predict.smimodel <- function(object, newdata, recursive = FALSE,
     predictions[[NROW(newdata)]] <- pred
     newdata1 <- dplyr::bind_rows(data_list)
     pred <- unlist(predictions)
-    pred_F <- newdata1 |> 
+    pred_F <- newdata1 |>
       dplyr::mutate(.predict = pred) |>
       tsibble::as_tsibble(index = {{ index_n }}, key = {{ key11 }})
   }else if(recursive == FALSE){
@@ -123,14 +130,14 @@ predict.smimodel <- function(object, newdata, recursive = FALSE,
         }
         names(ind) <- colnames(list_index)
         dat <- tibble::as_tibble(ind)
-        data_list[[i]] <- dplyr::bind_cols(newdata_cat, dat) 
+        data_list[[i]] <- dplyr::bind_cols(newdata_cat, dat)
       }
-      predictions[[i]] <- predict_fn(object$fit[[i]]$best$gam, data_list[[i]], 
+      predictions[[i]] <- predict_fn(object$fit[[i]]$best$gam, data_list[[i]],
                                      type = "response")
     }
     newdata1 <- dplyr::bind_rows(data_list)
     pred <- unlist(predictions)
-    pred_F <- newdata1 |> 
+    pred_F <- newdata1 |>
       dplyr::mutate(.predict = pred) |>
       tsibble::as_tsibble(index = {{ index_n }}, key = {{ key11 }})
   }
@@ -138,22 +145,29 @@ predict.smimodel <- function(object, newdata, recursive = FALSE,
 }
 
 
-#' Obtaining forecasts on a test set from a `smimodelFit`
+#' Obtaining forecasts on a test set from a \code{smimodelFit}
 #'
 #' Gives forecasts on a test set.
 #'
-#' @param object A `smimodelFit` object.
+#' @param object A \code{smimodelFit} object.
 #' @param newdata The set of new data on for which the forecasts are required
-#'   (i.e. test set; should be a `tibble`).
+#'   (i.e. test set; should be a \code{tibble}).
 #' @param recursive Whether to obtain recursive forecasts or not (default -
-#'   FALSE).
-#' @param recursive_colRange If `recursive = TRUE`, The range of column numbers
-#'   in `newdata` to be filled with forecasts.
+#'   \code{FALSE}).
+#' @param recursive_colRange If \code{recursive = TRUE}, the range of column
+#'   numbers in \code{newdata} to be filled with forecasts.
+#'   Recursive/autoregressive forecasting is required when the lags of the
+#'   response variable itself are used as predictor variables into the model.
+#'   Make sure such lagged variables are positioned together in increasing lag
+#'   order (i.e. \code{lag_1, lag_2, ..., lag_m}, \code{lag_m =} maximum lag
+#'   used) in \code{newdata}, with no break in the lagged variable sequence even
+#'   if some of the intermediate lags are not used as predictors.
 #' @param ... Other arguments not currently used.
+#' @return A \code{tibble} with forecasts on test set.
 #'
 #' @method predict smimodelFit
 #' @export
-predict.smimodelFit <- function(object, newdata, recursive = FALSE, 
+predict.smimodelFit <- function(object, newdata, recursive = FALSE,
                                 recursive_colRange = NULL, ...) {
   if (!is_tibble(newdata)) stop("newdata is not a tibble.")
   predict_fn <- mgcv::predict.gam
@@ -167,6 +181,9 @@ predict.smimodelFit <- function(object, newdata, recursive = FALSE,
   names(alpha) <- NULL
   if(all(alpha == 0)){
     if(recursive == TRUE){
+      # Prepare newdata for recursive forecasting
+      newdata <- prep_newdata(newdata = newdata, recursive_colRange = recursive_colRange)
+      # Recursive forecasting
       predictions =  vector(mode = "list", length = NROW(newdata))
       for(m in 1:(NROW(newdata) - 1)){
         data_temp = newdata[m, ]
@@ -183,11 +200,11 @@ predict.smimodelFit <- function(object, newdata, recursive = FALSE,
       data_temp = newdata[NROW(newdata), ]
       predictions[[NROW(newdata)]] = predict_fn(object$gam, data_temp, type = "response")
       pred <- unlist(predictions)
-      pred_F <- newdata |> 
-        dplyr::mutate(.predict = pred) 
+      pred_F <- newdata |>
+        dplyr::mutate(.predict = pred)
     }else if(recursive == FALSE){
       pred <- predict_fn(object$gam, newdata, type = "response")
-      pred_F <- newdata |> 
+      pred_F <- newdata |>
         dplyr::mutate(.predict = pred)
     }
   }else{
@@ -228,8 +245,8 @@ predict.smimodelFit <- function(object, newdata, recursive = FALSE,
       predictions[[NROW(newdata)]] = predict_fn(object$gam, data_list[[NROW(newdata)]], type = "response")
       newdata1 <- dplyr::bind_rows(data_list)
       pred <- unlist(predictions)
-      pred_F <- newdata1 |> 
-        dplyr::mutate(.predict = pred) 
+      pred_F <- newdata1 |>
+        dplyr::mutate(.predict = pred)
     }else if(recursive == FALSE){
       X_test <- as.matrix(newdata[ , object$vars_index])
       # Calculating indices
@@ -241,7 +258,7 @@ predict.smimodelFit <- function(object, newdata, recursive = FALSE,
       dat <- tibble::as_tibble(ind)
       data_list <- dplyr::bind_cols(newdata, dat)
       pred <- predict_fn(object$gam, data_list, type = "response")
-      pred_F <- data_list |> 
+      pred_F <- data_list |>
         dplyr::mutate(.predict = pred)
     }
   }
@@ -249,23 +266,30 @@ predict.smimodelFit <- function(object, newdata, recursive = FALSE,
 }
 
 
-#' Obtaining forecasts on a test set from a fitted `backward`
+#' Obtaining forecasts on a test set from a fitted \code{backward}
 #'
 #' Gives forecasts on a test set.
 #'
-#' @param object A `backward` object.
+#' @param object A \code{backward} object.
 #' @param newdata The set of new data on for which the forecasts are required
-#'   (i.e. test set; should be a `tsibble`).
+#'   (i.e. test set; should be a \code{tsibble}).
 #' @param recursive Whether to obtain recursive forecasts or not (default -
-#'   FALSE).
-#' @param recursive_colRange If `recursive = TRUE`, The range of column numbers
-#'   in `newdata` to be filled with forecasts.
+#'   \code{FALSE}).
+#' @param recursive_colRange If \code{recursive = TRUE}, the range of column
+#'   numbers in \code{newdata} to be filled with forecasts.
+#'   Recursive/autoregressive forecasting is required when the lags of the
+#'   response variable itself are used as predictor variables into the model.
+#'   Make sure such lagged variables are positioned together in increasing lag
+#'   order (i.e. \code{lag_1, lag_2, ..., lag_m}, \code{lag_m =} maximum lag
+#'   used) in \code{newdata}, with no break in the lagged variable sequence even
+#'   if some of the intermediate lags are not used as predictors.
 #' @param ... Other arguments not currently used.
+#' @return A \code{tsibble} with forecasts on test set.
 #'
 #' @method predict backward
 #'
 #' @export
-predict.backward <- function(object, newdata, 
+predict.backward <- function(object, newdata,
                              recursive = FALSE, recursive_colRange = NULL, ...){
   if (!is_tsibble(newdata)) stop("newdata is not a tsibble.")
   index_n <- index(newdata)
@@ -279,9 +303,9 @@ predict.backward <- function(object, newdata,
   predict_fn <- mgcv::predict.gam
   key11 <- key(newdata)[[1]]
   if(recursive == TRUE){
-    newdata <- newdata |>
-      as_tibble() |>
-      arrange({{index_n}})
+    # Prepare newdata for recursive forecasting
+    newdata <- prep_newdata(newdata = newdata, recursive_colRange = recursive_colRange)
+    # Recursive forecasting
     predictions =  vector(mode = "list", length = NROW(newdata))
     for(m in 1:(NROW(newdata) - 1)){
       data_temp = newdata[m, ]
@@ -300,10 +324,10 @@ predict.backward <- function(object, newdata,
     data_temp = newdata[NROW(newdata), ]
     key22 = data_temp[ , {{ key11 }}][[1]]
     key22_pos = which(object$key == key22)
-    predictions[[NROW(newdata)]] = predict_fn(object$fit[[key22_pos]], data_temp, 
+    predictions[[NROW(newdata)]] = predict_fn(object$fit[[key22_pos]], data_temp,
                                               type = "response")
     pred <- unlist(predictions)
-    pred_F <- newdata |> 
+    pred_F <- newdata |>
       mutate(.predict = pred) |>
       as_tsibble(index = {{ index_n }}, key = {{ key11 }})
   }else if(recursive == FALSE){
@@ -313,7 +337,7 @@ predict.backward <- function(object, newdata,
       predictions[[i]] <- predict_fn(object$fit[[i]], newdata_cat, type = "response")
     }
     pred <- unlist(predictions)
-    pred_F <- newdata |> 
+    pred_F <- newdata |>
       mutate(.predict = pred) |>
       as_tsibble(index = {{ index_n }}, key = {{ key11 }})
   }
@@ -321,23 +345,30 @@ predict.backward <- function(object, newdata,
 }
 
 
-#' Obtaining forecasts on a test set from a fitted `pprFit`
+#' Obtaining forecasts on a test set from a fitted \code{pprFit}
 #'
 #' Gives forecasts on a test set.
 #'
-#' @param object A `pprFit` object.
+#' @param object A \code{pprFit} object.
 #' @param newdata The set of new data on for which the forecasts are required
-#'   (i.e. test set; should be a `tsibble`).
+#'   (i.e. test set; should be a \code{tsibble}).
 #' @param recursive Whether to obtain recursive forecasts or not (default -
-#'   FALSE).
-#' @param recursive_colRange If `recursive = TRUE`, The range of column numbers
-#'   in `newdata` to be filled with forecasts.
+#'   \code{FALSE}).
+#' @param recursive_colRange If \code{recursive = TRUE}, the range of column
+#'   numbers in \code{newdata} to be filled with forecasts.
+#'   Recursive/autoregressive forecasting is required when the lags of the
+#'   response variable itself are used as predictor variables into the model.
+#'   Make sure such lagged variables are positioned together in increasing lag
+#'   order (i.e. \code{lag_1, lag_2, ..., lag_m}, \code{lag_m =} maximum lag
+#'   used) in \code{newdata}, with no break in the lagged variable sequence even
+#'   if some of the intermediate lags are not used as predictors.
 #' @param ... Other arguments not currently used.
+#' @return A \code{tsibble} with forecasts on test set.
 #'
 #' @method predict pprFit
 #'
 #' @export
-predict.pprFit <- function(object, newdata, 
+predict.pprFit <- function(object, newdata,
                            recursive = FALSE, recursive_colRange = NULL, ...){
   if (!is_tsibble(newdata)) stop("newdata is not a tsibble.")
   index_n <- index(newdata)
@@ -350,9 +381,9 @@ predict.pprFit <- function(object, newdata,
   }
   key11 <- key(newdata)[[1]]
   if(recursive == TRUE){
-    newdata <- newdata |>
-      as_tibble() |>
-      arrange({{index_n}})
+    # Prepare newdata for recursive forecasting
+    newdata <- prep_newdata(newdata = newdata, recursive_colRange = recursive_colRange)
+    # Recursive forecasting
     predictions =  vector(mode = "list", length = NROW(newdata))
     for(m in 1:(NROW(newdata) - 1)){
       data_temp = newdata[m, ]
@@ -371,10 +402,10 @@ predict.pprFit <- function(object, newdata,
     data_temp = newdata[NROW(newdata), ]
     key22 = data_temp[ , {{ key11 }}][[1]]
     key22_pos = which(object$key == key22)
-    predictions[[NROW(newdata)]] = predict(object$fit[[key22_pos]], data_temp, 
+    predictions[[NROW(newdata)]] = predict(object$fit[[key22_pos]], data_temp,
                                            type = "response")
     pred <- unlist(predictions)
-    pred_F <- newdata |> 
+    pred_F <- newdata |>
       mutate(.predict = pred) |>
       as_tsibble(index = {{ index_n }}, key = {{ key11 }})
   }else if(recursive == FALSE){
@@ -384,7 +415,7 @@ predict.pprFit <- function(object, newdata,
       predictions[[i]] <- predict(object$fit[[i]], newdata_cat, type = "response")
     }
     pred <- unlist(predictions)
-    pred_F <- newdata |> 
+    pred_F <- newdata |>
       mutate(.predict = pred) |>
       as_tsibble(index = {{ index_n }}, key = {{ key11 }})
   }
@@ -392,23 +423,30 @@ predict.pprFit <- function(object, newdata,
 }
 
 
-#' Obtaining forecasts on a test set from a fitted `gaimFit`
+#' Obtaining forecasts on a test set from a fitted \code{gaimFit}
 #'
 #' Gives forecasts on a test set.
 #'
-#' @param object A `gaimFit` object.
+#' @param object A \code{gaimFit} object.
 #' @param newdata The set of new data on for which the forecasts are required
-#'   (i.e. test set; should be a `tsibble`).
+#'   (i.e. test set; should be a \code{tsibble}).
 #' @param recursive Whether to obtain recursive forecasts or not (default -
-#'   FALSE).
-#' @param recursive_colRange If `recursive = TRUE`, The range of column numbers
-#'   in `newdata` to be filled with forecasts.
+#'   \code{FALSE}).
+#' @param recursive_colRange If \code{recursive = TRUE}, the range of column
+#'   numbers in \code{newdata} to be filled with forecasts.
+#'   Recursive/autoregressive forecasting is required when the lags of the
+#'   response variable itself are used as predictor variables into the model.
+#'   Make sure such lagged variables are positioned together in increasing lag
+#'   order (i.e. \code{lag_1, lag_2, ..., lag_m}, \code{lag_m =} maximum lag
+#'   used) in \code{newdata}, with no break in the lagged variable sequence even
+#'   if some of the intermediate lags are not used as predictors.
 #' @param ... Other arguments not currently used.
+#' @return A \code{tsibble} with forecasts on test set.
 #'
 #' @method predict gaimFit
 #'
 #' @export
-predict.gaimFit <- function(object, newdata, 
+predict.gaimFit <- function(object, newdata,
                             recursive = FALSE, recursive_colRange = NULL, ...){
   if (!is_tsibble(newdata)) stop("newdata is not a tsibble.")
   index_n <- index(newdata)
@@ -421,9 +459,9 @@ predict.gaimFit <- function(object, newdata,
   }
   key11 <- key(newdata)[[1]]
   if(recursive == TRUE){
-    newdata <- newdata |>
-      as_tibble() |>
-      arrange({{index_n}})
+    # Prepare newdata for recursive forecasting
+    newdata <- prep_newdata(newdata = newdata, recursive_colRange = recursive_colRange)
+    # Recursive forecasting
     predictions =  vector(mode = "list", length = NROW(newdata))
     for(m in 1:(NROW(newdata) - 1)){
       data_temp = newdata[m, ]
@@ -442,10 +480,10 @@ predict.gaimFit <- function(object, newdata,
     data_temp = newdata[NROW(newdata), ]
     key22 = data_temp[ , {{ key11 }}][[1]]
     key22_pos = which(object$key == key22)
-    predictions[[NROW(newdata)]] = predict(object$fit[[key22_pos]], data_temp, 
+    predictions[[NROW(newdata)]] = predict(object$fit[[key22_pos]], data_temp,
                                               type = "response")
     pred <- unlist(predictions)
-    pred_F <- newdata |> 
+    pred_F <- newdata |>
       mutate(.predict = pred) |>
       as_tsibble(index = {{ index_n }}, key = {{ key11 }})
   }else if(recursive == FALSE){
@@ -455,7 +493,7 @@ predict.gaimFit <- function(object, newdata,
       predictions[[i]] <- predict(object$fit[[i]], newdata_cat, type = "response")
     }
     pred <- unlist(predictions)
-    pred_F <- newdata |> 
+    pred_F <- newdata |>
       mutate(.predict = pred) |>
       as_tsibble(index = {{ index_n }}, key = {{ key11 }})
   }
@@ -463,23 +501,30 @@ predict.gaimFit <- function(object, newdata,
 }
 
 
-#' Obtaining forecasts on a test set from a fitted `lmFit`
+#' Obtaining forecasts on a test set from a fitted \code{lmFit}
 #'
 #' Gives forecasts on a test set.
 #'
-#' @param object A `lmFit` object.
+#' @param object A \code{lmFit} object.
 #' @param newdata The set of new data on for which the forecasts are required
-#'   (i.e. test set; should be a `tsibble`).
+#'   (i.e. test set; should be a \code{tsibble}).
 #' @param recursive Whether to obtain recursive forecasts or not (default -
-#'   FALSE).
-#' @param recursive_colRange If `recursive = TRUE`, The range of column numbers
-#'   in `newdata` to be filled with forecasts.
+#'   \code{FALSE}).
+#' @param recursive_colRange If \code{recursive = TRUE}, the range of column
+#'   numbers in \code{newdata} to be filled with forecasts.
+#'   Recursive/autoregressive forecasting is required when the lags of the
+#'   response variable itself are used as predictor variables into the model.
+#'   Make sure such lagged variables are positioned together in increasing lag
+#'   order (i.e. \code{lag_1, lag_2, ..., lag_m}, \code{lag_m =} maximum lag
+#'   used) in \code{newdata}, with no break in the lagged variable sequence even
+#'   if some of the intermediate lags are not used as predictors.
 #' @param ... Other arguments not currently used.
+#' @return A \code{tsibble} with forecasts on test set.
 #'
 #' @method predict lmFit
 #'
 #' @export
-predict.lmFit <- function(object, newdata, 
+predict.lmFit <- function(object, newdata,
                            recursive = FALSE, recursive_colRange = NULL, ...){
   if (!is_tsibble(newdata)) stop("newdata is not a tsibble.")
   index_n <- index(newdata)
@@ -492,9 +537,9 @@ predict.lmFit <- function(object, newdata,
   }
   key11 <- key(newdata)[[1]]
   if(recursive == TRUE){
-    newdata <- newdata |>
-      as_tibble() |>
-      arrange({{index_n}})
+    # Prepare newdata for recursive forecasting
+    newdata <- prep_newdata(newdata = newdata, recursive_colRange = recursive_colRange)
+    # Recursive forecasting
     predictions =  vector(mode = "list", length = NROW(newdata))
     for(m in 1:(NROW(newdata) - 1)){
       data_temp = newdata[m, ]
@@ -513,10 +558,10 @@ predict.lmFit <- function(object, newdata,
     data_temp = newdata[NROW(newdata), ]
     key22 = data_temp[ , {{ key11 }}][[1]]
     key22_pos = which(object$key == key22)
-    predictions[[NROW(newdata)]] = predict(object$fit[[key22_pos]], data_temp, 
+    predictions[[NROW(newdata)]] = predict(object$fit[[key22_pos]], data_temp,
                                            type = "response")
     pred <- unlist(predictions)
-    pred_F <- newdata |> 
+    pred_F <- newdata |>
       mutate(.predict = pred) |>
       as_tsibble(index = {{ index_n }}, key = {{ key11 }})
   }else if(recursive == FALSE){
@@ -526,7 +571,7 @@ predict.lmFit <- function(object, newdata,
       predictions[[i]] <- predict(object$fit[[i]], newdata_cat, type = "response")
     }
     pred <- unlist(predictions)
-    pred_F <- newdata |> 
+    pred_F <- newdata |>
       mutate(.predict = pred) |>
       as_tsibble(index = {{ index_n }}, key = {{ key11 }})
   }
@@ -534,26 +579,112 @@ predict.lmFit <- function(object, newdata,
 }
 
 
-#' Obtaining forecasts on a test set from a fitted `gamFit`
+#' Obtaining forecasts on a test set from a fitted \code{gamFit}
 #'
 #' Gives forecasts on a test set.
 #'
-#' @param object A `gamFit` object.
+#' @param object A \code{gamFit} object.
 #' @param newdata The set of new data on for which the forecasts are required
-#'   (i.e. test set; should be a `tibble`).
+#'   (i.e. test set; should be a \code{tsibble}).
 #' @param recursive Whether to obtain recursive forecasts or not (default -
-#'   FALSE).
-#' @param recursive_colRange If `recursive = TRUE`, The range of column numbers
-#'   in `newdata` to be filled with forecasts.
+#'   \code{FALSE}).
+#' @param recursive_colRange If \code{recursive = TRUE}, the range of column
+#'   numbers in \code{newdata} to be filled with forecasts.
+#'   Recursive/autoregressive forecasting is required when the lags of the
+#'   response variable itself are used as predictor variables into the model.
+#'   Make sure such lagged variables are positioned together in increasing lag
+#'   order (i.e. \code{lag_1, lag_2, ..., lag_m}, \code{lag_m =} maximum lag
+#'   used) in \code{newdata}, with no break in the lagged variable sequence even
+#'   if some of the intermediate lags are not used as predictors.
 #' @param ... Other arguments not currently used.
+#' @return A \code{tsibble} with forecasts on test set.
 #'
 #' @method predict gamFit
+#'
+#' @export
+predict.gamFit <- function(object, newdata,
+                          recursive = FALSE, recursive_colRange = NULL, ...){
+  if (!is_tsibble(newdata)) stop("newdata is not a tsibble.")
+  index_n <- index(newdata)
+  key_n <- key(newdata)
+  if (length(key(newdata)) == 0) {
+    newdata <- newdata |>
+      mutate(dummy_key = rep(1, NROW(newdata))) |>
+      as_tsibble(index = index_n, key = dummy_key)
+    key_n <- key(newdata)
+  }
+  key11 <- key(newdata)[[1]]
+  if(recursive == TRUE){
+    # Prepare newdata for recursive forecasting
+    newdata <- prep_newdata(newdata = newdata, recursive_colRange = recursive_colRange)
+    # Recursive forecasting
+    predictions =  vector(mode = "list", length = NROW(newdata))
+    for(m in 1:(NROW(newdata) - 1)){
+      data_temp = newdata[m, ]
+      key22 = data_temp[ , {{ key11 }}][[1]]
+      key22_pos = which(object$key == key22)
+      pred <- predict(object$fit[[key22_pos]], data_temp, type = "response")
+      predictions[[m]] <- pred
+      x_seq = seq((m+1), (m+((max(recursive_colRange) - min(recursive_colRange)) + 1)))
+      y_seq = recursive_colRange
+      for(l in 1:length(recursive_colRange)){
+        if((x_seq[l] <= NROW(newdata)) & is.na(newdata[x_seq[l], y_seq[l]])){
+          newdata[x_seq[l], y_seq[l]] = pred
+        }
+      }
+    }
+    data_temp = newdata[NROW(newdata), ]
+    key22 = data_temp[ , {{ key11 }}][[1]]
+    key22_pos = which(object$key == key22)
+    predictions[[NROW(newdata)]] = predict(object$fit[[key22_pos]], data_temp,
+                                           type = "response")
+    pred <- unlist(predictions)
+    pred_F <- newdata |>
+      mutate(.predict = pred) |>
+      as_tsibble(index = {{ index_n }}, key = {{ key11 }})
+  }else if(recursive == FALSE){
+    predictions <- vector(mode = "list", length = NROW(object))
+    for (i in 1:NROW(object)) {
+      newdata_cat <- newdata[newdata[{{ key11 }}] == object$key[i], ]
+      predictions[[i]] <- predict(object$fit[[i]], newdata_cat, type = "response")
+    }
+    pred <- unlist(predictions)
+    pred_F <- newdata |>
+      mutate(.predict = pred) |>
+      as_tsibble(index = {{ index_n }}, key = {{ key11 }})
+  }
+  return(pred_F)
+}
 
-predict.gamFit <- function(object, newdata, 
+
+#' Obtaining recursive forecasts on a test set from a fitted \code{mgcv::gam}
+#'
+#' Gives recursive forecasts on a test set.
+#'
+#' @param object A \code{gam} object.
+#' @param newdata The set of new data on for which the forecasts are required
+#'   (i.e. test set; should be a \code{tibble}).
+#' @param recursive Whether to obtain recursive forecasts or not (default -
+#'   \code{FALSE}).
+#' @param recursive_colRange If \code{recursive = TRUE}, the range of column
+#'   numbers in \code{newdata} to be filled with forecasts.
+#'   Recursive/autoregressive forecasting is required when the lags of the
+#'   response variable itself are used as predictor variables into the model.
+#'   Make sure such lagged variables are positioned together in increasing lag
+#'   order (i.e. \code{lag_1, lag_2, ..., lag_m}, \code{lag_m =} maximum lag
+#'   used) in \code{newdata}, with no break in the lagged variable sequence even
+#'   if some of the intermediate lags are not used as predictors.
+#' @param ... Other arguments not currently used.
+#' @return A \code{tibble} with forecasts on test set.
+
+predict_gam <- function(object, newdata,
                           recursive = FALSE, recursive_colRange = NULL, ...){
   if (!is_tibble(newdata)) stop("newdata is not a tibble.")
   predict_fn <- mgcv::predict.gam
   if(recursive == TRUE){
+    # Prepare newdata for recursive forecasting
+    newdata <- prep_newdata(newdata = newdata, recursive_colRange = recursive_colRange)
+    # Recursive forecasting
     predictions =  vector(mode = "list", length = NROW(newdata))
     for(m in 1:(NROW(newdata) - 1)){
       data_temp = newdata[m, ]
@@ -570,11 +701,11 @@ predict.gamFit <- function(object, newdata,
     data_temp = newdata[NROW(newdata), ]
     predictions[[NROW(newdata)]] = predict_fn(object, data_temp, type = "response")
     pred <- unlist(predictions)
-    pred_F <- newdata |> 
+    pred_F <- newdata |>
       mutate(.predict = pred)
   }else if(recursive == FALSE){
     pred <- predict_fn(object, newdata, type = "response")
-    pred_F <- newdata |> 
+    pred_F <- newdata |>
       dplyr::mutate(.predict = pred)
   }
   return(pred_F)

@@ -44,7 +44,6 @@ utils::globalVariables(c("dummy_key", "num_key", "New", "Old"))
 #' @return A \code{tibble}.
 #'
 #' @method augment smimodelFit
-
 augment.smimodelFit <- function(x, ...) {
   smimodel.resid <- x$gam$residuals
   smimodel.fitted <- x$gam$fitted.values

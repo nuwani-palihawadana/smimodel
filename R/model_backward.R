@@ -183,21 +183,13 @@ model_backward <- function(data, val.data, yvar,
     # Model fitting
     model1 <- mgcv::gam(my.formula, family = family, method = "REML", 
                         data = df_cat)
-    # Validation set MSE
+    # Predictions on validation set
     valData <- df_cat_val
-    if(recursive == TRUE){
-      index_val <- index(valData)
-      key_val <- key(valData)[[1]]
-      # Convert to a tibble
-      valData <- valData |>
-        as_tibble() |>
-        arrange({{index_val}})
-      # Adjust validation set for recursive forecasts
-      for(k in recursive_colRange){
-        valData[(k - (recursive_colRange[1] - 2)):NROW(valData), k] <- NA
-      }
-    }
-    # Predictions
+    # Convert to a tibble
+    index_val <- index(valData)
+    valData <- valData |>
+      as_tibble() |>
+      arrange({{index_val}})
     pred <- predict_gam(object = model1, newdata = valData, recursive = recursive,
                     recursive_colRange = recursive_colRange)$.predict
     # Validation set MSE
@@ -310,7 +302,6 @@ utils::globalVariables(c("...1", "...2"))
 #'   used) in \code{val.data}, with no break in the lagged variable sequence
 #'   even if some of the intermediate lags are not used as predictors.
 #' @return A \code{numeric}.
-
 eliminate <- function(ind, train, val, yvar, family = gaussian(), 
                       s.vars = NULL, s.basedim = NULL, 
                       linear.vars = NULL,
@@ -335,24 +326,15 @@ eliminate <- function(ind, train, val, yvar, family = gaussian(),
   my.formula <- as.formula(pre.formula)
   # Model fitting
   model1 <- mgcv::gam(my.formula, family = family, method = "REML", data = train)
-  # Validation set MSE
-  valData <- val
-  if(recursive == TRUE){
-    index_val <- index(valData)
-    key_val <- key(valData)[[1]]
-    # Convert to a tibble
-    valData <- valData |>
-      as_tibble() |>
-      arrange({{index_val}})
-    # Adjust validation set for recursive forecasts
-    for(a in recursive_colRange){
-      valData[(a - (recursive_colRange[1] - 2)):NROW(valData), a] <- NA
-    }
-  }
-  # Predictions
-  pred <- predict_gam(object = model1, newdata = valData, recursive = recursive,
+  # Predictions on validation set
+  # Convert to a tibble
+  index_val <- index(val)
+  val <- val |>
+    as_tibble() |>
+    arrange({{index_val}})
+  pred <- predict_gam(object = model1, newdata = val, recursive = recursive,
                   recursive_colRange = recursive_colRange)$.predict
   # Validation set MSE
-  mse1 = MSE(residuals = (as.numeric(as.matrix(valData[,{{yvar}}], ncol = 1)) - pred))
+  mse1 = MSE(residuals = (as.numeric(as.matrix(val[,{{yvar}}], ncol = 1)) - pred))
   return(mse1)
 }

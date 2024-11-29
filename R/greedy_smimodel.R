@@ -386,7 +386,6 @@ greedy_smimodel <- function(data, val.data, yvar, neighbour = 0,
 #'   information of the final optimised model. (For descriptions of the list
 #'   elements see \code{\link{make_smimodelFit}}).} \item{best_lambdas}{Selected
 #'   penalty parameter combination.}
-
 greedy.fit <- function(data, val.data, yvar, neighbour = 0, 
                        family = gaussian(), index.vars, 
                        initialise = c("ppr", "additive", "linear", 
@@ -623,7 +622,6 @@ greedy.fit <- function(data, val.data, yvar, neighbour = 0,
 #'   used) in \code{val.data}, with no break in the lagged variable sequence
 #'   even if some of the intermediate lags are not used as predictors.
 #' @return A \code{numeric}.
-
 tune_smimodel <- function(data, val.data, yvar, neighbour = 0,
                           family = gaussian(), index.vars, 
                           initialise = c("ppr", "additive", "linear", 
@@ -652,24 +650,16 @@ tune_smimodel <- function(data, val.data, yvar, neighbour = 0,
                            tol = tol, tolCoefs = tolCoefs,
                            TimeLimit = TimeLimit, MIPGap = MIPGap,
                            NonConvex = NonConvex, verbose = verbose)
-  # Validation set MSE
-  valData <- val.data
-  if(recursive == TRUE){
-    index_val <- index(valData)
-    key_val <- key(valData)[[1]]
-    # Convert to a tibble
-    valData <- valData |>
-      as_tibble() |>
-      arrange({{index_val}})
-    # Adjust validation set for recursive forecasts
-    for(i in recursive_colRange){
-      valData[(i - (recursive_colRange[1] - 2)):NROW(valData), i] <- NA
-    }
-  }
-  # Predictions
-  pred <- predict(object = smimodel$best, newdata = valData, recursive = recursive,
+  
+  # Predictions on validation set
+  # Convert to a tibble
+  index_val <- index(val.data)
+  val.data <- val.data |>
+    as_tibble() |>
+    arrange({{index_val}})
+  pred <- predict(object = smimodel$best, newdata = val.data, recursive = recursive,
                   recursive_colRange = recursive_colRange)$.predict
-  # MSE
-  smimodel_mse <- MSE(residuals = (as.numeric(as.matrix(valData[,{{yvar}}], ncol = 1)) - pred))
+  # Validation set MSE
+  smimodel_mse <- MSE(residuals = (as.numeric(as.matrix(val.data[,{{yvar}}], ncol = 1)) - pred))
   return(smimodel_mse)
 }

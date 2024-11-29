@@ -298,7 +298,6 @@ model_smimodel <- function(data, yvar, neighbour = 0, family = gaussian(),
 #'   \code{\link{make_smimodelFit}}).} \item{best}{A list of information of the
 #'   final optimised model. (For descriptions of the list elements see
 #'   \code{\link{make_smimodelFit}}).}
-
 smimodel.fit <- function(data, yvar, neighbour = 0, 
                          family = gaussian(), index.vars, 
                          initialise = c("ppr", "additive", "linear", 
@@ -486,7 +485,6 @@ utils::globalVariables(".")
 #'   variables that should be included linearly into the model.
 #' @return  A list of initial model information. For descriptions of the list
 #'   elements see \code{\link{make_smimodelFit}}).
-
 new_smimodelFit <- function(data, yvar, neighbour = 0, 
                             family = gaussian(), index.vars, 
                             initialise = c("additive", "linear", "userInput"), 
@@ -691,7 +689,6 @@ new_smimodelFit <- function(data, yvar, neighbour = 0,
 #'   variables that are included linearly in the model.}
 #'   \item{neighbour}{Number of neighbours of each key considered in model
 #'   fitting.} \item{gam}{Fitted \code{gam}.}
-
 make_smimodelFit <- function(x, yvar, neighbour, index.vars, index.ind, index.data,
                              index.names, alpha, s.vars = NULL, linear.vars = NULL){
   # Constructing a new index coefficient vector to have all predictors in each
@@ -767,7 +764,6 @@ make_smimodelFit <- function(x, yvar, neighbour, index.vars, index.ind, index.da
 #' @param ... Other arguments not currently used.
 #' @return  A list of optimised model information. For descriptions of the list
 #'   elements see \code{\link{make_smimodelFit}}).
-
 update_smimodelFit <- function(object, data, lambda0 = 1, lambda2 = 1, 
                                M = 10, max.iter = 50, 
                                tol = 0.001, tolCoefs = 0.001,
@@ -1141,7 +1137,6 @@ update_smimodelFit <- function(object, data, lambda0 = 1, lambda2 = 1,
 #' corresponding to \code{best_alpha}.}
 #' \item{X_new}{A matrix of selected predictor variables, corresponding to
 #' \code{best_alpha}.}
-
 inner_update <- function(x, data, yvar, family = gaussian(), index.vars, 
                          s.vars, linear.vars, num_ind, dgz, alpha_old, 
                          lambda0 = 1, lambda2 = 1, M = 10, max.iter = 50, 
@@ -1320,7 +1315,6 @@ inner_update <- function(x, data, yvar, family = gaussian(), index.vars,
 #'   non-convex quadratic constraints in Gurobi solver.
 #' @param verbose The option to print detailed solver output.
 #' @return A vector of normalised index coefficients.
-
 update_alpha <- function(Y, X, num_pred, num_ind, index.ind, dgz, alpha_old, 
                          lambda0 = 1, lambda2 = 1, M = 10, TimeLimit = Inf,
                          MIPGap = 1e-4, NonConvex = -1, verbose = FALSE){
@@ -1408,7 +1402,6 @@ update_alpha <- function(Y, X, num_pred, num_ind, index.ind, dgz, alpha_old,
 #'   \item{alpha_init}{Normalised vector of index coefficients.}
 #' \item{alpha_nonNormalised}{Non-normalised (i.e. prior to normalising)
 #' vector of index coefficients.}
-
 init_alpha <- function(Y, X, index.ind, init.type = "penalisedReg", 
                        lambda0 = 1, lambda2 = 1, M = 10){
   p = NCOL(X)
@@ -1477,7 +1470,6 @@ init_alpha <- function(Y, X, index.ind, init.type = "penalisedReg",
 #' @param lambda0 Penalty parameter for L0 penalty.
 #' @param lambda2 Penalty parameter for L2 penalty.
 #' @return A \code{numeric}.
-
 loss <- function(Y, Yhat, alpha, lambda0, lambda2){
   sqdError <- sum((Y - Yhat)^2)
   L0Penalty <- lambda0*sum(alpha != 0)
@@ -1493,7 +1485,6 @@ loss <- function(Y, Yhat, alpha, lambda0, lambda2){
 #'
 #' @param alpha A vector of index coefficients.
 #' @return A \code{numeric} vector.
-
 normalise_alpha <- function (alpha) {
   anorm <- norm(matrix(alpha, ncol = 1))
   if (!(is.na(anorm) | all(alpha == 0))) 
@@ -1514,7 +1505,6 @@ normalise_alpha <- function (alpha) {
 #'   scaled data set of class \code{tibble}.} \item{scaled_info}{A named numeric
 #'   vector of standard deviations of \code{index.vars} that were used to scale
 #'   the corresponding columns of \code{data}.}
-
 scaling <- function(data, index.vars){
   scaleData <- scale(data[ , index.vars], center = FALSE, 
                      scale = apply(data[ , index.vars], 2, sd, na.rm = TRUE))
@@ -1538,7 +1528,6 @@ scaling <- function(data, index.vars){
 #' @param object A \code{smimodel} object.
 #' @param scaledInfo The list returned from a call of the function
 #'   \code{\link{scaling}}.
-
 unscaling <- function(object, scaledInfo){
   scaledInfo <- scaledInfo$scaled_info
   list_index <- object$alpha
@@ -1567,7 +1556,6 @@ unscaling <- function(object, scaledInfo){
 #'   \item{index}{An \code{integer} vector that assigns group indices for each
 #'   predictor.} \item{index_positions}{A list of length = \code{num_ind} that
 #'   indicates which predictors belong to which index.}
-
 allpred_index <- function(num_pred, num_ind, ind_pos, alpha){
   init_list <- vector(mode = "list", length = num_ind)
   index <- vector(mode = "list", length = num_ind)
@@ -1605,7 +1593,6 @@ allpred_index <- function(num_pred, num_ind, ind_pos, alpha){
 #'   vector that assigns group indices for each predictor.}
 #'   \item{index_positions}{A list of length = \code{num_ind} that indicates
 #'   which predictors belong to which index.}
-
 split_index <- function(num_pred, num_ind){
   split_list <- numeric()
   rem_pred <- num_pred

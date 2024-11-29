@@ -731,6 +731,53 @@ bb_cvforecast <- function(object, data,
 utils::globalVariables(c("indexLag", "indexDiff", "row_idx", "grp"))
 
 
+#' Prepare a data set for recursive forecasting
+#'
+#' Prepare a test data for recursive forecasting by appropriately removing
+#' exisiting (actual) values from a specified range of columns (lagged response
+#' columns) of the data set. Handles seasonal data with gaps.
+#'
+#' @param newdata Data set to be prepared. Should be a \code{tsibble}.
+#' @param recursive_colRange The range of column numbers (lagged response
+#'   columns) in \code{newdata} from which existing values should be removed.
+#'   Make sure such columns are positioned together in increasing lag order
+#'   (i.e. \code{lag_1, lag_2, ..., lag_m}, \code{lag_m =} maximum lag used) in
+#'   \code{newdata}, with no break in the lagged variable sequence even if some
+#'   of the intermediate lags are not used as predictors.
+prep_newdata <- function(newdata, recursive_colRange){
+  # Index
+  index_data <- index(newdata)
+  # Convert to a tibble
+  newdata <- newdata |>
+    tibble::as_tibble() |>
+    dplyr::arrange({{index_data}})
+  # Constructing a column to store time difference between two observations
+  newdata <- newdata |>
+    mutate(indexLag = lag({{index_data}}),
+           indexDiff = {{index_data}} - indexLag)
+  # Identify times series with seasonal gaps
+  # Regular time difference
+  timediff <- as.numeric(names(table(newdata$indexDiff))[which.max(table(newdata$indexDiff))])
+  # Identify gap locations
+  idx <- which(newdata$indexDiff > timediff, arr.ind = TRUE)
+  if(length(idx) == 0){
+    # Adjusting the test set data to remove future response lags
+    newdata <- remove_lags(data = newdata, recursive_colRange = recursive_colRange)
+  }else{
+    # Split test set at gap locations and save splits as a list
+    newdata_list_temp <- newdata |>
+      mutate(row_idx = row_number(),
+             grp = cumsum(row_idx %in% idx)) |>
+      group_split(grp)
+    # Remove future response lags from each list element appropriately
+    newdata_list <- newdata_list_temp |>
+      purrr::map(~ remove_lags(data = ., recursive_colRange = recursive_colRange))
+    newdata <- bind_rows(newdata_list)
+  }
+  return(newdata)
+}
+
+
 #' Remove actual values from a data set for recursive forecasting
 #'
 #' Appropriately removes exisiting (actual) values from the specified column
@@ -740,8 +787,6 @@ utils::globalVariables(c("indexLag", "indexDiff", "row_idx", "grp"))
 #' @param data Data set from which the actual lagged values should be removed.
 #' @param recursive_colRange The range of column numbers in `data` from which
 #'   lagged values should be removed.
-#'
-#' @export
 remove_lags <- function(data, recursive_colRange){
   if(NROW(data) > 1){
     if(NROW(data) <= length(recursive_colRange)){
@@ -893,37 +938,14 @@ possibleFutures_smimodel <- function(object, newdata, bootstraps,
   }
   key11 <- key(newdata)[[1]]
 
+  # Names of the columns to be filled with forecasts
   recursive_colNames <- colnames(newdata)[recursive_colRange]
 
+  # Predict function to be used
   predict_fn <- mgcv::predict.gam
 
-  # Convert to a tibble
-  newdata <- newdata |>
-    tibble::as_tibble() |>
-    dplyr::arrange({{index_n}})
-  # Constructing a column to store time difference between two observations
-  newdata <- newdata |>
-    mutate(indexLag = lag({{index_n}}),
-           indexDiff = {{index_n}} - indexLag)
-  # Identify times series with seasonal gaps
-  # Regular time difference
-  timediff <- as.numeric(names(table(newdata$indexDiff))[which.max(table(newdata$indexDiff))])
-  # Identify gap locations
-  idx <- which(newdata$indexDiff > timediff, arr.ind = TRUE)
-  if(length(idx) == 0){
-    # Adjusting the test set data to remove future response lags
-    newdata <- remove_lags(data = newdata, recursive_colRange = recursive_colRange)
-  }else{
-    # Split test set at gap locations and save splits as a list
-    newdata_list_temp <- newdata |>
-      mutate(row_idx = row_number(),
-             grp = cumsum(row_idx %in% idx)) |>
-      group_split(grp)
-    # Remove future response lags from each list element appropriately
-    newdata_list <- newdata_list_temp |>
-      purrr::map(~ remove_lags(data = ., recursive_colRange = recursive_colRange))
-    newdata <- bind_rows(newdata_list)
-  }
+  # Prepare newdata for recursive forecasting
+  newdata <- prep_newdata(newdata = newdata, recursive_colRange = recursive_colRange)
 
   # Recursive possible futures
   # First, one-step-ahead possible futures
@@ -1095,35 +1117,11 @@ possibleFutures_benchmark <- function(object, newdata, bootstraps,
   }
   key11 <- key(newdata)[[1]]
 
+  # Names of the columns to be filled with forecasts
   recursive_colNames <- colnames(newdata)[recursive_colRange]
 
-  # Convert to a tibble
-  newdata <- newdata |>
-    tibble::as_tibble() |>
-    dplyr::arrange({{index_n}})
-  # Constructing a column to store time difference between two observations
-  newdata <- newdata |>
-    mutate(indexLag = lag({{index_n}}),
-           indexDiff = {{index_n}} - indexLag)
-  # Identify times series with seasonal gaps
-  # Regular time difference
-  timediff <- as.numeric(names(table(newdata$indexDiff))[which.max(table(newdata$indexDiff))])
-  # Identify gap locations
-  idx <- which(newdata$indexDiff > timediff, arr.ind = TRUE)
-  if(length(idx) == 0){
-    # Adjusting the test set data to remove future response lags
-    newdata <- remove_lags(data = newdata, recursive_colRange = recursive_colRange)
-  }else{
-    # Split test set at gap locations and save splits as a list
-    newdata_list_temp <- newdata |>
-      mutate(row_idx = row_number(),
-             grp = cumsum(row_idx %in% idx)) |>
-      group_split(grp)
-    # Remove future response lags from each list element appropriately
-    newdata_list <- newdata_list_temp |>
-      purrr::map(~ remove_lags(data = ., recursive_colRange = recursive_colRange))
-    newdata <- bind_rows(newdata_list)
-  }
+  # Prepare newdata for recursive forecasting
+  newdata <- prep_newdata(newdata = newdata, recursive_colRange = recursive_colRange)
 
   # Recursive possible futures
   # First, one-step-ahead possible futures

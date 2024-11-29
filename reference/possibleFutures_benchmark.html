@@ -49,8 +49,8 @@ fitted benchmark model through recursive forecasting.</p>
 
 
 <dl><dt id="arg-object">object<a class="anchor" aria-label="anchor" href="#arg-object"></a></dt>
-<dd><p>A fitted model object of the class <code>backward</code>, <code>pprFit</code>, or
-<code>gaimFit</code>.</p></dd>
+<dd><p>A fitted model object of the class <code>backward</code>,
+<code>pprFit</code>, or <code>gaimFit</code>.</p></dd>
 
 
 <dt id="arg-newdata">newdata<a class="anchor" aria-label="anchor" href="#arg-newdata"></a></dt>
@@ -65,6 +65,19 @@ fitted benchmark model through recursive forecasting.</p>
 <dt id="arg-recursive-colrange">recursive_colRange<a class="anchor" aria-label="anchor" href="#arg-recursive-colrange"></a></dt>
 <dd><p>The range of column numbers in <code>newdata</code> to be
 filled with forecasts.</p></dd>
+
+</dl></div>
+    <div class="section level2">
+    <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
+    <p>A list containing the following components:</p>
+<dl><dt>firstFuture</dt>
+<dd><p>A
+<code>numeric</code> vector of 1-step-ahead simulated futures.</p></dd>
+
+<dt>future_cols</dt>
+<dd><p>A list of multi-steps-ahead simulated futures, where
+each list element corresponds to each 1-step-ahead simulated future in
+<code>firstFuture</code>.</p></dd>
 
 </dl></div>
 

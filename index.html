@@ -14,8 +14,8 @@
 <link rel="apple-touch-icon" type="image/png" sizes="60x60" href="apple-touch-icon-60x60.png">
 <script src="deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.4.2/css/all.min.css" rel="stylesheet">
-<link href="deps/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet">
+<script src="deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Sparse Multiple Index (SMI) Models for High-dimensional Nonparametric Forecasting">
 <meta name="description" content="A general algorithm for estimating Sparse Multiple Index Models for high-dimensional nonparametric forecasting.">
 <meta property="og:description" content="A general algorithm for estimating Sparse Multiple Index Models for high-dimensional nonparametric forecasting.">
@@ -62,9 +62,13 @@
 </div>
 <!-- badges: start -->
 <!-- badges: end -->
-<p>The R package <em>smimodel</em> provides functions to estimate Sparse Multiple Index (SMI) Models for nonparametric forecasting/prediction. The SMI Modelling algorithm simultaneously performs optimal predictor selection (hence “sparse”) and predictor grouping, enabling parsimonious forecasting/prediction models in a high-dimensional context.</p>
+<p>The R package <em>smimodel</em> provides functions to estimate Sparse Multiple Index (SMI) Models for nonparametric forecasting/prediction. The SMI Modelling algorithm simultaneously performs optimal predictor selection (hence “sparse”) and predictor grouping, enabling parsimonious forecasting/prediction models in a high-dimensional context. For detailed information regarding the SMI Modelling algorithm refer the related working paper at <a href="https://www.monash.edu/business/ebs/research/publications/ebs/2024/wp16-2024.pdf" class="external-link uri">https://www.monash.edu/business/ebs/research/publications/ebs/2024/wp16-2024.pdf</a>.</p>
 <p>The package also includes functions to fit some benchmark comparison methods namely nonparametric additive model with backward elimination, group-wise additive index model and projection pursuit regression. These functions are designed to have a similar syntax and output format for convenient usage and interchangeability.</p>
-<p>For detailed information regarding the SMI Modelling algorithm refer the related working paper at <a href="https://www.monash.edu/business/ebs/research/publications/ebs/2024/wp16-2024.pdf" class="external-link uri">https://www.monash.edu/business/ebs/research/publications/ebs/2024/wp16-2024.pdf</a>.</p>
+<div class="section level4">
+<h4 id="additional-functionalities-experimental">Additional Functionalities (experimental):<a class="anchor" aria-label="anchor" href="#additional-functionalities-experimental"></a>
+</h4>
+<p>Furthermore, the smimodel package provides functions to generate prediction intervals to estimate uncertainty of the point forecasts produced by the SMI model and given benchmark models in time series forecasting problems. The classical <em>Block Bootstrap</em> method and a novel method named <em>Conformal Bootstrap</em>, which is a natural integration of bootstrap and classical split conformal prediction (the link to a reference working paper will be added here in due course), are implemented as prediction interval generation methods through a general online updating procedure as introduced by Wang and Hyndman (2024) (<a href="https://arxiv.org/pdf/2410.13115" class="external-link uri">https://arxiv.org/pdf/2410.13115</a>).</p>
+</div>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>

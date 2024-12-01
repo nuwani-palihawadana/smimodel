@@ -45,8 +45,78 @@
 #'   used) in \code{data}, with no break in the lagged variable sequence even if
 #'   some of the intermediate lags are not used as predictors.
 #' @param ... Other arguments not currently used.
+#' @return An object of class \code{cb_cvforecast}, which is a list that
+#'   contains following elements: \item{x}{The original time series.}
+#'   \item{method}{A character string "cb_cvforecast".}
+#'   \item{fit_times}{The number of times the model is fitted in
+#'   cross-validation.} \item{mean}{Point forecasts as a multivariate time
+#'   series, where the \eqn{h^{th}} column holds the point forecasts for
+#'   forecast horizon \eqn{h}. The time index corresponds to the period for
+#'   which the forecast is produced.}
+#'   \item{error}{Forecast errors given by \eqn{e_{t+h|t} = y_{t+h} -
+#'   \hat{y}_{t+h|t}}.} \item{level}{The confidence values associated with the
+#'   prediction intervals.}
+#'   \item{lower}{A list containing lower bounds for prediction intervals for
+#'   each level. Each element within the list will be a multivariate time series
+#'    with the same dimensional characteristics as \code{mean}.}
+#'    \item{upper}{A list containing upper bounds for prediction intervals for
+#'    each level. Each element within the list will be a multivariate time
+#'    series with the same dimensional characteristics as \code{mean}.}
 #'
 #' @seealso \code{\link{bb_cvforecast}}
+#'
+#' @examples
+#' \dontrun{
+#' library(dplyr)
+#' library(ROI)
+#' library(tibble)
+#' library(tidyr)
+#' library(tsibble)
+#'
+#' # Simulate data
+#' n = 1105
+#' set.seed(123)
+#' sim_data <- tibble(x_lag_000 = runif(n)) |>
+#'   mutate(
+#'     # Add x_lags
+#'     x_lag = lag_matrix(x_lag_000, 5)) |>
+#'   unpack(x_lag, names_sep = "_") |>
+#'   mutate(
+#'     # Response variable
+#'     y = (0.9*x_lag_000 + 0.6*x_lag_001 + 0.45*x_lag_003)^3 +
+#'     (0.35*x_lag_002 + 0.7*x_lag_005)^2 + rnorm(n, sd = 0.1),
+#'     # Add an index to the data set
+#'     inddd = seq(1, n)) |>
+#'   drop_na() |>
+#'   select(inddd, y, starts_with("x_lag")) |>
+#'   # Make the data set a `tsibble`
+#'   as_tsibble(index = inddd)
+#'
+#' # Index variables
+#' index.vars <- colnames(sim_data)[3:8]
+#'
+#' # Training set
+#' sim_train <- sim_data[1:1000, ]
+#' # Test set
+#' sim_test <- sim_data[1001:1100, ]
+#'
+#' # Model fitting
+#' smimodel_ppr <- model_smimodel(data = sim_train,
+#'                                yvar = "y",
+#'                                index.vars = index.vars,
+#'                                initialise = "ppr")
+#'
+#' # Conformal bootstrap prediction intervals (3-steps-ahead interval forecasts)
+#' set.seed(12345)
+#' smimodel_ppr_cb <- cb_cvforecast(object = smimodel_ppr,
+#'                                  data = sim_data,
+#'                                  yvar = "y",
+#'                                  predictor.vars = index.vars,
+#'                                  h = 3,
+#'                                  ncal = 30,
+#'                                  num.futures = 100,
+#'                                  window = 1000)
+#' }
 #'
 #' @export
 cb_cvforecast <- function(object, data, yvar, neighbour = 0, predictor.vars,
@@ -439,8 +509,78 @@ cb_cvforecast <- function(object, data, yvar, neighbour = 0, predictor.vars,
 #'   used) in \code{data}, with no break in the lagged variable sequence even if
 #'   some of the intermediate lags are not used as predictors.
 #' @param ... Other arguments not currently used.
+#' @return An object of class \code{bb_cvforecast}, which is a list that
+#'   contains following elements: \item{x}{The original time series.}
+#'   \item{method}{A character string "bb_cvforecast".} \item{fit_times}{The
+#'   number of times the model is fitted in cross-validation.}
+#' \item{mean}{Point forecasts as a multivariate time series, where the
+#' \eqn{h^{th}} column holds the point forecasts for forecast horizon \eqn{h}.
+#' The time index corresponds to the period for which the forecast is produced.}
+#' \item{res}{The matrix of in-sample residuals produced in cross-validation.
+#' The number of rows corresponds to \code{fit_times}, and the row names
+#' corresponds the time index of the forecast origin of the corresponding
+#' cross-validation iteration.} \item{level}{The confidence values
+#'  associated with the prediction intervals.} \item{lower}{A list containing
+#'  lower bounds for prediction intervals for each level. Each element within
+#'  the list will be a multivariate time series with the same dimensional
+#'  characteristics as \code{mean}.} \item{upper}{A list containing upper bounds
+#'   for prediction intervals for each level. Each element within the list will
+#'   be a multivariate time series with the same dimensional characteristics as
+#'   \code{mean}.}
 #'
 #' @seealso \code{\link{cb_cvforecast}}
+#'
+#' @examples
+#' \dontrun{
+#' library(dplyr)
+#' library(ROI)
+#' library(tibble)
+#' library(tidyr)
+#' library(tsibble)
+#'
+#' # Simulate data
+#' n = 1105
+#' set.seed(123)
+#' sim_data <- tibble(x_lag_000 = runif(n)) |>
+#'   mutate(
+#'     # Add x_lags
+#'     x_lag = lag_matrix(x_lag_000, 5)) |>
+#'   unpack(x_lag, names_sep = "_") |>
+#'   mutate(
+#'     # Response variable
+#'     y = (0.9*x_lag_000 + 0.6*x_lag_001 + 0.45*x_lag_003)^3 +
+#'     (0.35*x_lag_002 + 0.7*x_lag_005)^2 + rnorm(n, sd = 0.1),
+#'     # Add an index to the data set
+#'     inddd = seq(1, n)) |>
+#'   drop_na() |>
+#'   select(inddd, y, starts_with("x_lag")) |>
+#'   # Make the data set a `tsibble`
+#'   as_tsibble(index = inddd)
+#'
+#' # Index variables
+#' index.vars <- colnames(sim_data)[3:8]
+#'
+#' # Training set
+#' sim_train <- sim_data[1:1000, ]
+#' # Test set
+#' sim_test <- sim_data[1001:1100, ]
+#'
+#' # Model fitting
+#' smimodel_ppr <- model_smimodel(data = sim_train,
+#'                                yvar = "y",
+#'                                index.vars = index.vars,
+#'                                initialise = "ppr")
+#'
+#' # Block bootstrap prediction intervals (3-steps-ahead interval forecasts)
+#' set.seed(12345)
+#' smimodel_ppr_bb <- bb_cvforecast(object = smimodel_ppr,
+#'                                  data = sim_data,
+#'                                  yvar = "y",
+#'                                  predictor.vars = index.vars,
+#'                                  h = 3,
+#'                                  num.futures = 50,
+#'                                  window = 1000)
+#' }
 #'
 #' @export
 bb_cvforecast <- function(object, data,

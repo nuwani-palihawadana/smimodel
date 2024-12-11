@@ -184,15 +184,15 @@ model_backward <- function(data, val.data, yvar,
     model1 <- mgcv::gam(my.formula, family = family, method = "REML", 
                         data = df_cat)
     # Predictions on validation set
+    pred <- predict_gam(object = model1, newdata = df_cat_val, recursive = recursive,
+                    recursive_colRange = recursive_colRange)$.predict
+    # Validation set MSE
     valData <- df_cat_val
     # Convert to a tibble
     index_val <- index(valData)
     valData <- valData |>
       as_tibble() |>
       arrange({{index_val}})
-    pred <- predict_gam(object = model1, newdata = valData, recursive = recursive,
-                    recursive_colRange = recursive_colRange)$.predict
-    # Validation set MSE
     mse1 = MSE(residuals = (as.numeric(as.matrix(valData[,{{yvar}}], ncol = 1)) - pred))
     mse_old <- mse1
     mseMinRatio <- 1
@@ -245,9 +245,11 @@ model_backward <- function(data, val.data, yvar,
     # Model fitting
     models_list[[i]] <- mgcv::gam(my.formula, family = family, method = "REML",
                                   data = combinedData)
-    add <- combinedData |>
-      drop_na() |>
-      select({{ index_train }}, {{ key_train }})
+    # add <- combinedData |>
+    #   drop_na() |>
+    #   select({{ index_train }}, {{ key_train }})
+    indx <- which(combinedData[ , yvar][[1]] %in% models_list[[i]]$model[, yvar])
+    add <- combinedData[indx, ] |> select({{ index_train }}, {{ key_train }})
     models_list[[i]]$model <- bind_cols(add, models_list[[i]]$model)
     models_list[[i]]$model <- as_tsibble(models_list[[i]]$model,
                                          index = index_train,
@@ -327,14 +329,14 @@ eliminate <- function(ind, train, val, yvar, family = gaussian(),
   # Model fitting
   model1 <- mgcv::gam(my.formula, family = family, method = "REML", data = train)
   # Predictions on validation set
+  pred <- predict_gam(object = model1, newdata = val, recursive = recursive,
+                  recursive_colRange = recursive_colRange)$.predict
+  # Validation set MSE
   # Convert to a tibble
   index_val <- index(val)
   val <- val |>
     as_tibble() |>
     arrange({{index_val}})
-  pred <- predict_gam(object = model1, newdata = val, recursive = recursive,
-                  recursive_colRange = recursive_colRange)$.predict
-  # Validation set MSE
   mse1 = MSE(residuals = (as.numeric(as.matrix(val[,{{yvar}}], ncol = 1)) - pred))
   return(mse1)
 }

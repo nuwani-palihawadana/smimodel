@@ -151,7 +151,7 @@ predict.smimodel <- function(object, newdata, recursive = FALSE,
 #'
 #' @param object A \code{smimodelFit} object.
 #' @param newdata The set of new data on for which the forecasts are required
-#'   (i.e. test set; should be a \code{tibble}).
+#'   (i.e. test set; should be a \code{tsibble}).
 #' @param recursive Whether to obtain recursive forecasts or not (default -
 #'   \code{FALSE}).
 #' @param recursive_colRange If \code{recursive = TRUE}, the range of column
@@ -169,7 +169,7 @@ predict.smimodel <- function(object, newdata, recursive = FALSE,
 #' @export
 predict.smimodelFit <- function(object, newdata, recursive = FALSE,
                                 recursive_colRange = NULL, ...) {
-  if (!is_tibble(newdata)) stop("newdata is not a tibble.")
+  if (!is_tsibble(newdata)) stop("newdata is not a tsibble.")
   predict_fn <- mgcv::predict.gam
   list_index <- object$alpha
   num_ind <- NCOL(list_index)
@@ -203,12 +203,20 @@ predict.smimodelFit <- function(object, newdata, recursive = FALSE,
       pred_F <- newdata |>
         dplyr::mutate(.predict = pred)
     }else if(recursive == FALSE){
+      # Index
+      index_data <- index(newdata)
+      # Convert to a tibble
+      newdata <- newdata |>
+        tibble::as_tibble() |>
+        dplyr::arrange({{index_data}})
       pred <- predict_fn(object$gam, newdata, type = "response")
       pred_F <- newdata |>
         dplyr::mutate(.predict = pred)
     }
   }else{
     if(recursive == TRUE){
+      # Prepare newdata for recursive forecasting
+      newdata <- prep_newdata(newdata = newdata, recursive_colRange = recursive_colRange)
       predictions =  vector(mode = "list", length = NROW(newdata))
       data_list <- vector(mode = "list", length = NROW(newdata))
       for(m in 1:(NROW(newdata) - 1)){
@@ -248,6 +256,12 @@ predict.smimodelFit <- function(object, newdata, recursive = FALSE,
       pred_F <- newdata1 |>
         dplyr::mutate(.predict = pred)
     }else if(recursive == FALSE){
+      # Index
+      index_data <- index(newdata)
+      # Convert to a tibble
+      newdata <- newdata |>
+        tibble::as_tibble() |>
+        dplyr::arrange({{index_data}})
       X_test <- as.matrix(newdata[ , object$vars_index])
       # Calculating indices
       ind <- vector(mode = "list", length = num_ind)
@@ -663,7 +677,7 @@ predict.gamFit <- function(object, newdata,
 #'
 #' @param object A \code{gam} object.
 #' @param newdata The set of new data on for which the forecasts are required
-#'   (i.e. test set; should be a \code{tibble}).
+#'   (i.e. test set; should be a \code{tsibble}).
 #' @param recursive Whether to obtain recursive forecasts or not (default -
 #'   \code{FALSE}).
 #' @param recursive_colRange If \code{recursive = TRUE}, the range of column
@@ -678,7 +692,7 @@ predict.gamFit <- function(object, newdata,
 #' @return A \code{tibble} with forecasts on test set.
 predict_gam <- function(object, newdata,
                           recursive = FALSE, recursive_colRange = NULL, ...){
-  if (!is_tibble(newdata)) stop("newdata is not a tibble.")
+  if (!is_tsibble(newdata)) stop("newdata is not a tsibble.")
   predict_fn <- mgcv::predict.gam
   if(recursive == TRUE){
     # Prepare newdata for recursive forecasting
@@ -703,6 +717,12 @@ predict_gam <- function(object, newdata,
     pred_F <- newdata |>
       mutate(.predict = pred)
   }else if(recursive == FALSE){
+    # Index
+    index_data <- index(newdata)
+    # Convert to a tibble
+    newdata <- newdata |>
+      tibble::as_tibble() |>
+      dplyr::arrange({{index_data}})
     pred <- predict_fn(object, newdata, type = "response")
     pred_F <- newdata |>
       dplyr::mutate(.predict = pred)

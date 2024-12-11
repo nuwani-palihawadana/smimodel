@@ -651,15 +651,15 @@ tune_smimodel <- function(data, val.data, yvar, neighbour = 0,
                            TimeLimit = TimeLimit, MIPGap = MIPGap,
                            NonConvex = NonConvex, verbose = verbose)
   
-  # Predictions on validation set
+  # # Predictions on validation set
+  pred <- predict(object = smimodel$best, newdata = val.data, recursive = recursive,
+                  recursive_colRange = recursive_colRange)$.predict
+  # Validation set MSE
   # Convert to a tibble
   index_val <- index(val.data)
   val.data <- val.data |>
     as_tibble() |>
     arrange({{index_val}})
-  pred <- predict(object = smimodel$best, newdata = val.data, recursive = recursive,
-                  recursive_colRange = recursive_colRange)$.predict
-  # Validation set MSE
   smimodel_mse <- MSE(residuals = (as.numeric(as.matrix(val.data[,{{yvar}}], ncol = 1)) - pred))
   return(smimodel_mse)
 }

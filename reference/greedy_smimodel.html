@@ -65,8 +65,6 @@ penalty parameters are tuned separately for each individual model.</p>
 <span>  <span class="va">lambda0_seq</span>,</span>
 <span>  <span class="va">lambda2_seq</span>,</span>
 <span>  <span class="va">lambda_step</span>,</span>
-<span>  <span class="va">lambda0_start_seq</span>,</span>
-<span>  <span class="va">lambda2_start_seq</span>,</span>
 <span>  refit <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  M <span class="op">=</span> <span class="fl">10</span>,</span>
 <span>  max.iter <span class="op">=</span> <span class="fl">50</span>,</span>
@@ -197,16 +195,6 @@ variables that should be included linearly into the model.</p></dd>
 <dt id="arg-lambda-step">lambda_step<a class="anchor" aria-label="anchor" href="#arg-lambda-step"></a></dt>
 <dd><p>Step size between two adjacent values in
 <code>lambda0_seq</code> and <code>lambda2_seq</code>.</p></dd>
-
-
-<dt id="arg-lambda-start-seq">lambda0_start_seq<a class="anchor" aria-label="anchor" href="#arg-lambda-start-seq"></a></dt>
-<dd><p>A subset from <code>lambda0_seq</code> as candidate
-starting points for the greedy search.</p></dd>
-
-
-<dt id="arg-lambda-start-seq">lambda2_start_seq<a class="anchor" aria-label="anchor" href="#arg-lambda-start-seq"></a></dt>
-<dd><p>A subset from <code>lambda2_seq</code> as candidate
-starting points for the greedy search.</p></dd>
 
 
 <dt id="arg-refit">refit<a class="anchor" aria-label="anchor" href="#arg-refit"></a></dt>
@@ -352,15 +340,6 @@ Multiple Index Models for High-Dimensional Nonparametric Forecasting.
 <span class="r-in"><span><span class="va">lambda0</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">12</span>, by <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="co"># L2 penalty</span></span></span>
 <span class="r-in"><span><span class="va">lambda2</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">12</span>, by <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="co"># Full grid</span></span></span>
-<span class="r-in"><span><span class="va">grid1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/expand.grid.html" class="external-link">expand.grid</a></span><span class="op">(</span><span class="va">lambda0</span>, <span class="va">lambda2</span><span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Starting point options</span></span></span>
-<span class="r-in"><span><span class="va">starting</span> <span class="op">&lt;-</span> <span class="va">grid1</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">6</span>, <span class="fl">12</span>, <span class="fl">73</span>, <span class="fl">78</span>, <span class="fl">84</span>, <span class="fl">145</span>, <span class="fl">150</span>, <span class="fl">156</span><span class="op">)</span>, <span class="op">]</span></span></span>
-<span class="r-in"><span><span class="co"># L0 penalty</span></span></span>
-<span class="r-in"><span><span class="va">lambda0_start</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unlist.html" class="external-link">unlist</a></span><span class="op">(</span><span class="va">starting</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="co"># L2 penalty</span></span></span>
-<span class="r-in"><span><span class="va">lambda2_start</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unlist.html" class="external-link">unlist</a></span><span class="op">(</span><span class="va">starting</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Model fitting</span></span></span>
 <span class="r-in"><span><span class="va">smi_greedy</span> <span class="op">&lt;-</span> <span class="fu">greedy_smimodel</span><span class="op">(</span>data <span class="op">=</span> <span class="va">sim_train</span>,</span></span>
@@ -370,9 +349,7 @@ Multiple Index Models for High-Dimensional Nonparametric Forecasting.
 <span class="r-in"><span>                              initialise <span class="op">=</span> <span class="st">"additive"</span>,</span></span>
 <span class="r-in"><span>                              lambda0_seq <span class="op">=</span> <span class="va">lambda0</span>,</span></span>
 <span class="r-in"><span>                              lambda2_seq <span class="op">=</span> <span class="va">lambda2</span>,</span></span>
-<span class="r-in"><span>                              lambda_step <span class="op">=</span> <span class="fl">1</span>,</span></span>
-<span class="r-in"><span>                              lambda0_start_seq <span class="op">=</span> <span class="va">lambda0_start</span>,</span></span>
-<span class="r-in"><span>                              lambda2_start_seq <span class="op">=</span> <span class="va">lambda2_start</span><span class="op">)</span></span></span>
+<span class="r-in"><span>                              lambda_step <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Best (optimised) fitted model</span></span></span>
 <span class="r-in"><span><span class="va">smi_greedy</span><span class="op">$</span><span class="va">fit</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">best</span></span></span>

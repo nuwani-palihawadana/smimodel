@@ -22,8 +22,6 @@ greedy_smimodel(
   lambda0_seq,
   lambda2_seq,
   lambda_step,
-  lambda0_start_seq,
-  lambda2_start_seq,
   refit = TRUE,
   M = 10,
   max.iter = 50,
@@ -117,12 +115,6 @@ variables that should be included linearly into the model.}
 
 \item{lambda_step}{Step size between two adjacent values in
 \code{lambda0_seq} and \code{lambda2_seq}.}
-
-\item{lambda0_start_seq}{A subset from \code{lambda0_seq} as candidate
-starting points for the greedy search.}
-
-\item{lambda2_start_seq}{A subset from \code{lambda2_seq} as candidate
-starting points for the greedy search.}
 
 \item{refit}{Whether to refit the model combining training and validation
 sets after parameter tuning. If \code{FALSE}, the final model will be
@@ -223,15 +215,6 @@ index.vars <- colnames(sim_data)[3:8]
 lambda0 = seq(1, 12, by = 1)
 # L2 penalty
 lambda2 = seq(0, 12, by = 1)
-# Full grid
-grid1 <- expand.grid(lambda0, lambda2)
-
-# Starting point options
-starting <- grid1[c(1, 6, 12, 73, 78, 84, 145, 150, 156), ]
-# L0 penalty
-lambda0_start = as.numeric(unique(unlist(starting[1])))
-# L2 penalty
-lambda2_start = as.numeric(unique(unlist(starting[2])))
 
 # Model fitting
 smi_greedy <- greedy_smimodel(data = sim_train,
@@ -241,9 +224,7 @@ smi_greedy <- greedy_smimodel(data = sim_train,
                               initialise = "additive",
                               lambda0_seq = lambda0,
                               lambda2_seq = lambda2,
-                              lambda_step = 1,
-                              lambda0_start_seq = lambda0_start,
-                              lambda2_start_seq = lambda2_start)
+                              lambda_step = 1)
 
 # Best (optimised) fitted model
 smi_greedy$fit[[1]]$best

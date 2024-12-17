@@ -66,10 +66,6 @@
 #'   (penalty parameter for L2 penalty).
 #' @param lambda_step Step size between two adjacent values in
 #'   \code{lambda0_seq} and \code{lambda2_seq}.
-#' @param lambda0_start_seq A subset from \code{lambda0_seq} as candidate
-#'   starting points for the greedy search.
-#' @param lambda2_start_seq A subset from \code{lambda2_seq} as candidate
-#'   starting points for the greedy search.
 #' @param refit Whether to refit the model combining training and validation
 #'   sets after parameter tuning. If \code{FALSE}, the final model will be
 #'   estimated only on the training set.
@@ -155,15 +151,6 @@
 #' lambda0 = seq(1, 12, by = 1)
 #' # L2 penalty
 #' lambda2 = seq(0, 12, by = 1)
-#' # Full grid
-#' grid1 <- expand.grid(lambda0, lambda2)
-#'
-#' # Starting point options
-#' starting <- grid1[c(1, 6, 12, 73, 78, 84, 145, 150, 156), ]
-#' # L0 penalty
-#' lambda0_start = as.numeric(unique(unlist(starting[1])))
-#' # L2 penalty
-#' lambda2_start = as.numeric(unique(unlist(starting[2])))
 #'
 #' # Model fitting
 #' smi_greedy <- greedy_smimodel(data = sim_train,
@@ -173,9 +160,7 @@
 #'                               initialise = "additive",
 #'                               lambda0_seq = lambda0,
 #'                               lambda2_seq = lambda2,
-#'                               lambda_step = 1,
-#'                               lambda0_start_seq = lambda0_start,
-#'                               lambda2_start_seq = lambda2_start)
+#'                               lambda_step = 1)
 #'
 #' # Best (optimised) fitted model
 #' smi_greedy$fit[[1]]$best
@@ -193,7 +178,6 @@ greedy_smimodel <- function(data, val.data, yvar, neighbour = 0,
                             index.ind = NULL, index.coefs = NULL, 
                             s.vars = NULL, linear.vars = NULL, 
                             lambda0_seq, lambda2_seq, lambda_step,
-                            lambda0_start_seq, lambda2_start_seq, 
                             refit = TRUE, M = 10, max.iter = 50, 
                             tol = 0.001, tolCoefs = 0.001,
                             TimeLimit = Inf, MIPGap = 1e-4, NonConvex = -1, 
@@ -260,8 +244,6 @@ greedy_smimodel <- function(data, val.data, yvar, neighbour = 0,
                                       lambda0_seq = lambda0_seq, 
                                       lambda2_seq = lambda2_seq, 
                                       lambda_step = lambda_step,
-                                      lambda0_start_seq = lambda0_start_seq, 
-                                      lambda2_start_seq = lambda2_start_seq, 
                                       refit = refit,
                                       M = M, max.iter = max.iter, 
                                       tol = tol, tolCoefs = tolCoefs,
@@ -349,10 +331,6 @@ greedy_smimodel <- function(data, val.data, yvar, neighbour = 0,
 #'   (penalty parameter for L2 penalty).
 #' @param lambda_step Step size between two adjacent values in
 #'   \code{lambda0_seq} and \code{lambda2_seq}.
-#' @param lambda0_start_seq A subset from \code{lambda0_seq} as candidate
-#'   starting points for the greedy search.
-#' @param lambda2_start_seq A subset from \code{lambda2_seq} as candidate
-#'   starting points for the greedy search.
 #' @param refit Whether to refit the model combining training and validation
 #'   sets after parameter tuning. If \code{FALSE}, the final model will be
 #'   estimated only on the training set.
@@ -392,8 +370,7 @@ greedy.fit <- function(data, val.data, yvar, neighbour = 0,
                                       "multiple", "userInput"),
                        num_ind = 5, num_models = 5, seed = 123, index.ind = NULL, 
                        index.coefs = NULL, s.vars = NULL, linear.vars = NULL, 
-                       lambda0_seq, lambda2_seq, lambda_step,
-                       lambda0_start_seq, lambda2_start_seq, refit = TRUE,
+                       lambda0_seq, lambda2_seq, lambda_step, refit = TRUE,
                        M = 10, max.iter = 50, tol = 0.001, tolCoefs = 0.001,
                        TimeLimit = Inf, MIPGap = 1e-4, NonConvex = -1, 
                        verbose = FALSE, parallel = FALSE, workers = NULL,
@@ -414,7 +391,10 @@ greedy.fit <- function(data, val.data, yvar, neighbour = 0,
     map_f <- purrr::map
   }
   # Starting point options
-  lambda_comb <- expand.grid(lambda0_start_seq, lambda2_start_seq)
+  start_l0 <- c(min(lambda0_seq), round(max(lambda0_seq)/2), max(lambda0_seq))
+  start_l2 <- c(min(lambda2_seq), round(max(lambda2_seq)/2), max(lambda2_seq))
+  lambda_comb <- expand.grid(start_l0, start_l2)
+  
   # Model fitting for each combination of lambdas
   MSE_list <- seq(1, NROW(lambda_comb), by = 1) |>
     map_f(~ tune_smimodel(data = data, val.data = val.data, yvar = yvar, 

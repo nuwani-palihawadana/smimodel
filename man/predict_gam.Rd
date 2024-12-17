@@ -10,7 +10,7 @@ predict_gam(object, newdata, recursive = FALSE, recursive_colRange = NULL, ...)
 \item{object}{A \code{gam} object.}
 
 \item{newdata}{The set of new data on for which the forecasts are required
-(i.e. test set; should be a \code{tibble}).}
+(i.e. test set; should be a \code{tsibble}).}
 
 \item{recursive}{Whether to obtain recursive forecasts or not (default -
 \code{FALSE}).}

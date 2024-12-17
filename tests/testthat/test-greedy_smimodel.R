@@ -30,14 +30,6 @@ test_that("tests for greedy_smimodel()", {
   lambda0 = seq(1, 12, by = 1)
   # L2 penalty
   lambda2 = seq(0, 12, by = 1)
-  # Full grid
-  grid1 <- expand.grid(lambda0, lambda2)
-  # Starting point options
-  starting <- grid1[c(1, 6, 12, 73, 78, 84, 145, 150, 156), ]
-  # L0 penalty
-  lambda0_start = as.numeric(unique(unlist(starting[1])))
-  # L2 penalty
-  lambda2_start = as.numeric(unique(unlist(starting[2])))
   # Model fitting
   output1 <- greedy_smimodel(data = sim_train,
                              val.data = sim_val,
@@ -48,9 +40,7 @@ test_that("tests for greedy_smimodel()", {
                              linear.vars = linear.vars,
                              lambda0_seq = lambda0,
                              lambda2_seq = lambda2,
-                             lambda_step = 1,
-                             lambda0_start_seq = lambda0_start,
-                             lambda2_start_seq = lambda2_start)
+                             lambda_step = 1)
   
   print(output1)
   

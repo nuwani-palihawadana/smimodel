@@ -25,22 +25,15 @@ test_that("tests for greedy_smimodel()", {
   index.vars = c("x_lag_000", "x_lag_001", "x_lag_002", "x_lag_003")
   s.vars = "x_lag_004"
   linear.vars = "x_lag_005"
-  # Penalty parameter values to search
-  # L0 penalty
-  lambda0 = seq(1, 12, by = 1)
-  # L2 penalty
-  lambda2 = seq(0, 12, by = 1)
+  
   # Model fitting
   output1 <- greedy_smimodel(data = sim_train,
                              val.data = sim_val,
                              yvar = "y1",
                              index.vars = index.vars,
-                             initialise = "additive",
+                             initialise = "ppr",
                              s.vars = s.vars,
-                             linear.vars = linear.vars,
-                             lambda0_seq = lambda0,
-                             lambda2_seq = lambda2,
-                             lambda_step = 1)
+                             linear.vars = linear.vars)
   
   print(output1)
   

@@ -60,12 +60,9 @@
 #'   part of an index).
 #' @param linear.vars A \code{character} vector of names of the predictor
 #'   variables that should be included linearly into the model.
-#' @param lambda0_seq A \code{numeric} vector of candidate values for lambda0
-#'   (penalty parameter for L0 penalty).
-#' @param lambda2_seq A \code{numeric} vector of candidate values for lambda2
-#'   (penalty parameter for L2 penalty).
-#' @param lambda_step Step size between two adjacent values in
-#'   \code{lambda0_seq} and \code{lambda2_seq}.
+#' @param nlambda The number of lambda values - default is 100.
+#' @param lambda.min.ratio Smallest value for lambda, as a fraction of
+#'   lambda.max (data derived).
 #' @param refit Whether to refit the model combining training and validation
 #'   sets after parameter tuning. If \code{FALSE}, the final model will be
 #'   estimated only on the training set.
@@ -146,21 +143,13 @@
 #' # Index variables
 #' index.vars <- colnames(sim_data)[3:8]
 #'
-#' # Penalty parameter values to search
-#' # L0 penalty
-#' lambda0 = seq(1, 12, by = 1)
-#' # L2 penalty
-#' lambda2 = seq(0, 12, by = 1)
-#'
 #' # Model fitting
 #' smi_greedy <- greedy_smimodel(data = sim_train,
 #'                               val.data = sim_val,
 #'                               yvar = "y1",
 #'                               index.vars = index.vars,
-#'                               initialise = "additive",
-#'                               lambda0_seq = lambda0,
-#'                               lambda2_seq = lambda2,
-#'                               lambda_step = 1)
+#'                               initialise = "ppr",
+#'                               lambda.min.ratio = 0.1)
 #'
 #' # Best (optimised) fitted model
 #' smi_greedy$fit[[1]]$best
@@ -177,7 +166,7 @@ greedy_smimodel <- function(data, val.data, yvar, neighbour = 0,
                             num_ind = 5, num_models = 5, seed = 123, 
                             index.ind = NULL, index.coefs = NULL, 
                             s.vars = NULL, linear.vars = NULL, 
-                            lambda0_seq, lambda2_seq, lambda_step,
+                            nlambda = 100, lambda.min.ratio = 0.001,
                             refit = TRUE, M = 10, max.iter = 50, 
                             tol = 0.001, tolCoefs = 0.001,
                             TimeLimit = Inf, MIPGap = 1e-4, NonConvex = -1, 
@@ -241,9 +230,8 @@ greedy_smimodel <- function(data, val.data, yvar, neighbour = 0,
                                       seed = seed, index.ind = index.ind, 
                                       index.coefs = index.coefs, s.vars = s.vars,
                                       linear.vars = linear.vars, 
-                                      lambda0_seq = lambda0_seq, 
-                                      lambda2_seq = lambda2_seq, 
-                                      lambda_step = lambda_step,
+                                      nlambda = nlambda, 
+                                      lambda.min.ratio = lambda.min.ratio,
                                       refit = refit,
                                       M = M, max.iter = max.iter, 
                                       tol = tol, tolCoefs = tolCoefs,
@@ -325,12 +313,9 @@ greedy_smimodel <- function(data, val.data, yvar, neighbour = 0,
 #'   part of an index).
 #' @param linear.vars A \code{character} vector of names of the predictor
 #'   variables that should be included linearly into the model.
-#' @param lambda0_seq A \code{numeric} vector of candidate values for lambda0
-#'   (penalty parameter for L0 penalty).
-#' @param lambda2_seq A \code{numeric} vector of candidate values for lambda2
-#'   (penalty parameter for L2 penalty).
-#' @param lambda_step Step size between two adjacent values in
-#'   \code{lambda0_seq} and \code{lambda2_seq}.
+#' @param nlambda The number of lambda values - default is 100.
+#' @param lambda.min.ratio Smallest value for lambda, as a fraction of
+#'   lambda.max (data derived).
 #' @param refit Whether to refit the model combining training and validation
 #'   sets after parameter tuning. If \code{FALSE}, the final model will be
 #'   estimated only on the training set.
@@ -370,13 +355,38 @@ greedy.fit <- function(data, val.data, yvar, neighbour = 0,
                                       "multiple", "userInput"),
                        num_ind = 5, num_models = 5, seed = 123, index.ind = NULL,
                        index.coefs = NULL, s.vars = NULL, linear.vars = NULL,
-                       lambda0_seq, lambda2_seq, lambda_step, refit = TRUE,
-                       M = 10, max.iter = 50, tol = 0.001, tolCoefs = 0.001,
+                       nlambda = 100, lambda.min.ratio = 0.0001,
+                       refit = TRUE, M = 10, max.iter = 50, 
+                       tol = 0.001, tolCoefs = 0.001,
                        TimeLimit = Inf, MIPGap = 1e-4, NonConvex = -1,
                        verbose = FALSE, parallel = FALSE, workers = NULL,
                        recursive = FALSE, recursive_colRange = NULL){
+  
+  # Choosing lambdas - principles from glmnet linear regression
+  data <- data |> drop_na()
+  X <- as.matrix(data[ , index.vars])
+  Y <- as.matrix(data[ , yvar])
+  colIndex <- seq(1, NCOL(X), 1)
+  innerProd <- lapply(colIndex, function(x){abs(t(X[, x]) %*% Y)})
+  innerProd <- unlist(innerProd)
+  
+  # lambda0 range (approximated by L1 - the convex approximation of L0)
+  innerProd_l0 <- innerProd / (NROW(Y) * 1)
+  lambda0_max <- max(innerProd_l0)
+  lambda0_min <- lambda0_max * lambda.min.ratio
+  lambda0_seq <- exp(seq(log(lambda0_min), log(lambda0_max), length.out = nlambda))
+  l0_len <- length(lambda0_seq)
+  
+  # lambda2 range (Have taken alpha = 0.001 (alpha of elasticnet penalty in glmnet)
+  # as a value closer to zero (Theoretically for the ridge penalty it should be zero.))
+  innerProd_l2 <- innerProd / (NROW(Y) * 0.001)
+  lambda2_max <- max(innerProd_l2)
+  lambda2_min <- lambda2_max * lambda.min.ratio
+  lambda2_seq <- exp(seq(log(lambda2_min), log(lambda2_max), length.out = nlambda))
+  l2_len <- length(lambda2_seq)
+ 
   # Full grid
-  #grid1 <- expand.grid(lambda0_seq, lambda2_seq)
+  grid1 <- expand.grid(lambda0_seq, lambda2_seq)
   # Data frame for storing all combinations searched
   all_comb <- data.frame()
   # Current minimum MSE
@@ -391,8 +401,8 @@ greedy.fit <- function(data, val.data, yvar, neighbour = 0,
     map_f <- purrr::map
   }
   # Starting point options
-  start_l0 <- c(min(lambda0_seq), max(lambda0_seq)/2, max(lambda0_seq))
-  start_l2 <- c(min(lambda2_seq), max(lambda2_seq)/2, max(lambda2_seq))
+  start_l0 <- c(lambda0_seq[1], lambda0_seq[round(l0_len / 2)], lambda0_seq[l0_len])
+  start_l2 <- c(lambda2_seq[1], lambda2_seq[round(l2_len / 2)], lambda2_seq[l2_len])
   lambda_comb <- expand.grid(start_l0, start_l2)
   
   # Model fitting for each combination of lambdas
@@ -423,76 +433,30 @@ greedy.fit <- function(data, val.data, yvar, neighbour = 0,
   print("First round completed; starting point selected!")
   # Updating searched combinations store
   all_comb <- bind_rows(all_comb, lambda_comb)
-  # Initial step size
-  lambda_step <- max(lambda0_seq)/2
-  # Greedy search 1
+  
+  # Greedy search
   while(min_MSE < current_MSE){
     current_MSE <- min_MSE
     current_lambdas <- min_lambdas
     # Constructing new search space
-    lambda0_seq_new <- c((current_lambdas[1] - lambda_step), current_lambdas[1],
-                         (current_lambdas[1] + lambda_step))
-    lambda0_seq_new <- lambda0_seq_new[which(lambda0_seq_new >= 0)]
-    lambda2_seq_new <- c((current_lambdas[2] - lambda_step), current_lambdas[2],
-                         (current_lambdas[2] + lambda_step))
-    lambda2_seq_new <- lambda2_seq_new[which(lambda2_seq_new >= 0)]
-    lambda_comb_new <- expand.grid(lambda0_seq_new, lambda2_seq_new)
-    # lambda_exist1 <- do.call(paste0, lambda_comb_new) %in% do.call(paste0, grid1)
-    # lambda_comb_new1 <- lambda_comb_new[lambda_exist1 == TRUE, ]
-    lambda_exist <- do.call(paste0, lambda_comb_new) %in% do.call(paste0, all_comb)
-    lambda_comb <- lambda_comb_new[lambda_exist == FALSE, ]
-    if(NROW(lambda_comb) == 0){
-      break
+    # lambda0
+    l0_indx <- which(lambda0_seq == current_lambdas[1])
+    if(l0_indx < l0_len){
+      lambda0_seq_new <- c(lambda0_seq[l0_indx - 1], current_lambdas[1],
+                           lambda0_seq[l0_indx + 1])
     }else{
-      MSE_list <- seq(1, NROW(lambda_comb), by = 1) |>
-        map_f(~ tune_smimodel(data = data, val.data = val.data, yvar = yvar,
-                              neighbour = neighbour,
-                              family = family,
-                              index.vars = index.vars,
-                              initialise = initialise,
-                              num_ind = num_ind, num_models = num_models,
-                              seed = seed,
-                              index.ind = index.ind,
-                              index.coefs = index.coefs,
-                              s.vars = s.vars,
-                              linear.vars = linear.vars,
-                              lambda.comb = as.numeric(lambda_comb[., ]),
-                              M = M, max.iter = max.iter,
-                              tol = tol, tolCoefs = tolCoefs,
-                              TimeLimit = TimeLimit, MIPGap = MIPGap,
-                              NonConvex = NonConvex, verbose = verbose,
-                              recursive = recursive,
-                              recursive_colRange = recursive_colRange))
-      # Selecting best starting point
-      min_lambda_pos <- which.min(unlist(MSE_list))
-      min_MSE <- min(unlist(MSE_list))
-      min_lambdas <- as.numeric(lambda_comb[min_lambda_pos, ])
-      print("Another round completed!")
-      # Updating searched combinations store
-      all_comb <- bind_rows(all_comb, lambda_comb)
+      lambda0_seq_new <- c(lambda0_seq[l0_indx - 1], current_lambdas[1])
     }
-  }
-  # Update min_MSE to current minimum and min_lambdas to current best
-  min_MSE <- current_MSE
-  min_lambdas <- current_lambdas
-  # Reset current_MSE
-  current_MSE <- Inf
-  # Reduce step size
-  lambda_step <- 1
-  # Greedy search 2
-  while(min_MSE < current_MSE){
-    current_MSE <- min_MSE
-    current_lambdas <- min_lambdas
-    # Constructing new search space
-    lambda0_seq_new <- c((current_lambdas[1] - lambda_step), current_lambdas[1],
-                         (current_lambdas[1] + lambda_step))
-    lambda0_seq_new <- lambda0_seq_new[which(lambda0_seq_new >= 0)]
-    lambda2_seq_new <- c((current_lambdas[2] - lambda_step), current_lambdas[2],
-                         (current_lambdas[2] + lambda_step))
-    lambda2_seq_new <- lambda2_seq_new[which(lambda2_seq_new >= 0)]
+    # lambda2
+    l2_indx <- which(lambda2_seq == current_lambdas[2])
+    if(l2_indx < l2_len){
+      lambda2_seq_new <- c(lambda2_seq[l2_indx - 1], current_lambdas[2],
+                           lambda2_seq[l2_indx + 1])
+    }else{
+      lambda2_seq_new <- c(lambda2_seq[l2_indx - 1], current_lambdas[2])
+    }
     lambda_comb_new <- expand.grid(lambda0_seq_new, lambda2_seq_new)
-    # lambda_exist1 <- do.call(paste0, lambda_comb_new) %in% do.call(paste0, grid1)
-    # lambda_comb_new1 <- lambda_comb_new[lambda_exist1 == TRUE, ]
+    # Already searched combinations
     lambda_exist <- do.call(paste0, lambda_comb_new) %in% do.call(paste0, all_comb)
     lambda_comb <- lambda_comb_new[lambda_exist == FALSE, ]
     if(NROW(lambda_comb) == 0){

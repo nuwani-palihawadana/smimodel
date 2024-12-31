@@ -19,9 +19,8 @@ greedy.fit(
   index.coefs = NULL,
   s.vars = NULL,
   linear.vars = NULL,
-  lambda0_seq,
-  lambda2_seq,
-  lambda_step,
+  nlambda = 100,
+  lambda.min.ratio = 1e-04,
   refit = TRUE,
   M = 10,
   max.iter = 50,
@@ -107,14 +106,10 @@ part of an index).}
 \item{linear.vars}{A \code{character} vector of names of the predictor
 variables that should be included linearly into the model.}
 
-\item{lambda0_seq}{A \code{numeric} vector of candidate values for lambda0
-(penalty parameter for L0 penalty).}
+\item{nlambda}{The number of lambda values - default is 100.}
 
-\item{lambda2_seq}{A \code{numeric} vector of candidate values for lambda2
-(penalty parameter for L2 penalty).}
-
-\item{lambda_step}{Step size between two adjacent values in
-\code{lambda0_seq} and \code{lambda2_seq}.}
+\item{lambda.min.ratio}{Smallest value for lambda, as a fraction of
+lambda.max (data derived).}
 
 \item{refit}{Whether to refit the model combining training and validation
 sets after parameter tuning. If \code{FALSE}, the final model will be

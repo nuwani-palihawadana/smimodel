@@ -19,9 +19,8 @@ greedy_smimodel(
   index.coefs = NULL,
   s.vars = NULL,
   linear.vars = NULL,
-  lambda0_seq,
-  lambda2_seq,
-  lambda_step,
+  nlambda = 100,
+  lambda.min.ratio = 0.001,
   refit = TRUE,
   M = 10,
   max.iter = 50,
@@ -107,14 +106,10 @@ part of an index).}
 \item{linear.vars}{A \code{character} vector of names of the predictor
 variables that should be included linearly into the model.}
 
-\item{lambda0_seq}{A \code{numeric} vector of candidate values for lambda0
-(penalty parameter for L0 penalty).}
+\item{nlambda}{The number of lambda values - default is 100.}
 
-\item{lambda2_seq}{A \code{numeric} vector of candidate values for lambda2
-(penalty parameter for L2 penalty).}
-
-\item{lambda_step}{Step size between two adjacent values in
-\code{lambda0_seq} and \code{lambda2_seq}.}
+\item{lambda.min.ratio}{Smallest value for lambda, as a fraction of
+lambda.max (data derived).}
 
 \item{refit}{Whether to refit the model combining training and validation
 sets after parameter tuning. If \code{FALSE}, the final model will be
@@ -210,21 +205,13 @@ sim_val <- sim_data[1001:1200, ]
 # Index variables
 index.vars <- colnames(sim_data)[3:8]
 
-# Penalty parameter values to search
-# L0 penalty
-lambda0 = seq(1, 12, by = 1)
-# L2 penalty
-lambda2 = seq(0, 12, by = 1)
-
 # Model fitting
 smi_greedy <- greedy_smimodel(data = sim_train,
                               val.data = sim_val,
                               yvar = "y1",
                               index.vars = index.vars,
-                              initialise = "additive",
-                              lambda0_seq = lambda0,
-                              lambda2_seq = lambda2,
-                              lambda_step = 1)
+                              initialise = "ppr",
+                              lambda.min.ratio = 0.1)
 
 # Best (optimised) fitted model
 smi_greedy$fit[[1]]$best

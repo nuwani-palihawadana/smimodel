@@ -62,9 +62,8 @@ penalty parameters are tuned separately for each individual model.</p>
 <span>  index.coefs <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  s.vars <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  linear.vars <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  <span class="va">lambda0_seq</span>,</span>
-<span>  <span class="va">lambda2_seq</span>,</span>
-<span>  <span class="va">lambda_step</span>,</span>
+<span>  nlambda <span class="op">=</span> <span class="fl">100</span>,</span>
+<span>  lambda.min.ratio <span class="op">=</span> <span class="fl">0.001</span>,</span>
 <span>  refit <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  M <span class="op">=</span> <span class="fl">10</span>,</span>
 <span>  max.iter <span class="op">=</span> <span class="fl">50</span>,</span>
@@ -182,19 +181,13 @@ part of an index).</p></dd>
 variables that should be included linearly into the model.</p></dd>
 
 
-<dt id="arg-lambda-seq">lambda0_seq<a class="anchor" aria-label="anchor" href="#arg-lambda-seq"></a></dt>
-<dd><p>A <code>numeric</code> vector of candidate values for lambda0
-(penalty parameter for L0 penalty).</p></dd>
+<dt id="arg-nlambda">nlambda<a class="anchor" aria-label="anchor" href="#arg-nlambda"></a></dt>
+<dd><p>The number of lambda values - default is 100.</p></dd>
 
 
-<dt id="arg-lambda-seq">lambda2_seq<a class="anchor" aria-label="anchor" href="#arg-lambda-seq"></a></dt>
-<dd><p>A <code>numeric</code> vector of candidate values for lambda2
-(penalty parameter for L2 penalty).</p></dd>
-
-
-<dt id="arg-lambda-step">lambda_step<a class="anchor" aria-label="anchor" href="#arg-lambda-step"></a></dt>
-<dd><p>Step size between two adjacent values in
-<code>lambda0_seq</code> and <code>lambda2_seq</code>.</p></dd>
+<dt id="arg-lambda-min-ratio">lambda.min.ratio<a class="anchor" aria-label="anchor" href="#arg-lambda-min-ratio"></a></dt>
+<dd><p>Smallest value for lambda, as a fraction of
+lambda.max (data derived).</p></dd>
 
 
 <dt id="arg-refit">refit<a class="anchor" aria-label="anchor" href="#arg-refit"></a></dt>
@@ -335,21 +328,13 @@ Multiple Index Models for High-Dimensional Nonparametric Forecasting.
 <span class="r-in"><span><span class="co"># Index variables</span></span></span>
 <span class="r-in"><span><span class="va">index.vars</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">sim_data</span><span class="op">)</span><span class="op">[</span><span class="fl">3</span><span class="op">:</span><span class="fl">8</span><span class="op">]</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Penalty parameter values to search</span></span></span>
-<span class="r-in"><span><span class="co"># L0 penalty</span></span></span>
-<span class="r-in"><span><span class="va">lambda0</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">12</span>, by <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="co"># L2 penalty</span></span></span>
-<span class="r-in"><span><span class="va">lambda2</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">12</span>, by <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Model fitting</span></span></span>
 <span class="r-in"><span><span class="va">smi_greedy</span> <span class="op">&lt;-</span> <span class="fu">greedy_smimodel</span><span class="op">(</span>data <span class="op">=</span> <span class="va">sim_train</span>,</span></span>
 <span class="r-in"><span>                              val.data <span class="op">=</span> <span class="va">sim_val</span>,</span></span>
 <span class="r-in"><span>                              yvar <span class="op">=</span> <span class="st">"y1"</span>,</span></span>
 <span class="r-in"><span>                              index.vars <span class="op">=</span> <span class="va">index.vars</span>,</span></span>
-<span class="r-in"><span>                              initialise <span class="op">=</span> <span class="st">"additive"</span>,</span></span>
-<span class="r-in"><span>                              lambda0_seq <span class="op">=</span> <span class="va">lambda0</span>,</span></span>
-<span class="r-in"><span>                              lambda2_seq <span class="op">=</span> <span class="va">lambda2</span>,</span></span>
-<span class="r-in"><span>                              lambda_step <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
+<span class="r-in"><span>                              initialise <span class="op">=</span> <span class="st">"ppr"</span>,</span></span>
+<span class="r-in"><span>                              lambda.min.ratio <span class="op">=</span> <span class="fl">0.1</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Best (optimised) fitted model</span></span></span>
 <span class="r-in"><span><span class="va">smi_greedy</span><span class="op">$</span><span class="va">fit</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">best</span></span></span>

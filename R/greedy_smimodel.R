@@ -60,9 +60,12 @@
 #'   part of an index).
 #' @param linear.vars A \code{character} vector of names of the predictor
 #'   variables that should be included linearly into the model.
-#' @param nlambda The number of lambda values - default is 100.
-#' @param lambda.min.ratio Smallest value for lambda, as a fraction of
-#'   lambda.max (data derived).
+#' @param nlambda The number of values for lambda0 (penalty parameter for L0
+#'   penalty) - default is 100.
+#' @param lambda.min.ratio Smallest value for lambda0, as a fraction of
+#'   lambda0.max (data derived).
+#' @param lambda2_seq A \code{numeric} vector of candidate values for lambda2
+#'   (penalty parameter for L2 penalty) - a default sequence is provided.
 #' @param refit Whether to refit the model combining training and validation
 #'   sets after parameter tuning. If \code{FALSE}, the final model will be
 #'   estimated only on the training set.
@@ -166,7 +169,8 @@ greedy_smimodel <- function(data, val.data, yvar, neighbour = 0,
                             num_ind = 5, num_models = 5, seed = 123, 
                             index.ind = NULL, index.coefs = NULL, 
                             s.vars = NULL, linear.vars = NULL, 
-                            nlambda = 100, lambda.min.ratio = 0.001,
+                            nlambda = 100, lambda.min.ratio = 0.0001,
+                            lambda2_seq = c(0, 0.01, 0.1, 1, 10, 100),
                             refit = TRUE, M = 10, max.iter = 50, 
                             tol = 0.001, tolCoefs = 0.001,
                             TimeLimit = Inf, MIPGap = 1e-4, NonConvex = -1, 
@@ -232,6 +236,7 @@ greedy_smimodel <- function(data, val.data, yvar, neighbour = 0,
                                       linear.vars = linear.vars, 
                                       nlambda = nlambda, 
                                       lambda.min.ratio = lambda.min.ratio,
+                                      lambda2_seq = lambda2_seq,
                                       refit = refit,
                                       M = M, max.iter = max.iter, 
                                       tol = tol, tolCoefs = tolCoefs,
@@ -313,9 +318,12 @@ greedy_smimodel <- function(data, val.data, yvar, neighbour = 0,
 #'   part of an index).
 #' @param linear.vars A \code{character} vector of names of the predictor
 #'   variables that should be included linearly into the model.
-#' @param nlambda The number of lambda values - default is 100.
-#' @param lambda.min.ratio Smallest value for lambda, as a fraction of
-#'   lambda.max (data derived).
+#' @param nlambda The number of values for lambda0 (penalty parameter for L0
+#'   penalty) - default is 100.
+#' @param lambda.min.ratio Smallest value for lambda0, as a fraction of
+#'   lambda0.max (data derived).
+#' @param lambda2_seq A \code{numeric} vector of candidate values for lambda2
+#'   (penalty parameter for L2 penalty) - a default sequence is provided.
 #' @param refit Whether to refit the model combining training and validation
 #'   sets after parameter tuning. If \code{FALSE}, the final model will be
 #'   estimated only on the training set.
@@ -356,33 +364,30 @@ greedy.fit <- function(data, val.data, yvar, neighbour = 0,
                        num_ind = 5, num_models = 5, seed = 123, index.ind = NULL,
                        index.coefs = NULL, s.vars = NULL, linear.vars = NULL,
                        nlambda = 100, lambda.min.ratio = 0.0001,
+                       lambda2_seq = c(0, 0.01, 0.1, 1, 10, 100),
                        refit = TRUE, M = 10, max.iter = 50, 
                        tol = 0.001, tolCoefs = 0.001,
                        TimeLimit = Inf, MIPGap = 1e-4, NonConvex = -1,
                        verbose = FALSE, parallel = FALSE, workers = NULL,
                        recursive = FALSE, recursive_colRange = NULL){
   
-  # Choosing lambdas - principles from glmnet linear regression
-  data <- data |> drop_na()
-  X <- as.matrix(data[ , index.vars])
-  Y <- as.matrix(data[ , yvar])
-  colIndex <- seq(1, NCOL(X), 1)
-  innerProd <- lapply(colIndex, function(x){abs(t(X[, x]) %*% Y)})
-  innerProd <- unlist(innerProd)
-  
-  # lambda0 range (approximated by L1 - the convex approximation of L0)
-  innerProd_l0 <- innerProd / (NROW(Y) * 1)
-  lambda0_max <- max(innerProd_l0)
+  ## Calculating lambda0.max based on the scale of the first term in the 
+  ## SMI modelling objective function
+  # Fit an additive model (gam) as a benchmark
+  bench <- model_gam(data = data,
+                     yvar = yvar,
+                     family = family,
+                     neighbour = neighbour,
+                     s.vars = c(index.vars, s.vars),
+                     linear.vars = linear.vars)
+  # Residuals
+  bench_resid <- augment(bench)$.resid
+  # lambda0_seq
+  lambda0_max <- sum(bench_resid^2)
   lambda0_min <- lambda0_max * lambda.min.ratio
-  lambda0_seq <- exp(seq(log(lambda0_min), log(lambda0_max), length.out = nlambda))
-  l0_len <- length(lambda0_seq)
+  lambda0_seq <- c(0, exp(seq(log(lambda0_min), log(lambda0_max), length.out = nlambda)))
   
-  # lambda2 range (Have taken alpha = 0.001 (alpha of elasticnet penalty in glmnet)
-  # as a value closer to zero (Theoretically for the ridge penalty it should be zero.))
-  innerProd_l2 <- innerProd / (NROW(Y) * 0.001)
-  lambda2_max <- max(innerProd_l2)
-  lambda2_min <- lambda2_max * lambda.min.ratio
-  lambda2_seq <- exp(seq(log(lambda2_min), log(lambda2_max), length.out = nlambda))
+  l0_len <- length(lambda0_seq)
   l2_len <- length(lambda2_seq)
  
   # Full grid

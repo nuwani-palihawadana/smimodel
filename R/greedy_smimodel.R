@@ -405,37 +405,59 @@ greedy.fit <- function(data, val.data, yvar, neighbour = 0,
   } else {
     map_f <- purrr::map
   }
-  # Starting point options
-  start_l0 <- c(lambda0_seq[1], lambda0_seq[round(l0_len / 2)], lambda0_seq[l0_len])
-  start_l2 <- c(lambda2_seq[1], lambda2_seq[round(l2_len / 2)], lambda2_seq[l2_len])
+  # Starting point
+  start_l0 <- lambda0_seq[ceiling(l0_len / 2)]
+  start_l2 <- lambda2_seq[ceiling(l2_len / 2)]
   lambda_comb <- expand.grid(start_l0, start_l2)
   
-  # Model fitting for each combination of lambdas
-  MSE_list <- seq(1, NROW(lambda_comb), by = 1) |>
-    map_f(~ tune_smimodel(data = data, val.data = val.data, yvar = yvar,
-                          neighbour = neighbour,
-                          family = family,
-                          index.vars = index.vars,
-                          initialise = initialise,
-                          num_ind = num_ind, num_models = num_models,
-                          seed = seed,
-                          index.ind = index.ind,
-                          index.coefs = index.coefs,
-                          s.vars = s.vars,
-                          linear.vars = linear.vars,
-                          lambda.comb = as.numeric(lambda_comb[., ]),
-                          M = M, max.iter = max.iter,
-                          tol = tol, tolCoefs = tolCoefs,
-                          TimeLimit = TimeLimit, MIPGap = MIPGap,
-                          NonConvex = NonConvex, verbose = verbose,
-                          recursive = recursive,
-                          recursive_colRange = recursive_colRange))
-  #if (parallel) future:::ClusterRegistry("stop")
-  # Selecting best starting point
-  min_lambda_pos <- which.min(unlist(MSE_list))
-  min_MSE <- min(unlist(MSE_list))
-  min_lambdas <- as.numeric(lambda_comb[min_lambda_pos, ])
-  print("First round completed; starting point selected!")
+  min_lambdas <- c(start_l0, start_l2)
+  
+  min_MSE <- tune_smimodel(data = data, val.data = val.data, yvar = yvar,
+                               neighbour = neighbour,
+                               family = family,
+                               index.vars = index.vars,
+                               initialise = initialise,
+                               num_ind = num_ind, num_models = num_models,
+                               seed = seed,
+                               index.ind = index.ind,
+                               index.coefs = index.coefs,
+                               s.vars = s.vars,
+                               linear.vars = linear.vars,
+                               lambda.comb = min_lambdas,
+                               M = M, max.iter = max.iter,
+                               tol = tol, tolCoefs = tolCoefs,
+                               TimeLimit = TimeLimit, MIPGap = MIPGap,
+                               NonConvex = NonConvex, verbose = verbose,
+                               recursive = recursive,
+                               recursive_colRange = recursive_colRange)
+  
+  
+  # # Model fitting for each combination of lambdas
+  # MSE_list <- seq(1, NROW(lambda_comb), by = 1) |>
+  #   map_f(~ tune_smimodel(data = data, val.data = val.data, yvar = yvar,
+  #                         neighbour = neighbour,
+  #                         family = family,
+  #                         index.vars = index.vars,
+  #                         initialise = initialise,
+  #                         num_ind = num_ind, num_models = num_models,
+  #                         seed = seed,
+  #                         index.ind = index.ind,
+  #                         index.coefs = index.coefs,
+  #                         s.vars = s.vars,
+  #                         linear.vars = linear.vars,
+  #                         lambda.comb = as.numeric(lambda_comb[., ]),
+  #                         M = M, max.iter = max.iter,
+  #                         tol = tol, tolCoefs = tolCoefs,
+  #                         TimeLimit = TimeLimit, MIPGap = MIPGap,
+  #                         NonConvex = NonConvex, verbose = verbose,
+  #                         recursive = recursive,
+  #                         recursive_colRange = recursive_colRange))
+  # #if (parallel) future:::ClusterRegistry("stop")
+  # # Selecting best starting point
+  # min_lambda_pos <- which.min(unlist(MSE_list))
+  # min_MSE <- min(unlist(MSE_list))
+  # min_lambdas <- as.numeric(lambda_comb[min_lambda_pos, ])
+  # print("First round completed; starting point selected!")
   # Updating searched combinations store
   all_comb <- bind_rows(all_comb, lambda_comb)
   

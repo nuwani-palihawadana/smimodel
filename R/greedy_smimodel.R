@@ -64,8 +64,6 @@
 #'   penalty) - default is 100.
 #' @param lambda.min.ratio Smallest value for lambda0, as a fraction of
 #'   lambda0.max (data derived).
-#' @param lambda2_seq A \code{numeric} vector of candidate values for lambda2
-#'   (penalty parameter for L2 penalty) - a default sequence is provided.
 #' @param refit Whether to refit the model combining training and validation
 #'   sets after parameter tuning. If \code{FALSE}, the final model will be
 #'   estimated only on the training set.
@@ -170,7 +168,6 @@ greedy_smimodel <- function(data, val.data, yvar, neighbour = 0,
                             index.ind = NULL, index.coefs = NULL, 
                             s.vars = NULL, linear.vars = NULL, 
                             nlambda = 100, lambda.min.ratio = 0.0001,
-                            lambda2_seq = c(0, 0.01, 0.1, 1, 10, 100),
                             refit = TRUE, M = 10, max.iter = 50, 
                             tol = 0.001, tolCoefs = 0.001,
                             TimeLimit = Inf, MIPGap = 1e-4, NonConvex = -1, 
@@ -236,7 +233,6 @@ greedy_smimodel <- function(data, val.data, yvar, neighbour = 0,
                                       linear.vars = linear.vars, 
                                       nlambda = nlambda, 
                                       lambda.min.ratio = lambda.min.ratio,
-                                      lambda2_seq = lambda2_seq,
                                       refit = refit,
                                       M = M, max.iter = max.iter, 
                                       tol = tol, tolCoefs = tolCoefs,
@@ -322,8 +318,6 @@ greedy_smimodel <- function(data, val.data, yvar, neighbour = 0,
 #'   penalty) - default is 100.
 #' @param lambda.min.ratio Smallest value for lambda0, as a fraction of
 #'   lambda0.max (data derived).
-#' @param lambda2_seq A \code{numeric} vector of candidate values for lambda2
-#'   (penalty parameter for L2 penalty) - a default sequence is provided.
 #' @param refit Whether to refit the model combining training and validation
 #'   sets after parameter tuning. If \code{FALSE}, the final model will be
 #'   estimated only on the training set.
@@ -364,7 +358,6 @@ greedy.fit <- function(data, val.data, yvar, neighbour = 0,
                        num_ind = 5, num_models = 5, seed = 123, index.ind = NULL,
                        index.coefs = NULL, s.vars = NULL, linear.vars = NULL,
                        nlambda = 100, lambda.min.ratio = 0.0001,
-                       lambda2_seq = c(0, 0.01, 0.1, 1, 10, 100),
                        refit = TRUE, M = 10, max.iter = 50, 
                        tol = 0.001, tolCoefs = 0.001,
                        TimeLimit = Inf, MIPGap = 1e-4, NonConvex = -1,
@@ -387,11 +380,14 @@ greedy.fit <- function(data, val.data, yvar, neighbour = 0,
   lambda0_min <- lambda0_max * lambda.min.ratio
   lambda0_seq <- c(0, exp(seq(log(lambda0_min), log(lambda0_max), length.out = nlambda)))
   
+  # lambda2_seq - a sequence of power of tens
+  # lambda2.max is taken as the power of ten that matches the scale of lambda0.max
+  max_power10 <- round(log10(abs(lambda0_max)))
+  lambda2_seq <- c(0, 10^seq(-2, max_power10, by = 1))
+  
   l0_len <- length(lambda0_seq)
   l2_len <- length(lambda2_seq)
  
-  # Full grid
-  grid1 <- expand.grid(lambda0_seq, lambda2_seq)
   # Data frame for storing all combinations searched
   all_comb <- data.frame()
   # Current minimum MSE
@@ -431,33 +427,8 @@ greedy.fit <- function(data, val.data, yvar, neighbour = 0,
                                recursive = recursive,
                                recursive_colRange = recursive_colRange)
   
+  print("Starting point completed!")
   
-  # # Model fitting for each combination of lambdas
-  # MSE_list <- seq(1, NROW(lambda_comb), by = 1) |>
-  #   map_f(~ tune_smimodel(data = data, val.data = val.data, yvar = yvar,
-  #                         neighbour = neighbour,
-  #                         family = family,
-  #                         index.vars = index.vars,
-  #                         initialise = initialise,
-  #                         num_ind = num_ind, num_models = num_models,
-  #                         seed = seed,
-  #                         index.ind = index.ind,
-  #                         index.coefs = index.coefs,
-  #                         s.vars = s.vars,
-  #                         linear.vars = linear.vars,
-  #                         lambda.comb = as.numeric(lambda_comb[., ]),
-  #                         M = M, max.iter = max.iter,
-  #                         tol = tol, tolCoefs = tolCoefs,
-  #                         TimeLimit = TimeLimit, MIPGap = MIPGap,
-  #                         NonConvex = NonConvex, verbose = verbose,
-  #                         recursive = recursive,
-  #                         recursive_colRange = recursive_colRange))
-  # #if (parallel) future:::ClusterRegistry("stop")
-  # # Selecting best starting point
-  # min_lambda_pos <- which.min(unlist(MSE_list))
-  # min_MSE <- min(unlist(MSE_list))
-  # min_lambdas <- as.numeric(lambda_comb[min_lambda_pos, ])
-  # print("First round completed; starting point selected!")
   # Updating searched combinations store
   all_comb <- bind_rows(all_comb, lambda_comb)
   
@@ -560,7 +531,9 @@ greedy.fit <- function(data, val.data, yvar, neighbour = 0,
   print("Final model fitted!")
   output <- list("initial" = final_smimodel_list$initial,
                  "best" = final_smimodel_list$best,
-                 "best_lambdas" = current_lambdas)
+                 "best_lambdas" = current_lambdas,
+                 "lambda0_seq" = lambda0_seq,
+                 "lambda2_seq" = lambda2_seq)
   return(output)
 }
 

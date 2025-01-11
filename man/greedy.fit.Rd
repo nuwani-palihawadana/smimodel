@@ -21,7 +21,6 @@ greedy.fit(
   linear.vars = NULL,
   nlambda = 100,
   lambda.min.ratio = 1e-04,
-  lambda2_seq = c(0, 0.01, 0.1, 1, 10, 100),
   refit = TRUE,
   M = 10,
   max.iter = 50,
@@ -112,9 +111,6 @@ penalty) - default is 100.}
 
 \item{lambda.min.ratio}{Smallest value for lambda0, as a fraction of
 lambda0.max (data derived).}
-
-\item{lambda2_seq}{A \code{numeric} vector of candidate values for lambda2
-(penalty parameter for L2 penalty) - a default sequence is provided.}
 
 \item{refit}{Whether to refit the model combining training and validation
 sets after parameter tuning. If \code{FALSE}, the final model will be

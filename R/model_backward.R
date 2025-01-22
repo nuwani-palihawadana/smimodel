@@ -12,9 +12,6 @@
 #'   only one level will be created.
 #' @param val.data Validation data set. (The data set on which the model
 #'   selection will be performed.) Must be a data set of class \code{tsibble}.
-#'   (Once the model selection is completed, the
-#'   best model will be re-fitted for the combined data set \code{data +
-#'   val.data}.)
 #' @param yvar Name of the response variable as a character string.
 #' @param neighbour If multiple models are fitted: Number of neighbours of each
 #'   key (i.e. grouping variable) to be considered in model fitting to handle
@@ -33,6 +30,9 @@
 #' @param linear.vars A \code{character} vector of names of the predictor
 #'   variables that should be included linearly into the model (i.e. linear
 #'   predictors).
+#' @param refit Whether to refit the model combining training and validation
+#'   sets after model selection. If \code{FALSE}, the final model will be
+#'   estimated only on the training set.
 #' @param tol Tolerance for the ratio of relative change in validation set MSE,
 #'   used in model selection.
 #' @param parallel Whether to use parallel computing in model selection or not.
@@ -112,7 +112,7 @@
 model_backward <- function(data, val.data, yvar, 
                            neighbour = 0, family = gaussian(), 
                            s.vars = NULL, s.basedim = NULL, 
-                           linear.vars = NULL,  tol = 0.001, 
+                           linear.vars = NULL, refit = TRUE, tol = 0.001, 
                            parallel = FALSE, workers = NULL,
                            recursive = FALSE, recursive_colRange = NULL){
   if (!is_tsibble(data)) stop("data is not a tsibble.")
@@ -221,9 +221,7 @@ model_backward <- function(data, val.data, yvar,
         }
       }
     }
-    # Re-fit the best model for the combined data set training + validation
-    # Data
-    combinedData <- dplyr::bind_rows(df_cat, df_cat_val)
+    
     # Model formula
     allVars = c(Temp_s.vars, Temp_linear.vars)
     pre.formula <- paste0(yvar, " ~ ")
@@ -242,14 +240,23 @@ model_backward <- function(data, val.data, yvar,
       }
     }
     my.formula <- as.formula(pre.formula)
-    # Model fitting
-    models_list[[i]] <- mgcv::gam(my.formula, family = family, method = "REML",
-                                  data = combinedData)
-    # add <- combinedData |>
-    #   drop_na() |>
-    #   select({{ index_train }}, {{ key_train }})
-    indx <- which(combinedData[ , yvar][[1]] %in% models_list[[i]]$model[, yvar])
-    add <- combinedData[indx, ] |> select({{ index_train }}, {{ key_train }})
+    
+    if(refit == TRUE){
+      # Re-fit the best model for the combined data set training + validation
+      # Data
+      combinedData <- dplyr::bind_rows(df_cat, df_cat_val)
+      # Model fitting
+      models_list[[i]] <- mgcv::gam(my.formula, family = family, method = "REML",
+                                    data = combinedData)
+      indx <- which(combinedData[ , yvar][[1]] %in% models_list[[i]]$model[, yvar])
+      add <- combinedData[indx, ] |> select({{ index_train }}, {{ key_train }})
+    }else{
+      # Model fitting
+      models_list[[i]] <- mgcv::gam(my.formula, family = family, method = "REML",
+                                    data = df_cat)
+      indx <- which(df_cat[ , yvar][[1]] %in% models_list[[i]]$model[, yvar])
+      add <- df_cat[indx, ] |> select({{ index_train }}, {{ key_train }})
+    }
     models_list[[i]]$model <- bind_cols(add, models_list[[i]]$model)
     models_list[[i]]$model <- as_tsibble(models_list[[i]]$model,
                                          index = index_train,

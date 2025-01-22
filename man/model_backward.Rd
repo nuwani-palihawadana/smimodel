@@ -13,6 +13,7 @@ model_backward(
   s.vars = NULL,
   s.basedim = NULL,
   linear.vars = NULL,
+  refit = TRUE,
   tol = 0.001,
   parallel = FALSE,
   workers = NULL,
@@ -29,10 +30,7 @@ of the \code{tsibble}. If a \code{key} is not specified, a dummy key with
 only one level will be created.}
 
 \item{val.data}{Validation data set. (The data set on which the model
-selection will be performed.) Must be a data set of class \code{tsibble}.
-(Once the model selection is completed, the
-best model will be re-fitted for the combined data set \code{data +
-  val.data}.)}
+selection will be performed.) Must be a data set of class \code{tsibble}.}
 
 \item{yvar}{Name of the response variable as a character string.}
 
@@ -57,6 +55,10 @@ corresponding to \code{s.vars}. (For more information refer
 \item{linear.vars}{A \code{character} vector of names of the predictor
 variables that should be included linearly into the model (i.e. linear
 predictors).}
+
+\item{refit}{Whether to refit the model combining training and validation
+sets after model selection. If \code{FALSE}, the final model will be
+estimated only on the training set.}
 
 \item{tol}{Tolerance for the ratio of relative change in validation set MSE,
 used in model selection.}

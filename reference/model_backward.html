@@ -53,6 +53,7 @@ through a backward elimination procedure as proposed by Fan and Hyndman
 <span>  s.vars <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  s.basedim <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  linear.vars <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  refit <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  tol <span class="op">=</span> <span class="fl">0.001</span>,</span>
 <span>  parallel <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  workers <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -76,10 +77,7 @@ only one level will be created.</p></dd>
 
 <dt id="arg-val-data">val.data<a class="anchor" aria-label="anchor" href="#arg-val-data"></a></dt>
 <dd><p>Validation data set. (The data set on which the model
-selection will be performed.) Must be a data set of class <code>tsibble</code>.
-(Once the model selection is completed, the
-best model will be re-fitted for the combined data set <code>data +
-  val.data</code>.)</p></dd>
+selection will be performed.) Must be a data set of class <code>tsibble</code>.</p></dd>
 
 
 <dt id="arg-yvar">yvar<a class="anchor" aria-label="anchor" href="#arg-yvar"></a></dt>
@@ -116,6 +114,12 @@ corresponding to <code>s.vars</code>. (For more information refer
 <dd><p>A <code>character</code> vector of names of the predictor
 variables that should be included linearly into the model (i.e. linear
 predictors).</p></dd>
+
+
+<dt id="arg-refit">refit<a class="anchor" aria-label="anchor" href="#arg-refit"></a></dt>
+<dd><p>Whether to refit the model combining training and validation
+sets after model selection. If <code>FALSE</code>, the final model will be
+estimated only on the training set.</p></dd>
 
 
 <dt id="arg-tol">tol<a class="anchor" aria-label="anchor" href="#arg-tol"></a></dt>

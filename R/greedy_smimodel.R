@@ -250,6 +250,7 @@ greedy_smimodel <- function(data, val.data, yvar, neighbour = 0,
   class(models) <- c("smimodel", "tbl_df", "tbl", "data.frame")
   return(models)
 }
+utils::globalVariables(c("dummy_key", "num_key"))
 
 
 #' Greedy search for tuning penalty parameters

@@ -27,12 +27,13 @@ augment.smimodel <- function(x, ...) {
                                             Old = old_group[[i]],
                                             .resid = model.resid[[i]],
                                             .fitted = model.fitted[[i]])) |>
-      dplyr::filter(New == Old)
+      dplyr::filter(New == Old) |> 
+      select(Index, .resid, .fitted)
   }
   mod_res <- dplyr::bind_rows(df)
   return(mod_res)
 }
-utils::globalVariables(c("dummy_key", "num_key", "New", "Old"))
+utils::globalVariables(c("Index", ".resid", ".fitted", "New", "Old"))
 
 
 #' Augment function for class \code{smimodelFit}
@@ -84,7 +85,8 @@ augment.backward <- function(x, ...) {
       Old = old_group[[i]], .resid = model.resid[[i]],
       .fitted = model.fitted[[i]]
     )) |>
-      dplyr::filter(New == Old)
+      dplyr::filter(New == Old) |> 
+      select(Index, .resid, .fitted)
   }
   mod_res <- bind_rows(df)
   return(mod_res)
@@ -120,7 +122,8 @@ augment.pprFit <- function(x, ...) {
       Old = old_group[[i]], .resid = model.resid[[i]],
       .fitted = model.fitted[[i]]
     )) |>
-      dplyr::filter(New == Old)
+      dplyr::filter(New == Old) |> 
+      select(Index, .resid, .fitted)
   }
   mod_res <- bind_rows(df)
   return(mod_res)
@@ -156,7 +159,8 @@ augment.gaimFit <- function(x, ...) {
       Old = old_group[[i]], .resid = model.resid[[i]],
       .fitted = model.fitted[[i]]
     )) |>
-      dplyr::filter(New == Old)
+      dplyr::filter(New == Old) |> 
+      select(Index, .resid, .fitted)
   }
   mod_res <- bind_rows(df)
   return(mod_res)
@@ -192,7 +196,8 @@ augment.lmFit <- function(x, ...) {
       Old = old_group[[i]], .resid = model.resid[[i]],
       .fitted = model.fitted[[i]]
     )) |>
-      dplyr::filter(New == Old)
+      dplyr::filter(New == Old) |> 
+      select(Index, .resid, .fitted)
   }
   mod_res <- bind_rows(df)
   return(mod_res)
@@ -228,7 +233,8 @@ augment.gamFit <- function(x, ...) {
       Old = old_group[[i]], .resid = model.resid[[i]],
       .fitted = model.fitted[[i]]
     )) |>
-      dplyr::filter(New == Old)
+      dplyr::filter(New == Old) |> 
+      select(Index, .resid, .fitted)
   }
   mod_res <- bind_rows(df)
   return(mod_res)

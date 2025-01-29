@@ -57,6 +57,7 @@ subsets of time series data using a rolling forecast origin.</p>
 <span>  roll.length <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  recursive <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  recursive_colNames <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  na.rm <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -148,6 +149,11 @@ Make sure such lagged variables are positioned together in increasing lag
 order (i.e. <code>lag_1, lag_2, ..., lag_m</code>, <code>lag_m =</code> maximum lag
 used) in <code>data</code>, with no break in the lagged variable sequence even if
 some of the intermediate lags are not used as predictors.</p></dd>
+
+
+<dt id="arg-na-rm">na.rm<a class="anchor" aria-label="anchor" href="#arg-na-rm"></a></dt>
+<dd><p>logical; if <code>TRUE</code> (default), any <code>NA</code> and
+<code>NaN</code>'s are removed from the sample before the quantiles are computed.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>

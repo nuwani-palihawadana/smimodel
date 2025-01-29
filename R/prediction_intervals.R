@@ -44,6 +44,8 @@
 #'   order (i.e. \code{lag_1, lag_2, ..., lag_m}, \code{lag_m =} maximum lag
 #'   used) in \code{data}, with no break in the lagged variable sequence even if
 #'   some of the intermediate lags are not used as predictors.
+#' @param na.rm logical; if \code{TRUE} (default), any \code{NA} and
+#'   \code{NaN}'s are removed from the sample before the quantiles are computed.
 #' @param ... Other arguments not currently used.
 #' @return An object of class \code{cb_cvforecast}, which is a list that
 #'   contains following elements: \item{x}{The original time series.}
@@ -123,7 +125,8 @@ cb_cvforecast <- function(object, data, yvar, neighbour = 0, predictor.vars,
                           h = 1, ncal = 100, num.futures = 1000,
                           level = c(80, 95), forward = TRUE,
                           initial = 1, window = NULL, roll.length = 1,
-                          recursive = FALSE, recursive_colNames = NULL, ...) {
+                          recursive = FALSE, recursive_colNames = NULL, 
+                          na.rm = TRUE, ...) {
   # Check input data
   if (!is_tsibble(data)) stop("data is not a tsibble.")
 
@@ -431,7 +434,7 @@ cb_cvforecast <- function(object, data, yvar, neighbour = 0, predictor.vars,
     lower_q <- (1 - (level/100))/2
     upper_q <- lower_q + (level/100)
     for(p in 1:NROW(possibleFutures_mat)){
-      intervalsHilo <- quantile(possibleFutures_mat[p, ], probs = c(lower_q, upper_q))
+      intervalsHilo <- quantile(possibleFutures_mat[p, ], probs = c(lower_q, upper_q), na.rm = na.rm)
       nint <- length(level)
       lowerBound <- matrix(NA, ncol = nint, nrow = 1)
       upperBound <- lowerBound
@@ -512,6 +515,8 @@ cb_cvforecast <- function(object, data, yvar, neighbour = 0, predictor.vars,
 #'   order (i.e. \code{lag_1, lag_2, ..., lag_m}, \code{lag_m =} maximum lag
 #'   used) in \code{data}, with no break in the lagged variable sequence even if
 #'   some of the intermediate lags are not used as predictors.
+#' @param na.rm logical; if \code{TRUE} (default), any \code{NA} and
+#'   \code{NaN}'s are removed from the sample before the quantiles are computed.
 #' @param ... Other arguments not currently used.
 #' @return An object of class \code{bb_cvforecast}, which is a list that
 #'   contains following elements: \item{x}{The original time series.}
@@ -592,7 +597,8 @@ bb_cvforecast <- function(object, data,
                           h = 1, season.period = 1, m = 1,
                           num.futures = 1000, level = c(80, 95), forward = TRUE,
                           initial = 1, window = NULL, roll.length = 1,
-                          recursive = FALSE, recursive_colNames = NULL, ...) {
+                          recursive = FALSE, recursive_colNames = NULL, 
+                          na.rm = TRUE, ...) {
   # Check input data
   if (!is_tsibble(data)) stop("data is not a tsibble.")
 
@@ -862,7 +868,7 @@ bb_cvforecast <- function(object, data,
     lower_q <- (1 - (level/100))/2
     upper_q <- lower_q + (level/100)
     for(j in 1:NROW(pFutures[[i]])){
-      intervalsHilo <- quantile(pFutures[[i]][j, ], probs = c(lower_q, upper_q))
+      intervalsHilo <- quantile(pFutures[[i]][j, ], probs = c(lower_q, upper_q), na.rm = na.rm)
       nint <- length(level)
       lowerBound <- matrix(NA, ncol = nint, nrow = 1)
       upperBound <- lowerBound

@@ -22,6 +22,7 @@ bb_cvforecast(
   roll.length = 1,
   recursive = FALSE,
   recursive_colNames = NULL,
+  na.rm = TRUE,
   ...
 )
 }
@@ -81,6 +82,9 @@ Make sure such lagged variables are positioned together in increasing lag
 order (i.e. \code{lag_1, lag_2, ..., lag_m}, \code{lag_m =} maximum lag
 used) in \code{data}, with no break in the lagged variable sequence even if
 some of the intermediate lags are not used as predictors.}
+
+\item{na.rm}{logical; if \code{TRUE} (default), any \code{NA} and
+\code{NaN}'s are removed from the sample before the quantiles are computed.}
 
 \item{...}{Other arguments not currently used.}
 }

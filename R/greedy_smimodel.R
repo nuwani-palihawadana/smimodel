@@ -391,6 +391,8 @@ greedy.fit <- function(data, val.data, yvar, neighbour = 0,
  
   # Data frame for storing all combinations searched
   all_comb <- data.frame()
+  # Vector for storing validation set MSEs of all combinations searched
+  all_comb_mse <- numeric()
   # Current minimum MSE
   current_MSE <- Inf
   # Current best lambdas
@@ -432,6 +434,8 @@ greedy.fit <- function(data, val.data, yvar, neighbour = 0,
   
   # Updating searched combinations store
   all_comb <- bind_rows(all_comb, lambda_comb)
+  # Updating searched combinations MSE
+  all_comb_mse <- c(all_comb_mse, min_MSE)
   
   # Greedy search
   while(min_MSE < current_MSE){
@@ -487,8 +491,15 @@ greedy.fit <- function(data, val.data, yvar, neighbour = 0,
       print("Another round completed!")
       # Updating searched combinations store
       all_comb <- bind_rows(all_comb, lambda_comb)
+      # Updating searched combinations MSE
+      all_comb_mse <- c(all_comb_mse, unlist(MSE_list))
     }
   }
+  # tibble with the information on all searched lambda combinations
+  all_comb_info <- as_tibble(all_comb) |> 
+    rename(lambda0 = Var1,
+           lambda2 = Var2) |>
+    mutate(val_MSE = all_comb_mse)
   # Final smimodel: re-fit the best model for the combined data set training + validation
   # Data
   if(refit == TRUE){
@@ -534,7 +545,8 @@ greedy.fit <- function(data, val.data, yvar, neighbour = 0,
                  "best" = final_smimodel_list$best,
                  "best_lambdas" = current_lambdas,
                  "lambda0_seq" = lambda0_seq,
-                 "lambda2_seq" = lambda2_seq)
+                 "lambda2_seq" = lambda2_seq,
+                 "searched" = all_comb_info)
   return(output)
 }
 

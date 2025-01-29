@@ -160,30 +160,30 @@
 #' }
 #'
 #' @export
-greedy_smimodel <- function(data, val.data, yvar, neighbour = 0, 
-                            family = gaussian(), index.vars, 
-                            initialise = c("ppr", "additive", "linear", 
+greedy_smimodel <- function(data, val.data, yvar, neighbour = 0,
+                            family = gaussian(), index.vars,
+                            initialise = c("ppr", "additive", "linear",
                                            "multiple", "userInput"),
-                            num_ind = 5, num_models = 5, seed = 123, 
-                            index.ind = NULL, index.coefs = NULL, 
-                            s.vars = NULL, linear.vars = NULL, 
+                            num_ind = 5, num_models = 5, seed = 123,
+                            index.ind = NULL, index.coefs = NULL,
+                            s.vars = NULL, linear.vars = NULL,
                             nlambda = 100, lambda.min.ratio = 0.0001,
-                            refit = TRUE, M = 10, max.iter = 50, 
+                            refit = TRUE, M = 10, max.iter = 50,
                             tol = 0.001, tolCoefs = 0.001,
-                            TimeLimit = Inf, MIPGap = 1e-4, NonConvex = -1, 
+                            TimeLimit = Inf, MIPGap = 1e-4, NonConvex = -1,
                             verbose = FALSE, parallel = FALSE, workers = NULL,
                             recursive = FALSE, recursive_colRange = NULL){
-  
+
   # Message for gurobi installation
-  message("Do you have Gurobi solver installed? 
-  Make sure you have an active installation of Gurobi solver (https://www.gurobi.com/) 
-  in your local machine before using this function. 
+  message("Do you have Gurobi solver installed?
+  Make sure you have an active installation of Gurobi solver (https://www.gurobi.com/)
+  in your local machine before using this function.
   Refer the section 'Other Required Software' in the README for installation help.")
-  
+
   # Check for `tsibble`
   stopifnot(tsibble::is_tsibble(data))
   stopifnot(tsibble::is_tsibble(val.data))
-  
+
   initialise <- match.arg(initialise)
   # Data Preparation
   data1 <- data
@@ -221,25 +221,25 @@ greedy_smimodel <- function(data, val.data, yvar, neighbour = 0,
     df_cat_val <- data2 |>
       dplyr::filter((abs(num_key - ref$key_num[i]) <= neighbour) |
                       (abs(num_key - ref$key_num[i] + NROW(ref)) <= neighbour) |
-                      (abs(num_key - ref$key_num[i] - NROW(ref)) <= neighbour)) 
-    smimodels_list[[i]] <- greedy.fit(data = df_cat, val.data = df_cat_val, 
-                                      yvar = yvar, 
+                      (abs(num_key - ref$key_num[i] - NROW(ref)) <= neighbour))
+    smimodels_list[[i]] <- greedy.fit(data = df_cat, val.data = df_cat_val,
+                                      yvar = yvar,
                                       neighbour = neighbour,
-                                      family = family, index.vars = index.vars, 
+                                      family = family, index.vars = index.vars,
                                       initialise = initialise,
                                       num_ind = num_ind, num_models = num_models,
-                                      seed = seed, index.ind = index.ind, 
+                                      seed = seed, index.ind = index.ind,
                                       index.coefs = index.coefs, s.vars = s.vars,
-                                      linear.vars = linear.vars, 
-                                      nlambda = nlambda, 
+                                      linear.vars = linear.vars,
+                                      nlambda = nlambda,
                                       lambda.min.ratio = lambda.min.ratio,
                                       refit = refit,
-                                      M = M, max.iter = max.iter, 
+                                      M = M, max.iter = max.iter,
                                       tol = tol, tolCoefs = tolCoefs,
-                                      TimeLimit = TimeLimit, MIPGap = MIPGap, 
-                                      NonConvex = NonConvex, verbose = verbose, 
+                                      TimeLimit = TimeLimit, MIPGap = MIPGap,
+                                      NonConvex = NonConvex, verbose = verbose,
                                       parallel = parallel, workers = workers,
-                                      recursive = recursive, 
+                                      recursive = recursive,
                                       recursive_colRange = recursive_colRange)
   }
   data_list <- list(key_unique, smimodels_list)
@@ -359,13 +359,13 @@ greedy.fit <- function(data, val.data, yvar, neighbour = 0,
                        num_ind = 5, num_models = 5, seed = 123, index.ind = NULL,
                        index.coefs = NULL, s.vars = NULL, linear.vars = NULL,
                        nlambda = 100, lambda.min.ratio = 0.0001,
-                       refit = TRUE, M = 10, max.iter = 50, 
+                       refit = TRUE, M = 10, max.iter = 50,
                        tol = 0.001, tolCoefs = 0.001,
                        TimeLimit = Inf, MIPGap = 1e-4, NonConvex = -1,
                        verbose = FALSE, parallel = FALSE, workers = NULL,
                        recursive = FALSE, recursive_colRange = NULL){
-  
-  ## Calculating lambda0.max based on the scale of the first term in the 
+
+  ## Calculating lambda0.max based on the scale of the first term in the
   ## SMI modelling objective function
   # Fit an additive model (gam) as a benchmark
   bench <- model_gam(data = data,
@@ -380,15 +380,15 @@ greedy.fit <- function(data, val.data, yvar, neighbour = 0,
   lambda0_max <- sum(bench_resid^2)
   lambda0_min <- lambda0_max * lambda.min.ratio
   lambda0_seq <- c(0, exp(seq(log(lambda0_min), log(lambda0_max), length.out = nlambda)))
-  
+
   # lambda2_seq - a sequence of power of tens
   # lambda2.max is taken as the power of ten that matches the scale of lambda0.max
   max_power10 <- round(log10(abs(lambda0_max)))
   lambda2_seq <- c(0, 10^seq(-2, max_power10, by = 1))
-  
+
   l0_len <- length(lambda0_seq)
   l2_len <- length(lambda2_seq)
- 
+
   # Data frame for storing all combinations searched
   all_comb <- data.frame()
   # Vector for storing validation set MSEs of all combinations searched
@@ -404,39 +404,43 @@ greedy.fit <- function(data, val.data, yvar, neighbour = 0,
   } else {
     map_f <- purrr::map
   }
-  # Starting point
-  start_l0 <- lambda0_seq[ceiling(l0_len / 2)]
-  start_l2 <- lambda2_seq[ceiling(l2_len / 2)]
+  # Starting point options
+  start_l0 <- c(lambda0_seq[1], lambda0_seq[ceiling(l0_len / 2)], lambda0_seq[l0_len])
+  start_l2 <- c(lambda2_seq[1], lambda2_seq[ceiling(l2_len / 2)], lambda2_seq[l2_len])
   lambda_comb <- expand.grid(start_l0, start_l2)
-  
-  min_lambdas <- c(start_l0, start_l2)
-  
-  min_MSE <- tune_smimodel(data = data, val.data = val.data, yvar = yvar,
-                               neighbour = neighbour,
-                               family = family,
-                               index.vars = index.vars,
-                               initialise = initialise,
-                               num_ind = num_ind, num_models = num_models,
-                               seed = seed,
-                               index.ind = index.ind,
-                               index.coefs = index.coefs,
-                               s.vars = s.vars,
-                               linear.vars = linear.vars,
-                               lambda.comb = min_lambdas,
-                               M = M, max.iter = max.iter,
-                               tol = tol, tolCoefs = tolCoefs,
-                               TimeLimit = TimeLimit, MIPGap = MIPGap,
-                               NonConvex = NonConvex, verbose = verbose,
-                               recursive = recursive,
-                               recursive_colRange = recursive_colRange)
-  
-  print("Starting point completed!")
-  
+
+  # Model fitting for each combination of lambdas
+  MSE_list <- seq(1, NROW(lambda_comb), by = 1) |>
+    map_f(~ tune_smimodel(data = data, val.data = val.data, yvar = yvar,
+                          neighbour = neighbour,
+                          family = family,
+                          index.vars = index.vars,
+                          initialise = initialise,
+                          num_ind = num_ind, num_models = num_models,
+                          seed = seed,
+                          index.ind = index.ind,
+                          index.coefs = index.coefs,
+                          s.vars = s.vars,
+                          linear.vars = linear.vars,
+                          lambda.comb = as.numeric(lambda_comb[., ]),
+                          M = M, max.iter = max.iter,
+                          tol = tol, tolCoefs = tolCoefs,
+                          TimeLimit = TimeLimit, MIPGap = MIPGap,
+                          NonConvex = NonConvex, verbose = verbose,
+                          recursive = recursive,
+                          recursive_colRange = recursive_colRange))
+
+  #if (parallel) future:::ClusterRegistry("stop")
+  # Selecting best starting point
+  min_lambda_pos <- which.min(unlist(MSE_list))
+  min_MSE <- min(unlist(MSE_list))
+  min_lambdas <- as.numeric(lambda_comb[min_lambda_pos, ])
+  print("First round completed; starting point selected!")
   # Updating searched combinations store
   all_comb <- bind_rows(all_comb, lambda_comb)
   # Updating searched combinations MSE
-  all_comb_mse <- c(all_comb_mse, min_MSE)
-  
+  all_comb_mse <- c(all_comb_mse, unlist(MSE_list))
+
   # Greedy search
   while(min_MSE < current_MSE){
     current_MSE <- min_MSE
@@ -639,34 +643,34 @@ greedy.fit <- function(data, val.data, yvar, neighbour = 0,
 #'   even if some of the intermediate lags are not used as predictors.
 #' @return A \code{numeric}.
 tune_smimodel <- function(data, val.data, yvar, neighbour = 0,
-                          family = gaussian(), index.vars, 
-                          initialise = c("ppr", "additive", "linear", 
+                          family = gaussian(), index.vars,
+                          initialise = c("ppr", "additive", "linear",
                                          "multiple", "userInput"),
-                          num_ind = 5, num_models = 5, seed = 123, 
-                          index.ind = NULL, index.coefs = NULL, 
-                          s.vars = NULL, linear.vars = NULL, lambda.comb = c(1, 1), 
+                          num_ind = 5, num_models = 5, seed = 123,
+                          index.ind = NULL, index.coefs = NULL,
+                          s.vars = NULL, linear.vars = NULL, lambda.comb = c(1, 1),
                           M = 10, max.iter = 50, tol = 0.001, tolCoefs = 0.001,
-                          TimeLimit = Inf, MIPGap = 1e-4, 
+                          TimeLimit = Inf, MIPGap = 1e-4,
                           NonConvex = -1, verbose = FALSE, recursive = FALSE,
                           recursive_colRange = NULL){
   # Estimating smimodel
-  smimodel <- smimodel.fit(data = data, yvar = yvar, 
+  smimodel <- smimodel.fit(data = data, yvar = yvar,
                            neighbour = neighbour,
                            family = family,
-                           index.vars = index.vars, 
-                           initialise = initialise, 
-                           num_ind = num_ind, num_models = num_models, 
+                           index.vars = index.vars,
+                           initialise = initialise,
+                           num_ind = num_ind, num_models = num_models,
                            seed = seed,
-                           index.ind = index.ind, 
+                           index.ind = index.ind,
                            index.coefs = index.coefs,
                            s.vars = s.vars,
                            linear.vars = linear.vars,
-                           lambda0 = lambda.comb[[1]], lambda2 = lambda.comb[[2]], 
-                           M = M, max.iter = max.iter, 
+                           lambda0 = lambda.comb[[1]], lambda2 = lambda.comb[[2]],
+                           M = M, max.iter = max.iter,
                            tol = tol, tolCoefs = tolCoefs,
                            TimeLimit = TimeLimit, MIPGap = MIPGap,
                            NonConvex = NonConvex, verbose = verbose)
-  
+
   # # Predictions on validation set
   pred <- predict(object = smimodel$best, newdata = val.data, recursive = recursive,
                   recursive_colRange = recursive_colRange)$.predict

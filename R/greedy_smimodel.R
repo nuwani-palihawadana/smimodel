@@ -2,8 +2,10 @@
 #'
 #' Performs a greedy search over a given grid of penalty parameter combinations
 #' (lambda0, lambda2), and fits SMI model(s) with best (lowest validation set
-#' MSE) penalty parameter combination(s). If a grouping variable is used,
-#' penalty parameters are tuned separately for each individual model.
+#' MSE) penalty parameter combination(s). If the optimal combination lies on the
+#' edge of the grid, the penalty parameters are adjusted by ±10%, and a second
+#' round of grid search is performed. If a grouping variable is used, penalty
+#' parameters are tuned separately for each individual model.
 #'
 #' @param data Training data set on which models will be trained. Must be a data
 #'   set of class \code{tsibble}.(Make sure there are no additional date or time
@@ -95,12 +97,18 @@
 #'   columns: \item{key}{The level of the grouping variable (i.e. key of the
 #'   training data set).} \item{fit}{Information of the fitted model
 #'   corresponding to the \code{key}.}
-#'   Each row of the column \code{fit} contains a list with three elements:
+#'   Each row of the column \code{fit} contains a list with six elements:
 #'   \item{initial}{A list of information of the model initialisation. (For
 #'   descriptions of the list elements see \code{\link{make_smimodelFit}}).}
 #'   \item{best}{A list of information of the final optimised model. (For
 #'   descriptions of the list elements see \code{\link{make_smimodelFit}}).}
-#'   \item{best_lambdas}{Selected penalty parameter combination.} The number of
+#'   \item{best_lambdas}{Selected penalty parameter combination.}
+#'   \item{lambda0_seq}{Sequence of values for lambda0 used to construct the
+#'   initial grid.} \item{lambda2_seq}{Sequence of
+#'   values for lambda2 used to construct the initial grid.}
+#'   \item{searched}{A \code{tibble} containing the penalty parameter
+#'   combinations searched during the two-step greedy search and the
+#'   corresponding validation set MSEs.} The number of
 #'   rows of the \code{tibble} equals to the number of levels in the grouping
 #'   variable.
 #'
@@ -257,7 +265,9 @@ utils::globalVariables(c("dummy_key", "num_key"))
 #'
 #' Function to perform a greedy search over a given grid of penalty parameter
 #' combinations (lambda0, lambda2), and fits a single SMI model with the best
-#' (lowest validation set MSE) penalty parameter combination. This is a helper
+#' (lowest validation set MSE) penalty parameter combination. If the optimal
+#' combination lies on the edge of the grid, the penalty parameters are adjusted
+#' by ±10%, and a second round of grid search is performed.This is a helper
 #' function designed to be called from \code{\link{greedy_smimodel}}.
 #'
 #' @param data Training data set on which models will be trained. Must be a data
@@ -346,12 +356,17 @@ utils::globalVariables(c("dummy_key", "num_key"))
 #'   order (i.e. \code{lag_1, lag_2, ..., lag_m}, \code{lag_m =} maximum lag
 #'   used) in \code{val.data}, with no break in the lagged variable sequence
 #'   even if some of the intermediate lags are not used as predictors.
-#' @return  A list that contains three elements: \item{initial}{A list of
+#' @return  A list that contains six elements: \item{initial}{A list of
 #'   information of the model initialisation. (For descriptions of the list
 #'   elements see \code{\link{make_smimodelFit}}).} \item{best}{A list of
 #'   information of the final optimised model. (For descriptions of the list
 #'   elements see \code{\link{make_smimodelFit}}).} \item{best_lambdas}{Selected
-#'   penalty parameter combination.}
+#'   penalty parameter combination.} \item{lambda0_seq}{Sequence of values for
+#'   lambda0 used to construct the initial grid.} \item{lambda2_seq}{Sequence of
+#'   values for lambda2 used to construct the initial grid.}
+#'   \item{searched}{A \code{tibble} containing the penalty parameter
+#'   combinations searched during the two-step greedy search and the
+#'   corresponding validation set MSEs.} 
 greedy.fit <- function(data, val.data, yvar, neighbour = 0,
                        family = gaussian(), index.vars,
                        initialise = c("ppr", "additive", "linear",
@@ -408,6 +423,11 @@ greedy.fit <- function(data, val.data, yvar, neighbour = 0,
   start_l0 <- c(lambda0_seq[1], lambda0_seq[ceiling(l0_len / 2)], lambda0_seq[l0_len])
   start_l2 <- c(lambda2_seq[1], lambda2_seq[ceiling(l2_len / 2)], lambda2_seq[l2_len])
   lambda_comb <- expand.grid(start_l0, start_l2)
+  
+  # Corner points for grid expansion
+  cp1 <- expand.grid(start_l0, lambda2_seq[l2_len])
+  cp2 <- expand.grid(lambda0_seq[l0_len], start_l2)
+  corner_points <- dplyr::distinct(bind_rows(cp1, cp2))
 
   # Model fitting for each combination of lambdas
   MSE_list <- seq(1, NROW(lambda_comb), by = 1) |>
@@ -441,7 +461,7 @@ greedy.fit <- function(data, val.data, yvar, neighbour = 0,
   # Updating searched combinations MSE
   all_comb_mse <- c(all_comb_mse, unlist(MSE_list))
 
-  # Greedy search
+  # Greedy search - step 1
   while(min_MSE < current_MSE){
     current_MSE <- min_MSE
     current_lambdas <- min_lambdas
@@ -499,6 +519,71 @@ greedy.fit <- function(data, val.data, yvar, neighbour = 0,
       all_comb_mse <- c(all_comb_mse, unlist(MSE_list))
     }
   }
+  # If the selected point is a corner point, expand grind further
+  matchRow <- which(colSums(t(corner_points) == current_lambdas) == ncol(corner_points))
+  if(length(matchRow) != 0){
+    # Current minimum MSE - step 2
+    current_MSE2 <- Inf
+    # Current best lambdas - step 2
+    current_lambdas2 <- numeric(length = 2)
+    # min MSE and min lambdas
+    min_MSE <- current_MSE
+    min_lambdas <- current_lambdas
+    # Greedy search - step 2
+    while(min_MSE < current_MSE2){
+      current_MSE2 <- min_MSE
+      current_lambdas2 <- min_lambdas
+      # Constructing new search space
+      # lambda0
+      lambda0_seq_new <- c((current_lambdas2[1] - 0.1*current_lambdas2[1]), 
+                           current_lambdas2[1], 
+                           (current_lambdas2[1] + 0.1*current_lambdas2[1]))
+      lambda0_seq_new <- lambda0_seq_new[which(lambda0_seq_new >= 0)]
+      # lambda2
+      lambda2_seq_new <- c((current_lambdas2[2] - 0.1*current_lambdas2[2]), 
+                           current_lambdas2[2], 
+                           (current_lambdas2[2] + 0.1*current_lambdas2[2]))
+      lambda2_seq_new <- lambda2_seq_new[which(lambda2_seq_new >= 0)]
+      lambda_comb_new <- expand.grid(lambda0_seq_new, lambda2_seq_new)
+      # Already searched combinations
+      lambda_exist <- do.call(paste0, lambda_comb_new) %in% do.call(paste0, all_comb)
+      lambda_comb <- lambda_comb_new[lambda_exist == FALSE, ]
+      if(NROW(lambda_comb) == 0){
+        break
+      }else{
+        MSE_list <- seq(1, NROW(lambda_comb), by = 1) |>
+          map_f(~ tune_smimodel(data = data, val.data = val.data, yvar = yvar,
+                                neighbour = neighbour,
+                                family = family,
+                                index.vars = index.vars,
+                                initialise = initialise,
+                                num_ind = num_ind, num_models = num_models,
+                                seed = seed,
+                                index.ind = index.ind,
+                                index.coefs = index.coefs,
+                                s.vars = s.vars,
+                                linear.vars = linear.vars,
+                                lambda.comb = as.numeric(lambda_comb[., ]),
+                                M = M, max.iter = max.iter,
+                                tol = tol, tolCoefs = tolCoefs,
+                                TimeLimit = TimeLimit, MIPGap = MIPGap,
+                                NonConvex = NonConvex, verbose = verbose,
+                                recursive = recursive,
+                                recursive_colRange = recursive_colRange))
+        # Selecting best starting point
+        min_lambda_pos <- which.min(unlist(MSE_list))
+        min_MSE <- min(unlist(MSE_list))
+        min_lambdas <- as.numeric(lambda_comb[min_lambda_pos, ])
+        print("Another round of step 2 completed!")
+        # Updating searched combinations store
+        all_comb <- bind_rows(all_comb, lambda_comb)
+        # Updating searched combinations MSE
+        all_comb_mse <- c(all_comb_mse, unlist(MSE_list))
+      }
+    }
+    current_MSE <- current_MSE2
+    current_lambdas <- current_lambdas2
+  }
   # tibble with the information on all searched lambda combinations
   all_comb_info <- as_tibble(all_comb) |> 
     rename(lambda0 = Var1,
@@ -553,7 +638,7 @@ greedy.fit <- function(data, val.data, yvar, neighbour = 0,
                  "searched" = all_comb_info)
   return(output)
 }
-
+utils::globalVariables(c("Var1", "Var2"))
 
 
 #' SMI model with a given penalty parameter combination

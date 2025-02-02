@@ -37,7 +37,7 @@ test_that("tests for greedy_smimodel()", {
   
   print(output1)
   
-  expect_equal(names(output1$fit[[1]]), c("initial", "best", "best_lambdas", "lambda0_seq", "lambda2_seq"))
+  expect_equal(names(output1$fit[[1]]), c("initial", "best", "best_lambdas", "lambda0_seq", "lambda2_seq", "searched"))
   expect_equal(length(output1$fit[[1]]$best_lambdas), 2)
   expect_equal(names(output1$fit[[1]]$best), c("alpha", "derivatives", 
                                                "var_y", "vars_index", 

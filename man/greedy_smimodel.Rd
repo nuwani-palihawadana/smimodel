@@ -157,20 +157,28 @@ An object of class \code{smimodel}. This is a \code{tibble} with two
 columns: \item{key}{The level of the grouping variable (i.e. key of the
 training data set).} \item{fit}{Information of the fitted model
 corresponding to the \code{key}.}
-Each row of the column \code{fit} contains a list with three elements:
+Each row of the column \code{fit} contains a list with six elements:
 \item{initial}{A list of information of the model initialisation. (For
 descriptions of the list elements see \code{\link{make_smimodelFit}}).}
 \item{best}{A list of information of the final optimised model. (For
 descriptions of the list elements see \code{\link{make_smimodelFit}}).}
-\item{best_lambdas}{Selected penalty parameter combination.} The number of
+\item{best_lambdas}{Selected penalty parameter combination.}
+\item{lambda0_seq}{Sequence of values for lambda0 used to construct the
+initial grid.} \item{lambda2_seq}{Sequence of
+values for lambda2 used to construct the initial grid.}
+\item{searched}{A \code{tibble} containing the penalty parameter
+combinations searched during the two-step greedy search and the
+corresponding validation set MSEs.} The number of
 rows of the \code{tibble} equals to the number of levels in the grouping
 variable.
 }
 \description{
 Performs a greedy search over a given grid of penalty parameter combinations
 (lambda0, lambda2), and fits SMI model(s) with best (lowest validation set
-MSE) penalty parameter combination(s). If a grouping variable is used,
-penalty parameters are tuned separately for each individual model.
+MSE) penalty parameter combination(s). If the optimal combination lies on the
+edge of the grid, the penalty parameters are adjusted by ±10\%, and a second
+round of grid search is performed. If a grouping variable is used, penalty
+parameters are tuned separately for each individual model.
 }
 \examples{
 \dontrun{

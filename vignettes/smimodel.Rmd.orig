@@ -214,16 +214,6 @@ sim_train_new <- sim_data[1:1000, ]
 sim_val_new <- sim_data[1001:1200, ]
 ```
 
-Now, we have to provide a sequence of values for the penalty parameters.
-
-```{r grid}
-
-# L0 penalty parameter
-lambda0 = seq(0, 12, by = 1)
-# L2 penalty parameter
-lambda2 = seq(0, 12, by = 1)
-```
-
 Next, we can estimate the SMI model with simultaneous penalty parameter tuning as follows. Here, we use the initialisation option "ppr" just to demonstrate the functionality. 
 
 ```{r tunelambda}
@@ -232,10 +222,7 @@ smimodel_ppr_tune <- greedy_smimodel(data = sim_train_new,
                                      val.data = sim_val_new,
                                      yvar = "y",
                                      index.vars = index.vars,
-                                     initialise = "ppr",
-                                     lambda0_seq = lambda0,
-                                     lambda2_seq = lambda2,
-                                     lambda_step = 1)
+                                     initialise = "ppr")
 ```
 
 ```{r tunemodel}
@@ -248,4 +235,4 @@ smimodel_ppr_tune$fit[[1]]$best
 smimodel_ppr_tune$fit[[1]]$best_lambdas
 ```
 
-Here the selected penalty parameter combination is $(\lambda_{0}, \lambda_{2}) = (11, 5)$. 
+Here the selected penalty parameter combination is $(\lambda_{0}, \lambda_{2}) = (0.01489049, 0.01000000)$.

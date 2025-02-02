@@ -153,16 +153,23 @@ used) in \code{val.data}, with no break in the lagged variable sequence
 even if some of the intermediate lags are not used as predictors.}
 }
 \value{
-A list that contains three elements: \item{initial}{A list of
+A list that contains six elements: \item{initial}{A list of
 information of the model initialisation. (For descriptions of the list
 elements see \code{\link{make_smimodelFit}}).} \item{best}{A list of
 information of the final optimised model. (For descriptions of the list
 elements see \code{\link{make_smimodelFit}}).} \item{best_lambdas}{Selected
-penalty parameter combination.}
+penalty parameter combination.} \item{lambda0_seq}{Sequence of values for
+lambda0 used to construct the initial grid.} \item{lambda2_seq}{Sequence of
+values for lambda2 used to construct the initial grid.}
+\item{searched}{A \code{tibble} containing the penalty parameter
+combinations searched during the two-step greedy search and the
+corresponding validation set MSEs.}
 }
 \description{
 Function to perform a greedy search over a given grid of penalty parameter
 combinations (lambda0, lambda2), and fits a single SMI model with the best
-(lowest validation set MSE) penalty parameter combination. This is a helper
+(lowest validation set MSE) penalty parameter combination. If the optimal
+combination lies on the edge of the grid, the penalty parameters are adjusted
+by ±10\%, and a second round of grid search is performed.This is a helper
 function designed to be called from \code{\link{greedy_smimodel}}.
 }

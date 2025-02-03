@@ -535,15 +535,23 @@ greedy.fit <- function(data, val.data, yvar, neighbour = 0,
       current_lambdas2 <- min_lambdas
       # Constructing new search space
       # lambda0
-      lambda0_seq_new <- c((current_lambdas2[1] - 0.1*current_lambdas2[1]), 
-                           current_lambdas2[1], 
-                           (current_lambdas2[1] + 0.1*current_lambdas2[1]))
-      lambda0_seq_new <- lambda0_seq_new[which(lambda0_seq_new >= 0)]
+      if(current_lambdas2[1] == 0){
+        lambda0_seq_new <- c(current_lambdas2[1], 0.1)
+      }else{
+        lambda0_seq_new <- c((current_lambdas2[1] - 0.1*current_lambdas2[1]), 
+                             current_lambdas2[1], 
+                             (current_lambdas2[1] + 0.1*current_lambdas2[1]))
+        lambda0_seq_new <- lambda0_seq_new[which(lambda0_seq_new >= 0)] 
+      }
       # lambda2
-      lambda2_seq_new <- c((current_lambdas2[2] - 0.1*current_lambdas2[2]), 
-                           current_lambdas2[2], 
-                           (current_lambdas2[2] + 0.1*current_lambdas2[2]))
-      lambda2_seq_new <- lambda2_seq_new[which(lambda2_seq_new >= 0)]
+      if(current_lambdas2[2] == 0){
+        lambda2_seq_new <- c(current_lambdas2[2], 0.1)
+      }else{
+        lambda2_seq_new <- c((current_lambdas2[2] - 0.1*current_lambdas2[2]), 
+                             current_lambdas2[2], 
+                             (current_lambdas2[2] + 0.1*current_lambdas2[2]))
+        lambda2_seq_new <- lambda2_seq_new[which(lambda2_seq_new >= 0)]
+      }
       lambda_comb_new <- expand.grid(lambda0_seq_new, lambda2_seq_new)
       # Already searched combinations
       lambda_exist <- do.call(paste0, lambda_comb_new) %in% do.call(paste0, all_comb)

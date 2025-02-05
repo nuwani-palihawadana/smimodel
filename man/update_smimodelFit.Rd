@@ -25,10 +25,7 @@ update_smimodelFit(
 
 \item{data}{Training data set on which models will be trained. Must be a data
 set of class \code{tsibble}.(Make sure there are no additional date or time
-related variables except for the \code{index} of the \code{tsibble}). If
-multiple models are fitted, the grouping variable should be the \code{key}
-of the \code{tsibble}. If a \code{key} is not specified, a dummy key with
-only one level will be created.}
+related variables except for the \code{index} of the \code{tsibble}).}
 
 \item{lambda0}{Penalty parameter for L0 penalty.}
 

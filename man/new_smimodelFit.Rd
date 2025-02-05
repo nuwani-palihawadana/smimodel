@@ -20,20 +20,11 @@ new_smimodelFit(
 \arguments{
 \item{data}{Training data set on which models will be trained. Must be a data
 set of class \code{tsibble}.(Make sure there are no additional date or time
-related variables except for the \code{index} of the \code{tsibble}). If
-multiple models are fitted, the grouping variable should be the \code{key}
-of the \code{tsibble}. If a \code{key} is not specified, a dummy key with
-only one level will be created.}
+related variables except for the \code{index} of the \code{tsibble}).}
 
 \item{yvar}{Name of the response variable as a character string.}
 
-\item{neighbour}{If multiple models are fitted: Number of neighbours of each
-key (i.e. grouping variable) to be considered in model fitting to handle
-smoothing over the key. Should be an \code{integer}. If \code{neighbour =
-  x}, \code{x} number of keys before the key of interest and \code{x} number
-of keys after the key of interest are grouped together for model fitting.
-The default is \code{neighbour = 0} (i.e. no neighbours are considered for
-model fitting).}
+\item{neighbour}{\code{neighbour} argument passed from the outer function.}
 
 \item{family}{A description of the error distribution and link function to be
 used in the model (see \code{\link{glm}} and \code{\link{family}}).}

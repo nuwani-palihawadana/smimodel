@@ -232,18 +232,9 @@ model_smimodel <- function(data, yvar, neighbour = 0, family = gaussian(),
 #'
 #' @param data Training data set on which models will be trained. Must be a data
 #'   set of class \code{tsibble}.(Make sure there are no additional date or time
-#'   related variables except for the \code{index} of the \code{tsibble}). If
-#'   multiple models are fitted, the grouping variable should be the \code{key}
-#'   of the \code{tsibble}. If a \code{key} is not specified, a dummy key with
-#'   only one level will be created.
+#'   related variables except for the \code{index} of the \code{tsibble}). 
 #' @param yvar Name of the response variable as a character string.
-#' @param neighbour If multiple models are fitted: Number of neighbours of each
-#'   key (i.e. grouping variable) to be considered in model fitting to handle
-#'   smoothing over the key. Should be an \code{integer}. If \code{neighbour =
-#'   x}, \code{x} number of keys before the key of interest and \code{x} number
-#'   of keys after the key of interest are grouped together for model fitting.
-#'   The default is \code{neighbour = 0} (i.e. no neighbours are considered for
-#'   model fitting).
+#' @param neighbour `neighbour` argument passed from the outer function. 
 #' @param family A description of the error distribution and link function to be
 #'   used in the model (see \code{\link{glm}} and \code{\link{family}}).
 #' @param index.vars A \code{character} vector of names of the predictor
@@ -449,18 +440,9 @@ utils::globalVariables(".")
 #'
 #' @param data Training data set on which models will be trained. Must be a data
 #'   set of class \code{tsibble}.(Make sure there are no additional date or time
-#'   related variables except for the \code{index} of the \code{tsibble}). If
-#'   multiple models are fitted, the grouping variable should be the \code{key}
-#'   of the \code{tsibble}. If a \code{key} is not specified, a dummy key with
-#'   only one level will be created.
+#'   related variables except for the \code{index} of the \code{tsibble}). 
 #' @param yvar Name of the response variable as a character string.
-#' @param neighbour If multiple models are fitted: Number of neighbours of each
-#'   key (i.e. grouping variable) to be considered in model fitting to handle
-#'   smoothing over the key. Should be an \code{integer}. If \code{neighbour =
-#'   x}, \code{x} number of keys before the key of interest and \code{x} number
-#'   of keys after the key of interest are grouped together for model fitting.
-#'   The default is \code{neighbour = 0} (i.e. no neighbours are considered for
-#'   model fitting).
+#' @param neighbour `neighbour` argument passed from the outer function.
 #' @param family A description of the error distribution and link function to be
 #'   used in the model (see \code{\link{glm}} and \code{\link{family}}).
 #' @param index.vars A \code{character} vector of names of the predictor
@@ -655,13 +637,7 @@ new_smimodelFit <- function(data, yvar, neighbour = 0,
 #'
 #' @param x A fitted \code{gam} object.
 #' @param yvar Name of the response variable as a character string.
-#' @param neighbour If multiple models are fitted: Number of neighbours of each
-#'   key (i.e. grouping variable) to be considered in model fitting to handle
-#'   smoothing over the key. Should be an \code{integer}. If \code{neighbour =
-#'   x}, \code{x} number of keys before the key of interest and \code{x} number
-#'   of keys after the key of interest are grouped together for model fitting.
-#'   The default is \code{neighbour = 0} (i.e. no neighbours are considered for
-#'   model fitting).
+#' @param neighbour `neighbour` argument passed from the outer function.
 #' @param index.vars A \code{character} vector of names of the predictor
 #'   variables for which indices are estimated.
 #' @param index.ind An \code{integer} vector that assigns group index for each
@@ -744,10 +720,7 @@ make_smimodelFit <- function(x, yvar, neighbour, index.vars, index.ind, index.da
 #' @param object A \code{smimodelFit} object.
 #' @param data Training data set on which models will be trained. Must be a data
 #'   set of class \code{tsibble}.(Make sure there are no additional date or time
-#'   related variables except for the \code{index} of the \code{tsibble}). If
-#'   multiple models are fitted, the grouping variable should be the \code{key}
-#'   of the \code{tsibble}. If a \code{key} is not specified, a dummy key with
-#'   only one level will be created.
+#'   related variables except for the \code{index} of the \code{tsibble}). 
 #' @param lambda0 Penalty parameter for L0 penalty.
 #' @param lambda2 Penalty parameter for L2 penalty.
 #' @param M Big-M value used in MIP.

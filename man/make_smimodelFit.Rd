@@ -22,13 +22,7 @@ make_smimodelFit(
 
 \item{yvar}{Name of the response variable as a character string.}
 
-\item{neighbour}{If multiple models are fitted: Number of neighbours of each
-key (i.e. grouping variable) to be considered in model fitting to handle
-smoothing over the key. Should be an \code{integer}. If \code{neighbour =
-  x}, \code{x} number of keys before the key of interest and \code{x} number
-of keys after the key of interest are grouped together for model fitting.
-The default is \code{neighbour = 0} (i.e. no neighbours are considered for
-model fitting).}
+\item{neighbour}{\code{neighbour} argument passed from the outer function.}
 
 \item{index.vars}{A \code{character} vector of names of the predictor
 variables for which indices are estimated.}

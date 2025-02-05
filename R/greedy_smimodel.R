@@ -272,23 +272,14 @@ utils::globalVariables(c("dummy_key", "num_key"))
 #'
 #' @param data Training data set on which models will be trained. Must be a data
 #'   set of class \code{tsibble}.(Make sure there are no additional date or time
-#'   related variables except for the \code{index} of the \code{tsibble}). If
-#'   multiple models are fitted, the grouping variable should be the \code{key}
-#'   of the \code{tsibble}. If a \code{key} is not specified, a dummy key with
-#'   only one level will be created.
+#'   related variables except for the \code{index} of the \code{tsibble}). 
 #' @param val.data Validation data set. (The data set on which the penalty
 #'   parameter selection will be performed.) Must be a data set of class
 #'   \code{tsibble}. (Once the penalty parameter selection is completed, the
 #'   best model will be re-fitted for the combined data set \code{data +
 #'   val.data}.)
 #' @param yvar Name of the response variable as a character string.
-#' @param neighbour If multiple models are fitted: Number of neighbours of each
-#'   key (i.e. grouping variable) to be considered in model fitting to handle
-#'   smoothing over the key. Should be an \code{integer}. If \code{neighbour =
-#'   x}, \code{x} number of keys before the key of interest and \code{x} number
-#'   of keys after the key of interest are grouped together for model fitting.
-#'   The default is \code{neighbour = 0} (i.e. no neighbours are considered for
-#'   model fitting).
+#' @param neighbour `neighbour` argument passed from the outer function. 
 #' @param family A description of the error distribution and link function to be
 #'   used in the model (see \code{\link{glm}} and \code{\link{family}}).
 #' @param index.vars A \code{character} vector of names of the predictor
@@ -386,7 +377,6 @@ greedy.fit <- function(data, val.data, yvar, neighbour = 0,
   bench <- model_gam(data = data,
                      yvar = yvar,
                      family = family,
-                     neighbour = neighbour,
                      s.vars = c(index.vars, s.vars),
                      linear.vars = linear.vars)
   # Residuals
@@ -455,7 +445,7 @@ greedy.fit <- function(data, val.data, yvar, neighbour = 0,
   min_lambda_pos <- which.min(unlist(MSE_list))
   min_MSE <- min(unlist(MSE_list))
   min_lambdas <- as.numeric(lambda_comb[min_lambda_pos, ])
-  print("First round completed; starting point selected!")
+  print("A starting point is selected.")
   # Updating searched combinations store
   all_comb <- bind_rows(all_comb, lambda_comb)
   # Updating searched combinations MSE
@@ -512,14 +502,14 @@ greedy.fit <- function(data, val.data, yvar, neighbour = 0,
       min_lambda_pos <- which.min(unlist(MSE_list))
       min_MSE <- min(unlist(MSE_list))
       min_lambdas <- as.numeric(lambda_comb[min_lambda_pos, ])
-      print("Another round completed!")
+      print("An iteration of greedy search - step 1 is completed.")
       # Updating searched combinations store
       all_comb <- bind_rows(all_comb, lambda_comb)
       # Updating searched combinations MSE
       all_comb_mse <- c(all_comb_mse, unlist(MSE_list))
     }
   }
-  # If the selected point is a corner point, expand grind further
+  # If the selected point is a corner point, expand grind
   matchRow <- which(colSums(t(corner_points) == current_lambdas) == ncol(corner_points))
   if(length(matchRow) != 0){
     # Current minimum MSE - step 2
@@ -536,7 +526,7 @@ greedy.fit <- function(data, val.data, yvar, neighbour = 0,
       # Constructing new search space
       # lambda0
       if(current_lambdas2[1] == 0){
-        lambda0_seq_new <- c(current_lambdas2[1], 0.1)
+        lambda0_seq_new <- current_lambdas2[1]
       }else{
         lambda0_seq_new <- c((current_lambdas2[1] - 0.1*current_lambdas2[1]), 
                              current_lambdas2[1], 
@@ -545,7 +535,7 @@ greedy.fit <- function(data, val.data, yvar, neighbour = 0,
       }
       # lambda2
       if(current_lambdas2[2] == 0){
-        lambda2_seq_new <- c(current_lambdas2[2], 0.1)
+        lambda2_seq_new <- current_lambdas2[2]
       }else{
         lambda2_seq_new <- c((current_lambdas2[2] - 0.1*current_lambdas2[2]), 
                              current_lambdas2[2], 
@@ -582,7 +572,7 @@ greedy.fit <- function(data, val.data, yvar, neighbour = 0,
         min_lambda_pos <- which.min(unlist(MSE_list))
         min_MSE <- min(unlist(MSE_list))
         min_lambdas <- as.numeric(lambda_comb[min_lambda_pos, ])
-        print("Another round of step 2 completed!")
+        print("An iteration of greedy search - step 2 is completed.")
         # Updating searched combinations store
         all_comb <- bind_rows(all_comb, lambda_comb)
         # Updating searched combinations MSE
@@ -597,28 +587,42 @@ greedy.fit <- function(data, val.data, yvar, neighbour = 0,
     rename(lambda0 = Var1,
            lambda2 = Var2) |>
     mutate(val_MSE = all_comb_mse)
-  # Final smimodel: re-fit the best model for the combined data set training + validation
-  # Data
+  ## Compare with no-index and null models
+  if(!is.null(s.vars) | !is.null(linear.vars)){
+    # no-index model
+    noIndex_model <- model_gam(data = data,
+                               yvar = yvar,
+                               family = family,
+                               s.vars = s.vars,
+                               linear.vars = linear.vars)
+    noIndex_preds <- predict(object = noIndex_model, 
+                             newdata = val.data, 
+                             recursive = recursive,
+                             recursive_colRange = recursive_colRange)
+    noIndex_val_mse <- MSE(residuals = (as.numeric(as.matrix(noIndex_preds[,{{yvar}}], ncol = 1)) - noIndex_preds$.predict))
+    # null model
+    pre.formula <- paste(yvar, "~", 1)
+    null_model <- lm(formula = as.formula(pre.formula), data = data)
+    null_preds <- predict(object = null_model, newdata = val.data)
+    null_val_mse <- MSE(residuals = (as.numeric(as.matrix(val.data[,{{yvar}}], ncol = 1)) - null_preds))
+    # MSE vector
+    three_mse <- c(current_MSE, noIndex_val_mse, null_val_mse)
+  }else if(is.null(s.vars) & is.null(linear.vars)){
+    # null model
+    pre.formula <- paste(yvar, "~", 1)
+    null_model <- lm(formula = as.formula(pre.formula), data = data)
+    null_preds <- predict(object = null_model, newdata = val.data)
+    null_val_mse <- MSE(residuals = (as.numeric(as.matrix(val.data[,{{yvar}}], ncol = 1)) - null_preds))
+    # MSE vector
+    three_mse <- c(current_MSE, NA, null_val_mse)
+  }
+  min_three_mse <- which.min(three_mse)
+  ## Fit final model
   if(refit == TRUE){
-    combinedData <- dplyr::bind_rows(data, val.data)
-    final_smimodel_list <- smimodel.fit(data = combinedData, yvar = yvar,
-                                        neighbour = neighbour,
-                                        family = family,
-                                        index.vars = index.vars,
-                                        initialise = initialise,
-                                        num_ind = num_ind, num_models = num_models,
-                                        seed = seed,
-                                        index.ind = index.ind,
-                                        index.coefs = index.coefs,
-                                        s.vars = s.vars,
-                                        linear.vars = linear.vars,
-                                        lambda0 = current_lambdas[1],
-                                        lambda2 = current_lambdas[2],
-                                        M = M, max.iter = max.iter,
-                                        tol = tol, tolCoefs = tolCoefs,
-                                        TimeLimit = TimeLimit, MIPGap = MIPGap,
-                                        NonConvex = NonConvex, verbose = verbose)
-  }else{
+    # Re-fit the best model for the combined data set training + validation
+    data <- dplyr::bind_rows(data, val.data)
+  }
+  if(min_three_mse == 1){
     final_smimodel_list <- smimodel.fit(data = data, yvar = yvar,
                                         neighbour = neighbour,
                                         family = family,
@@ -636,8 +640,46 @@ greedy.fit <- function(data, val.data, yvar, neighbour = 0,
                                         tol = tol, tolCoefs = tolCoefs,
                                         TimeLimit = TimeLimit, MIPGap = MIPGap,
                                         NonConvex = NonConvex, verbose = verbose)
+    print("Final SMI model is fitted.")
+  }else if(min_three_mse == 2){
+    final_smimodel_list <- smimodel.fit(data = data, yvar = yvar,
+                                        neighbour = neighbour,
+                                        family = family,
+                                        index.vars = index.vars,
+                                        initialise = initialise,
+                                        num_ind = num_ind, num_models = num_models,
+                                        seed = seed,
+                                        index.ind = index.ind,
+                                        index.coefs = index.coefs,
+                                        s.vars = s.vars,
+                                        linear.vars = linear.vars,
+                                        lambda0 = 1e+50,
+                                        lambda2 = 0,
+                                        M = M, max.iter = max.iter,
+                                        tol = tol, tolCoefs = tolCoefs,
+                                        TimeLimit = TimeLimit, MIPGap = MIPGap,
+                                        NonConvex = NonConvex, verbose = verbose)
+    print("A null index model is selected as the final model. The final model consists only of s.vars and/or linear.vars.")
+  }else if(min_three_mse == 3){
+    final_smimodel_list <- smimodel.fit(data = data, yvar = yvar,
+                                        neighbour = neighbour,
+                                        family = family,
+                                        index.vars = index.vars,
+                                        initialise = initialise,
+                                        num_ind = num_ind, num_models = num_models,
+                                        seed = seed,
+                                        index.ind = index.ind,
+                                        index.coefs = index.coefs,
+                                        s.vars = NULL,
+                                        linear.vars = NULL,
+                                        lambda0 = 1e+50,
+                                        lambda2 = 0,
+                                        M = M, max.iter = max.iter,
+                                        tol = tol, tolCoefs = tolCoefs,
+                                        TimeLimit = TimeLimit, MIPGap = MIPGap,
+                                        NonConvex = NonConvex, verbose = verbose)
+    print("A null model is selected as the final model. The final model includes only the intercept.")
   }
-  print("Final model fitted!")
   output <- list("initial" = final_smimodel_list$initial,
                  "best" = final_smimodel_list$best,
                  "best_lambdas" = current_lambdas,
@@ -658,23 +700,14 @@ utils::globalVariables(c("Var1", "Var2"))
 #'
 #' @param data Training data set on which models will be trained. Must be a data
 #'   set of class \code{tsibble}.(Make sure there are no additional date or time
-#'   related variables except for the \code{index} of the \code{tsibble}). If
-#'   multiple models are fitted, the grouping variable should be the \code{key}
-#'   of the \code{tsibble}. If a \code{key} is not specified, a dummy key with
-#'   only one level will be created.
+#'   related variables except for the \code{index} of the \code{tsibble}). 
 #' @param val.data Validation data set. (The data set on which the penalty
 #'   parameter selection will be performed.) Must be a data set of class
 #'   \code{tsibble}. (Once the penalty parameter selection is completed, the
 #'   best model will be re-fitted for the combined data set \code{data +
 #'   val.data}.)
 #' @param yvar Name of the response variable as a character string.
-#' @param neighbour If multiple models are fitted: Number of neighbours of each
-#'   key (i.e. grouping variable) to be considered in model fitting to handle
-#'   smoothing over the key. Should be an \code{integer}. If \code{neighbour =
-#'   x}, \code{x} number of keys before the key of interest and \code{x} number
-#'   of keys after the key of interest are grouped together for model fitting.
-#'   The default is \code{neighbour = 0} (i.e. no neighbours are considered for
-#'   model fitting).
+#' @param neighbour `neighbour` argument passed from the outer function.
 #' @param family A description of the error distribution and link function to be
 #'   used in the model (see \code{\link{glm}} and \code{\link{family}}).
 #' @param index.vars A \code{character} vector of names of the predictor

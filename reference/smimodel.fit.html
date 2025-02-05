@@ -78,10 +78,7 @@ helper function designed to be called from user-facing wrapper functions,
 <dl><dt id="arg-data">data<a class="anchor" aria-label="anchor" href="#arg-data"></a></dt>
 <dd><p>Training data set on which models will be trained. Must be a data
 set of class <code>tsibble</code>.(Make sure there are no additional date or time
-related variables except for the <code>index</code> of the <code>tsibble</code>). If
-multiple models are fitted, the grouping variable should be the <code>key</code>
-of the <code>tsibble</code>. If a <code>key</code> is not specified, a dummy key with
-only one level will be created.</p></dd>
+related variables except for the <code>index</code> of the <code>tsibble</code>).</p></dd>
 
 
 <dt id="arg-yvar">yvar<a class="anchor" aria-label="anchor" href="#arg-yvar"></a></dt>
@@ -89,13 +86,7 @@ only one level will be created.</p></dd>
 
 
 <dt id="arg-neighbour">neighbour<a class="anchor" aria-label="anchor" href="#arg-neighbour"></a></dt>
-<dd><p>If multiple models are fitted: Number of neighbours of each
-key (i.e. grouping variable) to be considered in model fitting to handle
-smoothing over the key. Should be an <code>integer</code>. If <code>neighbour =
-  x</code>, <code>x</code> number of keys before the key of interest and <code>x</code> number
-of keys after the key of interest are grouped together for model fitting.
-The default is <code>neighbour = 0</code> (i.e. no neighbours are considered for
-model fitting).</p></dd>
+<dd><p><code>neighbour</code> argument passed from the outer function.</p></dd>
 
 
 <dt id="arg-family">family<a class="anchor" aria-label="anchor" href="#arg-family"></a></dt>

@@ -388,8 +388,8 @@ greedy.fit <- function(data, val.data, yvar, neighbour = 0,
 
   # lambda2_seq - a sequence of power of tens
   # lambda2.max is taken as the power of ten that matches the scale of lambda0.max
-  max_power10 <- round(log10(abs(lambda0_max)))
-  lambda2_seq <- c(0, 10^seq(-2, max_power10, by = 1))
+  lambda2_max <- round(log10(abs(lambda0_max)))
+  lambda2_seq <- c(0, 10^seq(-2, lambda2_max, by = 1))
 
   l0_len <- length(lambda0_seq)
   l2_len <- length(lambda2_seq)
@@ -414,12 +414,7 @@ greedy.fit <- function(data, val.data, yvar, neighbour = 0,
   start_l2 <- c(lambda2_seq[1], lambda2_seq[ceiling(l2_len / 2)], lambda2_seq[l2_len])
   lambda_comb <- expand.grid(start_l0, start_l2)
   
-  # Corner points for grid expansion
-  cp1 <- expand.grid(start_l0, lambda2_seq[l2_len])
-  cp2 <- expand.grid(lambda0_seq[l0_len], start_l2)
-  corner_points <- dplyr::distinct(bind_rows(cp1, cp2))
-
-  # Model fitting for each combination of lambdas
+  # Model fitting for each possible starting point
   MSE_list <- seq(1, NROW(lambda_comb), by = 1) |>
     map_f(~ tune_smimodel(data = data, val.data = val.data, yvar = yvar,
                           neighbour = neighbour,
@@ -439,8 +434,6 @@ greedy.fit <- function(data, val.data, yvar, neighbour = 0,
                           NonConvex = NonConvex, verbose = verbose,
                           recursive = recursive,
                           recursive_colRange = recursive_colRange))
-
-  #if (parallel) future:::ClusterRegistry("stop")
   # Selecting best starting point
   min_lambda_pos <- which.min(unlist(MSE_list))
   min_MSE <- min(unlist(MSE_list))
@@ -451,7 +444,7 @@ greedy.fit <- function(data, val.data, yvar, neighbour = 0,
   # Updating searched combinations MSE
   all_comb_mse <- c(all_comb_mse, unlist(MSE_list))
 
-  # Greedy search - step 1
+  # Greedy search - round 1
   while(min_MSE < current_MSE){
     current_MSE <- min_MSE
     current_lambdas <- min_lambdas
@@ -509,9 +502,9 @@ greedy.fit <- function(data, val.data, yvar, neighbour = 0,
       all_comb_mse <- c(all_comb_mse, unlist(MSE_list))
     }
   }
-  # If the selected point is a corner point, expand grind
-  matchRow <- which(colSums(t(corner_points) == current_lambdas) == ncol(corner_points))
-  if(length(matchRow) != 0){
+  
+  # If the selected point is an edge point, expand grid
+  if(current_lambdas[1] == lambda0_max | current_lambdas[2] == lambda2_max){
     # Current minimum MSE - step 2
     current_MSE2 <- Inf
     # Current best lambdas - step 2

@@ -398,10 +398,10 @@ greedy.fit <- function(data, val.data, yvar, neighbour = 0,
   all_comb <- data.frame()
   # Vector for storing validation set MSEs of all combinations searched
   all_comb_mse <- numeric()
-  # Current minimum MSE
-  current_MSE <- Inf
-  # Current best lambdas
-  current_lambdas <- numeric(length = 2)
+  # # Current minimum MSE
+  # current_MSE <- Inf
+  # # Current best lambdas
+  # current_lambdas <- numeric(length = 2)
   # Select map function
   if(parallel){
     future::plan("future::multisession", workers = workers)
@@ -412,10 +412,10 @@ greedy.fit <- function(data, val.data, yvar, neighbour = 0,
   # Starting point options
   start_l0 <- c(lambda0_seq[1], lambda0_seq[ceiling(l0_len / 2)], lambda0_seq[l0_len])
   start_l2 <- c(lambda2_seq[1], lambda2_seq[ceiling(l2_len / 2)], lambda2_seq[l2_len])
-  lambda_comb <- expand.grid(start_l0, start_l2)
+  lambda_comb_start <- expand.grid(start_l0, start_l2)
   
   # Model fitting for each possible starting point
-  MSE_list <- seq(1, NROW(lambda_comb), by = 1) |>
+  MSE_list <- seq(1, NROW(lambda_comb_start), by = 1) |>
     map_f(~ tune_smimodel(data = data, val.data = val.data, yvar = yvar,
                           neighbour = neighbour,
                           family = family,
@@ -427,22 +427,100 @@ greedy.fit <- function(data, val.data, yvar, neighbour = 0,
                           index.coefs = index.coefs,
                           s.vars = s.vars,
                           linear.vars = linear.vars,
-                          lambda.comb = as.numeric(lambda_comb[., ]),
+                          lambda.comb = as.numeric(lambda_comb_start[., ]),
                           M = M, max.iter = max.iter,
                           tol = tol, tolCoefs = tolCoefs,
                           TimeLimit = TimeLimit, MIPGap = MIPGap,
                           NonConvex = NonConvex, verbose = verbose,
                           recursive = recursive,
                           recursive_colRange = recursive_colRange))
-  # Selecting best starting point
-  min_lambda_pos <- which.min(unlist(MSE_list))
-  min_MSE <- min(unlist(MSE_list))
-  min_lambdas <- as.numeric(lambda_comb[min_lambda_pos, ])
-  print("A starting point is selected.")
+  # # Selecting best starting point
+  # min_lambda_pos <- which.min(unlist(MSE_list))
+  # min_MSE <- min(unlist(MSE_list))
+  # min_lambdas <- as.numeric(lambda_comb[min_lambda_pos, ])
+  # print("A starting point is selected.")
   # Updating searched combinations store
-  all_comb <- bind_rows(all_comb, lambda_comb)
+  all_comb <- bind_rows(all_comb, lambda_comb_start)
   # Updating searched combinations MSE
   all_comb_mse <- c(all_comb_mse, unlist(MSE_list))
+  
+  min_MSE_list <- vector(mode = "list", length = NROW(lambda_comb_start))
+  min_lambdas_list <- vector(mode = "list", length = NROW(lambda_comb_start))
+  for(i in 1:NROW(lambda_comb_start)){
+    # Current minimum MSE
+    current_MSE <- Inf
+    # Current best lambdas
+    current_lambdas <- numeric(length = 2)
+    min_MSE <- MSE_list[[i]]
+    min_lambdas <- as.numeric(lambda_comb_start[i, ])
+    # Search points around starting points
+    while(min_MSE < current_MSE){
+      current_MSE <- min_MSE
+      current_lambdas <- min_lambdas
+      # Constructing new search space
+      # lambda0
+      l0_indx <- which(lambda0_seq == current_lambdas[1])
+      if(l0_indx < l0_len){
+        lambda0_seq_new <- c(lambda0_seq[l0_indx - 1], current_lambdas[1],
+                             lambda0_seq[l0_indx + 1])
+      }else{
+        lambda0_seq_new <- c(lambda0_seq[l0_indx - 1], current_lambdas[1])
+      }
+      # lambda2
+      l2_indx <- which(lambda2_seq == current_lambdas[2])
+      if(l2_indx < l2_len){
+        lambda2_seq_new <- c(lambda2_seq[l2_indx - 1], current_lambdas[2],
+                             lambda2_seq[l2_indx + 1])
+      }else{
+        lambda2_seq_new <- c(lambda2_seq[l2_indx - 1], current_lambdas[2])
+      }
+      lambda_comb_new <- expand.grid(lambda0_seq_new, lambda2_seq_new)
+      # Already searched combinations
+      lambda_exist <- do.call(paste0, lambda_comb_new) %in% do.call(paste0, all_comb)
+      lambda_comb <- lambda_comb_new[lambda_exist == FALSE, ]
+      if(NROW(lambda_comb) == 0){
+        break
+      }else{
+        MSE_list <- seq(1, NROW(lambda_comb), by = 1) |>
+          map_f(~ tune_smimodel(data = data, val.data = val.data, yvar = yvar,
+                                neighbour = neighbour,
+                                family = family,
+                                index.vars = index.vars,
+                                initialise = initialise,
+                                num_ind = num_ind, num_models = num_models,
+                                seed = seed,
+                                index.ind = index.ind,
+                                index.coefs = index.coefs,
+                                s.vars = s.vars,
+                                linear.vars = linear.vars,
+                                lambda.comb = as.numeric(lambda_comb[., ]),
+                                M = M, max.iter = max.iter,
+                                tol = tol, tolCoefs = tolCoefs,
+                                TimeLimit = TimeLimit, MIPGap = MIPGap,
+                                NonConvex = NonConvex, verbose = verbose,
+                                recursive = recursive,
+                                recursive_colRange = recursive_colRange))
+        # Selecting best point
+        min_lambda_pos <- which.min(unlist(MSE_list))
+        min_MSE_list[[i]] <- min(unlist(MSE_list))
+        min_lambdas_list[[i]] <- as.numeric(lambda_comb[min_lambda_pos, ])
+        paste("Initial search around starting point", i, "completed.")
+        # Updating searched combinations store
+        all_comb <- bind_rows(all_comb, lambda_comb)
+        # Updating searched combinations MSE
+        all_comb_mse <- c(all_comb_mse, unlist(MSE_list))
+      }
+    }
+  }
+  
+  # Best point and corresponding (minimum) MSE upto now
+  min_lambda_pos <- which.min(unlist(min_MSE_list))
+  min_MSE <- min(unlist(min_MSE_list))
+  min_lambdas <- as.numeric(min_lambdas_list[[min_lambda_pos]])
+  # Reset current minimum MSE
+  current_MSE <- Inf
+  # Reset current best lambdas
+  current_lambdas <- numeric(length = 2)
 
   # Greedy search - round 1
   while(min_MSE < current_MSE){

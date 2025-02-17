@@ -205,7 +205,8 @@ algorithm, as predictors which are entering indices.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Fitted optimal SMI model</span></span>
 <span><span class="va">smimodel_ppr</span><span class="op">$</span><span class="va">fit</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">best</span></span>
-<span><span class="co">#&gt; $alpha</span></span>
+<span><span class="co">#&gt; SMI Model Fit:</span></span>
+<span><span class="co">#&gt; Index coefficients:</span></span>
 <span><span class="co">#&gt; 6 x 2 sparse Matrix of class "dgCMatrix"</span></span>
 <span><span class="co">#&gt;          index1   index2</span></span>
 <span><span class="co">#&gt; x_000 1.6279857 .       </span></span>
@@ -215,39 +216,19 @@ algorithm, as predictors which are entering indices.</p>
 <span><span class="co">#&gt; x_004 .         .       </span></span>
 <span><span class="co">#&gt; x_005 .         2.298439</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $derivatives</span></span>
-<span><span class="co">#&gt; # A tibble: 1,200 × 2</span></span>
-<span><span class="co">#&gt;       d1    d2</span></span>
-<span><span class="co">#&gt;    &lt;dbl&gt; &lt;dbl&gt;</span></span>
-<span><span class="co">#&gt;  1 0.973 0.387</span></span>
-<span><span class="co">#&gt;  2 1.41  0.550</span></span>
-<span><span class="co">#&gt;  3 4.06  0.190</span></span>
-<span><span class="co">#&gt;  4 1.74  0.460</span></span>
-<span><span class="co">#&gt;  5 1.62  0.603</span></span>
-<span><span class="co">#&gt;  6 4.04  0.159</span></span>
-<span><span class="co">#&gt;  7 2.60  0.390</span></span>
-<span><span class="co">#&gt;  8 1.90  0.599</span></span>
-<span><span class="co">#&gt;  9 2.89  0.387</span></span>
-<span><span class="co">#&gt; 10 0.777 0.375</span></span>
-<span><span class="co">#&gt; # ℹ 1,190 more rows</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $var_y</span></span>
+<span><span class="co">#&gt; Response variable:</span></span>
 <span><span class="co">#&gt; [1] "y"</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $vars_index</span></span>
+<span><span class="co">#&gt; Index variables:</span></span>
 <span><span class="co">#&gt; [1] "x_000" "x_001" "x_002" "x_003" "x_004" "x_005"</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $vars_s</span></span>
+<span><span class="co">#&gt; Spline variables (non-index):</span></span>
 <span><span class="co">#&gt; NULL</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $vars_linear</span></span>
+<span><span class="co">#&gt; Linear variables:</span></span>
 <span><span class="co">#&gt; NULL</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $neighbour</span></span>
-<span><span class="co">#&gt; [1] 0</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $gam</span></span>
-<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; GAM Fit:</span></span>
 <span><span class="co">#&gt; Family: gaussian </span></span>
 <span><span class="co">#&gt; Link function: identity </span></span>
 <span><span class="co">#&gt; </span></span>
@@ -257,10 +238,7 @@ algorithm, as predictors which are entering indices.</p>
 <span><span class="co">#&gt; Estimated degrees of freedom:</span></span>
 <span><span class="co">#&gt; 8.5 6.1  total = 15.6 </span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; REML score: -1028.854     </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; attr(,"class")</span></span>
-<span><span class="co">#&gt; [1] "smimodelFit" "list"</span></span></code></pre></div>
+<span><span class="co">#&gt; REML score: -1028.854</span></span></code></pre></div>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Estimated index structure</span></span>
 <span><span class="va">smimodel_ppr</span><span class="op">$</span><span class="va">fit</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">best</span><span class="op">$</span><span class="va">alpha</span></span>
@@ -289,7 +267,8 @@ algorithm, as predictors which are entering indices.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Fitted optimal SMI model</span></span>
 <span><span class="va">smimodel_additive</span><span class="op">$</span><span class="va">fit</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">best</span></span>
-<span><span class="co">#&gt; $alpha</span></span>
+<span><span class="co">#&gt; SMI Model Fit:</span></span>
+<span><span class="co">#&gt; Index coefficients:</span></span>
 <span><span class="co">#&gt; 6 x 2 sparse Matrix of class "dgCMatrix"</span></span>
 <span><span class="co">#&gt;          index1    index2</span></span>
 <span><span class="co">#&gt; x_000 0.4634955 .        </span></span>
@@ -299,39 +278,19 @@ algorithm, as predictors which are entering indices.</p>
 <span><span class="co">#&gt; x_004 .         .        </span></span>
 <span><span class="co">#&gt; x_005 .         0.6548227</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $derivatives</span></span>
-<span><span class="co">#&gt; # A tibble: 1,200 × 2</span></span>
-<span><span class="co">#&gt;       d1    d2</span></span>
-<span><span class="co">#&gt;    &lt;dbl&gt; &lt;dbl&gt;</span></span>
-<span><span class="co">#&gt;  1  3.42 1.36 </span></span>
-<span><span class="co">#&gt;  2  4.95 1.93 </span></span>
-<span><span class="co">#&gt;  3 14.3  0.667</span></span>
-<span><span class="co">#&gt;  4  6.12 1.62 </span></span>
-<span><span class="co">#&gt;  5  5.69 2.12 </span></span>
-<span><span class="co">#&gt;  6 14.2  0.559</span></span>
-<span><span class="co">#&gt;  7  9.14 1.37 </span></span>
-<span><span class="co">#&gt;  8  6.69 2.10 </span></span>
-<span><span class="co">#&gt;  9 10.1  1.36 </span></span>
-<span><span class="co">#&gt; 10  2.73 1.31 </span></span>
-<span><span class="co">#&gt; # ℹ 1,190 more rows</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $var_y</span></span>
+<span><span class="co">#&gt; Response variable:</span></span>
 <span><span class="co">#&gt; [1] "y"</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $vars_index</span></span>
+<span><span class="co">#&gt; Index variables:</span></span>
 <span><span class="co">#&gt; [1] "x_000" "x_001" "x_002" "x_003" "x_004" "x_005"</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $vars_s</span></span>
+<span><span class="co">#&gt; Spline variables (non-index):</span></span>
 <span><span class="co">#&gt; NULL</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $vars_linear</span></span>
+<span><span class="co">#&gt; Linear variables:</span></span>
 <span><span class="co">#&gt; NULL</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $neighbour</span></span>
-<span><span class="co">#&gt; [1] 0</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $gam</span></span>
-<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; GAM Fit:</span></span>
 <span><span class="co">#&gt; Family: gaussian </span></span>
 <span><span class="co">#&gt; Link function: identity </span></span>
 <span><span class="co">#&gt; </span></span>
@@ -341,10 +300,7 @@ algorithm, as predictors which are entering indices.</p>
 <span><span class="co">#&gt; Estimated degrees of freedom:</span></span>
 <span><span class="co">#&gt; 8.50 6.09  total = 15.59 </span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; REML score: -1028.856     </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; attr(,"class")</span></span>
-<span><span class="co">#&gt; [1] "smimodelFit" "list"</span></span></code></pre></div>
+<span><span class="co">#&gt; REML score: -1028.856</span></span></code></pre></div>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Estimated index structure</span></span>
 <span><span class="va">smimodel_additive</span><span class="op">$</span><span class="va">fit</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">best</span><span class="op">$</span><span class="va">alpha</span></span>
@@ -373,7 +329,8 @@ algorithm, as predictors which are entering indices.</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Fitted optimal SMI model</span></span>
 <span><span class="va">smimodel_linear</span><span class="op">$</span><span class="va">fit</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">best</span></span>
-<span><span class="co">#&gt; $alpha</span></span>
+<span><span class="co">#&gt; SMI Model Fit:</span></span>
+<span><span class="co">#&gt; Index coefficients:</span></span>
 <span><span class="co">#&gt; 6 x 1 sparse Matrix of class "dgCMatrix"</span></span>
 <span><span class="co">#&gt;           index1</span></span>
 <span><span class="co">#&gt; x_000 0.40811741</span></span>
@@ -383,39 +340,19 @@ algorithm, as predictors which are entering indices.</p>
 <span><span class="co">#&gt; x_004 .         </span></span>
 <span><span class="co">#&gt; x_005 0.07737565</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $derivatives</span></span>
-<span><span class="co">#&gt; # A tibble: 1,200 × 1</span></span>
-<span><span class="co">#&gt;       d1</span></span>
-<span><span class="co">#&gt;    &lt;dbl&gt;</span></span>
-<span><span class="co">#&gt;  1  4.35</span></span>
-<span><span class="co">#&gt;  2  6.55</span></span>
-<span><span class="co">#&gt;  3 14.4 </span></span>
-<span><span class="co">#&gt;  4  8.30</span></span>
-<span><span class="co">#&gt;  5  7.70</span></span>
-<span><span class="co">#&gt;  6 14.0 </span></span>
-<span><span class="co">#&gt;  7 10.3 </span></span>
-<span><span class="co">#&gt;  8  9.97</span></span>
-<span><span class="co">#&gt;  9 11.8 </span></span>
-<span><span class="co">#&gt; 10  3.27</span></span>
-<span><span class="co">#&gt; # ℹ 1,190 more rows</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $var_y</span></span>
+<span><span class="co">#&gt; Response variable:</span></span>
 <span><span class="co">#&gt; [1] "y"</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $vars_index</span></span>
+<span><span class="co">#&gt; Index variables:</span></span>
 <span><span class="co">#&gt; [1] "x_000" "x_001" "x_002" "x_003" "x_004" "x_005"</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $vars_s</span></span>
+<span><span class="co">#&gt; Spline variables (non-index):</span></span>
 <span><span class="co">#&gt; NULL</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $vars_linear</span></span>
+<span><span class="co">#&gt; Linear variables:</span></span>
 <span><span class="co">#&gt; NULL</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $neighbour</span></span>
-<span><span class="co">#&gt; [1] 0</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $gam</span></span>
-<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; GAM Fit:</span></span>
 <span><span class="co">#&gt; Family: gaussian </span></span>
 <span><span class="co">#&gt; Link function: identity </span></span>
 <span><span class="co">#&gt; </span></span>
@@ -425,10 +362,7 @@ algorithm, as predictors which are entering indices.</p>
 <span><span class="co">#&gt; Estimated degrees of freedom:</span></span>
 <span><span class="co">#&gt; 7.8  total = 8.8 </span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; REML score: -445.1356     </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; attr(,"class")</span></span>
-<span><span class="co">#&gt; [1] "smimodelFit" "list"</span></span></code></pre></div>
+<span><span class="co">#&gt; REML score: -445.1356</span></span></code></pre></div>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Estimated index structure</span></span>
 <span><span class="va">smimodel_linear</span><span class="op">$</span><span class="va">fit</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">best</span><span class="op">$</span><span class="va">alpha</span></span>
@@ -506,37 +440,68 @@ test set as below, using the <code>predict</code> method.</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">## Obtain forecasts on the test set</span></span>
 <span><span class="va">preds</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span>object <span class="op">=</span> <span class="va">smimodel_ppr</span>, newdata <span class="op">=</span> <span class="va">sim_test</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Error in meanf(object, h = h, level = level, fan = fan, lambda = lambda, : unused argument (newdata = list(1206:1405, c(3.49124169545011, 1.48362868456093, 0.502781151466303, 2.27193619962515, 1.14531957808155, 1.45610984085034, 3.44879723658308, 1.21856507692158, 1.21510637841818, 0.777318678622333, 1.13879005345479, 1.55195753203221, 1.19285369023581, 1.26592393873102, 1.53103764698884, 2.37005214231825, 0.78447230639341, 1.19430266360755, 1.08636567330945, 4.61157154321595, 0.470003649662609, 1.01924959240427, 0.883525899157584, 1.43646535084252, 2.41344470602436, 0.210141931929313, </span></span>
-<span><span class="co">#&gt; 0.637251369935488, 0.48483017070957, 0.967151385758648, 0.540051693859614, -0.00591690534489676, 0.192829269886108, 0.687094548337608, 2.23704857017094, 0.972787800623502, 0.248468455796017, 0.446560560518275, 0.937642573921337, 1.07642135846068, 1.36846596926693, 1.1095286857625, 0.842464729814123, 0.630526633304537, 0.181361282139659, 1.39781262875024, 1.76451132929887, 1.65183991960776, 1.67212413073567, 0.510996840980813, 0.340838317973449, 1.7758057963399, 0.182496225707728, 0.765780887805571, </span></span>
-<span><span class="co">#&gt; 2.87258591205838, 1.41653317072242, 1.21698679549925, 1.58445535932184, 0.456804606298418, 0.948892290643738, 0.782124436629586, 0.269516644409916, 0.564125078993966, 3.67479247159151, 0.249428593046589, 2.41414442388989, 1.1151045093036, 1.18091880331075, 2.48594504621317, 0.8366968619727, 3.62113303953107, 1.85194307899537, 2.55369432217125, 2.88924298012293, 1.21559903430533, 1.39883053317104, 0.357327249260404, 1.41962608127244, 1.96885399110918, 1.85271563305469, 2.74894999933475, 0.848028509082333, </span></span>
-<span><span class="co">#&gt; 2.4123314000411, 1.95653420413829, 1.09935402928691, 1.24013561056973, 2.45910901240064, 1.86299612209842, 0.779584087472622, 2.09700154359553, 1.66581902624261, 0.849626097247215, 2.28158752445974, 2.18492647368283, 3.20300505719549, 2.88106799282498, 0.484330876375508, 0.879319320585379, 1.57017242078446, 2.08452300185845, 2.88952363358089, 1.90686097300448, 0.883656221683908, 0.427785135368411, 1.29809079449427, 0.462613933115877, 0.49111505664609, 0.472619554531524, 1.15215841506567, 0.889414767405721, </span></span>
-<span><span class="co">#&gt; 0.997940424282521, 0.924419182096793, 0.992723113163425, 1.48599353487017, 0.552356378895732, 0.696160627938453, 0.56078848349202, 1.32881657641147, 1.44532143106875, 2.15143239251275, 1.99329991511979, 2.9653679860765, 0.806993063267065, 2.2397432320482, 0.203333035586841, 1.1885383715076, 1.34081109537064, 0.478576008768312, 1.27662766619159, 1.5084639051408, 1.06419969381383, 0.879954928978607, 1.3197077558515, 2.44087718061084, 2.40808377207946, 2.66875800605847, 1.09906425009879, 1.44237266345647, </span></span>
-<span><span class="co">#&gt; 1.08049007302439, 0.71776262976184, 0.934254863606583, 3.00845994344627, 1.33170081065305, 1.55531353894963, 2.17088609304485, 1.74388974176988, 1.00039187818363, 0.244443383064422, 0.363092362386087, 0.108011716088827, 0.241389845688585, 0.123337892716965, 0.111588462436474, 0.899819657518003, 0.888271389531245, 0.385985761505963, 2.2435527237008, 0.441588283874196, 1.67982534140622, 1.71940589840161, 0.713374843791116, 0.538975431559374, 0.123878832171816, 0.957385207634123, 0.415557958390278, </span></span>
-<span><span class="co">#&gt; 0.0796062394100005, 0.431013040324381, 0.038154833257998, 0.346458009662973, 0.660795831115044, 1.37469317700219, 2.60824644866285, 1.51871231915771, 3.17827515485932, 1.07891489715191, 0.997401093188051, 2.04560480378541, 0.437245201396994, 3.02189977021293, 0.653553937464913, 1.45339620156137, 1.50243841013214, 0.241936790268776, 2.61481425058869, 0.369841510025043, 0.998178525980495, 2.89159786476145, 1.7430900805267, 1.7096876262859, 1.26646771472005, 1.02338041495689, 2.23273213146023, 2.46246871305876, </span></span>
-<span><span class="co">#&gt; 1.44666530331206, 0.406412247646625, 0.397387842614919, 0.525586144889597, 0.449129836713747, 0.0306210066043653, 0.312672444538681, 0.276866814666007), c(0.988708860939369, 0.0647511295974255, 0.157662777928635, 0.785348618403077, 0.542188289808109, 0.416547345230356, 0.998882649000734, 0.255673117004335, 0.507875671144575, 0.0789711775723845, 0.813668364426121, 0.38217916013673, 0.802182707935572, 0.197923636762425, 0.946399770211428, 0.345672474242747, 0.522050247294828, 0.111688006436452, 0.885974851204082, </span></span>
-<span><span class="co">#&gt; 0.95425497321412, 0.0403807631228119, 0.4936161886435, 0.226063704816625, 0.858800339279696, 0.53093573381193, 0.0046381508000195, 0.277560080168769, 0.325203143060207, 0.588706276612356, 0.249684700742364, 0.0431172808166593, 0.110678787576035, 0.703753812005743, 0.939021238824353, 0.311169018037617, 0.0784929301589727, 0.321744091343135, 0.624905536882579, 0.440241849515587, 0.801345300627872, 0.279283805051818, 0.570713193388656, 0.0421280120499432, 0.190717455465347, 0.727086470695212, 0.826690050307661, </span></span>
-<span><span class="co">#&gt; 0.510721075348556, 0.567726165754721, 0.00115581974387169, 0.143778103170916, 0.865967083023861, 0.0825610605534166, 0.244570682058111, 0.98154315748252, 0.57758127944544, 0.24872636445798, 0.614953953772783, 0.0317573207430542, 0.146423544269055, 0.703072973992676, 0.065560708520934, 0.621807062299922, 0.937327365390956, 0.0878946147859097, 0.972803509328514, 0.0260107105132192, 0.725227952003479, 0.453706391621381, 0.566182404989377, 0.87273104628548, 0.55456317961216, 0.737652207259089, 0.62312916200608, </span></span>
-<span><span class="co">#&gt; 0.311028405791149, 0.392196484608576, 0.202087455429137, 0.852780389599502, 0.606830150820315, 0.75609801383689, 0.562516808742657, 0.275899012805894, 0.735558403655887, 0.549279793864116, 0.346127043943852, 0.514965634793043, 0.815767947584391, 0.526272569317371, 0.203040049877018, 0.848107680445537, 0.370494215050712, 0.303325170883909, 0.770597046939656, 0.733448554994538, 0.838905998272821, 0.569048842415214, 0.02628083829768, 0.486127228243276, 0.542681032791734, 0.836660116910934, 0.728664538124576, </span></span>
-<span><span class="co">#&gt; 0.555113806854934, 0.0734143974259496, 0.136502299224958, 0.684608696261421, 0.0996219362132251, 0.203785905148834, 0.365980138303712, 0.846195757621899, 0.236872595502064, 0.704877850599587, 0.107608830789104, 0.779068868607283, 0.25510568334721, 0.548043326009065, 0.0339015207719058, 0.806109476136044, 0.337752807186916, 0.916285858023912, 0.357106417883188, 0.975365013116971, 0.384378522634506, 0.488673535175622, 0.490776231279597, 0.0122546241618693, 0.641473200637847, 0.512574971653521, 0.320352118229493, </span></span>
-<span><span class="co">#&gt; 0.58143315766938, 0.617344408296049, 0.438274537678808, 0.170368980616331, 0.71508049662225, 0.747786548687145, 0.843914708122611, 0.534759046975523, 0.302235261537135, 0.456518182065338, 0.384342534467578, 0.249046854674816, 0.654626744799316, 0.95532370172441, 0.291082957293838, 0.650189086562023, 0.536359930876642, 0.597451866604388, 0.0248982694465667, 0.00484173954464495, 0.131378254387528, 0.0248171037528664, 0.0921294519212097, 0.475558224134147, 0.196656761225313, 0.814673948567361, 0.244059228105471, </span></span>
-<span><span class="co">#&gt; 0.488807637942955, 0.648882479639724, 0.158716470003128, 0.836977910948917, 0.436596529791132, 0.233495525084436, 0.298855992034078, 0.159421336837113, 0.585567104164511, 0.14877797709778, 0.179059559712186, 0.339221504982561, 0.18390193884261, 0.405541522195563, 0.613559618359432, 0.685671334387735, 0.823525600135326, 0.373982113786042, 0.952841004589573, 0.0188321589957923, 0.61237497231923, 0.463573763845488, 0.354729620506987, 0.882423028815538, 0.075802858453244, 0.88329119165428, 0.188221835764125, </span></span>
-<span><span class="co">#&gt; 0.215066746808589, 0.869532291544601, 0.0608380562625825, 0.234899600734934, 0.993015512824059, 0.678197727771476, 0.435486800502986, 0.37730994191952, 0.46118402434513, 0.801851871656254, 0.662966975243762, 0.46600366407074, 0.053259436506778, 0.23719791835174, 0.233239737572148, 0.230653600767255, 0.0617262739688158, 0.497118609258905, 0.24412508867681), c(0.486705572577193, 0.988708860939369, 0.0647511295974255, 0.157662777928635, 0.785348618403077, 0.542188289808109, 0.416547345230356, 0.998882649000734, </span></span>
-<span><span class="co">#&gt; 0.255673117004335, 0.507875671144575, 0.0789711775723845, 0.813668364426121, 0.38217916013673, 0.802182707935572, 0.197923636762425, 0.946399770211428, 0.345672474242747, 0.522050247294828, 0.111688006436452, 0.885974851204082, 0.95425497321412, 0.0403807631228119, 0.4936161886435, 0.226063704816625, 0.858800339279696, 0.53093573381193, 0.0046381508000195, 0.277560080168769, 0.325203143060207, 0.588706276612356, 0.249684700742364, 0.0431172808166593, 0.110678787576035, 0.703753812005743, 0.939</span></span>
 <span><span class="va">preds</span><span class="op">$</span><span class="va">.predict</span></span>
-<span><span class="co">#&gt; Error: object 'preds' not found</span></span></code></pre></div>
+<span><span class="co">#&gt;          1          2          3          4          5          6          7          8 </span></span>
+<span><span class="co">#&gt; 3.45875360 1.52227919 0.52880855 2.24035447 1.12107276 1.37713767 3.45942517 1.29280192 </span></span>
+<span><span class="co">#&gt;          9         10         11         12         13         14         15         16 </span></span>
+<span><span class="co">#&gt; 1.30480566 0.76693545 0.94033488 1.69198431 1.19066249 1.31326875 1.62227824 2.32393383 </span></span>
+<span><span class="co">#&gt;         17         18         19         20         21         22         23         24 </span></span>
+<span><span class="co">#&gt; 0.83445397 1.04509061 1.18655312 4.77834694 0.61093744 1.14584732 0.79738221 1.40808532 </span></span>
+<span><span class="co">#&gt;         25         26         27         28         29         30         31         32 </span></span>
+<span><span class="co">#&gt; 2.33526421 0.17577374 0.55496899 0.36529866 0.86681103 0.58204856 0.07682007 0.12715529 </span></span>
+<span><span class="co">#&gt;         33         34         35         36         37         38         39         40 </span></span>
+<span><span class="co">#&gt; 0.59371216 2.34226385 0.88236558 0.31311111 0.47272659 0.98720165 1.08509888 1.63224918 </span></span>
+<span><span class="co">#&gt;         41         42         43         44         45         46         47         48 </span></span>
+<span><span class="co">#&gt; 1.08438509 0.94669085 0.69782353 0.29352741 1.42720628 1.80572247 1.56637510 1.60908432 </span></span>
+<span><span class="co">#&gt;         49         50         51         52         53         54         55         56 </span></span>
+<span><span class="co">#&gt; 0.46992393 0.52987060 1.75371871 0.35670649 0.52323692 2.84421127 1.52535370 1.21156948 </span></span>
+<span><span class="co">#&gt;         57         58         59         60         61         62         63         64 </span></span>
+<span><span class="co">#&gt; 1.57453981 0.35167620 0.81628405 1.16983886 0.14744511 0.76252582 3.59290975 0.41181343 </span></span>
+<span><span class="co">#&gt;         65         66         67         68         69         70         71         72 </span></span>
+<span><span class="co">#&gt; 2.45049698 1.07340762 0.95589245 2.55009128 0.60641399 3.72815766 1.90521879 2.62652981 </span></span>
+<span><span class="co">#&gt;         73         74         75         76         77         78         79         80 </span></span>
+<span><span class="co">#&gt; 2.97443699 1.17261772 1.32266211 0.58847321 1.53256348 2.14620453 1.74196033 2.66079722 </span></span>
+<span><span class="co">#&gt;         81         82         83         84         85         86         87         88 </span></span>
+<span><span class="co">#&gt; 0.79429558 2.20897903 1.95718530 1.04773348 1.37572151 2.27213126 1.86737719 0.84856383 </span></span>
+<span><span class="co">#&gt;         89         90         91         92         93         94         95         96 </span></span>
+<span><span class="co">#&gt; 2.17397781 1.42471564 0.92667083 2.26161184 2.21898525 3.09128299 2.79446901 0.60598830 </span></span>
+<span><span class="co">#&gt;         97         98         99        100        101        102        103        104 </span></span>
+<span><span class="co">#&gt; 1.10399832 1.38587758 1.84832912 2.95928555 1.75660511 0.83714430 0.44663934 1.24111245 </span></span>
+<span><span class="co">#&gt;        105        106        107        108        109        110        111        112 </span></span>
+<span><span class="co">#&gt; 0.44727364 0.43799518 0.43482004 1.11403817 0.90800044 0.98409269 0.77391472 0.92785702 </span></span>
+<span><span class="co">#&gt;        113        114        115        116        117        118        119        120 </span></span>
+<span><span class="co">#&gt; 1.44316952 0.53590864 0.70992557 0.71795367 1.41767627 1.35755171 2.13572864 2.08429255 </span></span>
+<span><span class="co">#&gt;        121        122        123        124        125        126        127        128 </span></span>
+<span><span class="co">#&gt; 2.88077403 0.93061265 2.19668448 0.26132385 1.22310614 1.28597984 0.54794128 1.30397022 </span></span>
+<span><span class="co">#&gt;        129        130        131        132        133        134        135        136 </span></span>
+<span><span class="co">#&gt; 1.46473967 1.18312432 0.66352089 1.22851354 2.41435774 2.60599648 2.59238828 0.97740626 </span></span>
+<span><span class="co">#&gt;        137        138        139        140        141        142        143        144 </span></span>
+<span><span class="co">#&gt; 1.39710783 1.03604564 0.73902124 1.11037224 2.98249799 1.16391896 1.56621292 2.29963466 </span></span>
+<span><span class="co">#&gt;        145        146        147        148        149        150        151        152 </span></span>
+<span><span class="co">#&gt; 1.45009184 1.01222554 0.19617271 0.24803399 0.17703256 0.24552563 0.11939212 0.06335220 </span></span>
+<span><span class="co">#&gt;        153        154        155        156        157        158        159        160 </span></span>
+<span><span class="co">#&gt; 0.78697613 0.77510635 0.44432453 2.11483538 0.36391256 1.84129138 1.72201990 0.56247370 </span></span>
+<span><span class="co">#&gt;        161        162        163        164        165        166        167        168 </span></span>
+<span><span class="co">#&gt; 0.86526847 0.15402016 0.86083936 0.36209757 0.16949933 0.38394420 0.08913008 0.44101062 </span></span>
+<span><span class="co">#&gt;        169        170        171        172        173        174        175        176 </span></span>
+<span><span class="co">#&gt; 0.88294700 1.29236403 2.58720561 1.48371584 3.04050271 1.20272894 1.04586471 2.14226311 </span></span>
+<span><span class="co">#&gt;        177        178        179        180        181        182        183        184 </span></span>
+<span><span class="co">#&gt; 0.44197911 2.79409966 0.52716184 1.55409408 1.42580958 0.36625918 2.72545338 0.29608417 </span></span>
+<span><span class="co">#&gt;        185        186        187        188        189        190        191        192 </span></span>
+<span><span class="co">#&gt; 0.87043117 2.92144727 1.94118426 1.64383054 1.23770969 0.96011465 2.37079749 2.37095011 </span></span>
+<span><span class="co">#&gt;        193        194        195        196        197        198        199        200 </span></span>
+<span><span class="co">#&gt; 1.44371539 0.58065812 0.37881156 0.50417540 0.34462665 0.18876375 0.20226411 0.26617415</span></span></code></pre></div>
 <p>Once we obtain forecasts/predictions, we can evaluate the
 forecasting/predictive performance of the estimated SMI model by
 calculating forecast/prediction error measurements as desired.</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">## Calculate test set MSE and MAE</span></span>
 <span><span class="va">MSE_SMI_ppr</span> <span class="op">=</span> <span class="fu"><a href="../reference/point_measures.html">MSE</a></span><span class="op">(</span>residuals <span class="op">=</span> <span class="op">(</span><span class="va">preds</span><span class="op">$</span><span class="va">y</span> <span class="op">-</span> <span class="va">preds</span><span class="op">$</span><span class="va">.predict</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Error: object 'preds' not found</span></span>
 <span><span class="va">MSE_SMI_ppr</span></span>
-<span><span class="co">#&gt; Error: object 'MSE_SMI_ppr' not found</span></span>
+<span><span class="co">#&gt; [1] 0.01267398</span></span>
 <span><span class="va">MAE_SMI_ppr</span> <span class="op">=</span> <span class="fu"><a href="../reference/point_measures.html">MAE</a></span><span class="op">(</span>residuals <span class="op">=</span> <span class="op">(</span><span class="va">preds</span><span class="op">$</span><span class="va">y</span> <span class="op">-</span> <span class="va">preds</span><span class="op">$</span><span class="va">.predict</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Error: object 'preds' not found</span></span>
 <span><span class="va">MAE_SMI_ppr</span></span>
-<span><span class="co">#&gt; Error: object 'MAE_SMI_ppr' not found</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] 0.08956937</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="tuning-for-penalty-parameters">Tuning for penalty parameters<a class="anchor" aria-label="anchor" href="#tuning-for-penalty-parameters"></a>
@@ -763,7 +728,8 @@ parameter tuning as follows. Here, we use the initialisation option
 <div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Fitted optimal SMI model</span></span>
 <span><span class="va">smimodel_ppr_tune</span><span class="op">$</span><span class="va">fit</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">best</span></span>
-<span><span class="co">#&gt; $alpha</span></span>
+<span><span class="co">#&gt; SMI Model Fit:</span></span>
+<span><span class="co">#&gt; Index coefficients:</span></span>
 <span><span class="co">#&gt; 6 x 2 sparse Matrix of class "dgCMatrix"</span></span>
 <span><span class="co">#&gt;          index1   index2</span></span>
 <span><span class="co">#&gt; x_000 1.6282120 .       </span></span>
@@ -773,39 +739,19 @@ parameter tuning as follows. Here, we use the initialisation option
 <span><span class="co">#&gt; x_004 .         .       </span></span>
 <span><span class="co">#&gt; x_005 .         2.302190</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $derivatives</span></span>
-<span><span class="co">#&gt; # A tibble: 1,200 × 2</span></span>
-<span><span class="co">#&gt;       d1    d2</span></span>
-<span><span class="co">#&gt;    &lt;dbl&gt; &lt;dbl&gt;</span></span>
-<span><span class="co">#&gt;  1 0.973 0.385</span></span>
-<span><span class="co">#&gt;  2 1.41  0.550</span></span>
-<span><span class="co">#&gt;  3 4.06  0.190</span></span>
-<span><span class="co">#&gt;  4 1.74  0.461</span></span>
-<span><span class="co">#&gt;  5 1.62  0.603</span></span>
-<span><span class="co">#&gt;  6 4.04  0.159</span></span>
-<span><span class="co">#&gt;  7 2.60  0.389</span></span>
-<span><span class="co">#&gt;  8 1.90  0.599</span></span>
-<span><span class="co">#&gt;  9 2.89  0.386</span></span>
-<span><span class="co">#&gt; 10 0.777 0.374</span></span>
-<span><span class="co">#&gt; # ℹ 1,190 more rows</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $var_y</span></span>
+<span><span class="co">#&gt; Response variable:</span></span>
 <span><span class="co">#&gt; [1] "y"</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $vars_index</span></span>
+<span><span class="co">#&gt; Index variables:</span></span>
 <span><span class="co">#&gt; [1] "x_000" "x_001" "x_002" "x_003" "x_004" "x_005"</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $vars_s</span></span>
+<span><span class="co">#&gt; Spline variables (non-index):</span></span>
 <span><span class="co">#&gt; NULL</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $vars_linear</span></span>
+<span><span class="co">#&gt; Linear variables:</span></span>
 <span><span class="co">#&gt; NULL</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $neighbour</span></span>
-<span><span class="co">#&gt; [1] 0</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $gam</span></span>
-<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; GAM Fit:</span></span>
 <span><span class="co">#&gt; Family: gaussian </span></span>
 <span><span class="co">#&gt; Link function: identity </span></span>
 <span><span class="co">#&gt; </span></span>
@@ -815,10 +761,7 @@ parameter tuning as follows. Here, we use the initialisation option
 <span><span class="co">#&gt; Estimated degrees of freedom:</span></span>
 <span><span class="co">#&gt; 8.50 6.08  total = 15.58 </span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; REML score: -1028.858     </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; attr(,"class")</span></span>
-<span><span class="co">#&gt; [1] "smimodelFit" "list"</span></span></code></pre></div>
+<span><span class="co">#&gt; REML score: -1028.858</span></span></code></pre></div>
 <div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">## Selected penalty parameter combination</span></span>
 <span><span class="va">smimodel_ppr_tune</span><span class="op">$</span><span class="va">fit</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">best_lambdas</span></span>

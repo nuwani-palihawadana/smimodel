@@ -98,7 +98,7 @@ variables that should be included linearly into the model.}
 
 \item{lambda2}{Penalty parameter for L2 penalty.}
 
-\item{M}{Big-M value used in MIP.}
+\item{M}{Big-M value to be used in MIP.}
 
 \item{max.iter}{Maximum number of MIP iterations performed to update index
 coefficients for a given model.}

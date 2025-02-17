@@ -14,7 +14,16 @@ make_smimodelFit(
   index.names,
   alpha,
   s.vars = NULL,
-  linear.vars = NULL
+  linear.vars = NULL,
+  lambda0 = NULL,
+  lambda2 = NULL,
+  M = NULL,
+  max.iter = NULL,
+  tol = NULL,
+  tolCoefs = NULL,
+  TimeLimit = NULL,
+  MIPGap = NULL,
+  NonConvex = NULL
 )
 }
 \arguments{
@@ -44,6 +53,27 @@ of an index).}
 
 \item{linear.vars}{A \code{character} vector of names of the predictor
 variables that are included linearly in the model.}
+
+\item{lambda0}{Penalty parameter for L0 penalty.}
+
+\item{lambda2}{Penalty parameter for L2 penalty.}
+
+\item{M}{Big-M value to be used in MIP.}
+
+\item{max.iter}{Maximum number of MIP iterations performed to update index
+coefficients for a given model.}
+
+\item{tol}{Tolerance for the objective function value (loss) of MIP.}
+
+\item{tolCoefs}{Tolerance for coefficients.}
+
+\item{TimeLimit}{A limit for the total time (in seconds) expended in a single
+MIP iteration.}
+
+\item{MIPGap}{Relative MIP optimality gap.}
+
+\item{NonConvex}{The strategy for handling non-convex quadratic objectives or
+non-convex quadratic constraints in Gurobi solver.}
 }
 \value{
 An object of class \code{smimodelFit}, which is a list that contains
@@ -58,7 +88,17 @@ for which splines are fitted individually.}
 \item{vars_linear}{A \code{character} vector of names of the predictor
 variables that are included linearly in the model.}
 \item{neighbour}{Number of neighbours of each key considered in model
-fitting.} \item{gam}{Fitted \code{gam}.}
+fitting.} \item{gam}{Fitted \code{gam}.} \item{lambda0}{L0 penalty
+parameter used for model fitting.} \item{lambda2}{L2 penalty
+parameter used for model fitting.} \item{M}{Big-M value used in MIP.}
+\item{max.iter}{Maximum number of MIP iterations for a single round of
+index coefficients update.} \item{tol}{Tolerance for the objective function
+value (loss) used in solving MIP.} \item{tolCoefs}{Tolerance for
+coefficients used in updating index coefficients.} \item{TimeLimit}{Limit
+for the total time (in seconds) expended in a single MIP iteration.}
+\item{MIPGap}{Relative MIP optimality gap used.} \item{Nonconvex}{The
+strategy used for handling non-convex quadratic objectives or non-convex
+quadratic constraints in Gurobi solver.}
 }
 \description{
 Converts a given object of class \code{gam} to an object of class

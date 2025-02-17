@@ -33,8 +33,8 @@ update_alpha(
 \item{index.ind}{An integer vector that assigns group index for each
 predictor.}
 
-\item{dgz}{The \code{tibble} of derivatives of the estimated smooths from previous
-iteration.}
+\item{dgz}{The \code{tibble} of derivatives of the estimated smooths from
+previous iteration.}
 
 \item{alpha_old}{Vector of index coefficients from previous iteration.}
 
@@ -42,7 +42,7 @@ iteration.}
 
 \item{lambda2}{Penalty parameter for L2 penalty.}
 
-\item{M}{Big-M value used in MIP.}
+\item{M}{Big-M value to be used in MIP.}
 
 \item{TimeLimit}{A limit for the total time (in seconds) expended in a single
 MIP iteration.}

@@ -36,7 +36,11 @@ test_that("tests for model_smimodel()", {
   expect_equal(names(output1$fit[[1]]$best), c("alpha", "derivatives", 
                                                "var_y", "vars_index", 
                                                "vars_s", "vars_linear", 
-                                               "neighbour", "gam"))
+                                               "neighbour", "gam",
+                                               "lambda0", "lambda2",
+                                               "M", "max.iter",
+                                               "tol", "tolCoefs", "TimeLimit", 
+                                               "MIPGap", "Nonconvex"))
   expect_true(!is.null(output1$fit[[1]]$best$alpha))
   expect_true(!is.null(output1$fit[[1]]$best$gam))
   expect_equal(output1$fit[[1]]$best$vars_s, s.vars)

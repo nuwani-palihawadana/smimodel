@@ -56,7 +56,7 @@
 #'   variables that should be included linearly into the model.
 #' @param lambda0 Penalty parameter for L0 penalty.
 #' @param lambda2 Penalty parameter for L2 penalty.
-#' @param M Big-M value used in MIP.
+#' @param M Big-M value to be used in MIP.
 #' @param max.iter Maximum number of MIP iterations performed to update index
 #'   coefficients for a given model.
 #' @param tol Tolerance for the objective function value (loss) of MIP.
@@ -232,9 +232,9 @@ model_smimodel <- function(data, yvar, neighbour = 0, family = gaussian(),
 #'
 #' @param data Training data set on which models will be trained. Must be a data
 #'   set of class \code{tsibble}.(Make sure there are no additional date or time
-#'   related variables except for the \code{index} of the \code{tsibble}). 
+#'   related variables except for the \code{index} of the \code{tsibble}).
 #' @param yvar Name of the response variable as a character string.
-#' @param neighbour `neighbour` argument passed from the outer function. 
+#' @param neighbour `neighbour` argument passed from the outer function.
 #' @param family A description of the error distribution and link function to be
 #'   used in the model (see \code{\link{glm}} and \code{\link{family}}).
 #' @param index.vars A \code{character} vector of names of the predictor
@@ -273,7 +273,7 @@ model_smimodel <- function(data, yvar, neighbour = 0, family = gaussian(),
 #'   variables that should be included linearly into the model.
 #' @param lambda0 Penalty parameter for L0 penalty.
 #' @param lambda2 Penalty parameter for L2 penalty.
-#' @param M Big-M value used in MIP.
+#' @param M Big-M value to be used in MIP.
 #' @param max.iter Maximum number of MIP iterations performed to update index
 #'   coefficients for a given model.
 #' @param tol Tolerance for the objective function value (loss) of MIP.
@@ -440,7 +440,7 @@ utils::globalVariables(".")
 #'
 #' @param data Training data set on which models will be trained. Must be a data
 #'   set of class \code{tsibble}.(Make sure there are no additional date or time
-#'   related variables except for the \code{index} of the \code{tsibble}). 
+#'   related variables except for the \code{index} of the \code{tsibble}).
 #' @param yvar Name of the response variable as a character string.
 #' @param neighbour `neighbour` argument passed from the outer function.
 #' @param family A description of the error distribution and link function to be
@@ -652,6 +652,18 @@ new_smimodelFit <- function(data, yvar, neighbour = 0,
 #'   of an index).
 #' @param linear.vars A \code{character} vector of names of the predictor
 #'   variables that are included linearly in the model.
+#' @param lambda0 Penalty parameter for L0 penalty.
+#' @param lambda2 Penalty parameter for L2 penalty.
+#' @param M Big-M value to be used in MIP.
+#' @param max.iter Maximum number of MIP iterations performed to update index
+#'   coefficients for a given model.
+#' @param tol Tolerance for the objective function value (loss) of MIP.
+#' @param tolCoefs Tolerance for coefficients.
+#' @param TimeLimit A limit for the total time (in seconds) expended in a single
+#'   MIP iteration.
+#' @param MIPGap Relative MIP optimality gap.
+#' @param NonConvex The strategy for handling non-convex quadratic objectives or
+#'   non-convex quadratic constraints in Gurobi solver.
 #' @return An object of class \code{smimodelFit}, which is a list that contains
 #' following elements: \item{alpha}{A sparse matrix of index coefficients vectors.
 #' Each column of the matrix corresponds to the index coefficient vector of each
@@ -664,9 +676,24 @@ new_smimodelFit <- function(data, yvar, neighbour = 0,
 #'   \item{vars_linear}{A \code{character} vector of names of the predictor
 #'   variables that are included linearly in the model.}
 #'   \item{neighbour}{Number of neighbours of each key considered in model
-#'   fitting.} \item{gam}{Fitted \code{gam}.}
+#'   fitting.} \item{gam}{Fitted \code{gam}.} \item{lambda0}{L0 penalty
+#'   parameter used for model fitting.} \item{lambda2}{L2 penalty
+#'   parameter used for model fitting.} \item{M}{Big-M value used in MIP.}
+#'   \item{max.iter}{Maximum number of MIP iterations for a single round of
+#'   index coefficients update.} \item{tol}{Tolerance for the objective function
+#'    value (loss) used in solving MIP.} \item{tolCoefs}{Tolerance for
+#'    coefficients used in updating index coefficients.} \item{TimeLimit}{Limit
+#'    for the total time (in seconds) expended in a single MIP iteration.}
+#'    \item{MIPGap}{Relative MIP optimality gap used.} \item{Nonconvex}{The
+#'    strategy used for handling non-convex quadratic objectives or non-convex
+#'    quadratic constraints in Gurobi solver.}
 make_smimodelFit <- function(x, yvar, neighbour, index.vars, index.ind, index.data,
-                             index.names, alpha, s.vars = NULL, linear.vars = NULL){
+                             index.names, alpha, s.vars = NULL, linear.vars = NULL,
+                             lambda0 = NULL, lambda2 = NULL, 
+                             M = NULL, max.iter = NULL, 
+                             tol = NULL, tolCoefs = NULL,
+                             TimeLimit = NULL, 
+                             MIPGap = NULL, NonConvex = NULL){
   # Constructing a new index coefficient vector to have all predictors in each
   # index, and structuring output
   ind_pos <- split(1:length(index.ind), index.ind)
@@ -707,7 +734,12 @@ make_smimodelFit <- function(x, yvar, neighbour, index.vars, index.ind, index.da
   smimodel <- list("alpha" = alpha, "derivatives" = derivs, "var_y" = yvar, 
                    "vars_index" = index.vars, "vars_s" = s.vars,
                    "vars_linear" = linear.vars, 
-                   "neighbour" = neighbour, "gam" = x)
+                   "neighbour" = neighbour, "gam" = x,
+                   "lambda0" = lambda0, "lambda2" = lambda2,
+                   "M" = M, "max.iter" = max.iter,
+                   "tol" = tol, "tolCoefs" = tolCoefs,
+                   "TimeLimit" = TimeLimit, "MIPGap" = MIPGap,
+                   "Nonconvex" = NonConvex)
   class(smimodel) <- c("smimodelFit", "list")
   return(smimodel)
 }
@@ -720,10 +752,10 @@ make_smimodelFit <- function(x, yvar, neighbour, index.vars, index.ind, index.da
 #' @param object A \code{smimodelFit} object.
 #' @param data Training data set on which models will be trained. Must be a data
 #'   set of class \code{tsibble}.(Make sure there are no additional date or time
-#'   related variables except for the \code{index} of the \code{tsibble}). 
+#'   related variables except for the \code{index} of the \code{tsibble}).
 #' @param lambda0 Penalty parameter for L0 penalty.
 #' @param lambda2 Penalty parameter for L2 penalty.
-#' @param M Big-M value used in MIP.
+#' @param M Big-M value to be used in MIP.
 #' @param max.iter Maximum number of MIP iterations performed to update index
 #'   coefficients for a given model.
 #' @param tol Tolerance for the objective function value (loss) of MIP.
@@ -806,7 +838,12 @@ update_smimodelFit <- function(object, data, lambda0 = 1, lambda2 = 1,
                                        index.data = NULL, index.names = index.names,
                                        alpha = best_alpha1$best_alpha, 
                                        s.vars = object$vars_s,
-                                       linear.vars = object$vars_linear)
+                                       linear.vars = object$vars_linear,
+                                       lambda0 = lambda0, lambda2 = lambda2, 
+                                       M = M, max.iter = max.iter, 
+                                       tol = tol, tolCoefs = tolCoefs,
+                                       TimeLimit = TimeLimit, 
+                                       MIPGap = MIPGap, NonConvex = NonConvex)
   }else{
     # Checking models with higher number of indices
     alpha_current <- best_alpha1$best_alpha
@@ -971,7 +1008,12 @@ update_smimodelFit <- function(object, data, lambda0 = 1, lambda2 = 1,
                                                index.names = index.names,
                                                alpha = best_alpha2$best_alpha, 
                                                s.vars = object$vars_s,
-                                               linear.vars = object$vars_linear)
+                                               linear.vars = object$vars_linear,
+                                               lambda0 = lambda0, lambda2 = lambda2, 
+                                               M = M, max.iter = max.iter, 
+                                               tol = tol, tolCoefs = tolCoefs,
+                                               TimeLimit = TimeLimit, 
+                                               MIPGap = MIPGap, NonConvex = NonConvex)
             break
           }
         }else{
@@ -1059,7 +1101,12 @@ update_smimodelFit <- function(object, data, lambda0 = 1, lambda2 = 1,
                                          index.names = dat_names,
                                          alpha = alpha_current, 
                                          s.vars = object$vars_s,
-                                         linear.vars = object$vars_linear)
+                                         linear.vars = object$vars_linear,
+                                         lambda0 = lambda0, lambda2 = lambda2, 
+                                         M = M, max.iter = max.iter, 
+                                         tol = tol, tolCoefs = tolCoefs,
+                                         TimeLimit = TimeLimit, 
+                                         MIPGap = MIPGap, NonConvex = NonConvex)
     }
   }
   return(final_smimodel)
@@ -1091,7 +1138,7 @@ update_smimodelFit <- function(object, data, lambda0 = 1, lambda2 = 1,
 #' @param alpha_old Current vector of index coefficients.
 #' @param lambda0 Penalty parameter for L0 penalty.
 #' @param lambda2 Penalty parameter for L2 penalty.
-#' @param M Big-M value used in MIP.
+#' @param M Big-M value to be used in MIP.
 #' @param max.iter Maximum number of MIP iterations performed to update index
 #'   coefficients for a given model.
 #' @param tol Tolerance for loss.
@@ -1275,12 +1322,12 @@ inner_update <- function(x, data, yvar, family = gaussian(), index.vars,
 #' @param num_ind Number of indices.
 #' @param index.ind An integer vector that assigns group index for each
 #'   predictor.
-#' @param dgz The \code{tibble} of derivatives of the estimated smooths from previous
-#'   iteration.
+#' @param dgz The \code{tibble} of derivatives of the estimated smooths from
+#'   previous iteration.
 #' @param alpha_old Vector of index coefficients from previous iteration.
 #' @param lambda0 Penalty parameter for L0 penalty.
 #' @param lambda2 Penalty parameter for L2 penalty.
-#' @param M Big-M value used in MIP.
+#' @param M Big-M value to be used in MIP.
 #' @param TimeLimit A limit for the total time (in seconds) expended in a single
 #'   MIP iteration.
 #' @param MIPGap Relative MIP optimality gap.
@@ -1369,8 +1416,8 @@ update_alpha <- function(Y, X, num_pred, num_ind, index.ind, dgz, alpha_old,
 #'   penalty.
 #' @param lambda2 If \code{init.type = "penalisedReg"}, penalty parameter for L2
 #'   penalty.
-#' @param M If \code{init.type = "penalisedReg"}, the big-M value used in the
-#'   MIP.
+#' @param M If \code{init.type = "penalisedReg"}, the big-M value to be used in
+#'   the MIP.
 #' @return A list containing the following components:
 #'   \item{alpha_init}{Normalised vector of index coefficients.}
 #' \item{alpha_nonNormalised}{Non-normalised (i.e. prior to normalising)

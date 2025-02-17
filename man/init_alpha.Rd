@@ -32,8 +32,8 @@ penalty.}
 \item{lambda2}{If \code{init.type = "penalisedReg"}, penalty parameter for L2
 penalty.}
 
-\item{M}{If \code{init.type = "penalisedReg"}, the big-M value used in the
-MIP.}
+\item{M}{If \code{init.type = "penalisedReg"}, the big-M value to be used in
+the MIP.}
 }
 \value{
 A list containing the following components:

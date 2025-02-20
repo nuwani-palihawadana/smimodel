@@ -114,18 +114,18 @@ library(tsibble)
 # Simulate data
 n = 1205
 set.seed(123)
-sim_data <- tibble(x_lag_000 = runif(n)) %>%
+sim_data <- tibble(x_lag_000 = runif(n)) |> 
   mutate(
     # Add x_lags
-    x_lag = lag_matrix(x_lag_000, 5)) %>%
-  unpack(x_lag, names_sep = "_") %>%
+    x_lag = lag_matrix(x_lag_000, 5)) |> 
+  unpack(x_lag, names_sep = "_") |> 
   mutate(
     # Response variable
     y1 = (0.9*x_lag_000 + 0.6*x_lag_001 + 0.45*x_lag_003)^3 + rnorm(n, sd = 0.1),
     # Add an index to the data set
-    inddd = seq(1, n)) %>%
-  drop_na() %>%
-  select(inddd, y1, starts_with("x_lag")) %>%
+    inddd = seq(1, n)) |> 
+  drop_na() |> 
+  select(inddd, y1, starts_with("x_lag")) |> 
   # Make the data set a `tsibble`
   as_tsibble(index = inddd)
 
@@ -160,19 +160,19 @@ autoplot(object = smimodel_ppr)
 
 # Obtain residuals and fitted values
 augment(x = smimodel_ppr)
-#> # A tibble: 1,000 × 5
-#>    Index New     Old  .resid .fitted
-#>    <int> <chr> <dbl>   <dbl>   <dbl>
-#>  1     6 1         1  0.0859   0.495
-#>  2     7 1         1  0.0766   0.737
-#>  3     8 1         1  0.137    3.70 
-#>  4     9 1         1  0.0173   1.15 
-#>  5    10 1         1  0.118    0.942
-#>  6    11 1         1 -0.201    3.65 
-#>  7    12 1         1 -0.0471   1.83 
-#>  8    13 1         1  0.0111   1.28 
-#>  9    14 1         1 -0.0464   2.46 
-#> 10    15 1         1  0.0243   0.261
+#> # A tibble: 1,000 × 3
+#>    Index  .resid .fitted
+#>    <int>   <dbl>   <dbl>
+#>  1     6  0.0859   0.495
+#>  2     7  0.0766   0.737
+#>  3     8  0.137    3.70 
+#>  4     9  0.0173   1.15 
+#>  5    10  0.118    0.942
+#>  6    11 -0.201    3.65 
+#>  7    12 -0.0471   1.83 
+#>  8    13  0.0111   1.28 
+#>  9    14 -0.0464   2.46 
+#> 10    15  0.0243   0.261
 #> # ℹ 990 more rows
 ```
 

@@ -196,7 +196,9 @@ model_smimodel <- function(data, yvar, neighbour = 0, family = gaussian(),
     df_cat <- data1 |>
       dplyr::filter((abs(num_key - ref$key_num[i]) <= neighbour) |
                       (abs(num_key - ref$key_num[i] + NROW(ref)) <= neighbour) |
-                      (abs(num_key - ref$key_num[i] - NROW(ref)) <= neighbour)) 
+                      (abs(num_key - ref$key_num[i] - NROW(ref)) <= neighbour))
+    df_cat <- df_cat |>
+      drop_na()
     smimodels_list[[i]] <- smimodel.fit(data = df_cat, yvar = yvar, 
                                         neighbour = neighbour,
                                         family = family,

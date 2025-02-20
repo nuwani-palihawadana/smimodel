@@ -114,7 +114,9 @@ model_ppr <- function(data, yvar, neighbour = 0, index.vars, num_ind = 5, ...){
     df_cat <- data1 |>
       dplyr::filter((abs(num_key - ref$key_num[i]) <= neighbour) |
                       (abs(num_key - ref$key_num[i] + NROW(ref)) <= neighbour) |
-                      (abs(num_key - ref$key_num[i] - NROW(ref)) <= neighbour)) 
+                      (abs(num_key - ref$key_num[i] - NROW(ref)) <= neighbour))
+    df_cat <- df_cat |>
+      drop_na()
     ppr_list[[i]] <- stats::ppr(formula = as.formula(pre.formula),
                                 data = df_cat, nterms = num_ind, ... = ...)
     dot_args <- list(...)

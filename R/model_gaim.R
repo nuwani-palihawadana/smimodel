@@ -145,7 +145,9 @@ model_gaim <- function(data, yvar, neighbour = 0, index.vars, index.ind,
     df_cat <- data1 |>
       dplyr::filter((abs(num_key - ref$key_num[i]) <= neighbour) |
                       (abs(num_key - ref$key_num[i] + NROW(ref)) <= neighbour) |
-                      (abs(num_key - ref$key_num[i] - NROW(ref)) <= neighbour)) 
+                      (abs(num_key - ref$key_num[i] - NROW(ref)) <= neighbour))
+    df_cat <- df_cat |>
+      drop_na()
     gaim_list[[i]] <- cgaim::cgaim(formula = as.formula(pre.formula),
                                    data = df_cat, ... = ...)
     modelFrame <- model.frame(formula = as.formula(pre.formula), 

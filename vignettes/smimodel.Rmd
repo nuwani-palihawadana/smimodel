@@ -47,19 +47,19 @@ n = 1405
 set.seed(123)
 
 # Generate data
-sim_data <- tibble(x_000 = runif(n)) %>%
+sim_data <- tibble(x_000 = runif(n)) |> 
   mutate(
     # Add x_lags
-    x = lag_matrix(x_000, 5)) %>%
-  unpack(x, names_sep = "_") %>%
+    x = lag_matrix(x_000, 5)) |> 
+  unpack(x, names_sep = "_") |> 
   mutate(
     # Response variable
     y = (0.9*x_000 + 0.6*x_001 + 0.45*x_003)^3 + 
       (0.35*x_002 + 0.7*x_005)^2 + rnorm(n, sd = 0.1),
     # Add an index to the data set
-    inddd = seq(1, n)) %>%
-  drop_na() %>%
-  select(inddd, y, starts_with("x_")) %>%
+    inddd = seq(1, n)) |> 
+  drop_na() |> 
+  select(inddd, y, starts_with("x_")) |> 
   # Make the data set a `tsibble`
   as_tsibble(index = inddd)
 ```

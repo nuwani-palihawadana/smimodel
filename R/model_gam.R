@@ -121,11 +121,13 @@ model_gam <- function(data, yvar, family = gaussian(), neighbour = 0, s.vars,
     df_cat <- data1 |>
       dplyr::filter((abs(num_key - ref$key_num[i]) <= neighbour) |
                       (abs(num_key - ref$key_num[i] + NROW(ref)) <= neighbour) |
-                      (abs(num_key - ref$key_num[i] - NROW(ref)) <= neighbour)) 
-     gam_list[[i]] <- mgcv::gam(as.formula(pre.formula), family = family, 
+                      (abs(num_key - ref$key_num[i] - NROW(ref)) <= neighbour))
+    df_cat <- df_cat |>
+      drop_na()
+    gam_list[[i]] <- mgcv::gam(as.formula(pre.formula), family = family, 
                                 method = "REML", data = df_cat, ... = ...)
     add <- df_cat |>
-      drop_na() |>
+      #drop_na() |>
       select({{ data_index }}, {{ key11 }})
     gam_list[[i]]$model <- bind_cols(add, gam_list[[i]]$model)
     gam_list[[i]]$model <- as_tsibble(gam_list[[i]]$model,

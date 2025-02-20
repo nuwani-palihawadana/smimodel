@@ -226,6 +226,8 @@ greedy_smimodel <- function(data, val.data, yvar, neighbour = 0,
       dplyr::filter((abs(num_key - ref$key_num[i]) <= neighbour) |
                       (abs(num_key - ref$key_num[i] + NROW(ref)) <= neighbour) |
                       (abs(num_key - ref$key_num[i] - NROW(ref)) <= neighbour))
+    df_cat <- df_cat |>
+      drop_na()
     df_cat_val <- data2 |>
       dplyr::filter((abs(num_key - ref$key_num[i]) <= neighbour) |
                       (abs(num_key - ref$key_num[i] + NROW(ref)) <= neighbour) |

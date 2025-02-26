@@ -401,9 +401,13 @@ predict.pprFit <- function(object, newdata,
     predictions =  vector(mode = "list", length = NROW(newdata))
     for(m in 1:(NROW(newdata) - 1)){
       data_temp = newdata[m, ]
-      key22 = data_temp[ , {{ key11 }}][[1]]
-      key22_pos = which(object$key == key22)
-      pred <- predict(object$fit[[key22_pos]], data_temp, type = "response")
+      if(any(is.na(data_temp[ , 1:(NCOL(data_temp) - 2)]))){
+        pred <- NA
+      }else{
+        key22 = data_temp[ , {{ key11 }}][[1]]
+        key22_pos = which(object$key == key22)
+        pred <- predict(object$fit[[key22_pos]], data_temp, type = "response")
+      }
       predictions[[m]] <- pred
       x_seq = seq((m+1), (m+((max(recursive_colRange) - min(recursive_colRange)) + 1)))
       y_seq = recursive_colRange
@@ -414,10 +418,14 @@ predict.pprFit <- function(object, newdata,
       }
     }
     data_temp = newdata[NROW(newdata), ]
-    key22 = data_temp[ , {{ key11 }}][[1]]
-    key22_pos = which(object$key == key22)
-    predictions[[NROW(newdata)]] = predict(object$fit[[key22_pos]], data_temp,
-                                           type = "response")
+    if(any(is.na(data_temp[ , 1:(NCOL(data_temp) - 2)]))){
+      pred <- NA
+    }else{
+      key22 = data_temp[ , {{ key11 }}][[1]]
+      key22_pos = which(object$key == key22)
+      pred <- predict(object$fit[[key22_pos]], data_temp, type = "response")
+    }
+    predictions[[NROW(newdata)]] <- pred
     pred <- unlist(predictions)
     pred_F <- newdata |>
       mutate(.predict = pred) |>

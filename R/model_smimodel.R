@@ -1386,11 +1386,28 @@ update_alpha <- function(Y, X, num_pred, num_ind, index.ind, dgz, alpha_old,
                                         nobj = 2*num_ind*num_pred), # lower default bound is 0
                   maximum = FALSE)
   # Solving
-  sol <- ROI::ROI_solve(init, solver = "gurobi", 
-                        TimeLimit = TimeLimit, 
-                        MIPGap = MIPGap, 
-                        NonConvex = NonConvex, 
-                        verbose = verbose)
+  sol <- tryCatch(
+    {
+      ROI::ROI_solve(init, solver = "gurobi", 
+                     TimeLimit = TimeLimit, 
+                     MIPGap = MIPGap, 
+                     NonConvex = NonConvex, 
+                     verbose = verbose)
+    },
+    error = function(e) {
+      message("Error: ", conditionMessage(e))
+      ROI::ROI_solve(init, solver = "gurobi", 
+                     TimeLimit = TimeLimit, 
+                     MIPGap = MIPGap, 
+                     NonConvex = 2, 
+                     verbose = verbose)
+    }
+  )
+  # sol <- ROI::ROI_solve(init, solver = "gurobi", 
+  #                       TimeLimit = TimeLimit, 
+  #                       MIPGap = MIPGap, 
+  #                       NonConvex = NonConvex, 
+  #                       verbose = verbose)
   # Binary variables check
   coefs <- sol$solution[1:(num_ind*num_pred)]
   indicators <- sol$solution[((num_ind*num_pred)+1):(num_ind*num_pred*2)]

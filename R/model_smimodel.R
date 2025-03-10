@@ -898,8 +898,22 @@ update_smimodelFit <- function(object, data, lambda0 = 1, lambda2 = 1,
         Yhat <- as.matrix(fun1$fitted.values, ncol = 1, nrow = length(fun1$fitted.values))
         # Residuals (R) matrix
         R <- as.matrix(data[ , object$var_y] - Yhat)
-        coefs_init <- init_alpha(Y = R, X = X_init, index.ind = index.ind,
-                                 init.type = "reg")$alpha_init
+        # coefs_init <- init_alpha(Y = R, X = X_init, index.ind = index.ind,
+        #                          init.type = "reg")$alpha_init
+        # Initialising coefficients for the new index
+        # Data
+        lm.data <- data.frame(cbind(R, X_init))
+        # Formula
+        lm.formula <- lapply(colnames(X_init), function(var) paste0(var)) |>
+          paste(collapse = "+")
+        lm.formula <- paste(object$var_y, "~", lm.formula, "- 1")
+        # Fit a linear regression (without intercept)
+        lm.model <- stats::lm(formula = as.formula(lm.formula), data = lm.data)
+        # Initialised (estimated) coefficients
+        coefs_init <- lm.model$coefficients
+        # Convert NAs to zero
+        na_indx <- which(is.na(coefs_init))
+        coefs_init[na_indx] <- 0
         new_ind <- numeric(length = num_pred)
         new_ind[drop_pred_ind] <- coefs_init
         alpha <- c(alpha_current, new_ind)

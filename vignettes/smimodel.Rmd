@@ -118,12 +118,12 @@ smimodel_ppr$fit[[1]]$best
 #> Index coefficients:
 #> 6 x 2 sparse Matrix of class "dgCMatrix"
 #>          index1   index2
-#> x_000 1.6279857 .       
-#> x_001 1.0728102 .       
-#> x_002 .         1.211800
-#> x_003 0.8107054 .       
+#> x_000 1.6277830 .       
+#> x_001 1.0729663 .       
+#> x_002 .         1.213462
+#> x_003 0.8107518 .       
 #> x_004 .         .       
-#> x_005 .         2.298439
+#> x_005 .         2.296776
 #> 
 #> Response variable:
 #> [1] "y"
@@ -147,7 +147,7 @@ smimodel_ppr$fit[[1]]$best
 #> Estimated degrees of freedom:
 #> 8.5 6.1  total = 15.6 
 #> 
-#> REML score: -1028.854
+#> REML score: -1028.843
 ```
 
 
@@ -156,12 +156,12 @@ smimodel_ppr$fit[[1]]$best
 smimodel_ppr$fit[[1]]$best$alpha
 #> 6 x 2 sparse Matrix of class "dgCMatrix"
 #>          index1   index2
-#> x_000 1.6279857 .       
-#> x_001 1.0728102 .       
-#> x_002 .         1.211800
-#> x_003 0.8107054 .       
+#> x_000 1.6277830 .       
+#> x_001 1.0729663 .       
+#> x_002 .         1.213462
+#> x_003 0.8107518 .       
 #> x_004 .         .       
-#> x_005 .         2.298439
+#> x_005 .         2.296776
 ```
 
 #### SMI model with "additive" initialisation:
@@ -175,6 +175,7 @@ smimodel_additive <- model_smimodel(data = sim_train,
 #> [1] "model 1"
 #> [1] "Loss increased for 3 consecutive iterations!"
 #> [1] "Loss increased for 3 consecutive iterations!"
+#> [1] "Loss increased for 3 consecutive iterations!"
 #> [1] "Final model fitted!"
 ```
 
@@ -185,13 +186,13 @@ smimodel_additive$fit[[1]]$best
 #> SMI Model Fit:
 #> Index coefficients:
 #> 6 x 2 sparse Matrix of class "dgCMatrix"
-#>          index1    index2
-#> x_000 0.4634955 .        
-#> x_001 0.3054954 .        
-#> x_002 .         0.3451773
-#> x_003 0.2310091 .        
-#> x_004 .         .        
-#> x_005 .         0.6548227
+#>          index1   index2
+#> x_000 0.4634888 .       
+#> x_001 0.3055250 .       
+#> x_002 .         0.345865
+#> x_003 0.2309862 .       
+#> x_004 .         .       
+#> x_005 .         0.654135
 #> 
 #> Response variable:
 #> [1] "y"
@@ -213,9 +214,9 @@ smimodel_additive$fit[[1]]$best
 #> y ~ s(index1, bs = "cr") + s(index2, bs = "cr")
 #> 
 #> Estimated degrees of freedom:
-#> 8.50 6.09  total = 15.59 
+#> 8.5 6.1  total = 15.6 
 #> 
-#> REML score: -1028.856
+#> REML score: -1028.838
 ```
 
 
@@ -223,13 +224,13 @@ smimodel_additive$fit[[1]]$best
 # Estimated index structure
 smimodel_additive$fit[[1]]$best$alpha
 #> 6 x 2 sparse Matrix of class "dgCMatrix"
-#>          index1    index2
-#> x_000 0.4634955 .        
-#> x_001 0.3054954 .        
-#> x_002 .         0.3451773
-#> x_003 0.2310091 .        
-#> x_004 .         .        
-#> x_005 .         0.6548227
+#>          index1   index2
+#> x_000 0.4634888 .       
+#> x_001 0.3055250 .       
+#> x_002 .         0.345865
+#> x_003 0.2309862 .       
+#> x_004 .         .       
+#> x_005 .         0.654135
 ```
 
 #### SMI model with "linear" initialisation:
@@ -242,6 +243,8 @@ smimodel_linear <- model_smimodel(data = sim_train,
                                   initialise = "linear")
 #> [1] "model 1"
 #> [1] "Tolerance for loss reached!"
+#> [1] "Tolerance for loss reached!"
+#> [1] "Loss increased for 3 consecutive iterations!"
 #> [1] "Loss increased for 3 consecutive iterations!"
 #> [1] "Final model fitted!"
 ```
@@ -252,14 +255,14 @@ smimodel_linear <- model_smimodel(data = sim_train,
 smimodel_linear$fit[[1]]$best
 #> SMI Model Fit:
 #> Index coefficients:
-#> 6 x 1 sparse Matrix of class "dgCMatrix"
-#>           index1
-#> x_000 0.40811741
-#> x_001 0.26853838
-#> x_002 0.04185720
-#> x_003 0.20411136
-#> x_004 .         
-#> x_005 0.07737565
+#> 6 x 2 sparse Matrix of class "dgCMatrix"
+#>          index1    index2
+#> x_000 0.4636130 .        
+#> x_001 0.3055494 .        
+#> x_002 .         0.3467785
+#> x_003 0.2308376 .        
+#> x_004 .         .        
+#> x_005 .         0.6532215
 #> 
 #> Response variable:
 #> [1] "y"
@@ -278,32 +281,32 @@ smimodel_linear$fit[[1]]$best
 #> Link function: identity 
 #> 
 #> Formula:
-#> y ~ s(index1, bs = "cr")
+#> y ~ s(index1, bs = "cr") + s(index2, bs = "cr")
 #> 
 #> Estimated degrees of freedom:
-#> 7.8  total = 8.8 
+#> 8.50 6.12  total = 15.62 
 #> 
-#> REML score: -445.1356
+#> REML score: -1028.798
 ```
 
 
 ``` r
 # Estimated index structure
 smimodel_linear$fit[[1]]$best$alpha
-#> 6 x 1 sparse Matrix of class "dgCMatrix"
-#>           index1
-#> x_000 0.40811741
-#> x_001 0.26853838
-#> x_002 0.04185720
-#> x_003 0.20411136
-#> x_004 .         
-#> x_005 0.07737565
+#> 6 x 2 sparse Matrix of class "dgCMatrix"
+#>          index1    index2
+#> x_000 0.4636130 .        
+#> x_001 0.3055494 .        
+#> x_002 .         0.3467785
+#> x_003 0.2308376 .        
+#> x_004 .         .        
+#> x_005 .         0.6532215
 ```
 
 
-In this case, the SMI models fitted with "ppr" and "additive" initialisation options have correctly identified the index structure of the response $y$ by estimating two linear combinations (i.e. indices), while dropping out the irrelevant predictor $x\_004$. While correctly identifying $x\_004$ as an irrelevant predictor variable, the SMI model estimated with "linear" intialisation however, has not correctly identified the index structure of the model -- has estimated only a single index instead of the two indices. 
+In this case, all three SMI models fitted (with "ppr", "additive" and "linear" initialisation options) have correctly identified the index structure of the response $y$ by estimating two linear combinations (i.e. indices), while dropping out the irrelevant predictor $x\_004$. 
 
-Thus, as mentioned earlier, the final estimated model can change depending on the initialisation option chosen. Hence, the users are encouraged to experiment with different available initialisation options when choosing the best fit for the data/application of interest. (In a real-world problem (where the true model is unknown), it will be useful to fit SMI models with different initialisation options, and see which option gives the best forecasting/prediction accuracy.)
+(Note: The final estimated model may change depending on the initialisation option chosen. Hence, the users are encouraged to experiment with different available initialisation options when choosing the best fit for the data/application of interest. In a real-world problem (where the true model is unknown), it will be useful to fit SMI models with different initialisation options, and see which option gives the best forecasting/prediction accuracy.)
 
 ### Visualisation of estimated smooths
 
@@ -328,16 +331,16 @@ augment(x = smimodel_ppr)
 #> # A tibble: 1,200 × 3
 #>    Index   .resid .fitted
 #>    <int>    <dbl>   <dbl>
-#>  1     6  0.0566    0.757
-#>  2     7 -0.0397    1.50 
-#>  3     8 -0.0552    3.78 
-#>  4     9  0.0499    1.78 
+#>  1     6  0.0560    0.758
+#>  2     7 -0.0398    1.50 
+#>  3     8 -0.0549    3.78 
+#>  4     9  0.0500    1.78 
 #>  5    10  0.155     1.88 
 #>  6    11 -0.145     3.70 
 #>  7    12  0.200     2.16 
-#>  8    13 -0.00571   2.20 
-#>  9    14 -0.0585    2.78 
-#> 10    15  0.0690    0.588
+#>  8    13 -0.00581   2.20 
+#>  9    14 -0.0587    2.78 
+#> 10    15  0.0687    0.588
 #> # ℹ 1,190 more rows
 ```
 
@@ -351,55 +354,55 @@ Based on an estimated SMI model, we obtain forecasts/predictions on a test set a
 preds = predict(object = smimodel_ppr, newdata = sim_test)
 preds$.predict
 #>          1          2          3          4          5          6          7          8 
-#> 3.45875360 1.52227919 0.52880855 2.24035447 1.12107276 1.37713767 3.45942517 1.29280192 
+#> 3.45843482 1.52233929 0.52915671 2.23979539 1.12095152 1.37701048 3.45916664 1.29311926 
 #>          9         10         11         12         13         14         15         16 
-#> 1.30480566 0.76693545 0.94033488 1.69198431 1.19066249 1.31326875 1.62227824 2.32393383 
+#> 1.30501441 0.76679807 0.94005154 1.69171847 1.19072414 1.31337854 1.62219972 2.32412054 
 #>         17         18         19         20         21         22         23         24 
-#> 0.83445397 1.04509061 1.18655312 4.77834694 0.61093744 1.14584732 0.79738221 1.40808532 
+#> 0.83485639 1.04503698 1.18641786 4.77792576 0.61146893 1.14608392 0.79743662 1.40762829 
 #>         25         26         27         28         29         30         31         32 
-#> 2.33526421 0.17577374 0.55496899 0.36529866 0.86681103 0.58204856 0.07682007 0.12715529 
+#> 2.33510632 0.17597884 0.55499981 0.36522200 0.86654016 0.58190432 0.07687419 0.12706185 
 #>         33         34         35         36         37         38         39         40 
-#> 0.59371216 2.34226385 0.88236558 0.31311111 0.47272659 0.98720165 1.08509888 1.63224918 
+#> 0.59343493 2.34185400 0.88253877 0.31336997 0.47271658 0.98664796 1.08475055 1.63218384 
 #>         41         42         43         44         45         46         47         48 
-#> 1.08438509 0.94669085 0.69782353 0.29352741 1.42720628 1.80572247 1.56637510 1.60908432 
+#> 1.08462208 0.94685717 0.69773155 0.29353883 1.42673101 1.80559706 1.56668680 1.60935120 
 #>         49         50         51         52         53         54         55         56 
-#> 0.46992393 0.52987060 1.75371871 0.35670649 0.52323692 2.84421127 1.52535370 1.21156948 
+#> 0.47009455 0.52983748 1.75310041 0.35657771 0.52346543 2.84389939 1.52548116 1.21179344 
 #>         57         58         59         60         61         62         63         64 
-#> 1.57453981 0.35167620 0.81628405 1.16983886 0.14744511 0.76252582 3.59290975 0.41181343 
+#> 1.57460678 0.35170993 0.81595949 1.16945351 0.14737637 0.76259052 3.59274308 0.41202691 
 #>         65         66         67         68         69         70         71         72 
-#> 2.45049698 1.07340762 0.95589245 2.55009128 0.60641399 3.72815766 1.90521879 2.62652981 
+#> 2.45045046 1.07377542 0.95611899 2.54999411 0.60652246 3.72765379 1.90551702 2.62672272 
 #>         73         74         75         76         77         78         79         80 
-#> 2.97443699 1.17261772 1.32266211 0.58847321 1.53256348 2.14620453 1.74196033 2.66079722 
+#> 2.97464279 1.17286068 1.32248353 0.58831081 1.53233149 2.14607215 1.74226840 2.66106411 
 #>         81         82         83         84         85         86         87         88 
-#> 0.79429558 2.20897903 1.95718530 1.04773348 1.37572151 2.27213126 1.86737719 0.84856383 
+#> 0.79446176 2.20873718 1.95711933 1.04782140 1.37583209 2.27205189 1.86749216 0.84887843 
 #>         89         90         91         92         93         94         95         96 
-#> 2.17397781 1.42471564 0.92667083 2.26161184 2.21898525 3.09128299 2.79446901 0.60598830 
+#> 2.17380289 1.42472135 0.92674929 2.26138084 2.21902797 3.09125236 2.79493313 0.60640910 
 #>         97         98         99        100        101        102        103        104 
-#> 1.10399832 1.38587758 1.84832912 2.95928555 1.75660511 0.83714430 0.44663934 1.24111245 
+#> 1.10386530 1.38544895 1.84807628 2.95947510 1.75696400 0.83750488 0.44672968 1.24063710 
 #>        105        106        107        108        109        110        111        112 
-#> 0.44727364 0.43799518 0.43482004 1.11403817 0.90800044 0.98409269 0.77391472 0.92785702 
+#> 0.44698763 0.43814184 0.43480837 1.11387344 0.90802148 0.98412301 0.77399901 0.92781919 
 #>        113        114        115        116        117        118        119        120 
-#> 1.44316952 0.53590864 0.70992557 0.71795367 1.41767627 1.35755171 2.13572864 2.08429255 
+#> 1.44309503 0.53601097 0.70986280 0.71780586 1.41745632 1.35757618 2.13593015 2.08429787 
 #>        121        122        123        124        125        126        127        128 
-#> 2.88077403 0.93061265 2.19668448 0.26132385 1.22310614 1.28597984 0.54794128 1.30397022 
+#> 2.88104888 0.93104399 2.19651802 0.26130171 1.22262725 1.28590866 0.54812550 1.30396156 
 #>        129        130        131        132        133        134        135        136 
-#> 1.46473967 1.18312432 0.66352089 1.22851354 2.41435774 2.60599648 2.59238828 0.97740626 
+#> 1.46480333 1.18319405 0.66373798 1.22840273 2.41410935 2.60613213 2.59292461 0.97764028 
 #>        137        138        139        140        141        142        143        144 
-#> 1.39710783 1.03604564 0.73902124 1.11037224 2.98249799 1.16391896 1.56621292 2.29963466 
+#> 1.39710638 1.03590256 0.73885115 1.11010945 2.98224561 1.16424945 1.56661578 2.29979223 
 #>        145        146        147        148        149        150        151        152 
-#> 1.45009184 1.01222554 0.19617271 0.24803399 0.17703256 0.24552563 0.11939212 0.06335220 
+#> 1.45017582 1.01202295 0.19616637 0.24760981 0.17676178 0.24514812 0.11934916 0.06336549 
 #>        153        154        155        156        157        158        159        160 
-#> 0.78697613 0.77510635 0.44432453 2.11483538 0.36391256 1.84129138 1.72201990 0.56247370 
+#> 0.78679674 0.77522978 0.44446630 2.11473265 0.36401620 1.84107675 1.72220377 0.56277107 
 #>        161        162        163        164        165        166        167        168 
-#> 0.86526847 0.15402016 0.86083936 0.36209757 0.16949933 0.38394420 0.08913008 0.44101062 
+#> 0.86527742 0.15397755 0.86058688 0.36201708 0.16952403 0.38383432 0.08906202 0.44081266 
 #>        169        170        171        172        173        174        175        176 
-#> 0.88294700 1.29236403 2.58720561 1.48371584 3.04050271 1.20272894 1.04586471 2.14226311 
+#> 0.88282070 1.29237794 2.58721676 1.48405203 3.04060340 1.20293468 1.04606752 2.14209043 
 #>        177        178        179        180        181        182        183        184 
-#> 0.44197911 2.79409966 0.52716184 1.55409408 1.42580958 0.36625918 2.72545338 0.29608417 
+#> 0.44201454 2.79361783 0.52732444 1.55414248 1.42598659 0.36663459 2.72500268 0.29617963 
 #>        185        186        187        188        189        190        191        192 
-#> 0.87043117 2.92144727 1.94118426 1.64383054 1.23770969 0.96011465 2.37079749 2.37095011 
+#> 0.87044077 2.92102132 1.94128710 1.64401566 1.23797710 0.96011158 2.37027743 2.37107628 
 #>        193        194        195        196        197        198        199        200 
-#> 1.44371539 0.58065812 0.37881156 0.50417540 0.34462665 0.18876375 0.20226411 0.26617415
+#> 1.44414361 0.58086686 0.37871181 0.50380451 0.34436357 0.18857385 0.20219476 0.26610323
 ```
 
 Once we obtain forecasts/predictions, we can evaluate the forecasting/predictive performance of the estimated SMI model by calculating forecast/prediction error measurements as desired.
@@ -409,10 +412,10 @@ Once we obtain forecasts/predictions, we can evaluate the forecasting/predictive
 ## Calculate test set MSE and MAE
 MSE_SMI_ppr = MSE(residuals = (preds$y - preds$.predict))
 MSE_SMI_ppr
-#> [1] 0.01267398
+#> [1] 0.01267114
 MAE_SMI_ppr = MAE(residuals = (preds$y - preds$.predict))
 MAE_SMI_ppr
-#> [1] 0.08956937
+#> [1] 0.08956175
 ```
 
 ### Tuning for penalty parameters
@@ -465,7 +468,8 @@ smimodel_ppr_tune <- greedy_smimodel(data = sim_train_new,
 #> [1] "Tolerance for loss reached!"
 #> [1] "Final model fitted!"
 #> [1] "Tolerance for loss reached!"
-#> [1] "Tolerance for loss reached!"
+#> [1] "Loss increased for 3 consecutive iterations!"
+#> [1] "Loss increased for 3 consecutive iterations!"
 #> [1] "Final model fitted!"
 #> [1] "Potential starting points completed."
 #> [1] "Tolerance for loss reached!"
@@ -474,9 +478,7 @@ smimodel_ppr_tune <- greedy_smimodel(data = sim_train_new,
 #> [1] "Loss increased for 3 consecutive iterations!"
 #> [1] "Final model fitted!"
 #> [1] "Tolerance for loss reached!"
-#> [1] "Loss increased for 3 consecutive iterations!"
 #> [1] "Tolerance for loss reached!"
-#> [1] "Loss increased for 3 consecutive iterations!"
 #> [1] "Final model fitted!"
 #> [1] "Initial search around potential starting point 1 completed."
 #> [1] "Tolerance for loss reached!"
@@ -506,8 +508,8 @@ smimodel_ppr_tune <- greedy_smimodel(data = sim_train_new,
 #> [1] "Final model fitted!"
 #> [1] "Initial search around potential starting point 3 completed."
 #> [1] "Tolerance for loss reached!"
-#> [1] "Loss increased for 3 consecutive iterations!"
-#> [1] "Loss increased for 3 consecutive iterations!"
+#> [1] "Tolerance for loss reached!"
+#> [1] "Tolerance for loss reached!"
 #> [1] "Final model fitted!"
 #> [1] "Tolerance for loss reached!"
 #> [1] "Final model fitted!"
@@ -524,7 +526,7 @@ smimodel_ppr_tune <- greedy_smimodel(data = sim_train_new,
 #> [1] "Loss increased for 3 consecutive iterations!"
 #> [1] "Final model fitted!"
 #> [1] "Loss increased for 3 consecutive iterations!"
-#> [1] "Loss increased for 3 consecutive iterations!"
+#> [1] "Tolerance for loss reached!"
 #> [1] "Final model fitted!"
 #> [1] "Loss increased for 3 consecutive iterations!"
 #> [1] "Loss increased for 3 consecutive iterations!"
@@ -571,53 +573,13 @@ smimodel_ppr_tune <- greedy_smimodel(data = sim_train_new,
 #> [1] "Tolerance for loss reached!"
 #> [1] "Final model fitted!"
 #> [1] "Tolerance for loss reached!"
-#> [1] "Tolerance for loss reached!"
+#> [1] "Loss increased for 3 consecutive iterations!"
+#> [1] "Loss increased for 3 consecutive iterations!"
 #> [1] "Final model fitted!"
 #> [1] "Initial search around potential starting point 9 completed."
 #> [1] "Starting point for the greedy search selected."
-#> [1] "Tolerance for loss reached!"
-#> [1] "Tolerance for loss reached!"
-#> [1] "Final model fitted!"
-#> [1] "Tolerance for loss reached!"
-#> [1] "Loss increased for 3 consecutive iterations!"
-#> [1] "Tolerance for loss reached!"
-#> [1] "Loss increased for 3 consecutive iterations!"
-#> [1] "Final model fitted!"
-#> [1] "Tolerance for loss reached!"
 #> [1] "Loss increased for 3 consecutive iterations!"
 #> [1] "Loss increased for 3 consecutive iterations!"
-#> [1] "Final model fitted!"
-#> [1] "An iteration of greedy search - step 1 is completed."
-#> [1] "Tolerance for loss reached!"
-#> [1] "Tolerance for loss reached!"
-#> [1] "Final model fitted!"
-#> [1] "Tolerance for loss reached!"
-#> [1] "Tolerance for loss reached!"
-#> [1] "Loss increased for 3 consecutive iterations!"
-#> [1] "Final model fitted!"
-#> [1] "Tolerance for loss reached!"
-#> [1] "Loss increased for 3 consecutive iterations!"
-#> [1] "Loss increased for 3 consecutive iterations!"
-#> [1] "Final model fitted!"
-#> [1] "An iteration of greedy search - step 1 is completed."
-#> [1] "Tolerance for loss reached!"
-#> [1] "Loss increased for 3 consecutive iterations!"
-#> [1] "Loss increased for 3 consecutive iterations!"
-#> [1] "Loss increased for 3 consecutive iterations!"
-#> [1] "Final model fitted!"
-#> [1] "Tolerance for loss reached!"
-#> [1] "Tolerance for loss reached!"
-#> [1] "Loss increased for 3 consecutive iterations!"
-#> [1] "Final model fitted!"
-#> [1] "Tolerance for loss reached!"
-#> [1] "Loss increased for 3 consecutive iterations!"
-#> [1] "Loss increased for 3 consecutive iterations!"
-#> [1] "Final model fitted!"
-#> [1] "An iteration of greedy search - step 1 is completed."
-#> [1] "Maximum iterations reached!"
-#> [1] "Tolerance for loss reached!"
-#> [1] "Tolerance for loss reached!"
-#> [1] "Tolerance for loss reached!"
 #> [1] "Final model fitted!"
 #> [1] "Final SMI model is fitted."
 ```
@@ -630,12 +592,12 @@ smimodel_ppr_tune$fit[[1]]$best
 #> Index coefficients:
 #> 6 x 2 sparse Matrix of class "dgCMatrix"
 #>          index1   index2
-#> x_000 1.6282120 .       
-#> x_001 1.0726790 .       
-#> x_002 .         1.208052
-#> x_003 0.8106106 .       
+#> x_000 1.6275097 .       
+#> x_001 1.0728695 .       
+#> x_002 .         1.214242
+#> x_003 0.8111214 .       
 #> x_004 .         .       
-#> x_005 .         2.302190
+#> x_005 .         2.295995
 #> 
 #> Response variable:
 #> [1] "y"
@@ -657,16 +619,16 @@ smimodel_ppr_tune$fit[[1]]$best
 #> y ~ s(index1, bs = "cr") + s(index2, bs = "cr")
 #> 
 #> Estimated degrees of freedom:
-#> 8.50 6.08  total = 15.58 
+#> 8.5 6.1  total = 15.6 
 #> 
-#> REML score: -1028.858
+#> REML score: -1028.836
 ```
 
 
 ``` r
 ## Selected penalty parameter combination
 smimodel_ppr_tune$fit[[1]]$best_lambdas
-#> [1] 0.01489049 0.01000000
+#> [1] 1.180046 1.000000
 ```
 
-Here the selected penalty parameter combination is $(\lambda_{0}, \lambda_{2}) = (0.01489049, 0.01000000)$.
+Here the selected penalty parameter combination is $(\lambda_{0}, \lambda_{2}) = (1.180046, 1.000000)$.

@@ -156,9 +156,9 @@ smimodel_linear$fit[[1]]$best$alpha
 ```
 
 
-In this case, the SMI models fitted with "ppr" and "additive" initialisation options have correctly identified the index structure of the response $y$ by estimating two linear combinations (i.e. indices), while dropping out the irrelevant predictor $x\_004$. While correctly identifying $x\_004$ as an irrelevant predictor variable, the SMI model estimated with "linear" intialisation however, has not correctly identified the index structure of the model -- has estimated only a single index instead of the two indices. 
+In this case, all three SMI models fitted (with "ppr", "additive" and "linear" initialisation options) have correctly identified the index structure of the response $y$ by estimating two linear combinations (i.e. indices), while dropping out the irrelevant predictor $x\_004$. 
 
-Thus, as mentioned earlier, the final estimated model can change depending on the initialisation option chosen. Hence, the users are encouraged to experiment with different available initialisation options when choosing the best fit for the data/application of interest. (In a real-world problem (where the true model is unknown), it will be useful to fit SMI models with different initialisation options, and see which option gives the best forecasting/prediction accuracy.)
+(Note: The final estimated model may change depending on the initialisation option chosen. Hence, the users are encouraged to experiment with different available initialisation options when choosing the best fit for the data/application of interest. In a real-world problem (where the true model is unknown), it will be useful to fit SMI models with different initialisation options, and see which option gives the best forecasting/prediction accuracy.)
 
 ### Visualisation of estimated smooths
 
@@ -235,4 +235,4 @@ smimodel_ppr_tune$fit[[1]]$best
 smimodel_ppr_tune$fit[[1]]$best_lambdas
 ```
 
-Here the selected penalty parameter combination is $(\lambda_{0}, \lambda_{2}) = (0.01489049, 0.01000000)$.
+Here the selected penalty parameter combination is $(\lambda_{0}, \lambda_{2}) = (1.180046, 1.000000)$.

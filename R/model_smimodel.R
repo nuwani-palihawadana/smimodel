@@ -914,6 +914,7 @@ update_smimodelFit <- function(object, data, lambda0 = 1, lambda2 = 1,
         # Convert NAs to zero
         na_indx <- which(is.na(coefs_init))
         coefs_init[na_indx] <- 0
+        coefs_init <- unlist(tapply(coefs_init, index.ind, normalise_alpha))
         new_ind <- numeric(length = num_pred)
         new_ind[drop_pred_ind] <- coefs_init
         alpha <- c(alpha_current, new_ind)

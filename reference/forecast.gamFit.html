@@ -44,6 +44,7 @@
 <span>  h <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  level <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">80</span>, <span class="fl">95</span><span class="op">)</span>,</span>
 <span>  <span class="va">newdata</span>,</span>
+<span>  exclude.trunc <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  recursive <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  recursive_colRange <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="va">...</span></span>
@@ -70,6 +71,11 @@ to <code><a href="model_gam.html">model_gam</a></code>.</p></dd>
 <dt id="arg-newdata">newdata<a class="anchor" aria-label="anchor" href="#arg-newdata"></a></dt>
 <dd><p>The set of new data on for which the forecasts are required
 (i.e. test set; should be a <code>tsibble</code>).</p></dd>
+
+
+<dt id="arg-exclude-trunc">exclude.trunc<a class="anchor" aria-label="anchor" href="#arg-exclude-trunc"></a></dt>
+<dd><p>The names of the predictor variables that should not be
+truncated for stable predictions as a character string.</p></dd>
 
 
 <dt id="arg-recursive">recursive<a class="anchor" aria-label="anchor" href="#arg-recursive"></a></dt>

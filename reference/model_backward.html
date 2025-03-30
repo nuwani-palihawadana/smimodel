@@ -57,6 +57,7 @@ through a backward elimination procedure as proposed by Fan and Hyndman
 <span>  tol <span class="op">=</span> <span class="fl">0.001</span>,</span>
 <span>  parallel <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  workers <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  exclude.trunc <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  recursive <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  recursive_colRange <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -133,6 +134,16 @@ used in model selection.</p></dd>
 
 <dt id="arg-workers">workers<a class="anchor" aria-label="anchor" href="#arg-workers"></a></dt>
 <dd><p>If <code>parallel = TRUE</code>, number of workers to use.</p></dd>
+
+
+<dt id="arg-exclude-trunc">exclude.trunc<a class="anchor" aria-label="anchor" href="#arg-exclude-trunc"></a></dt>
+<dd><p>The names of the predictor variables that should not be
+truncated for stable predictions as a character string. (Since the
+nonlinear functions are estimated using splines, extrapolation is not
+desirable. Hence, if any predictor variable in <code>val.data</code> that is treated
+non-linearly in the estimated model, will be truncated to be in the
+in-sample range before obtaining predictions. If any variables are listed
+here will be excluded from such truncation.)</p></dd>
 
 
 <dt id="arg-recursive">recursive<a class="anchor" aria-label="anchor" href="#arg-recursive"></a></dt>

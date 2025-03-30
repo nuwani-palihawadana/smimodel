@@ -49,6 +49,7 @@ bootstrap method.</p>
 <span>  season.period <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  m <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  num.futures <span class="op">=</span> <span class="fl">1000</span>,</span>
+<span>  exclude.trunc <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  recursive <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  recursive_colRange <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -85,6 +86,11 @@ horizon).</p></dd>
 
 <dt id="arg-num-futures">num.futures<a class="anchor" aria-label="anchor" href="#arg-num-futures"></a></dt>
 <dd><p>Number of possible future sample paths to be generated.</p></dd>
+
+
+<dt id="arg-exclude-trunc">exclude.trunc<a class="anchor" aria-label="anchor" href="#arg-exclude-trunc"></a></dt>
+<dd><p>The names of the predictor variables that should not be
+truncated for stable predictions as a character string.</p></dd>
 
 
 <dt id="arg-recursive">recursive<a class="anchor" aria-label="anchor" href="#arg-recursive"></a></dt>

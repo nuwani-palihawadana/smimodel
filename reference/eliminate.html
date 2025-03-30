@@ -56,6 +56,7 @@ function of the package, and designed to be called from
 <span>  s.vars <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  s.basedim <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  linear.vars <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  exclude.trunc <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  recursive <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  recursive_colRange <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -106,6 +107,16 @@ corresponding to <code>s.vars</code>. (For more information refer
 <dd><p>A <code>character</code> vector of names of the predictor
 variables that should be included linearly into the model (i.e. linear
 predictors).</p></dd>
+
+
+<dt id="arg-exclude-trunc">exclude.trunc<a class="anchor" aria-label="anchor" href="#arg-exclude-trunc"></a></dt>
+<dd><p>The names of the predictor variables that should not be
+truncated for stable predictions as a character string. (Since the
+nonlinear functions are estimated using splines, extrapolation is not
+desirable. Hence, if any predictor variable in <code>val</code> that is treated
+non-linearly in the estimated model, will be truncated to be in the
+in-sample range before obtaining predictions. If any variables are listed
+here will be excluded from such truncation.)</p></dd>
 
 
 <dt id="arg-recursive">recursive<a class="anchor" aria-label="anchor" href="#arg-recursive"></a></dt>

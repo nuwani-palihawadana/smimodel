@@ -41,7 +41,13 @@ fitted benchmark model through recursive forecasting.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">possibleFutures_benchmark</span><span class="op">(</span><span class="va">object</span>, <span class="va">newdata</span>, <span class="va">bootstraps</span>, <span class="va">recursive_colRange</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">possibleFutures_benchmark</span><span class="op">(</span></span>
+<span>  <span class="va">object</span>,</span>
+<span>  <span class="va">newdata</span>,</span>
+<span>  <span class="va">bootstraps</span>,</span>
+<span>  exclude.trunc <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  <span class="va">recursive_colRange</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -60,6 +66,11 @@ fitted benchmark model through recursive forecasting.</p>
 
 <dt id="arg-bootstraps">bootstraps<a class="anchor" aria-label="anchor" href="#arg-bootstraps"></a></dt>
 <dd><p>Generated matrix of bootstrapped residual series.</p></dd>
+
+
+<dt id="arg-exclude-trunc">exclude.trunc<a class="anchor" aria-label="anchor" href="#arg-exclude-trunc"></a></dt>
+<dd><p>The names of the predictor variables that should not be
+truncated for stable predictions as a character string.</p></dd>
 
 
 <dt id="arg-recursive-colrange">recursive_colRange<a class="anchor" aria-label="anchor" href="#arg-recursive-colrange"></a></dt>

@@ -4,7 +4,13 @@
 \alias{possibleFutures_smimodel}
 \title{Possible future sample paths (multi-step) from \code{smimodel} residuals}
 \usage{
-possibleFutures_smimodel(object, newdata, bootstraps, recursive_colRange)
+possibleFutures_smimodel(
+  object,
+  newdata,
+  bootstraps,
+  exclude.trunc = NULL,
+  recursive_colRange
+)
 }
 \arguments{
 \item{object}{A \code{smimodel} object.}
@@ -13,6 +19,9 @@ possibleFutures_smimodel(object, newdata, bootstraps, recursive_colRange)
 (i.e. test set; should be a \code{tsibble}).}
 
 \item{bootstraps}{Generated matrix of bootstrapped residual series.}
+
+\item{exclude.trunc}{The names of the predictor variables that should not be
+truncated for stable predictions as a character string.}
 
 \item{recursive_colRange}{The range of column numbers in \code{newdata} to be
 filled with forecasts.}

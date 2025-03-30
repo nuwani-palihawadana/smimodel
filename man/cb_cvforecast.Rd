@@ -19,6 +19,7 @@ cb_cvforecast(
   initial = 1,
   window = NULL,
   roll.length = 1,
+  exclude.trunc = NULL,
   recursive = FALSE,
   recursive_colNames = NULL,
   na.rm = TRUE,
@@ -68,6 +69,14 @@ will not be used.}
 
 \item{roll.length}{Number of observations by which each rolling/expanding
 window should be rolled forward.}
+
+\item{exclude.trunc}{The names of the predictor variables that should not be
+truncated for stable predictions as a character string. (Since the
+nonlinear functions are estimated using splines, extrapolation is not
+desirable. Hence, if any predictor variable is treated non-linearly in the
+estimated model, will be truncated to be in the in-sample range before
+obtaining predictions. If any variables are listed here will be excluded
+from such truncation.)}
 
 \item{recursive}{Whether to obtain recursive forecasts or not (default -
 \code{FALSE}).}

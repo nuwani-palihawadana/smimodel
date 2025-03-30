@@ -13,6 +13,7 @@ eliminate(
   s.vars = NULL,
   s.basedim = NULL,
   linear.vars = NULL,
+  exclude.trunc = NULL,
   recursive = FALSE,
   recursive_colRange = NULL
 )
@@ -44,6 +45,14 @@ corresponding to \code{s.vars}. (For more information refer
 \item{linear.vars}{A \code{character} vector of names of the predictor
 variables that should be included linearly into the model (i.e. linear
 predictors).}
+
+\item{exclude.trunc}{The names of the predictor variables that should not be
+truncated for stable predictions as a character string. (Since the
+nonlinear functions are estimated using splines, extrapolation is not
+desirable. Hence, if any predictor variable in \code{val} that is treated
+non-linearly in the estimated model, will be truncated to be in the
+in-sample range before obtaining predictions. If any variables are listed
+here will be excluded from such truncation.)}
 
 \item{recursive}{Whether to obtain recursive forecasts or not (default -
 \code{FALSE}).}

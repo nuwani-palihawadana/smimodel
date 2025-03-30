@@ -9,6 +9,7 @@
   h = 1,
   level = c(80, 95),
   newdata,
+  exclude.trunc = NULL,
   recursive = FALSE,
   recursive_colRange = NULL,
   ...
@@ -24,6 +25,9 @@ to \code{\link{model_ppr}}.}
 
 \item{newdata}{The set of new data on for which the forecasts are required
 (i.e. test set; should be a \code{tsibble}).}
+
+\item{exclude.trunc}{The names of the predictor variables that should not be
+truncated for stable predictions as a character string.}
 
 \item{recursive}{Whether to obtain recursive forecasts or not (default -
 \code{FALSE}).}

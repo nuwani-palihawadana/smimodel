@@ -12,6 +12,7 @@ blockBootstrap(
   season.period = 1,
   m = 1,
   num.futures = 1000,
+  exclude.trunc = NULL,
   recursive = FALSE,
   recursive_colRange = NULL
 )
@@ -31,6 +32,9 @@ horizon).}
 \item{m}{Multiplier. (Block size = \code{season.period * m})}
 
 \item{num.futures}{Number of possible future sample paths to be generated.}
+
+\item{exclude.trunc}{The names of the predictor variables that should not be
+truncated for stable predictions as a character string.}
 
 \item{recursive}{Whether to obtain recursive forecasts or not (default -
 FALSE).}

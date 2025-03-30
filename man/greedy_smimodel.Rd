@@ -32,6 +32,7 @@ greedy_smimodel(
   verbose = FALSE,
   parallel = FALSE,
   workers = NULL,
+  exclude.trunc = NULL,
   recursive = FALSE,
   recursive_colRange = NULL
 )
@@ -139,6 +140,14 @@ non-convex quadratic constraints in Gurobi solver.}
 for different penalty parameter combinations.}
 
 \item{workers}{If \code{parallel = TRUE}: Number of cores to use.}
+
+\item{exclude.trunc}{The names of the predictor variables that should not be
+truncated for stable predictions as a character string. (Since the
+nonlinear functions are estimated using splines, extrapolation is not
+desirable. Hence, if any predictor variable in \code{val.data} that is treated
+non-linearly in the estimated model, will be truncated to be in the
+in-sample range before obtaining predictions. If any variables are listed
+here will be excluded from such truncation.)}
 
 \item{recursive}{Whether to obtain recursive forecasts or not (default -
 \code{FALSE}).}

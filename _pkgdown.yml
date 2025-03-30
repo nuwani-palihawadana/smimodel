@@ -105,6 +105,7 @@ reference:
   - possibleFutures_benchmark
   - prep_newdata
   - remove_lags
+  - truncate_vars
 - title: Package metadata
   desc: |
     Package information.

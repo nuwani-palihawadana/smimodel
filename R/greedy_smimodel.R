@@ -83,6 +83,13 @@
 #' @param parallel The option to use parallel processing in fitting SMI models
 #'   for different penalty parameter combinations.
 #' @param workers If \code{parallel = TRUE}: Number of cores to use.
+#' @param exclude.trunc The names of the predictor variables that should not be
+#'   truncated for stable predictions as a character string. (Since the
+#'   nonlinear functions are estimated using splines, extrapolation is not
+#'   desirable. Hence, if any predictor variable in `val.data` that is treated
+#'   non-linearly in the estimated model, will be truncated to be in the
+#'   in-sample range before obtaining predictions. If any variables are listed
+#'   here will be excluded from such truncation.)
 #' @param recursive Whether to obtain recursive forecasts or not (default -
 #'   \code{FALSE}).
 #' @param recursive_colRange If \code{recursive = TRUE}, the range of column
@@ -180,6 +187,7 @@ greedy_smimodel <- function(data, val.data, yvar, neighbour = 0,
                             tol = 0.001, tolCoefs = 0.001,
                             TimeLimit = Inf, MIPGap = 1e-4, NonConvex = -1,
                             verbose = FALSE, parallel = FALSE, workers = NULL,
+                            exclude.trunc = NULL,
                             recursive = FALSE, recursive_colRange = NULL){
 
   # Message for gurobi installation
@@ -197,12 +205,10 @@ greedy_smimodel <- function(data, val.data, yvar, neighbour = 0,
   data1 <- data
   data2 <- val.data
   data_index <- index(data1)
-  data_key <- key(data1)
   if (length(key(data1)) == 0) {
     data1 <- data1 |>
       mutate(dummy_key = rep(1, NROW(data1))) |>
       as_tsibble(index = data_index, key = dummy_key)
-    data_key <- key(data1)
     data2 <- data2 |>
       mutate(dummy_key = rep(1, NROW(data2))) |>
       as_tsibble(index = data_index, key = dummy_key)
@@ -249,6 +255,7 @@ greedy_smimodel <- function(data, val.data, yvar, neighbour = 0,
                                       TimeLimit = TimeLimit, MIPGap = MIPGap,
                                       NonConvex = NonConvex, verbose = verbose,
                                       parallel = parallel, workers = workers,
+                                      exclude.trunc = exclude.trunc,
                                       recursive = recursive,
                                       recursive_colRange = recursive_colRange)
   }
@@ -339,6 +346,13 @@ utils::globalVariables(c("dummy_key", "num_key"))
 #' @param parallel The option to use parallel processing in fitting SMI models
 #'   for different penalty parameter combinations.
 #' @param workers If \code{parallel = TRUE}: Number of cores to use.
+#' @param exclude.trunc The names of the predictor variables that should not be
+#'   truncated for stable predictions as a character string. (Since the
+#'   nonlinear functions are estimated using splines, extrapolation is not
+#'   desirable. Hence, if any predictor variable in `val.data` that is treated
+#'   non-linearly in the estimated model, will be truncated to be in the
+#'   in-sample range before obtaining predictions. If any variables are listed
+#'   here will be excluded from such truncation.)
 #' @param recursive Whether to obtain recursive forecasts or not (default -
 #'   \code{FALSE}).
 #' @param recursive_colRange If \code{recursive = TRUE}, the range of column
@@ -371,6 +385,7 @@ greedy.fit <- function(data, val.data, yvar, neighbour = 0,
                        tol = 0.001, tolCoefs = 0.001,
                        TimeLimit = Inf, MIPGap = 1e-4, NonConvex = -1,
                        verbose = FALSE, parallel = FALSE, workers = NULL,
+                       exclude.trunc = NULL,
                        recursive = FALSE, recursive_colRange = NULL){
 
   ## Calculating lambda0.max based on the scale of the first term in the
@@ -432,6 +447,7 @@ greedy.fit <- function(data, val.data, yvar, neighbour = 0,
                           tol = tol, tolCoefs = tolCoefs,
                           TimeLimit = TimeLimit, MIPGap = MIPGap,
                           NonConvex = NonConvex, verbose = verbose,
+                          exclude.trunc = exclude.trunc,
                           recursive = recursive,
                           recursive_colRange = recursive_colRange))
   print("Potential starting points completed.")
@@ -488,6 +504,7 @@ greedy.fit <- function(data, val.data, yvar, neighbour = 0,
                               tol = tol, tolCoefs = tolCoefs,
                               TimeLimit = TimeLimit, MIPGap = MIPGap,
                               NonConvex = NonConvex, verbose = verbose,
+                              exclude.trunc = exclude.trunc,
                               recursive = recursive,
                               recursive_colRange = recursive_colRange))
       # Store the point that gives minimum validation set MSE
@@ -563,6 +580,7 @@ greedy.fit <- function(data, val.data, yvar, neighbour = 0,
                               tol = tol, tolCoefs = tolCoefs,
                               TimeLimit = TimeLimit, MIPGap = MIPGap,
                               NonConvex = NonConvex, verbose = verbose,
+                              exclude.trunc = exclude.trunc,
                               recursive = recursive,
                               recursive_colRange = recursive_colRange))
       # Selecting best point
@@ -633,6 +651,7 @@ greedy.fit <- function(data, val.data, yvar, neighbour = 0,
                                 tol = tol, tolCoefs = tolCoefs,
                                 TimeLimit = TimeLimit, MIPGap = MIPGap,
                                 NonConvex = NonConvex, verbose = verbose,
+                                exclude.trunc = exclude.trunc,
                                 recursive = recursive,
                                 recursive_colRange = recursive_colRange))
         # Selecting best starting point
@@ -664,6 +683,7 @@ greedy.fit <- function(data, val.data, yvar, neighbour = 0,
                                linear.vars = linear.vars)
     noIndex_preds <- predict(object = noIndex_model, 
                              newdata = val.data, 
+                             exclude.trunc = exclude.trunc,
                              recursive = recursive,
                              recursive_colRange = recursive_colRange)
     noIndex_val_mse <- MSE(residuals = (as.numeric(as.matrix(noIndex_preds[,{{yvar}}], ncol = 1)) - noIndex_preds$.predict))
@@ -824,6 +844,13 @@ utils::globalVariables(c("Var1", "Var2"))
 #' @param NonConvex The strategy for handling non-convex quadratic objectives or
 #'   non-convex quadratic constraints in Gurobi solver.
 #' @param verbose The option to print detailed solver output.
+#' @param exclude.trunc The names of the predictor variables that should not be
+#'   truncated for stable predictions as a character string. (Since the
+#'   nonlinear functions are estimated using splines, extrapolation is not
+#'   desirable. Hence, if any predictor variable in `val.data` that is treated
+#'   non-linearly in the estimated model, will be truncated to be in the
+#'   in-sample range before obtaining predictions. If any variables are listed
+#'   here will be excluded from such truncation.)
 #' @param recursive Whether to obtain recursive forecasts or not (default -
 #'   \code{FALSE}).
 #' @param recursive_colRange If \code{recursive = TRUE}, the range of column
@@ -844,8 +871,9 @@ tune_smimodel <- function(data, val.data, yvar, neighbour = 0,
                           s.vars = NULL, linear.vars = NULL, lambda.comb = c(1, 1),
                           M = 10, max.iter = 50, tol = 0.001, tolCoefs = 0.001,
                           TimeLimit = Inf, MIPGap = 1e-4,
-                          NonConvex = -1, verbose = FALSE, recursive = FALSE,
-                          recursive_colRange = NULL){
+                          NonConvex = -1, verbose = FALSE, 
+                          exclude.trunc = NULL,
+                          recursive = FALSE, recursive_colRange = NULL){
   # Estimating smimodel
   smimodel <- smimodel.fit(data = data, yvar = yvar,
                            neighbour = neighbour,
@@ -865,7 +893,8 @@ tune_smimodel <- function(data, val.data, yvar, neighbour = 0,
                            NonConvex = NonConvex, verbose = verbose)
 
   # # Predictions on validation set
-  pred <- predict(object = smimodel$best, newdata = val.data, recursive = recursive,
+  pred <- predict(object = smimodel$best, newdata = val.data, 
+                  exclude.trunc = exclude.trunc, recursive = recursive,
                   recursive_colRange = recursive_colRange)$.predict
   # Validation set MSE
   # Convert to a tibble

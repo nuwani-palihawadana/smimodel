@@ -37,6 +37,13 @@
 #'   used in model selection.
 #' @param parallel Whether to use parallel computing in model selection or not.
 #' @param workers If \code{parallel = TRUE}, number of workers to use.
+#' @param exclude.trunc The names of the predictor variables that should not be
+#'   truncated for stable predictions as a character string. (Since the
+#'   nonlinear functions are estimated using splines, extrapolation is not
+#'   desirable. Hence, if any predictor variable in `val.data` that is treated
+#'   non-linearly in the estimated model, will be truncated to be in the
+#'   in-sample range before obtaining predictions. If any variables are listed
+#'   here will be excluded from such truncation.)
 #' @param recursive Whether to obtain recursive forecasts or not (default -
 #'   \code{FALSE}).
 #' @param recursive_colRange If \code{recursive = TRUE}, the range of column
@@ -114,6 +121,7 @@ model_backward <- function(data, val.data, yvar,
                            s.vars = NULL, s.basedim = NULL, 
                            linear.vars = NULL, refit = TRUE, tol = 0.001, 
                            parallel = FALSE, workers = NULL,
+                           exclude.trunc = NULL,
                            recursive = FALSE, recursive_colRange = NULL){
   if (!is_tsibble(data)) stop("data is not a tsibble.")
   if (!is_tsibble(val.data)) stop("val.data is not a tsibble.")
@@ -186,8 +194,10 @@ model_backward <- function(data, val.data, yvar,
     model1 <- mgcv::gam(my.formula, family = family, method = "REML", 
                         data = df_cat)
     # Predictions on validation set
-    pred <- predict_gam(object = model1, newdata = df_cat_val, recursive = recursive,
-                    recursive_colRange = recursive_colRange)$.predict
+    pred <- predict_gam(object = model1, newdata = df_cat_val, 
+                        exclude.trunc = exclude.trunc,
+                        recursive = recursive,
+                        recursive_colRange = recursive_colRange)$.predict
     # Validation set MSE
     valData <- df_cat_val
     # Convert to a tibble
@@ -205,9 +215,12 @@ model_backward <- function(data, val.data, yvar,
       allVars = c(Temp_s.vars, Temp_linear.vars)
       MSE_list <- seq_along(allVars) |>
         map_f(~ eliminate(ind = ., train = df_cat, val = df_cat_val, 
-                          yvar = yvar,
+                          yvar = yvar, family = family, 
                           s.vars = Temp_s.vars, s.basedim = s.basedim, 
-                          linear.vars = Temp_linear.vars))
+                          linear.vars = Temp_linear.vars,
+                          exclude.trunc = exclude.trunc,
+                          recursive = recursive, 
+                          recursive_colRange = recursive_colRange))
       # Selecting best model
       best_model_pos <- which.min(unlist(MSE_list))
       # MSE check
@@ -302,6 +315,13 @@ utils::globalVariables(c("...1", "...2"))
 #' @param linear.vars A \code{character} vector of names of the predictor
 #'   variables that should be included linearly into the model (i.e. linear
 #'   predictors).
+#' @param exclude.trunc The names of the predictor variables that should not be
+#'   truncated for stable predictions as a character string. (Since the
+#'   nonlinear functions are estimated using splines, extrapolation is not
+#'   desirable. Hence, if any predictor variable in `val` that is treated
+#'   non-linearly in the estimated model, will be truncated to be in the
+#'   in-sample range before obtaining predictions. If any variables are listed
+#'   here will be excluded from such truncation.)
 #' @param recursive Whether to obtain recursive forecasts or not (default -
 #'   \code{FALSE}).
 #' @param recursive_colRange If \code{recursive = TRUE}, the range of column
@@ -315,7 +335,7 @@ utils::globalVariables(c("...1", "...2"))
 #' @return A \code{numeric}.
 eliminate <- function(ind, train, val, yvar, family = gaussian(), 
                       s.vars = NULL, s.basedim = NULL, 
-                      linear.vars = NULL,
+                      linear.vars = NULL, exclude.trunc = NULL,
                       recursive = FALSE, recursive_colRange = NULL){
   allVars = c(s.vars, linear.vars)
   pre.formula <- paste0(yvar, " ~ ")
@@ -338,8 +358,10 @@ eliminate <- function(ind, train, val, yvar, family = gaussian(),
   # Model fitting
   model1 <- mgcv::gam(my.formula, family = family, method = "REML", data = train)
   # Predictions on validation set
-  pred <- predict_gam(object = model1, newdata = val, recursive = recursive,
-                  recursive_colRange = recursive_colRange)$.predict
+  pred <- predict_gam(object = model1, newdata = val, 
+                      exclude.trunc = exclude.trunc, 
+                      recursive = recursive,
+                      recursive_colRange = recursive_colRange)$.predict
   # Validation set MSE
   # Convert to a tibble
   index_val <- index(val)

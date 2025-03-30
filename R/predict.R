@@ -5,6 +5,13 @@
 #' @param object A \code{smimodel} object.
 #' @param newdata The set of new data on for which the forecasts are required
 #'   (i.e. test set; should be a \code{tsibble}).
+#' @param exclude.trunc The names of the predictor variables that should not be
+#'   truncated for stable predictions as a character string. (Since the
+#'   nonlinear functions are estimated using splines, extrapolation is not
+#'   desirable. Hence, if any predictor variable in `newdata` that is treated
+#'   non-linearly in the estimated model, will be truncated to be in the
+#'   in-sample range before obtaining predictions. If any variables are listed
+#'   here will be excluded from such truncation.)
 #' @param recursive Whether to obtain recursive forecasts or not (default -
 #'   \code{FALSE}).
 #' @param recursive_colRange If \code{recursive = TRUE}, the range of column
@@ -21,19 +28,17 @@
 #' @method predict smimodel
 #'
 #' @export
-predict.smimodel <- function(object, newdata, recursive = FALSE,
+predict.smimodel <- function(object, newdata, exclude.trunc = NULL, 
+                             recursive = FALSE,
                              recursive_colRange = NULL, ...) {
   if (!tsibble::is_tsibble(newdata)) stop("newdata is not a tsibble.")
   index_n <- index(newdata)
-  key_n <- key(newdata)
   if (length(key(newdata)) == 0) {
     newdata <- newdata |>
       dplyr::mutate(dummy_key = rep(1, NROW(newdata))) |>
       tsibble::as_tsibble(index = index_n, key = dummy_key)
-    key_n <- key(newdata)
   }
   key11 <- key(newdata)[[1]]
-  predict_fn <- mgcv::predict.gam
   if(recursive == TRUE){
     # Prepare newdata for recursive forecasting
     newdata <- prep_newdata(newdata = newdata, recursive_colRange = recursive_colRange)
@@ -44,7 +49,8 @@ predict.smimodel <- function(object, newdata, recursive = FALSE,
       data_temp = newdata[m, ]
       key22 = data_temp[ , {{ key11 }}][[1]]
       key22_pos = which(object$key == key22)
-      list_index <- object$fit[[key22_pos]]$best$alpha
+      object_temp <- object$fit[[key22_pos]]
+      list_index <- object_temp$best$alpha
       numInd <- NCOL(list_index)
       alpha <- vector(mode = "list", length = numInd)
       for(b in 1:numInd){
@@ -55,7 +61,7 @@ predict.smimodel <- function(object, newdata, recursive = FALSE,
       if(all(alpha == 0)){
         data_list[[m]] <- data_temp
       }else{
-        X_test <- as.matrix(newdata[m, object$fit[[key22_pos]]$best$vars_index])
+        X_test <- as.matrix(data_temp[ , object_temp$best$vars_index])
         # Calculating indices
         ind <- vector(mode = "list", length = numInd)
         for(i in 1:numInd){
@@ -65,7 +71,33 @@ predict.smimodel <- function(object, newdata, recursive = FALSE,
         dat <- tibble::as_tibble(ind)
         data_list[[m]] <- dplyr::bind_cols(data_temp, dat)
       }
-      pred <- predict_fn(object$fit[[key22_pos]]$best$gam, data_list[[m]], type = "response")
+      ## Avoid extrapolation; truncate non-linear predictors to match in-sample
+      # Predictors to truncate
+      gam_cols <- colnames(object_temp$best$gam$model)
+      no_trunc_cols <- unique(c(as.character(index_n), as.character(key11),
+                         object_temp$best$var_y, object_temp$best$vars_linear, 
+                         exclude.trunc))
+      trunc_indx <- !(gam_cols %in% no_trunc_cols)
+      trunc_cols <- gam_cols[trunc_indx]
+      if(length(trunc_cols != 0)){
+        data_list[[m]] <- truncate_vars(object.data = object_temp$best$gam$model,
+                                        data = data_list[[m]],
+                                        cols.trunc = trunc_cols)
+        # for(j in 1:length(trunc_cols)){
+        #   # In-sample range
+        #   insample_range <- range(object_temp$best$gam$model[ , trunc_cols[j]])
+        #   # Truncate
+        #   if(data_list[[m]][ , trunc_cols[j]] < insample_range[1]){
+        #     # Less than minimum
+        #     data_list[[m]][ , trunc_cols[j]] <- insample_range[1]
+        #   }else if(data_list[[m]][ , trunc_cols[j]] > insample_range[2]){
+        #     # Greater than maximum
+        #     data_list[[m]][ , trunc_cols[j]] <- insample_range[2]
+        #   }
+        # }
+      }
+      # Prediction
+      pred <- predict(object_temp$best$gam, data_list[[m]], type = "response")
       predictions[[m]] <- pred
       x_seq = seq((m+1), (m+((max(recursive_colRange) - min(recursive_colRange)) + 1)))
       y_seq = recursive_colRange
@@ -78,7 +110,8 @@ predict.smimodel <- function(object, newdata, recursive = FALSE,
     data_temp = newdata[NROW(newdata), ]
     key22 = data_temp[ , {{ key11 }}][[1]]
     key22_pos = which(object$key == key22)
-    list_index <- object$fit[[key22_pos]]$best$alpha
+    object_temp <- object$fit[[key22_pos]]
+    list_index <- object_temp$best$alpha
     numInd <- NCOL(list_index)
     alpha <- vector(mode = "list", length = numInd)
     for(w in 1:numInd){
@@ -89,7 +122,7 @@ predict.smimodel <- function(object, newdata, recursive = FALSE,
     if(all(alpha == 0)){
       data_list[[NROW(newdata)]] <- data_temp
     }else{
-      X_test <- as.matrix(newdata[NROW(newdata), object$fit[[key22_pos]]$best$vars_index])
+      X_test <- as.matrix(data_temp[ , object_temp$best$vars_index])
       # Calculating indices
       ind <- vector(mode = "list", length = numInd)
       for(a in 1:numInd){
@@ -99,18 +132,40 @@ predict.smimodel <- function(object, newdata, recursive = FALSE,
       dat <- tibble::as_tibble(ind)
       data_list[[NROW(newdata)]] <- dplyr::bind_cols(data_temp, dat)
     }
-    pred <- predict_fn(object$fit[[key22_pos]]$best$gam, data_list[[NROW(newdata)]], type = "response")
+    ## Avoid extrapolation; truncate non-linear predictors to match in-sample
+    # Predictors to truncate
+    gam_cols <- colnames(object_temp$best$gam$model)
+    no_trunc_cols <- unique(c(as.character(index_n), as.character(key11),
+                              object_temp$best$var_y, object_temp$best$vars_linear, 
+                              exclude.trunc))
+    trunc_indx <- !(gam_cols %in% no_trunc_cols)
+    trunc_cols <- gam_cols[trunc_indx]
+    if(length(trunc_cols != 0)){
+      data_list[[NROW(newdata)]] <- truncate_vars(object.data = object_temp$best$gam$model,
+                                                  data = data_list[[NROW(newdata)]],
+                                                  cols.trunc = trunc_cols)
+      # for(j in 1:length(trunc_cols)){
+      #   # In-sample range
+      #   insample_range <- range(object_temp$best$gam$model[ , trunc_cols[j]])
+      #   # Truncate
+      #   if(data_list[[NROW(newdata)]][ , trunc_cols[j]] < insample_range[1]){
+      #     # Less than minimum
+      #     data_list[[NROW(newdata)]][ , trunc_cols[j]] <- insample_range[1]
+      #   }else if(data_list[[NROW(newdata)]][ , trunc_cols[j]] > insample_range[2]){
+      #     # Greater than maximum
+      #     data_list[[NROW(newdata)]][ , trunc_cols[j]] <- insample_range[2]
+      #   }
+      # } 
+    }
+    # Prediction
+    pred <- predict(object_temp$best$gam, data_list[[NROW(newdata)]], type = "response")
     predictions[[NROW(newdata)]] <- pred
-    newdata1 <- dplyr::bind_rows(data_list)
-    pred <- unlist(predictions)
-    pred_F <- newdata1 |>
-      dplyr::mutate(.predict = pred) |>
-      tsibble::as_tsibble(index = {{ index_n }}, key = {{ key11 }})
   }else if(recursive == FALSE){
     predictions <- vector(mode = "list", length = NROW(object))
     data_list <- vector(mode = "list", length = NROW(object))
     for (i in 1:NROW(object)) {
       newdata_cat <- newdata[newdata[{{ key11 }}] == object$key[i], ]
+      object_temp <- object$fit[[i]]
       list_index <- object$fit[[i]]$best$alpha
       numInd <- NCOL(list_index)
       alpha <- vector(mode = "list", length = numInd)
@@ -132,15 +187,40 @@ predict.smimodel <- function(object, newdata, recursive = FALSE,
         dat <- tibble::as_tibble(ind)
         data_list[[i]] <- dplyr::bind_cols(newdata_cat, dat)
       }
-      predictions[[i]] <- predict_fn(object$fit[[i]]$best$gam, data_list[[i]],
+      ## Avoid extrapolation; truncate non-linear predictors to match in-sample
+      # Predictors to truncate
+      gam_cols <- colnames(object_temp$best$gam$model)
+      no_trunc_cols <- unique(c(as.character(index_n), as.character(key11),
+                                object_temp$best$var_y, object_temp$best$vars_linear, 
+                                exclude.trunc))
+      trunc_indx <- !(gam_cols %in% no_trunc_cols)
+      trunc_cols <- gam_cols[trunc_indx]
+      if(length(trunc_cols != 0)){
+        data_list[[i]] <- truncate_vars(object.data = object_temp$best$gam$model,
+                                        data = data_list[[i]],
+                                        cols.trunc = trunc_cols)
+        # for(j in 1:length(trunc_cols)){
+        #   # In-sample range
+        #   insample_range <- range(object_temp$best$gam$model[ , trunc_cols[j]])
+        #   # Less than minimum
+        #   smaller_indx <- which(data_list[[i]][ , trunc_cols[j]] < insample_range[1])
+        #   # Greater than maximum
+        #   larger_indx <- which(data_list[[i]][ , trunc_cols[j]] > insample_range[2])
+        #   # Truncate
+        #   data_list[[i]][ , trunc_cols[j]][smaller_indx] <- insample_range[1]
+        #   data_list[[i]][ , trunc_cols[j]][larger_indx] <- insample_range[2]
+        # }
+      }
+      # Prediction
+      predictions[[i]] <- predict(object$fit[[i]]$best$gam, data_list[[i]],
                                      type = "response")
     }
-    newdata1 <- dplyr::bind_rows(data_list)
-    pred <- unlist(predictions)
-    pred_F <- newdata1 |>
-      dplyr::mutate(.predict = pred) |>
-      tsibble::as_tsibble(index = {{ index_n }}, key = {{ key11 }})
   }
+  newdata1 <- dplyr::bind_rows(data_list)
+  pred <- unlist(predictions)
+  pred_F <- newdata1 |>
+    dplyr::mutate(.predict = pred) |>
+    tsibble::as_tsibble(index = {{ index_n }}, key = {{ key11 }})
   return(pred_F)
 }
 
@@ -152,6 +232,13 @@ predict.smimodel <- function(object, newdata, recursive = FALSE,
 #' @param object A \code{smimodelFit} object.
 #' @param newdata The set of new data on for which the forecasts are required
 #'   (i.e. test set; should be a \code{tsibble}).
+#' @param exclude.trunc The names of the predictor variables that should not be
+#'   truncated for stable predictions as a character string. (Since the
+#'   nonlinear functions are estimated using splines, extrapolation is not
+#'   desirable. Hence, if any predictor variable in `newdata` that is treated
+#'   non-linearly in the estimated model, will be truncated to be in the
+#'   in-sample range before obtaining predictions. If any variables are listed
+#'   here will be excluded from such truncation.)
 #' @param recursive Whether to obtain recursive forecasts or not (default -
 #'   \code{FALSE}).
 #' @param recursive_colRange If \code{recursive = TRUE}, the range of column
@@ -167,10 +254,10 @@ predict.smimodel <- function(object, newdata, recursive = FALSE,
 #'
 #' @method predict smimodelFit
 #' @export
-predict.smimodelFit <- function(object, newdata, recursive = FALSE,
+predict.smimodelFit <- function(object, newdata, exclude.trunc = NULL, 
+                                recursive = FALSE,
                                 recursive_colRange = NULL, ...) {
   if (!is_tsibble(newdata)) stop("newdata is not a tsibble.")
-  predict_fn <- mgcv::predict.gam
   list_index <- object$alpha
   num_ind <- NCOL(list_index)
   alpha <- vector(mode = "list", length = num_ind)
@@ -179,6 +266,14 @@ predict.smimodelFit <- function(object, newdata, recursive = FALSE,
   }
   alpha <- unlist(alpha)
   names(alpha) <- NULL
+  # Predictors to truncate
+  gam_cols <- colnames(object$gam$model)
+  index_n <- index(object$gam$model)
+  key11 <- key(object$gam$model)[[1]]
+  no_trunc_cols <- c(as.character(index_n), as.character(key11),
+                     object$var_y, object$vars_linear, exclude.trunc)
+  trunc_indx <- !(gam_cols %in% no_trunc_cols)
+  trunc_cols <- gam_cols[trunc_indx]
   if(all(alpha == 0)){
     if(recursive == TRUE){
       # Prepare newdata for recursive forecasting
@@ -187,7 +282,26 @@ predict.smimodelFit <- function(object, newdata, recursive = FALSE,
       predictions =  vector(mode = "list", length = NROW(newdata))
       for(m in 1:(NROW(newdata) - 1)){
         data_temp = newdata[m, ]
-        pred <- predict_fn(object$gam, data_temp, type = "response")
+        if(length(trunc_cols != 0)){
+          ## Avoid extrapolation; truncate non-linear predictors to match in-sample
+          data_temp <- truncate_vars(object.data = object$gam$model,
+                                          data = data_temp,
+                                          cols.trunc = trunc_cols)
+          
+          # for(j in 1:length(trunc_cols)){
+          #   # In-sample range
+          #   insample_range <- range(object$gam$model[ , trunc_cols[j]])
+          #   # Truncate
+          #   if(data_temp[ , trunc_cols[j]] < insample_range[1]){
+          #     # Less than minimum
+          #     data_temp[ , trunc_cols[j]] <- insample_range[1]
+          #   }else if(data_temp[ , trunc_cols[j]] > insample_range[2]){
+          #     # Greater than maximum
+          #     data_temp[ , trunc_cols[j]] <- insample_range[2]
+          #   }
+          # }
+        }
+        pred <- predict(object$gam, data_temp, type = "response")
         predictions[[m]] <- pred
         x_seq = seq((m+1), (m+((max(recursive_colRange) - min(recursive_colRange)) + 1)))
         y_seq = recursive_colRange
@@ -198,7 +312,25 @@ predict.smimodelFit <- function(object, newdata, recursive = FALSE,
         }
       }
       data_temp = newdata[NROW(newdata), ]
-      predictions[[NROW(newdata)]] = predict_fn(object$gam, data_temp, type = "response")
+      if(length(trunc_cols != 0)){
+        ## Avoid extrapolation; truncate non-linear predictors to match in-sample
+        data_temp <- truncate_vars(object.data = object$gam$model,
+                                   data = data_temp,
+                                   cols.trunc = trunc_cols)
+        # for(k in 1:length(trunc_cols)){
+        #   # In-sample range
+        #   insample_range <- range(object$gam$model[ , trunc_cols[k]])
+        #   # Truncate
+        #   if(data_temp[ , trunc_cols[k]] < insample_range[1]){
+        #     # Less than minimum
+        #     data_temp[ , trunc_cols[k]] <- insample_range[1]
+        #   }else if(data_temp[ , trunc_cols[k]] > insample_range[2]){
+        #     # Greater than maximum
+        #     data_temp[ , trunc_cols[k]] <- insample_range[2]
+        #   }
+        # }
+      }
+      predictions[[NROW(newdata)]] = predict(object$gam, data_temp, type = "response")
       pred <- unlist(predictions)
       pred_F <- newdata |>
         dplyr::mutate(.predict = pred)
@@ -209,7 +341,23 @@ predict.smimodelFit <- function(object, newdata, recursive = FALSE,
       newdata <- newdata |>
         tibble::as_tibble() |>
         dplyr::arrange({{index_data}})
-      pred <- predict_fn(object$gam, newdata, type = "response")
+      if(length(trunc_cols != 0)){
+        newdata <- truncate_vars(object.data = object$gam$model,
+                                   data = newdata,
+                                   cols.trunc = trunc_cols)
+        # for(a in 1:length(trunc_cols)){
+        #   # In-sample range
+        #   insample_range <- range(object$gam$model[ , trunc_cols[a]])
+        #   # Less than minimum
+        #   smaller_indx <- which(newdata[ , trunc_cols[a]] < insample_range[1])
+        #   # Greater than maximum
+        #   larger_indx <- which(newdata[ , trunc_cols[a]] > insample_range[2])
+        #   # Truncate
+        #   newdata[ , trunc_cols[a]][smaller_indx] <- insample_range[1]
+        #   newdata[ , trunc_cols[a]][larger_indx] <- insample_range[2]
+        # }
+      }
+      pred <- predict(object$gam, newdata, type = "response")
       pred_F <- newdata |>
         dplyr::mutate(.predict = pred)
     }
@@ -221,7 +369,7 @@ predict.smimodelFit <- function(object, newdata, recursive = FALSE,
       data_list <- vector(mode = "list", length = NROW(newdata))
       for(m in 1:(NROW(newdata) - 1)){
         data_temp = newdata[m, ]
-        X_test <- as.matrix(newdata[m, object$vars_index])
+        X_test <- as.matrix(data_temp[ , object$vars_index])
         # Calculating indices
         ind <- vector(mode = "list", length = num_ind)
         for(i in 1:num_ind){
@@ -230,7 +378,25 @@ predict.smimodelFit <- function(object, newdata, recursive = FALSE,
         names(ind) <- colnames(list_index)
         dat <- tibble::as_tibble(ind)
         data_list[[m]] <- dplyr::bind_cols(data_temp, dat)
-        pred <- predict_fn(object$gam, data_list[[m]], type = "response")
+        if(length(trunc_cols != 0)){
+          ## Avoid extrapolation; truncate non-linear predictors to match in-sample
+          data_list[[m]] <- truncate_vars(object.data = object$gam$model,
+                                     data = data_list[[m]],
+                                     cols.trunc = trunc_cols)
+          # for(j in 1:length(trunc_cols)){
+          #   # In-sample range
+          #   insample_range <- range(object$gam$model[ , trunc_cols[j]])
+          #   # Truncate
+          #   if(data_list[[m]][ , trunc_cols[j]] < insample_range[1]){
+          #     # Less than minimum
+          #     data_list[[m]][ , trunc_cols[j]] <- insample_range[1]
+          #   }else if(data_list[[m]][ , trunc_cols[j]] > insample_range[2]){
+          #     # Greater than maximum
+          #     data_list[[m]][ , trunc_cols[j]] <- insample_range[2]
+          #   }
+          # } 
+        }
+        pred <- predict(object$gam, data_list[[m]], type = "response")
         predictions[[m]] <- pred
         x_seq = seq((m+1), (m+((max(recursive_colRange) - min(recursive_colRange)) + 1)))
         y_seq = recursive_colRange
@@ -241,7 +407,7 @@ predict.smimodelFit <- function(object, newdata, recursive = FALSE,
         }
       }
       data_temp = newdata[NROW(newdata), ]
-      X_test <- as.matrix(newdata[NROW(newdata), object$vars_index])
+      X_test <- as.matrix(data_temp[ , object$vars_index])
       # Calculating indices
       ind <- vector(mode = "list", length = num_ind)
       for(i in 1:num_ind){
@@ -250,7 +416,25 @@ predict.smimodelFit <- function(object, newdata, recursive = FALSE,
       names(ind) <- colnames(list_index)
       dat <- tibble::as_tibble(ind)
       data_list[[NROW(newdata)]] <- dplyr::bind_cols(data_temp, dat)
-      predictions[[NROW(newdata)]] = predict_fn(object$gam, data_list[[NROW(newdata)]], type = "response")
+      if(length(trunc_cols != 0)){
+        ## Avoid extrapolation; truncate non-linear predictors to match in-sample
+        data_list[[NROW(newdata)]] <- truncate_vars(object.data = object$gam$model,
+                                                    data = data_list[[NROW(newdata)]],
+                                                    cols.trunc = trunc_cols)
+        # for(j in 1:length(trunc_cols)){
+        #   # In-sample range
+        #   insample_range <- range(object$gam$model[ , trunc_cols[j]])
+        #   # Truncate
+        #   if(data_list[[NROW(newdata)]][ , trunc_cols[j]] < insample_range[1]){
+        #     # Less than minimum
+        #     data_list[[NROW(newdata)]][ , trunc_cols[j]] <- insample_range[1]
+        #   }else if(data_list[[NROW(newdata)]][ , trunc_cols[j]] > insample_range[2]){
+        #     # Greater than maximum
+        #     data_list[[NROW(newdata)]][ , trunc_cols[j]] <- insample_range[2]
+        #   }
+        # }
+      }
+      predictions[[NROW(newdata)]] = predict(object$gam, data_list[[NROW(newdata)]], type = "response")
       newdata1 <- dplyr::bind_rows(data_list)
       pred <- unlist(predictions)
       pred_F <- newdata1 |>
@@ -271,7 +455,24 @@ predict.smimodelFit <- function(object, newdata, recursive = FALSE,
       names(ind) <- colnames(list_index)
       dat <- tibble::as_tibble(ind)
       data_list <- dplyr::bind_cols(newdata, dat)
-      pred <- predict_fn(object$gam, data_list, type = "response")
+      if(length(trunc_cols != 0)){
+        ## Avoid extrapolation; truncate non-linear predictors to match in-sample
+        data_list <- truncate_vars(object.data = object$gam$model,
+                                   data = data_list,
+                                   cols.trunc = trunc_cols)
+        # for(b in 1:length(trunc_cols)){
+        #   # In-sample range
+        #   insample_range <- range(object$gam$model[ , trunc_cols[b]])
+        #   # Less than minimum
+        #   smaller_indx <- which(data_list[ , trunc_cols[b]] < insample_range[1])
+        #   # Greater than maximum
+        #   larger_indx <- which(data_list[ , trunc_cols[b]] > insample_range[2])
+        #   # Truncate
+        #   data_list[ , trunc_cols[b]][smaller_indx] <- insample_range[1]
+        #   data_list[ , trunc_cols[b]][larger_indx] <- insample_range[2]
+        # }
+      }
+      pred <- predict(object$gam, data_list, type = "response")
       pred_F <- data_list |>
         dplyr::mutate(.predict = pred)
     }
@@ -287,6 +488,13 @@ predict.smimodelFit <- function(object, newdata, recursive = FALSE,
 #' @param object A \code{backward} object.
 #' @param newdata The set of new data on for which the forecasts are required
 #'   (i.e. test set; should be a \code{tsibble}).
+#' @param exclude.trunc The names of the predictor variables that should not be
+#'   truncated for stable predictions as a character string. (Since the
+#'   nonlinear functions are estimated using splines, extrapolation is not
+#'   desirable. Hence, if any predictor variable in `newdata` that is treated
+#'   non-linearly in the estimated model, will be truncated to be in the
+#'   in-sample range before obtaining predictions. If any variables are listed
+#'   here will be excluded from such truncation.)
 #' @param recursive Whether to obtain recursive forecasts or not (default -
 #'   \code{FALSE}).
 #' @param recursive_colRange If \code{recursive = TRUE}, the range of column
@@ -303,19 +511,16 @@ predict.smimodelFit <- function(object, newdata, recursive = FALSE,
 #' @method predict backward
 #'
 #' @export
-predict.backward <- function(object, newdata,
+predict.backward <- function(object, newdata, exclude.trunc = NULL,
                              recursive = FALSE, recursive_colRange = NULL, ...){
   if (!is_tsibble(newdata)) stop("newdata is not a tsibble.")
   index_n <- index(newdata)
-  key_n <- key(newdata)
   if (length(key(newdata)) == 0) {
     newdata <- newdata |>
       mutate(dummy_key = rep(1, NROW(newdata))) |>
       as_tsibble(index = index_n, key = dummy_key)
-    key_n <- key(newdata)
   }
-  predict_fn <- mgcv::predict.gam
-  key11 <- key(newdata)[[1]]
+  key_n <- key(newdata)[[1]]
   if(recursive == TRUE){
     # Prepare newdata for recursive forecasting
     newdata <- prep_newdata(newdata = newdata, recursive_colRange = recursive_colRange)
@@ -323,9 +528,36 @@ predict.backward <- function(object, newdata,
     predictions =  vector(mode = "list", length = NROW(newdata))
     for(m in 1:(NROW(newdata) - 1)){
       data_temp = newdata[m, ]
-      key22 = data_temp[ , {{ key11 }}][[1]]
+      key22 = data_temp[ , {{ key_n }}][[1]]
       key22_pos = which(object$key == key22)
-      pred <- predict_fn(object$fit[[key22_pos]], data_temp, type = "response")
+      object_temp <- object$fit[[key22_pos]]
+      ## Avoid extrapolation; truncate non-linear predictors to match in-sample
+      # Predictors to truncate
+      gam_cols <- colnames(object_temp$model)
+      remove_temp <- as.character(attributes(object_temp$pterms)$variables)
+      no_trunc_cols <- unique(c(as.character(index_n), as.character(key_n),
+                                remove_temp[2:length(remove_temp)], 
+                                exclude.trunc))
+      trunc_indx <- !(gam_cols %in% no_trunc_cols)
+      trunc_cols <- gam_cols[trunc_indx]
+      if(length(trunc_cols) != 0){
+        data_temp <- truncate_vars(object.data = object_temp$model,
+                                   data = data_temp,
+                                   cols.trunc = trunc_cols)
+        # for(j in 1:length(trunc_cols)){
+        #   # In-sample range
+        #   insample_range <- range(object_temp$model[ , trunc_cols[j]])
+        #   # Truncate
+        #   if(data_temp[ , trunc_cols[j]] < insample_range[1]){
+        #     # Less than minimum
+        #     data_temp[ , trunc_cols[j]] <- insample_range[1]
+        #   }else if(data_temp[ , trunc_cols[j]] > insample_range[2]){
+        #     # Greater than maximum
+        #     data_temp[ , trunc_cols[j]] <- insample_range[2]
+        #   }
+        # }
+      }
+      pred <- predict(object_temp, data_temp, type = "response")
       predictions[[m]] <- pred
       x_seq = seq((m+1), (m+((max(recursive_colRange) - min(recursive_colRange)) + 1)))
       y_seq = recursive_colRange
@@ -336,25 +568,72 @@ predict.backward <- function(object, newdata,
       }
     }
     data_temp = newdata[NROW(newdata), ]
-    key22 = data_temp[ , {{ key11 }}][[1]]
+    key22 = data_temp[ , {{ key_n }}][[1]]
     key22_pos = which(object$key == key22)
-    predictions[[NROW(newdata)]] = predict_fn(object$fit[[key22_pos]], data_temp,
-                                              type = "response")
-    pred <- unlist(predictions)
-    pred_F <- newdata |>
-      mutate(.predict = pred) |>
-      as_tsibble(index = {{ index_n }}, key = {{ key11 }})
+    object_temp <- object$fit[[key22_pos]]
+    ## Avoid extrapolation; truncate non-linear predictors to match in-sample
+    # Predictors to truncate
+    gam_cols <- colnames(object_temp$model)
+    remove_temp <- as.character(attributes(object_temp$pterms)$variables)
+    no_trunc_cols <- unique(c(as.character(index_n), as.character(key_n),
+                              remove_temp[2:length(remove_temp)], 
+                              exclude.trunc))
+    trunc_indx <- !(gam_cols %in% no_trunc_cols)
+    trunc_cols <- gam_cols[trunc_indx]
+    if(length(trunc_cols) != 0){
+      data_temp <- truncate_vars(object.data = object_temp$model,
+                                 data = data_temp,
+                                 cols.trunc = trunc_cols)
+      # for(j in 1:length(trunc_cols)){
+      #   # In-sample range
+      #   insample_range <- range(object_temp$model[ , trunc_cols[j]])
+      #   # Truncate
+      #   if(data_temp[ , trunc_cols[j]] < insample_range[1]){
+      #     # Less than minimum
+      #     data_temp[ , trunc_cols[j]] <- insample_range[1]
+      #   }else if(data_temp[ , trunc_cols[j]] > insample_range[2]){
+      #     # Greater than maximum
+      #     data_temp[ , trunc_cols[j]] <- insample_range[2]
+      #   }
+      # } 
+    }
+    predictions[[NROW(newdata)]] = predict(object_temp, data_temp, type = "response")
   }else if(recursive == FALSE){
     predictions <- vector(mode = "list", length = NROW(object))
     for (i in 1:NROW(object)) {
-      newdata_cat <- newdata[newdata[{{ key11 }}] == object$key[i], ]
-      predictions[[i]] <- predict_fn(object$fit[[i]], newdata_cat, type = "response")
+      newdata_cat <- newdata[newdata[{{ key_n }}] == object$key[i], ]
+      ## Avoid extrapolation; truncate non-linear predictors to match in-sample
+      # Predictors to truncate
+      gam_cols <- colnames(object$fit[[i]]$model)
+      remove_temp <- as.character(attributes(object$fit[[i]]$pterms)$variables)
+      no_trunc_cols <- unique(c(as.character(index_n), as.character(key_n),
+                                remove_temp[2:length(remove_temp)], 
+                                exclude.trunc))
+      trunc_indx <- !(gam_cols %in% no_trunc_cols)
+      trunc_cols <- gam_cols[trunc_indx]
+      if(length(trunc_cols) != 0){
+        newdata_cat <- truncate_vars(object.data = object$fit[[i]]$model,
+                                     data = newdata_cat,
+                                     cols.trunc = trunc_cols)
+        # for(j in 1:length(trunc_cols)){
+        #   # In-sample range
+        #   insample_range <- range(object_temp$model[ , trunc_cols[j]])
+        #   # Less than minimum
+        #   smaller_indx <- which(newdata_cat[ , trunc_cols[j]] < insample_range[1])
+        #   # Greater than maximum
+        #   larger_indx <- which(newdata_cat[ , trunc_cols[j]] > insample_range[2])
+        #   # Truncate
+        #   newdata_cat[ , trunc_cols[j]][smaller_indx] <- insample_range[1]
+        #   newdata_cat[ , trunc_cols[j]][larger_indx] <- insample_range[2]
+        # }
+      }
+      predictions[[i]] <- predict(object$fit[[i]], newdata_cat, type = "response")
     }
-    pred <- unlist(predictions)
-    pred_F <- newdata |>
-      mutate(.predict = pred) |>
-      as_tsibble(index = {{ index_n }}, key = {{ key11 }})
   }
+  pred <- unlist(predictions)
+  pred_F <- newdata |>
+    mutate(.predict = pred) |>
+    as_tsibble(index = {{ index_n }}, key = {{ key_n }})
   return(pred_F)
 }
 
@@ -366,6 +645,13 @@ predict.backward <- function(object, newdata,
 #' @param object A \code{pprFit} object.
 #' @param newdata The set of new data on for which the forecasts are required
 #'   (i.e. test set; should be a \code{tsibble}).
+#' @param exclude.trunc The names of the predictor variables that should not be
+#'   truncated for stable predictions as a character string. (Since the
+#'   nonlinear functions are estimated using splines, extrapolation is not
+#'   desirable. Hence, if any predictor variable in `newdata` that is treated
+#'   non-linearly in the estimated model, will be truncated to be in the
+#'   in-sample range before obtaining predictions. If any variables are listed
+#'   here will be excluded from such truncation.)
 #' @param recursive Whether to obtain recursive forecasts or not (default -
 #'   \code{FALSE}).
 #' @param recursive_colRange If \code{recursive = TRUE}, the range of column
@@ -382,16 +668,14 @@ predict.backward <- function(object, newdata,
 #' @method predict pprFit
 #'
 #' @export
-predict.pprFit <- function(object, newdata,
+predict.pprFit <- function(object, newdata, exclude.trunc = NULL,
                            recursive = FALSE, recursive_colRange = NULL, ...){
   if (!is_tsibble(newdata)) stop("newdata is not a tsibble.")
   index_n <- index(newdata)
-  key_n <- key(newdata)
   if (length(key(newdata)) == 0) {
     newdata <- newdata |>
       mutate(dummy_key = rep(1, NROW(newdata))) |>
       as_tsibble(index = index_n, key = dummy_key)
-    key_n <- key(newdata)
   }
   key11 <- key(newdata)[[1]]
   if(recursive == TRUE){
@@ -401,12 +685,23 @@ predict.pprFit <- function(object, newdata,
     predictions =  vector(mode = "list", length = NROW(newdata))
     for(m in 1:(NROW(newdata) - 1)){
       data_temp = newdata[m, ]
-      if(any(is.na(data_temp[ , 1:(NCOL(data_temp) - 2)]))){
+      col_retain <- !(colnames(data_temp) %in% c("indexLag", "indexDiff", "row_idx", "grp"))
+      if(any(is.na(data_temp[ , col_retain]))){
         pred <- NA
       }else{
         key22 = data_temp[ , {{ key11 }}][[1]]
         key22_pos = which(object$key == key22)
-        pred <- predict(object$fit[[key22_pos]], data_temp, type = "response")
+        object_temp <- object$fit[[key22_pos]]
+        ## Avoid extrapolation; truncate non-linear predictors to match in-sample
+        # Predictors to truncate
+        trunc_indx <- !(object_temp$xnames %in% exclude.trunc)
+        trunc_cols <- object_temp$xnames[trunc_indx]
+        if(length(trunc_cols) != 0){
+          data_temp <- truncate_vars(object.data = object_temp$model,
+                                     data = data_temp,
+                                     cols.trunc = trunc_cols)
+        }
+        pred <- predict(object_temp, data_temp, type = "response")
       }
       predictions[[m]] <- pred
       x_seq = seq((m+1), (m+((max(recursive_colRange) - min(recursive_colRange)) + 1)))
@@ -423,24 +718,39 @@ predict.pprFit <- function(object, newdata,
     }else{
       key22 = data_temp[ , {{ key11 }}][[1]]
       key22_pos = which(object$key == key22)
-      pred <- predict(object$fit[[key22_pos]], data_temp, type = "response")
+      object_temp <- object$fit[[key22_pos]]
+      ## Avoid extrapolation; truncate non-linear predictors to match in-sample
+      # Predictors to truncate
+      trunc_indx <- !(object_temp$xnames %in% exclude.trunc)
+      trunc_cols <- object_temp$xnames[trunc_indx]
+      if(length(trunc_cols) != 0){
+        data_temp <- truncate_vars(object.data = object_temp$model,
+                                   data = data_temp,
+                                   cols.trunc = trunc_cols)
+      }
+      pred <- predict(object_temp, data_temp, type = "response")
     }
     predictions[[NROW(newdata)]] <- pred
-    pred <- unlist(predictions)
-    pred_F <- newdata |>
-      mutate(.predict = pred) |>
-      as_tsibble(index = {{ index_n }}, key = {{ key11 }})
   }else if(recursive == FALSE){
     predictions <- vector(mode = "list", length = NROW(object))
     for (i in 1:NROW(object)) {
       newdata_cat <- newdata[newdata[{{ key11 }}] == object$key[i], ]
+      ## Avoid extrapolation; truncate non-linear predictors to match in-sample
+      # Predictors to truncate
+      trunc_indx <- !(object$fit[[i]]$xnames %in% exclude.trunc)
+      trunc_cols <- object$fit[[i]]$xnames[trunc_indx]
+      if(length(trunc_cols) != 0){
+        newdata_cat <- truncate_vars(object.data = object$fit[[i]]$model,
+                                     data = newdata_cat,
+                                     cols.trunc = trunc_cols)
+      }
       predictions[[i]] <- predict(object$fit[[i]], newdata_cat, type = "response")
     }
-    pred <- unlist(predictions)
-    pred_F <- newdata |>
-      mutate(.predict = pred) |>
-      as_tsibble(index = {{ index_n }}, key = {{ key11 }})
   }
+  pred <- unlist(predictions)
+  pred_F <- newdata |>
+    mutate(.predict = pred) |>
+    as_tsibble(index = {{ index_n }}, key = {{ key11 }})
   return(pred_F)
 }
 
@@ -472,12 +782,10 @@ predict.gaimFit <- function(object, newdata,
                             recursive = FALSE, recursive_colRange = NULL, ...){
   if (!is_tsibble(newdata)) stop("newdata is not a tsibble.")
   index_n <- index(newdata)
-  key_n <- key(newdata)
   if (length(key(newdata)) == 0) {
     newdata <- newdata |>
       mutate(dummy_key = rep(1, NROW(newdata))) |>
       as_tsibble(index = index_n, key = dummy_key)
-    key_n <- key(newdata)
   }
   key11 <- key(newdata)[[1]]
   if(recursive == TRUE){
@@ -504,21 +812,17 @@ predict.gaimFit <- function(object, newdata,
     key22_pos = which(object$key == key22)
     predictions[[NROW(newdata)]] = predict(object$fit[[key22_pos]], data_temp,
                                               type = "response")
-    pred <- unlist(predictions)
-    pred_F <- newdata |>
-      mutate(.predict = pred) |>
-      as_tsibble(index = {{ index_n }}, key = {{ key11 }})
   }else if(recursive == FALSE){
     predictions <- vector(mode = "list", length = NROW(object))
     for (i in 1:NROW(object)) {
       newdata_cat <- newdata[newdata[{{ key11 }}] == object$key[i], ]
       predictions[[i]] <- predict(object$fit[[i]], newdata_cat, type = "response")
     }
-    pred <- unlist(predictions)
-    pred_F <- newdata |>
-      mutate(.predict = pred) |>
-      as_tsibble(index = {{ index_n }}, key = {{ key11 }})
   }
+  pred <- unlist(predictions)
+  pred_F <- newdata |>
+    mutate(.predict = pred) |>
+    as_tsibble(index = {{ index_n }}, key = {{ key11 }})
   return(pred_F)
 }
 
@@ -550,12 +854,10 @@ predict.lmFit <- function(object, newdata,
                            recursive = FALSE, recursive_colRange = NULL, ...){
   if (!is_tsibble(newdata)) stop("newdata is not a tsibble.")
   index_n <- index(newdata)
-  key_n <- key(newdata)
   if (length(key(newdata)) == 0) {
     newdata <- newdata |>
       mutate(dummy_key = rep(1, NROW(newdata))) |>
       as_tsibble(index = index_n, key = dummy_key)
-    key_n <- key(newdata)
   }
   key11 <- key(newdata)[[1]]
   if(recursive == TRUE){
@@ -582,21 +884,17 @@ predict.lmFit <- function(object, newdata,
     key22_pos = which(object$key == key22)
     predictions[[NROW(newdata)]] = predict(object$fit[[key22_pos]], data_temp,
                                            type = "response")
-    pred <- unlist(predictions)
-    pred_F <- newdata |>
-      mutate(.predict = pred) |>
-      as_tsibble(index = {{ index_n }}, key = {{ key11 }})
   }else if(recursive == FALSE){
     predictions <- vector(mode = "list", length = NROW(object))
     for (i in 1:NROW(object)) {
       newdata_cat <- newdata[newdata[{{ key11 }}] == object$key[i], ]
       predictions[[i]] <- predict(object$fit[[i]], newdata_cat, type = "response")
     }
-    pred <- unlist(predictions)
-    pred_F <- newdata |>
-      mutate(.predict = pred) |>
-      as_tsibble(index = {{ index_n }}, key = {{ key11 }})
   }
+  pred <- unlist(predictions)
+  pred_F <- newdata |>
+    mutate(.predict = pred) |>
+    as_tsibble(index = {{ index_n }}, key = {{ key11 }})
   return(pred_F)
 }
 
@@ -608,6 +906,13 @@ predict.lmFit <- function(object, newdata,
 #' @param object A \code{gamFit} object.
 #' @param newdata The set of new data on for which the forecasts are required
 #'   (i.e. test set; should be a \code{tsibble}).
+#' @param exclude.trunc The names of the predictor variables that should not be
+#'   truncated for stable predictions as a character string. (Since the
+#'   nonlinear functions are estimated using splines, extrapolation is not
+#'   desirable. Hence, if any predictor variable in `newdata` that is treated
+#'   non-linearly in the estimated model, will be truncated to be in the
+#'   in-sample range before obtaining predictions. If any variables are listed
+#'   here will be excluded from such truncation.)
 #' @param recursive Whether to obtain recursive forecasts or not (default -
 #'   \code{FALSE}).
 #' @param recursive_colRange If \code{recursive = TRUE}, the range of column
@@ -624,16 +929,14 @@ predict.lmFit <- function(object, newdata,
 #' @method predict gamFit
 #'
 #' @export
-predict.gamFit <- function(object, newdata,
+predict.gamFit <- function(object, newdata, exclude.trunc = NULL,
                           recursive = FALSE, recursive_colRange = NULL, ...){
   if (!is_tsibble(newdata)) stop("newdata is not a tsibble.")
   index_n <- index(newdata)
-  key_n <- key(newdata)
   if (length(key(newdata)) == 0) {
     newdata <- newdata |>
       mutate(dummy_key = rep(1, NROW(newdata))) |>
       as_tsibble(index = index_n, key = dummy_key)
-    key_n <- key(newdata)
   }
   key11 <- key(newdata)[[1]]
   if(recursive == TRUE){
@@ -645,7 +948,22 @@ predict.gamFit <- function(object, newdata,
       data_temp = newdata[m, ]
       key22 = data_temp[ , {{ key11 }}][[1]]
       key22_pos = which(object$key == key22)
-      pred <- predict(object$fit[[key22_pos]], data_temp, type = "response")
+      object_temp <- object$fit[[key22_pos]]
+      ## Avoid extrapolation; truncate non-linear predictors to match in-sample
+      # Predictors to truncate
+      gam_cols <- colnames(object_temp$model)
+      remove_temp <- as.character(attributes(object_temp$pterms)$variables)
+      no_trunc_cols <- unique(c(as.character(index_n), as.character(key11),
+                                remove_temp[2:length(remove_temp)], 
+                                exclude.trunc))
+      trunc_indx <- !(gam_cols %in% no_trunc_cols)
+      trunc_cols <- gam_cols[trunc_indx]
+      if(length(trunc_cols) != 0){
+        data_temp <- truncate_vars(object.data = object_temp$model,
+                                   data = data_temp,
+                                   cols.trunc = trunc_cols)
+      }
+      pred <- predict(object_temp, data_temp, type = "response")
       predictions[[m]] <- pred
       x_seq = seq((m+1), (m+((max(recursive_colRange) - min(recursive_colRange)) + 1)))
       y_seq = recursive_colRange
@@ -658,23 +976,47 @@ predict.gamFit <- function(object, newdata,
     data_temp = newdata[NROW(newdata), ]
     key22 = data_temp[ , {{ key11 }}][[1]]
     key22_pos = which(object$key == key22)
-    predictions[[NROW(newdata)]] = predict(object$fit[[key22_pos]], data_temp,
-                                           type = "response")
-    pred <- unlist(predictions)
-    pred_F <- newdata |>
-      mutate(.predict = pred) |>
-      as_tsibble(index = {{ index_n }}, key = {{ key11 }})
+    object_temp <- object$fit[[key22_pos]]
+    ## Avoid extrapolation; truncate non-linear predictors to match in-sample
+    # Predictors to truncate
+    gam_cols <- colnames(object_temp$model)
+    remove_temp <- as.character(attributes(object_temp$pterms)$variables)
+    no_trunc_cols <- unique(c(as.character(index_n), as.character(key11),
+                              remove_temp[2:length(remove_temp)], 
+                              exclude.trunc))
+    trunc_indx <- !(gam_cols %in% no_trunc_cols)
+    trunc_cols <- gam_cols[trunc_indx]
+    if(length(trunc_cols) != 0){
+      data_temp <- truncate_vars(object.data = object_temp$model,
+                                 data = data_temp,
+                                 cols.trunc = trunc_cols)
+    }
+    predictions[[NROW(newdata)]] = predict(object_temp, data_temp, type = "response")
   }else if(recursive == FALSE){
     predictions <- vector(mode = "list", length = NROW(object))
     for (i in 1:NROW(object)) {
       newdata_cat <- newdata[newdata[{{ key11 }}] == object$key[i], ]
+      ## Avoid extrapolation; truncate non-linear predictors to match in-sample
+      # Predictors to truncate
+      gam_cols <- colnames(object$fit[[i]]$model)
+      remove_temp <- as.character(attributes(object$fit[[i]]$pterms)$variables)
+      no_trunc_cols <- unique(c(as.character(index_n), as.character(key11),
+                                remove_temp[2:length(remove_temp)], 
+                                exclude.trunc))
+      trunc_indx <- !(gam_cols %in% no_trunc_cols)
+      trunc_cols <- gam_cols[trunc_indx]
+      if(length(trunc_cols) != 0){
+        newdata_cat <- truncate_vars(object.data = object$fit[[i]]$model,
+                                     data = newdata_cat,
+                                     cols.trunc = trunc_cols)
+      }
       predictions[[i]] <- predict(object$fit[[i]], newdata_cat, type = "response")
     }
-    pred <- unlist(predictions)
-    pred_F <- newdata |>
-      mutate(.predict = pred) |>
-      as_tsibble(index = {{ index_n }}, key = {{ key11 }})
   }
+  pred <- unlist(predictions)
+  pred_F <- newdata |>
+    mutate(.predict = pred) |>
+    as_tsibble(index = {{ index_n }}, key = {{ key11 }})
   return(pred_F)
 }
 
@@ -686,6 +1028,13 @@ predict.gamFit <- function(object, newdata,
 #' @param object A \code{gam} object.
 #' @param newdata The set of new data on for which the forecasts are required
 #'   (i.e. test set; should be a \code{tsibble}).
+#' @param exclude.trunc The names of the predictor variables that should not be
+#'   truncated for stable predictions as a character string. (Since the
+#'   nonlinear functions are estimated using splines, extrapolation is not
+#'   desirable. Hence, if any predictor variable in `newdata` that is treated
+#'   non-linearly in the estimated model, will be truncated to be in the
+#'   in-sample range before obtaining predictions. If any variables are listed
+#'   here will be excluded from such truncation.)
 #' @param recursive Whether to obtain recursive forecasts or not (default -
 #'   \code{FALSE}).
 #' @param recursive_colRange If \code{recursive = TRUE}, the range of column
@@ -698,10 +1047,18 @@ predict.gamFit <- function(object, newdata,
 #'   if some of the intermediate lags are not used as predictors.
 #' @param ... Other arguments not currently used.
 #' @return A \code{tibble} with forecasts on test set.
-predict_gam <- function(object, newdata,
+predict_gam <- function(object, newdata, exclude.trunc = NULL, 
                           recursive = FALSE, recursive_colRange = NULL, ...){
   if (!is_tsibble(newdata)) stop("newdata is not a tsibble.")
-  predict_fn <- mgcv::predict.gam
+  index_n <- index(newdata)
+  # Predictors to truncate
+  gam_cols <- colnames(object$model)
+  remove_temp <- as.character(attributes(object$pterms)$variables)
+  no_trunc_cols <- unique(c(as.character(index_n),
+                            remove_temp[2:length(remove_temp)], 
+                            exclude.trunc))
+  trunc_indx <- !(gam_cols %in% no_trunc_cols)
+  trunc_cols <- gam_cols[trunc_indx]
   if(recursive == TRUE){
     # Prepare newdata for recursive forecasting
     newdata <- prep_newdata(newdata = newdata, recursive_colRange = recursive_colRange)
@@ -709,7 +1066,25 @@ predict_gam <- function(object, newdata,
     predictions =  vector(mode = "list", length = NROW(newdata))
     for(m in 1:(NROW(newdata) - 1)){
       data_temp = newdata[m, ]
-      pred <- predict_fn(object, data_temp, type = "response")
+      if(length(trunc_cols) != 0){
+        ## Avoid extrapolation; truncate non-linear predictors to match in-sample
+        data_temp <- truncate_vars(object.data = object$model,
+                                     data = data_temp,
+                                     cols.trunc = trunc_cols)
+        # for(j in 1:length(trunc_cols)){
+        #   # In-sample range
+        #   insample_range <- range(object$model[ , trunc_cols[j]])
+        #   # Truncate
+        #   if(data_temp[ , trunc_cols[j]] < insample_range[1]){
+        #     # Less than minimum
+        #     data_temp[ , trunc_cols[j]] <- insample_range[1]
+        #   }else if(data_temp[ , trunc_cols[j]] > insample_range[2]){
+        #     # Greater than maximum
+        #     data_temp[ , trunc_cols[j]] <- insample_range[2]
+        #   }
+        # }
+      }
+      pred <- predict(object, data_temp, type = "response")
       predictions[[m]] <- pred
       x_seq = seq((m+1), (m+((max(recursive_colRange) - min(recursive_colRange)) + 1)))
       y_seq = recursive_colRange
@@ -720,10 +1095,26 @@ predict_gam <- function(object, newdata,
       }
     }
     data_temp = newdata[NROW(newdata), ]
-    predictions[[NROW(newdata)]] = predict_fn(object, data_temp, type = "response")
+    if(length(trunc_cols) != 0){
+      ## Avoid extrapolation; truncate non-linear predictors to match in-sample
+      data_temp <- truncate_vars(object.data = object$model,
+                                 data = data_temp,
+                                 cols.trunc = trunc_cols)
+      # for(j in 1:length(trunc_cols)){
+      #   # In-sample range
+      #   insample_range <- range(object$model[ , trunc_cols[j]])
+      #   # Truncate
+      #   if(data_temp[ , trunc_cols[j]] < insample_range[1]){
+      #     # Less than minimum
+      #     data_temp[ , trunc_cols[j]] <- insample_range[1]
+      #   }else if(data_temp[ , trunc_cols[j]] > insample_range[2]){
+      #     # Greater than maximum
+      #     data_temp[ , trunc_cols[j]] <- insample_range[2]
+      #   }
+      # } 
+    }
+    predictions[[NROW(newdata)]] = predict(object, data_temp, type = "response")
     pred <- unlist(predictions)
-    pred_F <- newdata |>
-      mutate(.predict = pred)
   }else if(recursive == FALSE){
     # Index
     index_data <- index(newdata)
@@ -731,10 +1122,27 @@ predict_gam <- function(object, newdata,
     newdata <- newdata |>
       tibble::as_tibble() |>
       dplyr::arrange({{index_data}})
-    pred <- predict_fn(object, newdata, type = "response")
-    pred_F <- newdata |>
-      dplyr::mutate(.predict = pred)
+    if(length(trunc_cols) != 0){
+      ## Avoid extrapolation; truncate non-linear predictors to match in-sample
+      newdata <- truncate_vars(object.data = object$model,
+                               data = newdata,
+                               cols.trunc = trunc_cols)
+      # for(j in 1:length(trunc_cols)){
+      #   # In-sample range
+      #   insample_range <- range(object$model[ , trunc_cols[j]])
+      #   # Less than minimum
+      #   smaller_indx <- which(newdata[ , trunc_cols[j]] < insample_range[1])
+      #   # Greater than maximum
+      #   larger_indx <- which(newdata[ , trunc_cols[j]] > insample_range[2])
+      #   # Truncate
+      #   newdata[ , trunc_cols[j]][smaller_indx] <- insample_range[1]
+      #   newdata[ , trunc_cols[j]][larger_indx] <- insample_range[2]
+      # } 
+    }
+    pred <- predict(object, newdata, type = "response")
   }
+  pred_F <- newdata |>
+    dplyr::mutate(.predict = pred)
   return(pred_F)
 }
 
@@ -910,4 +1318,39 @@ predict.cgaim <- function(object, newdata,
     )
     return(out)
   }
+}
+
+
+#' Truncating predictors to be in the in-sample range
+#'
+#' Truncates predictors to be in the in-sample range to avoid spline 
+#' extrapolation.
+#'
+#' @param object.data In-sample data set.
+#' @param data Out-of-sample data set of which variables should be truncated.
+#' @param cols.trunc Column names of the variables to be truncated.
+truncate_vars <- function(object.data, data, cols.trunc){
+  for(i in 1:length(cols.trunc)){
+    # In-sample range
+    insample_range <- range(object.data[ , cols.trunc[i]])
+    # Truncate
+    if(NROW(data) == 1){
+      if(data[ , cols.trunc[i]] < insample_range[1]){
+        # Less than minimum
+        data[ , cols.trunc[i]] <- insample_range[1]
+      }else if(data[ , cols.trunc[i]] > insample_range[2]){
+        # Greater than maximum
+        data[ , cols.trunc[i]] <- insample_range[2]
+      }
+    }else{
+      # Less than minimum
+      smaller_indx <- which(data[ , cols.trunc[i]] < insample_range[1])
+      # Greater than maximum
+      larger_indx <- which(data[ , cols.trunc[i]] > insample_range[2])
+      # Truncate
+      data[smaller_indx, cols.trunc[i]] <- insample_range[1]
+      data[larger_indx, cols.trunc[i]] <- insample_range[2]
+    }
+  }
+  return(data)
 }

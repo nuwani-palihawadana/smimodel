@@ -34,6 +34,13 @@
 #'   will not be used.
 #' @param roll.length Number of observations by which each rolling/expanding
 #'   window should be rolled forward.
+#' @param exclude.trunc The names of the predictor variables that should not be
+#'   truncated for stable predictions as a character string. (Since the
+#'   nonlinear functions are estimated using splines, extrapolation is not
+#'   desirable. Hence, if any predictor variable is treated non-linearly in the
+#'   estimated model, will be truncated to be in the in-sample range before
+#'   obtaining predictions. If any variables are listed here will be excluded
+#'   from such truncation.)
 #' @param recursive Whether to obtain recursive forecasts or not (default -
 #'   \code{FALSE}).
 #' @param recursive_colNames If \code{recursive = TRUE}, a character vector
@@ -125,6 +132,7 @@ cb_cvforecast <- function(object, data, yvar, neighbour = 0, predictor.vars,
                           h = 1, ncal = 100, num.futures = 1000,
                           level = c(80, 95), forward = TRUE,
                           initial = 1, window = NULL, roll.length = 1,
+                          exclude.trunc = NULL,
                           recursive = FALSE, recursive_colNames = NULL, 
                           na.rm = TRUE, ...) {
   # Check input data
@@ -368,6 +376,7 @@ cb_cvforecast <- function(object, data, yvar, neighbour = 0, predictor.vars,
     # Obtain predictions on test set
     preds <- predict(object = modelFit[[i]],
                      newdata = test,
+                     exclude.trunc = exclude.trunc,
                      recursive = recursive,
                      recursive_colRange = recursive_colRange)
     # Convert to a tibble
@@ -422,6 +431,7 @@ cb_cvforecast <- function(object, data, yvar, neighbour = 0, predictor.vars,
       futures <- possibleFutures_benchmark(object = forecastModel,
                                            newdata = newdata,
                                            bootstraps = bootstraps,
+                                           exclude.trunc = exclude.trunc,
                                            recursive_colRange = recursive_colRange)
       names(futures$future_cols) <- 1:length(futures$future_cols)
       possibleFutures_part2 <- as.matrix(bind_cols(futures$future_cols))
@@ -505,6 +515,13 @@ cb_cvforecast <- function(object, data, yvar, neighbour = 0, predictor.vars,
 #'   will not be used.
 #' @param roll.length Number of observations by which each rolling/expanding
 #'   window should be rolled forward.
+#' @param exclude.trunc The names of the predictor variables that should not be
+#'   truncated for stable predictions as a character string. (Since the
+#'   nonlinear functions are estimated using splines, extrapolation is not
+#'   desirable. Hence, if any predictor variable is treated non-linearly in the
+#'   estimated model, will be truncated to be in the in-sample range before
+#'   obtaining predictions. If any variables are listed here will be excluded
+#'   from such truncation.)
 #' @param recursive Whether to obtain recursive forecasts or not (default -
 #'   \code{FALSE}).
 #' @param recursive_colNames If \code{recursive = TRUE}, a character vector
@@ -597,6 +614,7 @@ bb_cvforecast <- function(object, data,
                           h = 1, season.period = 1, m = 1,
                           num.futures = 1000, level = c(80, 95), forward = TRUE,
                           initial = 1, window = NULL, roll.length = 1,
+                          exclude.trunc = NULL,
                           recursive = FALSE, recursive_colNames = NULL, 
                           na.rm = TRUE, ...) {
   # Check input data
@@ -849,6 +867,7 @@ bb_cvforecast <- function(object, data,
     # Obtain predictions on test set
     preds <- predict(object = modelFit[[i]],
                      newdata = test,
+                     exclude.trunc = exclude.trunc,
                      recursive = recursive,
                      recursive_colRange = recursive_colRange)
     # Store predictions
@@ -862,6 +881,7 @@ bb_cvforecast <- function(object, data,
                                     resids = na.omit(res[i, ]), preds = pf[i, ],
                                     season.period = season.period, m = m,
                                     num.futures = num.futures,
+                                    exclude.trunc = exclude.trunc,
                                     recursive = recursive,
                                     recursive_colRange = recursive_colRange)
     # Prediction interval bounds
@@ -995,13 +1015,15 @@ remove_lags <- function(data, recursive_colRange){
 #' @param season.period Length of the seasonal period.
 #' @param m Multiplier. (Block size = \code{season.period * m})
 #' @param num.futures Number of possible future sample paths to be generated.
+#' @param exclude.trunc The names of the predictor variables that should not be
+#'   truncated for stable predictions as a character string.
 #' @param recursive Whether to obtain recursive forecasts or not (default -
 #'   FALSE).
 #' @param recursive_colRange If \code{recursive = TRUE}, The range of column
 #'   numbers in test data to be filled with forecasts.
 #' @return A matrix of simulated future sample paths.
 blockBootstrap <- function(object, newdata, resids, preds, season.period = 1,
-                           m = 1, num.futures = 1000,
+                           m = 1, num.futures = 1000, exclude.trunc = NULL,
                            recursive = FALSE, recursive_colRange = NULL){
 
   # Generate the matrix of bootstrapped series
@@ -1020,11 +1042,13 @@ blockBootstrap <- function(object, newdata, resids, preds, season.period = 1,
       futures <- possibleFutures_smimodel(object = object,
                                           newdata = newdata,
                                           bootstraps = bootstraps,
+                                          exclude.trunc = exclude.trunc,
                                           recursive_colRange = recursive_colRange)
     }else{
       futures <- possibleFutures_benchmark(object = object,
                                            newdata = newdata,
                                            bootstraps = bootstraps,
+                                           exclude.trunc = exclude.trunc,
                                            recursive_colRange = recursive_colRange)
     }
     names(futures$future_cols) <- 1:length(futures$future_cols)
@@ -1103,6 +1127,8 @@ randomBlock <- function(series, block.size){
 #' @param newdata The set of new data on for which the forecasts are required
 #'   (i.e. test set; should be a \code{tsibble}).
 #' @param bootstraps Generated matrix of bootstrapped residual series.
+#' @param exclude.trunc The names of the predictor variables that should not be
+#'   truncated for stable predictions as a character string.
 #' @param recursive_colRange The range of column numbers in \code{newdata} to be
 #'   filled with forecasts.
 #' @return A list containing the following components: \item{firstFuture}{A
@@ -1111,22 +1137,20 @@ randomBlock <- function(series, block.size){
 #'   each list element corresponds to each 1-step-ahead simulated future in
 #'   \code{firstFuture}.} 
 possibleFutures_smimodel <- function(object, newdata, bootstraps,
-                                     recursive_colRange){
+                                     exclude.trunc = NULL, recursive_colRange){
   index_n <- index(newdata)
-  key_n <- key(newdata)
   if (length(key(newdata)) == 0) {
     newdata <- newdata |>
       mutate(dummy_key = rep(1, NROW(newdata))) |>
       as_tsibble(index = index_n, key = dummy_key)
-    key_n <- key(newdata)
   }
   key11 <- key(newdata)[[1]]
 
   # Names of the columns to be filled with forecasts
   recursive_colNames <- colnames(newdata)[recursive_colRange]
 
-  # Predict function to be used
-  predict_fn <- mgcv::predict.gam
+  # # Predict function to be used
+  # predict_fn <- mgcv::predict.gam
 
   # Prepare newdata for recursive forecasting
   newdata <- prep_newdata(newdata = newdata, recursive_colRange = recursive_colRange)
@@ -1157,7 +1181,9 @@ possibleFutures_smimodel <- function(object, newdata, bootstraps,
     dat <- tibble::as_tibble(ind)
     data_list1 <- dplyr::bind_cols(data_temp, dat)
   }
-  pred1 <- predict_fn(object$fit[[key22_pos]]$best$gam, data_list1, type = "response")
+  #pred1 <- predict_fn(object$fit[[key22_pos]]$best$gam, data_list1, type = "response")
+  pred1 <- predict(object$fit[[key22_pos]]$best, data_list1, 
+                   exclude.trunc = exclude.trunc)$.predict
   possibleFutures1 <- as.numeric(pred1) + bootstraps[1, ]
 
   # Should fill the missing response lags in newdata using each of the
@@ -1222,8 +1248,10 @@ possibleFutures_smimodel <- function(object, newdata, bootstraps,
         dat <- tibble::as_tibble(ind)
         data_list1 <- dplyr::bind_cols(data_temp, dat)
       }
-      pred1 <- predict_fn(object$fit[[key22_pos]]$best$gam, data_list1, type = "response")
-      temp_Futures[[t-1]] <- pred1 + bootstraps[t, s]
+      #pred1 <- predict_fn(object$fit[[key22_pos]]$best$gam, data_list1, type = "response")
+      pred1 <- predict(object$fit[[key22_pos]]$best, data_list1,
+                       exclude.trunc = exclude.trunc)$.predict
+      temp_Futures[[t-1]] <- as.numeric(pred1) + bootstraps[t, s]
       recursive_colRange_new <- which(colnames(newdata_list[[s]]) %in% recursive_colNames)
       fill_data_temp <- newdata_list[[s]][ , recursive_colRange_new]
       remain_data_temp <- newdata_list[[s]][ , -recursive_colRange_new]
@@ -1266,9 +1294,11 @@ possibleFutures_smimodel <- function(object, newdata, bootstraps,
       dat <- tibble::as_tibble(ind)
       data_list1 <- dplyr::bind_cols(data_temp, dat)
     }
-    pred1 <- predict_fn(object$fit[[key22_pos]]$best$gam, data_list1,
-                        type = "response")
-    temp_Futures[[NROW(newdata_list[[s]]) - 1]] <- pred1 + bootstraps[NROW(newdata_list[[s]]), s]
+    # pred1 <- predict_fn(object$fit[[key22_pos]]$best$gam, data_list1,
+    #                     type = "response")
+    pred1 <- predict(object$fit[[key22_pos]]$best, data_list1,
+                     exclude.trunc = exclude.trunc)$.predict
+    temp_Futures[[NROW(newdata_list[[s]]) - 1]] <- as.numeric(pred1) + bootstraps[NROW(newdata_list[[s]]), s]
     future_cols[[s]] <- unlist(temp_Futures)
   }
   output <- list("firstFuture" = possibleFutures1, "future_cols" = future_cols)
@@ -1287,6 +1317,8 @@ possibleFutures_smimodel <- function(object, newdata, bootstraps,
 #' @param newdata The set of new data on for which the forecasts are required
 #'   (i.e. test set; should be a \code{tsibble}).
 #' @param bootstraps Generated matrix of bootstrapped residual series.
+#' @param exclude.trunc The names of the predictor variables that should not be
+#'   truncated for stable predictions as a character string.
 #' @param recursive_colRange The range of column numbers in \code{newdata} to be
 #'   filled with forecasts.
 #' @return A list containing the following components: \item{firstFuture}{A
@@ -1295,14 +1327,13 @@ possibleFutures_smimodel <- function(object, newdata, bootstraps,
 #'   each list element corresponds to each 1-step-ahead simulated future in
 #'   \code{firstFuture}.}  
 possibleFutures_benchmark <- function(object, newdata, bootstraps,
+                                      exclude.trunc = NULL,
                                       recursive_colRange){
   index_n <- index(newdata)
-  key_n <- key(newdata)
   if (length(key(newdata)) == 0) {
     newdata <- newdata |>
       mutate(dummy_key = rep(1, NROW(newdata))) |>
       as_tsibble(index = index_n, key = dummy_key)
-    key_n <- key(newdata)
   }
   key11 <- key(newdata)[[1]]
 
@@ -1317,7 +1348,41 @@ possibleFutures_benchmark <- function(object, newdata, bootstraps,
   data_temp = newdata[1, ]
   key22 = data_temp[ , {{ key11 }}][[1]]
   key22_pos = which(object$key == key22)
-  pred1 <- predict(object$fit[[key22_pos]], data_temp, type = "response")
+  object_temp <- object$fit[[key22_pos]]
+  if("backward" %in% class(object)){
+    ## Avoid extrapolation; truncate non-linear predictors to match in-sample
+    gam_cols <- colnames(object_temp$model)
+    remove_temp <- as.character(attributes(object_temp$pterms)$variables)
+    no_trunc_cols <- unique(c(as.character(index_n), as.character(key11),
+                              remove_temp[2:length(remove_temp)], 
+                              exclude.trunc))
+    trunc_indx <- !(gam_cols %in% no_trunc_cols)
+    trunc_cols <- gam_cols[trunc_indx]
+    if(length(trunc_cols) != 0){
+      data_temp <- truncate_vars(object.data = object_temp$model,
+                                 data = data_temp,
+                                 cols.trunc = trunc_cols)
+    }
+    pred1 <- predict(object_temp, data_temp, type = "response")
+  }else if("pprFit" %in% class(object)){
+    col_retain <- !(colnames(data_temp) %in% c("indexLag", "indexDiff", "row_idx", "grp"))
+    if(any(is.na(data_temp[ , col_retain]))){
+      pred1 <- NA
+    }else{
+      ## Avoid extrapolation; truncate non-linear predictors to match in-sample
+      trunc_indx <- !(object_temp$xnames %in% exclude.trunc)
+      trunc_cols <- object_temp$xnames[trunc_indx]
+      if(length(trunc_cols) != 0){
+        data_temp <- truncate_vars(object.data = object_temp$model,
+                                   data = data_temp,
+                                   cols.trunc = trunc_cols)
+      }
+      pred1 <- predict(object_temp, data_temp, type = "response")
+    }
+  }else if("gaimFit" %in% class(object)){
+    pred1 <- predict(object_temp, data_temp, type = "response")
+  }
+  #pred1 <- predict(object$fit[[key22_pos]], data_temp, type = "response")
   possibleFutures1 <- as.numeric(pred1) + bootstraps[1, ]
   # Should fill the missing response lags in newdata using each of the
   # possible future values separately
@@ -1361,7 +1426,41 @@ possibleFutures_benchmark <- function(object, newdata, bootstraps,
       data_temp = newdata_list[[s]][t, ]
       key22 = data_temp[ , {{ key11 }}][[1]]
       key22_pos = which(object$key == key22)
-      pred1 <- predict(object$fit[[key22_pos]], data_temp, type = "response")
+      object_temp <- object$fit[[key22_pos]]
+      if("backward" %in% class(object)){
+        ## Avoid extrapolation; truncate non-linear predictors to match in-sample
+        gam_cols <- colnames(object_temp$model)
+        remove_temp <- as.character(attributes(object_temp$pterms)$variables)
+        no_trunc_cols <- unique(c(as.character(index_n), as.character(key11),
+                                  remove_temp[2:length(remove_temp)], 
+                                  exclude.trunc))
+        trunc_indx <- !(gam_cols %in% no_trunc_cols)
+        trunc_cols <- gam_cols[trunc_indx]
+        if(length(trunc_cols) != 0){
+          data_temp <- truncate_vars(object.data = object_temp$model,
+                                     data = data_temp,
+                                     cols.trunc = trunc_cols)
+        }
+        pred1 <- predict(object_temp, data_temp, type = "response")
+      }else if("pprFit" %in% class(object)){
+        col_retain <- !(colnames(data_temp) %in% c("indexLag", "indexDiff", "row_idx", "grp"))
+        if(any(is.na(data_temp[ , col_retain]))){
+          pred1 <- NA
+        }else{
+          ## Avoid extrapolation; truncate non-linear predictors to match in-sample
+          trunc_indx <- !(object_temp$xnames %in% exclude.trunc)
+          trunc_cols <- object_temp$xnames[trunc_indx]
+          if(length(trunc_cols) != 0){
+            data_temp <- truncate_vars(object.data = object_temp$model,
+                                       data = data_temp,
+                                       cols.trunc = trunc_cols)
+          }
+          pred1 <- predict(object_temp, data_temp, type = "response")
+        }
+      }else if("gaimFit" %in% class(object)){
+        pred1 <- predict(object_temp, data_temp, type = "response")
+      }
+      #pred1 <- predict(object$fit[[key22_pos]], data_temp, type = "response")
       temp_Futures[[t-1]] <- pred1 + bootstraps[t, s]
       recursive_colRange_new <- which(colnames(newdata_list[[s]]) %in% recursive_colNames)
       fill_data_temp <- newdata_list[[s]][ , recursive_colRange_new]
@@ -1383,7 +1482,41 @@ possibleFutures_benchmark <- function(object, newdata, bootstraps,
     data_temp = newdata_list[[s]][NROW(newdata_list[[s]]), ]
     key22 = data_temp[ , {{ key11 }}][[1]]
     key22_pos = which(object$key == key22)
-    pred1 <- predict(object$fit[[key22_pos]], data_temp, type = "response")
+    object_temp <- object$fit[[key22_pos]]
+    if("backward" %in% class(object)){
+      ## Avoid extrapolation; truncate non-linear predictors to match in-sample
+      gam_cols <- colnames(object_temp$model)
+      remove_temp <- as.character(attributes(object_temp$pterms)$variables)
+      no_trunc_cols <- unique(c(as.character(index_n), as.character(key11),
+                                remove_temp[2:length(remove_temp)], 
+                                exclude.trunc))
+      trunc_indx <- !(gam_cols %in% no_trunc_cols)
+      trunc_cols <- gam_cols[trunc_indx]
+      if(length(trunc_cols) != 0){
+        data_temp <- truncate_vars(object.data = object_temp$model,
+                                   data = data_temp,
+                                   cols.trunc = trunc_cols)
+      }
+      pred1 <- predict(object_temp, data_temp, type = "response")
+    }else if("pprFit" %in% class(object)){
+      col_retain <- !(colnames(data_temp) %in% c("indexLag", "indexDiff", "row_idx", "grp"))
+      if(any(is.na(data_temp[ , col_retain]))){
+        pred1 <- NA
+      }else{
+        ## Avoid extrapolation; truncate non-linear predictors to match in-sample
+        trunc_indx <- !(object_temp$xnames %in% exclude.trunc)
+        trunc_cols <- object_temp$xnames[trunc_indx]
+        if(length(trunc_cols) != 0){
+          data_temp <- truncate_vars(object.data = object_temp$model,
+                                     data = data_temp,
+                                     cols.trunc = trunc_cols)
+        }
+        pred1 <- predict(object_temp, data_temp, type = "response")
+      }
+    }else if("gaimFit" %in% class(object)){
+      pred1 <- predict(object_temp, data_temp, type = "response")
+    }
+    #pred1 <- predict(object$fit[[key22_pos]], data_temp, type = "response")
     temp_Futures[[NROW(newdata_list[[s]]) - 1]] <- pred1 + bootstraps[NROW(newdata_list[[s]]), s]
     future_cols[[s]] <- unlist(temp_Futures)
   }

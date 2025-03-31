@@ -139,12 +139,10 @@ cb_cvforecast <- function(object, data, yvar, neighbour = 0, predictor.vars,
   if (!is_tsibble(data)) stop("data is not a tsibble.")
 
   index_data <- index(data)
-  key_data <- key(data)
   if (length(key(data)) == 0) {
     data <- data |>
       dplyr::mutate(dummy_key = rep(1, NROW(data))) |>
       tsibble::as_tsibble(index = index_data, key = dummy_key)
-    key_data <- key(data)
   }
   key_data1 <- key(data)[[1]]
 
@@ -203,6 +201,12 @@ cb_cvforecast <- function(object, data, yvar, neighbour = 0, predictor.vars,
                        arrange({{index_data}}) |>
                        select(all_of(index_data), all_of(key_data1), all_of(predictor.vars)) |>
                        as_tsibble(index = index_data, key = key_data1))
+    
+    if(any(is.na(test))){
+      print(paste0("Skipping a window due to missing values in test set!"))
+      next
+    }
+    
     if(recursive == TRUE){
       recursive_colRange <- suppressWarnings(which(colnames(test) %in% recursive_colNames))
     }else{
@@ -621,12 +625,10 @@ bb_cvforecast <- function(object, data,
   if (!is_tsibble(data)) stop("data is not a tsibble.")
 
   index_data <- index(data)
-  key_data <- key(data)
   if (length(key(data)) == 0) {
     data <- data |>
       dplyr::mutate(dummy_key = rep(1, NROW(data))) |>
       tsibble::as_tsibble(index = index_data, key = dummy_key)
-    key_data <- key(data)
   }
   key_data1 <- key(data)[[1]]
 
@@ -694,6 +696,12 @@ bb_cvforecast <- function(object, data,
                        arrange({{index_data}}) |>
                        select(all_of(index_data), all_of(key_data1), all_of(predictor.vars)) |>
                        as_tsibble(index = index_data, key = key_data1))
+    
+    if(any(is.na(test))){
+      print(paste0("Skipping a window due to missing values in test set!"))
+      next
+    }
+    
     if(recursive == TRUE){
       recursive_colRange <- suppressWarnings(which(colnames(test) %in% recursive_colNames))
     }else{

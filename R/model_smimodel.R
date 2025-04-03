@@ -622,7 +622,7 @@ new_smimodelFit <- function(data, yvar, neighbour = 0,
                              index = data_index,
                              key = all_of(data_key))
   }
-  smimodel <- make_smimodelFit(x = fun1, yvar = yvar, 
+  smimodel <- make_smimodelFit(x = fun1, data = data, yvar = yvar, 
                                neighbour = neighbour,
                                index.vars = index.vars, 
                                index.ind = index.ind, index.data = dat_new,
@@ -638,6 +638,7 @@ new_smimodelFit <- function(data, yvar, neighbour = 0,
 #' \code{smimodelFit}.
 #'
 #' @param x A fitted \code{gam} object.
+#' @param data The original training data set.
 #' @param yvar Name of the response variable as a character string.
 #' @param neighbour `neighbour` argument passed from the outer function.
 #' @param index.vars A \code{character} vector of names of the predictor
@@ -689,7 +690,7 @@ new_smimodelFit <- function(data, yvar, neighbour = 0,
 #'    \item{MIPGap}{Relative MIP optimality gap used.} \item{Nonconvex}{The
 #'    strategy used for handling non-convex quadratic objectives or non-convex
 #'    quadratic constraints in Gurobi solver.}
-make_smimodelFit <- function(x, yvar, neighbour, index.vars, index.ind, index.data,
+make_smimodelFit <- function(x, data, yvar, neighbour, index.vars, index.ind, index.data,
                              index.names, alpha, s.vars = NULL, linear.vars = NULL,
                              lambda0 = NULL, lambda2 = NULL, 
                              M = NULL, max.iter = NULL, 
@@ -733,9 +734,13 @@ make_smimodelFit <- function(x, yvar, neighbour, index.vars, index.ind, index.da
   }else if(is.null(index.data)){
     derivs <- NULL
   }
+  # Store range (min & max) of each original predictor variable
+  vars_original <- data[ , c(index.vars, s.vars)]
+  vars_range <- apply(vars_original, 2, range)
   smimodel <- list("alpha" = alpha, "derivatives" = derivs, "var_y" = yvar, 
                    "vars_index" = index.vars, "vars_s" = s.vars,
                    "vars_linear" = linear.vars, 
+                   "vars_range" = vars_range,
                    "neighbour" = neighbour, "gam" = x,
                    "lambda0" = lambda0, "lambda2" = lambda2,
                    "M" = M, "max.iter" = max.iter,
@@ -833,7 +838,8 @@ update_smimodelFit <- function(object, data, lambda0 = 1, lambda2 = 1,
                                    key = all_of(data_key))
     index.names <- paste0("index", 1:length(best_alpha1$ind_pos))
     print("Final model fitted!")
-    final_smimodel <- make_smimodelFit(x = fun1_final, yvar = object$var_y, 
+    final_smimodel <- make_smimodelFit(x = fun1_final, data = data,
+                                       yvar = object$var_y, 
                                        neighbour = object$neighbour,
                                        index.vars = object$vars_index, 
                                        index.ind = best_alpha1$index.ind, 
@@ -1016,7 +1022,7 @@ update_smimodelFit <- function(object, data, lambda0 = 1, lambda2 = 1,
             index.names <- paste0("index", 1:length(best_alpha2$ind_pos))
             alpha_current <- best_alpha2$best_alpha
             print("Final model fitted!")
-            final_smimodel <- make_smimodelFit(x = fun_null, 
+            final_smimodel <- make_smimodelFit(x = fun_null, data = data,
                                                yvar = object$var_y, 
                                                neighbour = object$neighbour,
                                                index.vars = object$vars_index, 
@@ -1109,7 +1115,7 @@ update_smimodelFit <- function(object, data, lambda0 = 1, lambda2 = 1,
                                      index = data_index,
                                      key = all_of(data_key))
       print("Final model fitted!")
-      final_smimodel <- make_smimodelFit(x = fun1_final, 
+      final_smimodel <- make_smimodelFit(x = fun1_final, data = data,
                                          yvar = object$var_y,
                                          neighbour = object$neighbour,
                                          index.vars = object$vars_index, 

@@ -252,10 +252,13 @@ cb_cvforecast <- function(object, data, yvar, neighbour = 0, predictor.vars,
           temp[[a]] <- ifelse(length(var_list) == 1, 1, 2)
         }
         temp <- unlist(temp)
+        vars_index <- character()
+        vars_s <- character()
         if(all(temp == 1)){
           pre.formula <- lapply(indexStr[[b]]$index.vars, function(var) paste0("s(", var, ")")) |>
             paste(collapse = "+")
           pre.formula <- paste0(yvar, " ~", pre.formula)
+          vars_s <- c(vars_s, indexStr[[b]]$index.vars)
         }else{
           var_list <- indexStr[[b]]$index.vars[ind_pos[[1]]]
           if(length(var_list) > 1){
@@ -263,10 +266,12 @@ cb_cvforecast <- function(object, data, yvar, neighbour = 0, predictor.vars,
               paste(collapse = ",") |>
               paste0(")")
             pre.formula <- paste0(yvar, " ~ g(", pre.formula)
+            vars_index <- c(vars_index, var_list)
           }else{
             pre.formula <- lapply(var_list, function(var) paste0(var)) |>
               paste0(")")
             pre.formula <- paste0(yvar, " ~ s(", pre.formula)
+            vars_s <- c(vars_s, var_list)
           }
           if(length(ind_pos) > 1){
             for(g in 2:length(ind_pos)){
@@ -276,10 +281,12 @@ cb_cvforecast <- function(object, data, yvar, neighbour = 0, predictor.vars,
                   paste(collapse = ",") |>
                   paste0(")")
                 pre.formula <- paste0(pre.formula, " + g(", add.formula)
+                vars_index <- c(vars_index, var_list)
               }else{
                 add.formula <- lapply(var_list, function(var) paste0(var)) |>
                   paste0(")")
                 pre.formula <- paste0(pre.formula, " +s(", add.formula)
+                vars_s <- c(vars_s, var_list)
               }
             }
           }
@@ -288,6 +295,7 @@ cb_cvforecast <- function(object, data, yvar, neighbour = 0, predictor.vars,
           s.formula <- lapply(object$fit[[1]]$best$vars_s, function(var) paste0("s(", var, ")")) |>
             paste(collapse = "+")
           pre.formula <- paste(pre.formula, "+", s.formula)
+          vars_s <- c(vars_s, object$fit[[1]]$best$vars_s)
         }
         if (!is.null(object$fit[[1]]$best$vars_linear)){
           linear.formula <- lapply(object$fit[[1]]$best$vars_linear, function(var) paste0(var)) |>
@@ -319,6 +327,9 @@ cb_cvforecast <- function(object, data, yvar, neighbour = 0, predictor.vars,
           model_list[[b]]$model <- as_tsibble(model_list[[b]]$model,
                                               index = index_data,
                                               key = all_of(key_data1))
+          model_list[[b]]$vars_index <- unique(vars_index)
+          model_list[[b]]$vars_s <- unique(vars_s)
+          model_list[[b]]$vars_linear <- unique(object$fit[[1]]$best$vars_linear)
         }
       }else if("backward" %in% class(object)){
         # Model fitting
@@ -347,6 +358,9 @@ cb_cvforecast <- function(object, data, yvar, neighbour = 0, predictor.vars,
         model_list[[b]]$model <- as_tsibble(model_list[[b]]$model,
                                             index = index_data,
                                             key = all_of(key_data1))
+        model_list[[b]]$vars_index <- unique(object$fit[[b]]$vars_index)
+        model_list[[b]]$vars_s <- unique(object$fit[[b]]$vars_s)
+        model_list[[b]]$vars_linear <- unique(object$fit[[b]]$best$vars_linear)
       }else if("pprFit" %in% class(object)){
         pre.formula <- object$fit[[b]]$terms
         attributes(pre.formula) <- NULL
@@ -747,10 +761,13 @@ bb_cvforecast <- function(object, data,
           temp[[a]] <- ifelse(length(var_list) == 1, 1, 2)
         }
         temp <- unlist(temp)
+        vars_index <- character()
+        vars_s <- character()
         if(all(temp == 1)){
           pre.formula <- lapply(indexStr[[b]]$index.vars, function(var) paste0("s(", var, ")")) |>
             paste(collapse = "+")
           pre.formula <- paste0(yvar, " ~", pre.formula)
+          vars_s <- c(vars_s, indexStr[[b]]$index.vars)
         }else{
           var_list <- indexStr[[b]]$index.vars[ind_pos[[1]]]
           if(length(var_list) > 1){
@@ -758,10 +775,12 @@ bb_cvforecast <- function(object, data,
               paste(collapse = ",") |>
               paste0(")")
             pre.formula <- paste0(yvar, " ~ g(", pre.formula)
+            vars_index <- c(vars_index, var_list)
           }else{
             pre.formula <- lapply(var_list, function(var) paste0(var)) |>
               paste0(")")
             pre.formula <- paste0(yvar, " ~ s(", pre.formula)
+            vars_s <- c(vars_s, var_list)
           }
           if(length(ind_pos) > 1){
             for(g in 2:length(ind_pos)){
@@ -771,10 +790,12 @@ bb_cvforecast <- function(object, data,
                   paste(collapse = ",") |>
                   paste0(")")
                 pre.formula <- paste0(pre.formula, " + g(", add.formula)
+                vars_index <- c(vars_index, var_list)
               }else{
                 add.formula <- lapply(var_list, function(var) paste0(var)) |>
                   paste0(")")
                 pre.formula <- paste0(pre.formula, " +s(", add.formula)
+                vars_s <- c(vars_s, var_list)
               }
             }
           }
@@ -783,6 +804,7 @@ bb_cvforecast <- function(object, data,
           s.formula <- lapply(object$fit[[1]]$best$vars_s, function(var) paste0("s(", var, ")")) |>
             paste(collapse = "+")
           pre.formula <- paste(pre.formula, "+", s.formula)
+          vars_s <- c(vars_s, object$fit[[1]]$best$vars_s)
         }
         if (!is.null(object$fit[[1]]$best$vars_linear)){
           linear.formula <- lapply(object$fit[[1]]$best$vars_linear, function(var) paste0(var)) |>
@@ -814,6 +836,9 @@ bb_cvforecast <- function(object, data,
           model_list[[b]]$model <- as_tsibble(model_list[[b]]$model,
                                               index = index_data,
                                               key = all_of(key_data1))
+          model_list[[b]]$vars_index <- unique(vars_index)
+          model_list[[b]]$vars_s <- unique(vars_s)
+          model_list[[b]]$vars_linear <- unique(object$fit[[1]]$best$vars_linear)
         }
       }else if("backward" %in% class(object)){
         # Model fitting
@@ -842,6 +867,9 @@ bb_cvforecast <- function(object, data,
         model_list[[b]]$model <- as_tsibble(model_list[[b]]$model,
                                             index = index_data,
                                             key = all_of(key_data1))
+        model_list[[b]]$vars_index <- unique(object$fit[[b]]$vars_index)
+        model_list[[b]]$vars_s <- unique(object$fit[[b]]$vars_s)
+        model_list[[b]]$vars_linear <- unique(object$fit[[b]]$best$vars_linear)
       }else if("pprFit" %in% class(object)){
         pre.formula <- object$fit[[b]]$terms
         attributes(pre.formula) <- NULL
@@ -1152,23 +1180,30 @@ possibleFutures_smimodel <- function(object, newdata, bootstraps,
       mutate(dummy_key = rep(1, NROW(newdata))) |>
       as_tsibble(index = index_n, key = dummy_key)
   }
-  key11 <- key(newdata)[[1]]
-
+  key_n <- key(newdata)[[1]]
   # Names of the columns to be filled with forecasts
   recursive_colNames <- colnames(newdata)[recursive_colRange]
-
-  # # Predict function to be used
-  # predict_fn <- mgcv::predict.gam
-
   # Prepare newdata for recursive forecasting
   newdata <- prep_newdata(newdata = newdata, recursive_colRange = recursive_colRange)
-
   # Recursive possible futures
   # First, one-step-ahead possible futures
   data_temp = newdata[1, ]
-  key22 = data_temp[ , {{ key11 }}][[1]]
+  key22 = data_temp[ , {{ key_n }}][[1]]
   key22_pos = which(object$key == key22)
-  list_index <- object$fit[[key22_pos]]$best$alpha
+  object_temp <- object$fit[[key22_pos]]
+  ## Avoid extrapolation; truncate non-linear predictors to match in-sample
+  ## range
+  # Predictors to truncate
+  gam_cols <- c(object_temp$best$vars_index, object_temp$best$vars_s)
+  trunc_indx <- !(gam_cols %in% exclude.trunc)
+  trunc_cols <- gam_cols[trunc_indx]
+  # Truncate
+  if(length(trunc_cols != 0)){
+    data_temp <- truncate_vars(range.object = object_temp$best$vars_range,
+                               data = data_temp,
+                               cols.trunc = trunc_cols)
+  }
+  list_index <- object_temp$best$alpha
   numInd <- NCOL(list_index)
   alpha <- vector(mode = "list", length = numInd)
   for(a in 1:numInd){
@@ -1179,7 +1214,7 @@ possibleFutures_smimodel <- function(object, newdata, bootstraps,
   if(all(alpha == 0)){
     data_list1 <- data_temp
   }else{
-    X_test <- as.matrix(newdata[1, object$fit[[key22_pos]]$best$vars_index])
+    X_test <- as.matrix(data_temp[ , object_temp$best$vars_index])
     # Calculating indices
     ind <- vector(mode = "list", length = numInd)
     for(b in 1:numInd){
@@ -1189,11 +1224,8 @@ possibleFutures_smimodel <- function(object, newdata, bootstraps,
     dat <- tibble::as_tibble(ind)
     data_list1 <- dplyr::bind_cols(data_temp, dat)
   }
-  #pred1 <- predict_fn(object$fit[[key22_pos]]$best$gam, data_list1, type = "response")
-  pred1 <- predict(object$fit[[key22_pos]]$best, data_list1, 
-                   exclude.trunc = exclude.trunc)$.predict
+  pred1 <- predict(object_temp$best$gam, data_list1, type = "response")
   possibleFutures1 <- as.numeric(pred1) + bootstraps[1, ]
-
   # Should fill the missing response lags in newdata using each of the
   # possible future values separately
   newdata_list <- vector(mode = "list", length = length(possibleFutures1))
@@ -1233,9 +1265,22 @@ possibleFutures_smimodel <- function(object, newdata, bootstraps,
     temp_Futures <- vector(mode = "list", length = length(2:NROW(newdata_list[[s]])))
     for(t in 2:(NROW(newdata_list[[s]]) - 1)){
       data_temp = newdata_list[[s]][t, ]
-      key22 = data_temp[ , {{ key11 }}][[1]]
+      key22 = data_temp[ , {{ key_n }}][[1]]
       key22_pos = which(object$key == key22)
-      list_index <- object$fit[[key22_pos]]$best$alpha
+      object_temp <- object$fit[[key22_pos]]
+      ## Avoid extrapolation; truncate non-linear predictors to match in-sample
+      ## range
+      # Predictors to truncate
+      gam_cols <- c(object_temp$best$vars_index, object_temp$best$vars_s)
+      trunc_indx <- !(gam_cols %in% exclude.trunc)
+      trunc_cols <- gam_cols[trunc_indx]
+      # Truncate
+      if(length(trunc_cols != 0)){
+        data_temp <- truncate_vars(range.object = object_temp$best$vars_range,
+                                   data = data_temp,
+                                   cols.trunc = trunc_cols)
+      }
+      list_index <- object_temp$best$alpha
       numInd <- NCOL(list_index)
       alpha <- vector(mode = "list", length = numInd)
       for(d in 1:numInd){
@@ -1246,7 +1291,7 @@ possibleFutures_smimodel <- function(object, newdata, bootstraps,
       if(all(alpha == 0)){
         data_list1 <- data_temp
       }else{
-        X_test <- as.matrix(newdata_list[[s]][t, object$fit[[key22_pos]]$best$vars_index])
+        X_test <- as.matrix(data_temp[ , object_temp$best$vars_index])
         # Calculating indices
         ind <- vector(mode = "list", length = numInd)
         for(h in 1:numInd){
@@ -1256,9 +1301,7 @@ possibleFutures_smimodel <- function(object, newdata, bootstraps,
         dat <- tibble::as_tibble(ind)
         data_list1 <- dplyr::bind_cols(data_temp, dat)
       }
-      #pred1 <- predict_fn(object$fit[[key22_pos]]$best$gam, data_list1, type = "response")
-      pred1 <- predict(object$fit[[key22_pos]]$best, data_list1,
-                       exclude.trunc = exclude.trunc)$.predict
+      pred1 <- predict(object_temp$best$gam, data_list1, type = "response")
       temp_Futures[[t-1]] <- as.numeric(pred1) + bootstraps[t, s]
       recursive_colRange_new <- which(colnames(newdata_list[[s]]) %in% recursive_colNames)
       fill_data_temp <- newdata_list[[s]][ , recursive_colRange_new]
@@ -1278,9 +1321,22 @@ possibleFutures_smimodel <- function(object, newdata, bootstraps,
       newdata_list[[s]] <- as_tibble(newdata_temp)
     }
     data_temp = newdata_list[[s]][NROW(newdata_list[[s]]), ]
-    key22 = data_temp[ , {{ key11 }}][[1]]
+    key22 = data_temp[ , {{ key_n }}][[1]]
     key22_pos = which(object$key == key22)
-    list_index <- object$fit[[key22_pos]]$best$alpha
+    object_temp <- object$fit[[key22_pos]]
+    ## Avoid extrapolation; truncate non-linear predictors to match in-sample
+    ## range
+    # Predictors to truncate
+    gam_cols <- c(object_temp$best$vars_index, object_temp$best$vars_s)
+    trunc_indx <- !(gam_cols %in% exclude.trunc)
+    trunc_cols <- gam_cols[trunc_indx]
+    # Truncate
+    if(length(trunc_cols != 0)){
+      data_temp <- truncate_vars(range.object = object_temp$best$vars_range,
+                                 data = data_temp,
+                                 cols.trunc = trunc_cols)
+    }
+    list_index <- object_temp$best$alpha
     numInd <- NCOL(list_index)
     alpha <- vector(mode = "list", length = numInd)
     for(w in 1:numInd){
@@ -1291,8 +1347,7 @@ possibleFutures_smimodel <- function(object, newdata, bootstraps,
     if(all(alpha == 0)){
       data_list1 <- data_temp
     }else{
-      X_test <- as.matrix(newdata_list[[s]][NROW(newdata_list[[s]]),
-                                            object$fit[[key22_pos]]$best$vars_index])
+      X_test <- as.matrix(data_temp[ , object_temp$best$vars_index])
       # Calculating indices
       ind <- vector(mode = "list", length = numInd)
       for(z in 1:numInd){
@@ -1302,10 +1357,7 @@ possibleFutures_smimodel <- function(object, newdata, bootstraps,
       dat <- tibble::as_tibble(ind)
       data_list1 <- dplyr::bind_cols(data_temp, dat)
     }
-    # pred1 <- predict_fn(object$fit[[key22_pos]]$best$gam, data_list1,
-    #                     type = "response")
-    pred1 <- predict(object$fit[[key22_pos]]$best, data_list1,
-                     exclude.trunc = exclude.trunc)$.predict
+    pred1 <- predict(object_temp$best$gam, data_list1, type = "response")
     temp_Futures[[NROW(newdata_list[[s]]) - 1]] <- as.numeric(pred1) + bootstraps[NROW(newdata_list[[s]]), s]
     future_cols[[s]] <- unlist(temp_Futures)
   }
@@ -1343,31 +1395,34 @@ possibleFutures_benchmark <- function(object, newdata, bootstraps,
       mutate(dummy_key = rep(1, NROW(newdata))) |>
       as_tsibble(index = index_n, key = dummy_key)
   }
-  key11 <- key(newdata)[[1]]
-
+  key_n <- key(newdata)[[1]]
   # Names of the columns to be filled with forecasts
   recursive_colNames <- colnames(newdata)[recursive_colRange]
-
   # Prepare newdata for recursive forecasting
   newdata <- prep_newdata(newdata = newdata, recursive_colRange = recursive_colRange)
-
   # Recursive possible futures
   # First, one-step-ahead possible futures
   data_temp = newdata[1, ]
-  key22 = data_temp[ , {{ key11 }}][[1]]
+  key22 = data_temp[ , {{ key_n }}][[1]]
   key22_pos = which(object$key == key22)
   object_temp <- object$fit[[key22_pos]]
   if("backward" %in% class(object)){
     ## Avoid extrapolation; truncate non-linear predictors to match in-sample
+    ## range
+    # Predictors to truncate
     gam_cols <- colnames(object_temp$model)
     remove_temp <- as.character(attributes(object_temp$pterms)$variables)
-    no_trunc_cols <- unique(c(as.character(index_n), as.character(key11),
+    no_trunc_cols <- unique(c(as.character(index_n), as.character(key_n),
                               remove_temp[2:length(remove_temp)], 
                               exclude.trunc))
     trunc_indx <- !(gam_cols %in% no_trunc_cols)
     trunc_cols <- gam_cols[trunc_indx]
+    # In-sample range 
+    vars_original <- object_temp$model[ , trunc_cols]
+    vars_range <- apply(vars_original, 2, range)
+    # Truncate
     if(length(trunc_cols) != 0){
-      data_temp <- truncate_vars(object.data = object_temp$model,
+      data_temp <- truncate_vars(range.object = vars_range,
                                  data = data_temp,
                                  cols.trunc = trunc_cols)
     }
@@ -1377,26 +1432,44 @@ possibleFutures_benchmark <- function(object, newdata, bootstraps,
     if(any(is.na(data_temp[ , col_retain]))){
       pred1 <- NA
     }else{
-      ## Avoid extrapolation; truncate non-linear predictors to match in-sample
+      ## Avoid extrapolation; truncate non-linear predictors to match 
+      ## in-sample range
+      # Predictors to truncate
       trunc_indx <- !(object_temp$xnames %in% exclude.trunc)
       trunc_cols <- object_temp$xnames[trunc_indx]
+      # In-sample range 
+      vars_original <- object_temp$model[ , trunc_cols]
+      vars_range <- apply(vars_original, 2, range)
       if(length(trunc_cols) != 0){
-        data_temp <- truncate_vars(object.data = object_temp$model,
+        data_temp <- truncate_vars(range.object = vars_range,
                                    data = data_temp,
                                    cols.trunc = trunc_cols)
       }
       pred1 <- predict(object_temp, data_temp, type = "response")
     }
   }else if("gaimFit" %in% class(object)){
+    ## Avoid extrapolation; truncate non-linear predictors to match in-sample
+    ## range
+    # Predictors to truncate
+    cgaim_cols <- c(object_temp$vars_index, object_temp$vars_s)
+    trunc_indx <- !(cgaim_cols %in% exclude.trunc)
+    trunc_cols <- cgaim_cols[trunc_indx]
+    # In-sample range 
+    vars_original <- bind_cols(object_temp$x, object_temp$sm_mod$Xcov)[ , trunc_cols]
+    vars_range <- apply(vars_original, 2, range)
+    # Truncate
+    if(length(trunc_cols) != 0){
+      data_temp <- truncate_vars(range.object = vars_range,
+                                 data = data_temp,
+                                 cols.trunc = trunc_cols)
+    }
     pred1 <- predict(object_temp, data_temp, type = "response")
   }
-  #pred1 <- predict(object$fit[[key22_pos]], data_temp, type = "response")
   possibleFutures1 <- as.numeric(pred1) + bootstraps[1, ]
   # Should fill the missing response lags in newdata using each of the
   # possible future values separately
   newdata_list <- vector(mode = "list", length = length(possibleFutures1))
   future_cols <- vector(mode = "list", length = length(possibleFutures1))
-
   # Separate the columns in recursive_colRange
   # This is done for extracting only the numerical columns (where values should
   # be replaced with possible futures) so that it can converted to a matrix
@@ -1432,20 +1505,26 @@ possibleFutures_benchmark <- function(object, newdata, bootstraps,
     temp_Futures <- vector(mode = "list", length = length(2:NROW(newdata_list[[s]])))
     for(t in 2:(NROW(newdata_list[[s]]) - 1)){
       data_temp = newdata_list[[s]][t, ]
-      key22 = data_temp[ , {{ key11 }}][[1]]
+      key22 = data_temp[ , {{ key_n }}][[1]]
       key22_pos = which(object$key == key22)
       object_temp <- object$fit[[key22_pos]]
       if("backward" %in% class(object)){
         ## Avoid extrapolation; truncate non-linear predictors to match in-sample
+        ## range
+        # Predictors to truncate
         gam_cols <- colnames(object_temp$model)
         remove_temp <- as.character(attributes(object_temp$pterms)$variables)
-        no_trunc_cols <- unique(c(as.character(index_n), as.character(key11),
+        no_trunc_cols <- unique(c(as.character(index_n), as.character(key_n),
                                   remove_temp[2:length(remove_temp)], 
                                   exclude.trunc))
         trunc_indx <- !(gam_cols %in% no_trunc_cols)
         trunc_cols <- gam_cols[trunc_indx]
+        # In-sample range 
+        vars_original <- object_temp$model[ , trunc_cols]
+        vars_range <- apply(vars_original, 2, range)
+        # Truncate
         if(length(trunc_cols) != 0){
-          data_temp <- truncate_vars(object.data = object_temp$model,
+          data_temp <- truncate_vars(range.object = vars_range,
                                      data = data_temp,
                                      cols.trunc = trunc_cols)
         }
@@ -1455,17 +1534,37 @@ possibleFutures_benchmark <- function(object, newdata, bootstraps,
         if(any(is.na(data_temp[ , col_retain]))){
           pred1 <- NA
         }else{
-          ## Avoid extrapolation; truncate non-linear predictors to match in-sample
+          ## Avoid extrapolation; truncate non-linear predictors to match 
+          ## in-sample range
+          # Predictors to truncate
           trunc_indx <- !(object_temp$xnames %in% exclude.trunc)
           trunc_cols <- object_temp$xnames[trunc_indx]
+          # In-sample range 
+          vars_original <- object_temp$model[ , trunc_cols]
+          vars_range <- apply(vars_original, 2, range)
           if(length(trunc_cols) != 0){
-            data_temp <- truncate_vars(object.data = object_temp$model,
+            data_temp <- truncate_vars(range.object = vars_range,
                                        data = data_temp,
                                        cols.trunc = trunc_cols)
           }
           pred1 <- predict(object_temp, data_temp, type = "response")
         }
       }else if("gaimFit" %in% class(object)){
+        ## Avoid extrapolation; truncate non-linear predictors to match in-sample
+        ## range
+        # Predictors to truncate
+        cgaim_cols <- c(object_temp$vars_index, object_temp$vars_s)
+        trunc_indx <- !(cgaim_cols %in% exclude.trunc)
+        trunc_cols <- cgaim_cols[trunc_indx]
+        # In-sample range 
+        vars_original <- bind_cols(object_temp$x, object_temp$sm_mod$Xcov)[ , trunc_cols]
+        vars_range <- apply(vars_original, 2, range)
+        # Truncate
+        if(length(trunc_cols) != 0){
+          data_temp <- truncate_vars(range.object = vars_range,
+                                     data = data_temp,
+                                     cols.trunc = trunc_cols)
+        }
         pred1 <- predict(object_temp, data_temp, type = "response")
       }
       #pred1 <- predict(object$fit[[key22_pos]], data_temp, type = "response")
@@ -1488,20 +1587,26 @@ possibleFutures_benchmark <- function(object, newdata, bootstraps,
       newdata_list[[s]] <- as_tibble(newdata_temp)
     }
     data_temp = newdata_list[[s]][NROW(newdata_list[[s]]), ]
-    key22 = data_temp[ , {{ key11 }}][[1]]
+    key22 = data_temp[ , {{ key_n }}][[1]]
     key22_pos = which(object$key == key22)
     object_temp <- object$fit[[key22_pos]]
     if("backward" %in% class(object)){
       ## Avoid extrapolation; truncate non-linear predictors to match in-sample
+      ## range
+      # Predictors to truncate
       gam_cols <- colnames(object_temp$model)
       remove_temp <- as.character(attributes(object_temp$pterms)$variables)
-      no_trunc_cols <- unique(c(as.character(index_n), as.character(key11),
+      no_trunc_cols <- unique(c(as.character(index_n), as.character(key_n),
                                 remove_temp[2:length(remove_temp)], 
                                 exclude.trunc))
       trunc_indx <- !(gam_cols %in% no_trunc_cols)
       trunc_cols <- gam_cols[trunc_indx]
+      # In-sample range 
+      vars_original <- object_temp$model[ , trunc_cols]
+      vars_range <- apply(vars_original, 2, range)
+      # Truncate
       if(length(trunc_cols) != 0){
-        data_temp <- truncate_vars(object.data = object_temp$model,
+        data_temp <- truncate_vars(range.object = vars_range,
                                    data = data_temp,
                                    cols.trunc = trunc_cols)
       }
@@ -1511,17 +1616,37 @@ possibleFutures_benchmark <- function(object, newdata, bootstraps,
       if(any(is.na(data_temp[ , col_retain]))){
         pred1 <- NA
       }else{
-        ## Avoid extrapolation; truncate non-linear predictors to match in-sample
+        ## Avoid extrapolation; truncate non-linear predictors to match 
+        ## in-sample range
+        # Predictors to truncate
         trunc_indx <- !(object_temp$xnames %in% exclude.trunc)
         trunc_cols <- object_temp$xnames[trunc_indx]
+        # In-sample range 
+        vars_original <- object_temp$model[ , trunc_cols]
+        vars_range <- apply(vars_original, 2, range)
         if(length(trunc_cols) != 0){
-          data_temp <- truncate_vars(object.data = object_temp$model,
+          data_temp <- truncate_vars(range.object = vars_range,
                                      data = data_temp,
                                      cols.trunc = trunc_cols)
         }
         pred1 <- predict(object_temp, data_temp, type = "response")
       }
     }else if("gaimFit" %in% class(object)){
+      ## Avoid extrapolation; truncate non-linear predictors to match in-sample
+      ## range
+      # Predictors to truncate
+      cgaim_cols <- c(object_temp$vars_index, object_temp$vars_s)
+      trunc_indx <- !(cgaim_cols %in% exclude.trunc)
+      trunc_cols <- cgaim_cols[trunc_indx]
+      # In-sample range 
+      vars_original <- bind_cols(object_temp$x, object_temp$sm_mod$Xcov)[ , trunc_cols]
+      vars_range <- apply(vars_original, 2, range)
+      # Truncate
+      if(length(trunc_cols) != 0){
+        data_temp <- truncate_vars(range.object = vars_range,
+                                   data = data_temp,
+                                   cols.trunc = trunc_cols)
+      }
       pred1 <- predict(object_temp, data_temp, type = "response")
     }
     #pred1 <- predict(object$fit[[key22_pos]], data_temp, type = "response")

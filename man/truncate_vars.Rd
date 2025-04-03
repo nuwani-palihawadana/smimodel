@@ -4,10 +4,12 @@
 \alias{truncate_vars}
 \title{Truncating predictors to be in the in-sample range}
 \usage{
-truncate_vars(object.data, data, cols.trunc)
+truncate_vars(range.object, data, cols.trunc)
 }
 \arguments{
-\item{object.data}{In-sample data set.}
+\item{range.object}{A matrix containing range of each predictor variable.
+Should be a matrix with two rows for min and max, and the columns should
+correspond to variables.}
 
 \item{data}{Out-of-sample data set of which variables should be truncated.}
 

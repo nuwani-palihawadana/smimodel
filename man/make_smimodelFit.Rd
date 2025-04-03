@@ -6,6 +6,7 @@
 \usage{
 make_smimodelFit(
   x,
+  data,
   yvar,
   neighbour,
   index.vars,
@@ -28,6 +29,8 @@ make_smimodelFit(
 }
 \arguments{
 \item{x}{A fitted \code{gam} object.}
+
+\item{data}{The original training data set.}
 
 \item{yvar}{Name of the response variable as a character string.}
 

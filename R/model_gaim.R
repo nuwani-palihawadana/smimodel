@@ -159,6 +159,9 @@ model_gaim <- function(data, yvar, neighbour = 0, index.vars, index.ind,
     gaim_list[[i]]$model <- as_tsibble(gaim_list[[i]]$model,
                                        index = data_index,
                                        key = all_of(key11))
+    gaim_list[[i]]$vars_index <- index.vars
+    gaim_list[[i]]$vars_s <- s.vars
+    gaim_list[[i]]$vars_linear <- linear.vars
   }
   # Structuring the output
   data_list <- list(key_unique, gaim_list)

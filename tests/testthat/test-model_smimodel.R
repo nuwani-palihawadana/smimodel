@@ -35,7 +35,8 @@ test_that("tests for model_smimodel()", {
   expect_equal(names(output1$fit[[1]]), c("initial", "best"))
   expect_equal(names(output1$fit[[1]]$best), c("alpha", "derivatives", 
                                                "var_y", "vars_index", 
-                                               "vars_s", "vars_linear", 
+                                               "vars_s", "vars_linear",
+                                               "vars_range",
                                                "neighbour", "gam",
                                                "lambda0", "lambda2",
                                                "M", "max.iter",

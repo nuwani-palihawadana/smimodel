@@ -41,15 +41,17 @@ extrapolation.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">truncate_vars</span><span class="op">(</span><span class="va">object.data</span>, <span class="va">data</span>, <span class="va">cols.trunc</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">truncate_vars</span><span class="op">(</span><span class="va">range.object</span>, <span class="va">data</span>, <span class="va">cols.trunc</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
 
 
-<dl><dt id="arg-object-data">object.data<a class="anchor" aria-label="anchor" href="#arg-object-data"></a></dt>
-<dd><p>In-sample data set.</p></dd>
+<dl><dt id="arg-range-object">range.object<a class="anchor" aria-label="anchor" href="#arg-range-object"></a></dt>
+<dd><p>A matrix containing range of each predictor variable.
+Should be a matrix with two rows for min and max, and the columns should
+correspond to variables.</p></dd>
 
 
 <dt id="arg-data">data<a class="anchor" aria-label="anchor" href="#arg-data"></a></dt>

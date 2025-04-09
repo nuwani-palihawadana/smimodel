@@ -331,15 +331,15 @@ smimodel.fit <- function(data, yvar, neighbour = 0,
     index.coefs <- vector(mode = "list", length = NCOL(ppr_coefs))
     for(a in 1:NCOL(ppr_coefs)){
       index.ind[[a]] <- rep(a, NROW(ppr_coefs))
-      index.coefs[[a]] <- ppr_coefs[ , a]
+      index.coefs[[a]] <- ppr_coefs[ , a]/scaledInfo
     }
     index.ind <- unlist(index.ind)
     index.coefs <- unlist(index.coefs)
     names(index.coefs) <- NULL
-    data1 <- data1 |>
-      tsibble::as_tsibble(index = {{data_index}}, key = {{data_key}})
+    # data1 <- data1 |>
+    #   tsibble::as_tsibble(index = {{data_index}}, key = {{data_key}})
     # Constructing the initial `smimodel`
-    init_smimodel <- new_smimodelFit(data = data1, yvar = yvar, 
+    init_smimodel <- new_smimodelFit(data = data, yvar = yvar, 
                                      neighbour = neighbour,
                                      family = family,
                                      index.vars = index.vars, 
@@ -349,14 +349,14 @@ smimodel.fit <- function(data, yvar, neighbour = 0,
                                      s.vars = s.vars,
                                      linear.vars = linear.vars)
     # Optimising the initial `smimodel`
-    opt_smimodel_temp <- update_smimodelFit(object = init_smimodel, data = data1, 
-                                            lambda0 = lambda0, lambda2 = lambda2, 
-                                            M = M, max.iter = max.iter, 
-                                            tol = tol, tolCoefs = tolCoefs,
-                                            TimeLimit = TimeLimit, 
-                                            MIPGap = MIPGap, NonConvex = NonConvex,
-                                            verbose = verbose)
-    opt_smimodel <- unscaling(object = opt_smimodel_temp, scaledInfo = scaled)
+    opt_smimodel <- update_smimodelFit(object = init_smimodel, data = data, 
+                                       lambda0 = lambda0, lambda2 = lambda2, 
+                                       M = M, max.iter = max.iter, 
+                                       tol = tol, tolCoefs = tolCoefs,
+                                       TimeLimit = TimeLimit, 
+                                       MIPGap = MIPGap, NonConvex = NonConvex,
+                                       verbose = verbose)
+    #opt_smimodel <- unscaling(object = opt_smimodel_temp, scaledInfo = scaled)
   }else if(initialise == "multiple"){
     Y_data <- as.matrix(data[ , yvar])
     num_pred <- length(index.vars)

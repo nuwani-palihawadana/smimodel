@@ -235,4 +235,4 @@ smimodel_ppr_tune$fit[[1]]$best
 smimodel_ppr_tune$fit[[1]]$best_lambdas
 ```
 
-Here the selected penalty parameter combination is $(\lambda_{0}, \lambda_{2}) = (0.01489049, 0.01000000)$.
+Here the selected penalty parameter combination is $(\lambda_{0}, \lambda_{2}) = (0.01356766, 0.01000000)$.

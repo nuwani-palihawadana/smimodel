@@ -947,7 +947,9 @@ bb_cvforecast <- function(object, data,
   out$fit_times <- fit_times
   out$mean <- leadlagMat(pf, 1:h) |> window(start = time(pf)[nfirst + 1L])
   out$res <- res[rowSums(is.na(res)) != ncol(res), ]
-  row.names(out$res) <- seq(nfirst, nlast, by = 1)
+  if(NROW(out$res) == length(seq(nfirst, nlast, by = 1))){
+    row.names(out$res) <- seq(nfirst, nlast, by = 1)
+  }
   out$level <- level
   out$lower <- lapply(lower,
                       function(low) leadlagMat(low, 1:h) |>

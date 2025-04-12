@@ -366,10 +366,24 @@ cb_cvforecast <- function(object, data, yvar, neighbour = 0, predictor.vars,
         attributes(pre.formula) <- NULL
         model_list[[b]] <- stats::ppr(formula = as.formula(pre.formula),
                                       data = df_cat, nterms = object$fit[[b]]$mu)
-        add <- df_cat |>
-          #drop_na() |>
-          select({{ index_data }}, {{ key_data1 }})
-        model_list[[b]]$model <- bind_cols(add, model_list[[b]]$model)
+        dot_args <- list(...)
+        if ("subset" %in% names(dot_args)){
+          modelFrame <- model.frame(formula = as.formula(pre.formula), 
+                                    data = df_cat[dot_args$subset, ])
+          add <- df_cat[dot_args$subset, ] |>
+            #drop_na() |>
+            select({{ index_data }}, {{ key_data1 }})
+        }else{
+          modelFrame <- model.frame(formula = as.formula(pre.formula), 
+                                    data = df_cat)
+          add <- df_cat |>
+            #drop_na() |>
+            select({{ index_data }}, {{ key_data1 }})
+        }
+        # add <- df_cat |>
+        #   #drop_na() |>
+        #   select({{ index_data }}, {{ key_data1 }})
+        model_list[[b]]$model <- bind_cols(add, modelFrame)
         model_list[[b]]$model <- as_tsibble(model_list[[b]]$model,
                                             index = index_data,
                                             key = all_of(key_data1))
@@ -875,10 +889,24 @@ bb_cvforecast <- function(object, data,
         attributes(pre.formula) <- NULL
         model_list[[b]] <- stats::ppr(formula = as.formula(pre.formula),
                                       data = df_cat, nterms = object$fit[[b]]$mu)
-        add <- df_cat |>
-          #drop_na() |>
-          select({{ index_data }}, {{ key_data1 }})
-        model_list[[b]]$model <- bind_cols(add, model_list[[b]]$model)
+        dot_args <- list(...)
+        if ("subset" %in% names(dot_args)){
+          modelFrame <- model.frame(formula = as.formula(pre.formula), 
+                                    data = df_cat[dot_args$subset, ])
+          add <- df_cat[dot_args$subset, ] |>
+            #drop_na() |>
+            select({{ index_data }}, {{ key_data1 }})
+        }else{
+          modelFrame <- model.frame(formula = as.formula(pre.formula), 
+                                    data = df_cat)
+          add <- df_cat |>
+            #drop_na() |>
+            select({{ index_data }}, {{ key_data1 }})
+        }
+        # add <- df_cat |>
+        #   #drop_na() |>
+        #   select({{ index_data }}, {{ key_data1 }})
+        model_list[[b]]$model <- bind_cols(add, modelFrame)
         model_list[[b]]$model <- as_tsibble(model_list[[b]]$model,
                                             index = index_data,
                                             key = all_of(key_data1))

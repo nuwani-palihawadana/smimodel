@@ -59,6 +59,8 @@ subsets of time series data using a rolling forecast origin.</p>
 <span>  recursive <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  recursive_colNames <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  na.rm <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  nacheck_frac_numerator <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>  nacheck_frac_denominator <span class="op">=</span> <span class="fl">3</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -165,6 +167,16 @@ some of the intermediate lags are not used as predictors.</p></dd>
 <dt id="arg-na-rm">na.rm<a class="anchor" aria-label="anchor" href="#arg-na-rm"></a></dt>
 <dd><p>logical; if <code>TRUE</code> (default), any <code>NA</code> and
 <code>NaN</code>'s are removed from the sample before the quantiles are computed.</p></dd>
+
+
+<dt id="arg-nacheck-frac-numerator">nacheck_frac_numerator<a class="anchor" aria-label="anchor" href="#arg-nacheck-frac-numerator"></a></dt>
+<dd><p>Numerator of the fraction of non-missing values
+that is required in a test set.</p></dd>
+
+
+<dt id="arg-nacheck-frac-denominator">nacheck_frac_denominator<a class="anchor" aria-label="anchor" href="#arg-nacheck-frac-denominator"></a></dt>
+<dd><p>Denominator of the fraction of non-missing
+values that is required in a test set.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>

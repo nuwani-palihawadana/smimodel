@@ -53,6 +53,10 @@
 #'   some of the intermediate lags are not used as predictors.
 #' @param na.rm logical; if \code{TRUE} (default), any \code{NA} and
 #'   \code{NaN}'s are removed from the sample before the quantiles are computed.
+#' @param nacheck_frac_numerator Numerator of the fraction of non-missing values
+#'   that is required in a test set.
+#' @param nacheck_frac_denominator Denominator of the fraction of non-missing
+#'   values that is required in a test set.
 #' @param ... Other arguments not currently used.
 #' @return An object of class \code{cb_cvforecast}, which is a list that
 #'   contains following elements: \item{x}{The original time series.}
@@ -134,7 +138,8 @@ cb_cvforecast <- function(object, data, yvar, neighbour = 0, predictor.vars,
                           initial = 1, window = NULL, roll.length = 1,
                           exclude.trunc = NULL,
                           recursive = FALSE, recursive_colNames = NULL, 
-                          na.rm = TRUE, ...) {
+                          na.rm = TRUE, nacheck_frac_numerator = 2, 
+                          nacheck_frac_denominator = 3, ...) {
   # Check input data
   if (!is_tsibble(data)) stop("data is not a tsibble.")
 
@@ -421,7 +426,8 @@ cb_cvforecast <- function(object, data, yvar, neighbour = 0, predictor.vars,
   }
 
   ### Bootstrapping non-conformity scores with rolling calibration sets
-  errors_temp <- na.omit(err)
+  #errors_temp <- na.omit(err)
+  errors_temp <- ts(err[indx, ], start = indx[1], end = indx[length(indx)], frequency = frequency(err))
   errors <- ts(errors_temp[1:NROW(errors_temp) - 1, ], start = start(errors_temp), frequency = frequency(errors_temp))
   if (ncal > NROW(errors))
     stop("`ncal` is larger than the number of rows in the matrix of non-conformity scores.")
@@ -433,11 +439,13 @@ cb_cvforecast <- function(object, data, yvar, neighbour = 0, predictor.vars,
     errors_subset <- subset(errors,
                             start = j - ncal + 1L,
                             end = j)
+    # Take only non-missing rows
+    errors_subset_temp <- drop_na(as_tibble(errors_subset))
     ## Generate the matrix of bootstrapped series
     # Bootstrapped row indices
-    sample_row_indx <- sample(seq(NROW(errors_subset)), num.futures, replace = TRUE)
+    sample_row_indx <- sample(seq(NROW(errors_subset_temp)), num.futures, replace = TRUE)
     # Matrix of bootstrapped series (h*num.futures)
-    bootstraps <- t(errors_subset[sample_row_indx, ])
+    bootstraps <- t(errors_subset_temp[sample_row_indx, ])
     colnames(bootstraps) <- seq(1, num.futures)
     ## Possible futures through bootstrapping non-conformity scores
     if(recursive == FALSE){
@@ -454,10 +462,19 @@ cb_cvforecast <- function(object, data, yvar, neighbour = 0, predictor.vars,
       # Rolling test set (of length h)
       newdata <- data1[(end(errors_subset)[1] + 2):(end(errors_subset)[1] + 1 + h), ] |>
         as_tsibble(index = index_data, key = key_data1)
+      nacheck_rows <- NROW(newdata)*(nacheck_frac_numerator/nacheck_frac_denominator)
+      if(any(is.na(newdata[1:nacheck_rows, ]))){
+        print(paste0("Skipping generation of PIs due to too many missing values in test set!"))
+        next
+      }
       # recursive_colRange
       recursive_colRange <- suppressWarnings(which(colnames(newdata) %in% recursive_colNames))
       # Forecasting model estimated on the most recent training window
       forecastModel <- modelFit[[end(errors_subset)[1] + 1]]
+      if(is.null(forecastModel)){
+        print(paste0("Skipping generation of PIs; no forecast model available!"))
+        next
+      }
       # Objects of class "smimodel" do not occur here. Hence, using
       # possibleFutures_benchmark()
       futures <- possibleFutures_benchmark(object = forecastModel,

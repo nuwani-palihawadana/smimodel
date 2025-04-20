@@ -433,14 +433,21 @@ cb_cvforecast <- function(object, data, yvar, neighbour = 0, predictor.vars,
     stop("`ncal` is larger than the number of rows in the matrix of non-conformity scores.")
 
   indx_cal <- seq(ncal, NROW(errors), by = 1)
+  cal_times <- length(indx_cal)
+  num_cal <- rep(NA, length(indx_cal))
+  skip_cal <- rep(NA, length(indx_cal))
+  count <- 0
   for(j in indx_cal){
     print(paste("This is", j))
+    count <- count + 1
     # Calibration set
     errors_subset <- subset(errors,
                             start = j - ncal + 1L,
                             end = j)
     # Take only non-missing rows
     errors_subset_temp <- drop_na(as_tibble(errors_subset))
+    # Update num_cal
+    num_cal[[count]] <- NROW(errors_subset_temp)
     ## Generate the matrix of bootstrapped series
     # Bootstrapped row indices
     sample_row_indx <- sample(seq(NROW(errors_subset_temp)), num.futures, replace = TRUE)
@@ -465,6 +472,8 @@ cb_cvforecast <- function(object, data, yvar, neighbour = 0, predictor.vars,
       nacheck_rows <- NROW(newdata)*(nacheck_frac_numerator/nacheck_frac_denominator)
       if(any(is.na(newdata[1:nacheck_rows, ]))){
         print(paste0("Skipping generation of PIs due to too many missing values in test set!"))
+        # Update skip_cal
+        skip_cal[[count]] <- 1
         next
       }
       # recursive_colRange
@@ -473,6 +482,8 @@ cb_cvforecast <- function(object, data, yvar, neighbour = 0, predictor.vars,
       forecastModel <- modelFit[[end(errors_subset)[1] + 1]]
       if(is.null(forecastModel)){
         print(paste0("Skipping generation of PIs; no forecast model available!"))
+        # Update skip_cal
+        skip_cal[[count]] <- 1
         next
       }
       # Objects of class "smimodel" do not occur here. Hence, using
@@ -517,6 +528,9 @@ cb_cvforecast <- function(object, data, yvar, neighbour = 0, predictor.vars,
   out$mean <- leadlagMat(pf, 1:h) |> window(start = time(pf)[nfirst + 1L])
   out$error <- leadlagMat(err, 1:h) |> window(start = time(err)[nfirst + 1L], end = time(err)[n])
   out$level <- level
+  out$cal_times <- cal_times
+  out$num_cal <- num_cal
+  out$skip_cal <- skip_cal
   out$lower <- lapply(lower,
                       function(low) leadlagMat(low, 1:h) |>
                         window(start = time(low)[nfirst + 1L]))

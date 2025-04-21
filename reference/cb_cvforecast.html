@@ -208,16 +208,27 @@ which the forecast is produced.</p></dd>
  <dt>level</dt>
 <dd><p>The confidence values associated with the
 prediction intervals.</p></dd>
-
-<dt>lower</dt>
-<dd><p>A list containing lower bounds for prediction intervals for
-each level. Each element within the list will be a multivariate time series
-with the same dimensional characteristics as <code>mean</code>.</p></dd>
-
-<dt>upper</dt>
-<dd><p>A list containing upper bounds for prediction intervals for
-each level. Each element within the list will be a multivariate time
-series with the same dimensional characteristics as <code>mean</code>.</p></dd>
+ <dt>cal_times</dt>
+<dd><p>The number of calibration windows
+considered in cross-validation.</p></dd>
+ <dt>num_cal</dt>
+<dd><p>The number of non-missing
+multi-step forecast errors in each calibration window.</p></dd>
+ <dt>skip_cal</dt>
+<dd><p>An
+indicator vector indicating whether a calibration window is skipped without
+constructing prediction intervals due to missing model or missing data in
+the test set.</p></dd>
+ <dt>lower</dt>
+<dd><p>A list containing lower bounds for prediction
+intervals for each level. Each element within the list will be a
+multivariate time series with the same dimensional characteristics as
+<code>mean</code>.</p></dd>
+ <dt>upper</dt>
+<dd><p>A list containing upper bounds for prediction
+intervals for each level. Each element within the list will be a
+multivariate time series with the same dimensional characteristics as
+<code>mean</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">

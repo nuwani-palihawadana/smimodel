@@ -68,13 +68,18 @@
 #'   which the forecast is produced.}
 #'   \item{error}{Forecast errors given by \eqn{e_{t+h|t} = y_{t+h} -
 #'   \hat{y}_{t+h|t}}.} \item{level}{The confidence values associated with the
-#'   prediction intervals.}
-#'   \item{lower}{A list containing lower bounds for prediction intervals for
-#'   each level. Each element within the list will be a multivariate time series
-#'    with the same dimensional characteristics as \code{mean}.}
-#'    \item{upper}{A list containing upper bounds for prediction intervals for
-#'    each level. Each element within the list will be a multivariate time
-#'    series with the same dimensional characteristics as \code{mean}.}
+#'   prediction intervals.} \item{cal_times}{The number of calibration windows
+#'   considered in cross-validation.} \item{num_cal}{The number of non-missing
+#'   multi-step forecast errors in each calibration window.} \item{skip_cal}{An
+#'   indicator vector indicating whether a calibration window is skipped without
+#'   constructing prediction intervals due to missing model or missing data in
+#'   the test set.} \item{lower}{A list containing lower bounds for prediction
+#'   intervals for each level. Each element within the list will be a
+#'   multivariate time series with the same dimensional characteristics as
+#'   \code{mean}.} \item{upper}{A list containing upper bounds for prediction
+#'   intervals for each level. Each element within the list will be a
+#'   multivariate time series with the same dimensional characteristics as
+#'   \code{mean}.}
 #'
 #' @seealso \code{\link{bb_cvforecast}}
 #'

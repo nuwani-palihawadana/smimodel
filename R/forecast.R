@@ -9,6 +9,8 @@
 #' @param level Confidence level for prediction intervals.
 #' @param newdata The set of new data on for which the forecasts are required
 #'   (i.e. test set; should be a \code{tsibble}).
+#' @param exclude.trunc The names of the predictor variables that should not be
+#'   truncated for stable predictions as a character string.
 #' @param recursive Whether to obtain recursive forecasts or not (default -
 #'   \code{FALSE}).
 #' @param recursive_colRange If \code{recursive = TRUE}, the range of column
@@ -24,9 +26,11 @@
 #'
 #' @export
 forecast.gaimFit <- function(object, h = 1, level = c(80, 95), newdata, 
+                             exclude.trunc = NULL,
                              recursive = FALSE, recursive_colRange = NULL, ...){
   method <- "Groupwise Additive Index Model"
-  pred <- predict(object = object, newdata = newdata, recursive = recursive,
+  pred <- predict(object = object, newdata = newdata, 
+                  exclude.trunc = exclude.trunc, recursive = recursive,
                   recursive_colRange = recursive_colRange)$.predict
   fitted <- augment(object)$.fitted
   residuals <- augment(object)$.resid

@@ -1002,16 +1002,16 @@ cb_cvforecast_trial <- function(object, data, yvar, neighbour = 0, predictor.var
     errors_subset_temp <- drop_na(as_tibble(errors_subset))
     # Update num_cal
     num_cal[[count]] <- NROW(errors_subset_temp)
+    # scale multi-step errors
+    centred_mat <- scale(errors_subset_temp, center = TRUE, scale = FALSE)
+    col_sd <- apply(centred_mat, 2, sd)
+    scaled_mat <- centred_mat
+    scaled_mat[ , 2:NCOL(centred_mat)] <- sweep(scaled_mat[, 2:NCOL(centred_mat)], 2, col_sd[-1], "/") * col_sd[1]
     ## Generate the matrix of bootstrapped series
     # Bootstrapped row indices
-    sample_row_indx <- sample(seq(NROW(errors_subset_temp)), num.futures, replace = TRUE)
-    boot_temp <- errors_subset_temp[sample_row_indx, ]
-    centred_mat <- scale(boot_temp, center = TRUE, scale = FALSE)
-    col_sd <- apply(centred_mat, 2, sd)
-    bootstraps_temp <- centred_mat
-    bootstraps_temp[ , 2:NCOL(centred_mat)] <- sweep(bootstraps_temp[, 2:NCOL(centred_mat)], 2, col_sd[-1], "/") * col_sd[1]
+    sample_row_indx <- sample(seq(NROW(scaled_mat)), num.futures, replace = TRUE)
     # Matrix of bootstrapped series (h*num.futures)
-    bootstraps <- t(bootstraps_temp)
+    bootstraps <- t(scaled_mat[sample_row_indx, ])
     #bootstraps <- t(errors_subset_temp[sample_row_indx, ])
     colnames(bootstraps) <- seq(1, num.futures)
     ## Possible futures through bootstrapping non-conformity scores

@@ -1566,7 +1566,7 @@ cb_cvforecast_v2 <- function(object, data, yvar, neighbour = 0, predictor.vars,
     bootstraps <- matrix(, h, num.futures)
     for (my_iter in 1:num.futures) {
       myc <- sample(1:(nrow(errors_subset_temp) - h + 1), 1)
-      bootstraps[, my_iter] <- errors_subset_temp[myc:(myc + h - 1), 1]
+      bootstraps[, my_iter] <- errors_subset_temp[myc:(myc + h - 1), 1][[1]]
     }
     
     colnames(bootstraps) <- seq(1, num.futures)

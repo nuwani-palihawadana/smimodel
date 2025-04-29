@@ -460,7 +460,7 @@ cb_cvforecast <- function(object, data, yvar, neighbour = 0, predictor.vars,
     bootstraps <- t(errors_subset_temp[sample_row_indx, ])
     colnames(bootstraps) <- seq(1, num.futures)
     ## Possible futures through bootstrapping non-conformity scores
-    if(recursive == FALSE){
+    #if(recursive == FALSE){
       # Predictions for the rolling test set (of length h)
       preds <- pf[end(errors_subset)[1] + 1, ]
       npreds <- length(preds)
@@ -470,40 +470,40 @@ cb_cvforecast <- function(object, data, yvar, neighbour = 0, predictor.vars,
         possibleFutures[[m]] <- preds[m] + bootstraps[m, ]
       }
       possibleFutures_mat <- as.matrix(bind_rows(possibleFutures))
-    }else if(recursive == TRUE){
-      # Rolling test set (of length h)
-      newdata <- data1[(end(errors_subset)[1] + 2):(end(errors_subset)[1] + 1 + h), ] |>
-        as_tsibble(index = index_data, key = key_data1)
-      nacheck_rows <- NROW(newdata)*(nacheck_frac_numerator/nacheck_frac_denominator)
-      if(any(is.na(newdata[1:nacheck_rows, ]))){
-        print(paste0("Skipping generation of PIs due to too many missing values in test set!"))
-        # Update skip_cal
-        skip_cal[[count]] <- 1
-        next
-      }
-      # recursive_colRange
-      recursive_colRange <- suppressWarnings(which(colnames(newdata) %in% recursive_colNames))
-      # Forecasting model estimated on the most recent training window
-      forecastModel <- modelFit[[end(errors_subset)[1] + 1]]
-      if(is.null(forecastModel)){
-        print(paste0("Skipping generation of PIs; no forecast model available!"))
-        # Update skip_cal
-        skip_cal[[count]] <- 1
-        next
-      }
-      # Objects of class "smimodel" do not occur here. Hence, using
-      # possibleFutures_benchmark()
-      futures <- possibleFutures_benchmark(object = forecastModel,
-                                           newdata = newdata,
-                                           bootstraps = bootstraps,
-                                           exclude.trunc = exclude.trunc,
-                                           recursive_colRange = recursive_colRange)
-      names(futures$future_cols) <- 1:length(futures$future_cols)
-      possibleFutures_part2 <- as.matrix(bind_cols(futures$future_cols))
-      possibleFutures_part1 <- matrix(futures$firstFuture, nrow = 1,
-                                      ncol = length(futures$firstFuture))
-      possibleFutures_mat <- rbind(possibleFutures_part1, possibleFutures_part2)
-    }
+    # }else if(recursive == TRUE){
+    #   # Rolling test set (of length h)
+    #   newdata <- data1[(end(errors_subset)[1] + 2):(end(errors_subset)[1] + 1 + h), ] |>
+    #     as_tsibble(index = index_data, key = key_data1)
+    #   nacheck_rows <- NROW(newdata)*(nacheck_frac_numerator/nacheck_frac_denominator)
+    #   if(any(is.na(newdata[1:nacheck_rows, ]))){
+    #     print(paste0("Skipping generation of PIs due to too many missing values in test set!"))
+    #     # Update skip_cal
+    #     skip_cal[[count]] <- 1
+    #     next
+    #   }
+    #   # recursive_colRange
+    #   recursive_colRange <- suppressWarnings(which(colnames(newdata) %in% recursive_colNames))
+    #   # Forecasting model estimated on the most recent training window
+    #   forecastModel <- modelFit[[end(errors_subset)[1] + 1]]
+    #   if(is.null(forecastModel)){
+    #     print(paste0("Skipping generation of PIs; no forecast model available!"))
+    #     # Update skip_cal
+    #     skip_cal[[count]] <- 1
+    #     next
+    #   }
+    #   # Objects of class "smimodel" do not occur here. Hence, using
+    #   # possibleFutures_benchmark()
+    #   futures <- possibleFutures_benchmark(object = forecastModel,
+    #                                        newdata = newdata,
+    #                                        bootstraps = bootstraps,
+    #                                        exclude.trunc = exclude.trunc,
+    #                                        recursive_colRange = recursive_colRange)
+    #   names(futures$future_cols) <- 1:length(futures$future_cols)
+    #   possibleFutures_part2 <- as.matrix(bind_cols(futures$future_cols))
+    #   possibleFutures_part1 <- matrix(futures$firstFuture, nrow = 1,
+    #                                   ncol = length(futures$firstFuture))
+    #   possibleFutures_mat <- rbind(possibleFutures_part1, possibleFutures_part2)
+    # }
 
     # Prediction interval bounds
     lower_q <- (1 - (level/100))/2

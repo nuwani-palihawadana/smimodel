@@ -698,13 +698,13 @@ cb_cvforecast <- function(object, data, yvar, neighbour = 0, predictor.vars,
 #'
 #' @export
 cb_cvforecast_v2 <- function(object, data, yvar, neighbour = 0, predictor.vars,
-                          h = 1, ncal = 100, num.futures = 1000,
-                          level = c(80, 95), forward = TRUE,
-                          initial = 1, window = NULL, roll.length = 1,
-                          exclude.trunc = NULL,
-                          recursive = FALSE, recursive_colNames = NULL, 
-                          na.rm = TRUE, nacheck_frac_numerator = 2, 
-                          nacheck_frac_denominator = 3, ...) {
+                             h = 1, ncal = 100, num.futures = 1000,
+                             level = c(80, 95), forward = TRUE,
+                             initial = 1, window = NULL, roll.length = 1,
+                             exclude.trunc = NULL,
+                             recursive = FALSE, recursive_colNames = NULL, 
+                             na.rm = TRUE, nacheck_frac_numerator = 2, 
+                             nacheck_frac_denominator = 3, ...) {
   # Check input data
   if (!is_tsibble(data)) stop("data is not a tsibble.")
   
@@ -1013,24 +1013,22 @@ cb_cvforecast_v2 <- function(object, data, yvar, neighbour = 0, predictor.vars,
     errors_subset_temp <- drop_na(as_tibble(errors_subset))
     # Update num_cal
     num_cal[[count]] <- NROW(errors_subset_temp)
-    
-    ## Generate the matrix of bootstrapped series - one-step-ahead forecast errors
+    ## Generate the matrix of sped series
+    # Bootstrapped row indices
+    sample_row_indx <- sample(seq(NROW(errors_subset_temp)), num.futures, replace = TRUE)
     # Matrix of bootstrapped series (h*num.futures)
+    # bootstraps <- t(errors_subset_temp[sample_row_indx, ])
+    
     bootstraps <- matrix(, h, num.futures)
     for (my_iter in 1:num.futures) {
       myc <- sample(1:(nrow(errors_subset_temp) - h + 1), 1)
       bootstraps[, my_iter] <- errors_subset_temp[myc:(myc + h - 1), 1][[1]]
     }
+    
     colnames(bootstraps) <- seq(1, num.futures)
     
     ## Possible futures through bootstrapping non-conformity scores
     if(recursive == FALSE){
-      ## Generate the matrix of bootstrapped series - multi-step-ahead forecast errors
-      # Bootstrapped row indices
-      sample_row_indx <- sample(seq(NROW(errors_subset_temp)), num.futures, replace = TRUE)
-      # Matrix of bootstrapped series (h*num.futures)
-      bootstraps <- t(errors_subset_temp[sample_row_indx, ])
-      colnames(bootstraps) <- seq(1, num.futures)
       # Predictions for the rolling test set (of length h)
       preds <- pf[end(errors_subset)[1] + 1, ]
       npreds <- length(preds)
@@ -1041,14 +1039,6 @@ cb_cvforecast_v2 <- function(object, data, yvar, neighbour = 0, predictor.vars,
       }
       possibleFutures_mat <- as.matrix(bind_rows(possibleFutures))
     }else if(recursive == TRUE){
-      # ## Generate the matrix of bootstrapped series - one-step-ahead forecast errors
-      # # Matrix of bootstrapped series (h*num.futures)
-      # bootstraps <- matrix(, h, num.futures)
-      # for (my_iter in 1:num.futures) {
-      #   myc <- sample(1:(nrow(errors_subset_temp) - h + 1), 1)
-      #   bootstraps[, my_iter] <- errors_subset_temp[myc:(myc + h - 1), 1][[1]]
-      # }
-      # colnames(bootstraps) <- seq(1, num.futures)
       # Rolling test set (of length h)
       newdata <- data1[(end(errors_subset)[1] + 2):(end(errors_subset)[1] + 1 + h), ] |>
         as_tsibble(index = index_data, key = key_data1)
@@ -1123,6 +1113,7 @@ cb_cvforecast_v2 <- function(object, data, yvar, neighbour = 0, predictor.vars,
   
   return(structure(out, class = "cb_cvforecast"))
 }
+
 
 
 #' Single season block bootstrap prediction intervals through time series

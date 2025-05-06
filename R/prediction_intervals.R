@@ -553,6 +553,7 @@ cb_cvforecast <- function(object, data, yvar, neighbour = 0, predictor.vars,
   out$upper <- lapply(upper,
                       function(up) leadlagMat(up, 1:h) |>
                         window(start = time(up)[nfirst + 1L]))
+  out$possible_futures <- possibleFutures_mat
   
   return(structure(out, class = "cb_cvforecast"))
 }
@@ -1110,6 +1111,7 @@ cb_cvforecast_v2 <- function(object, data, yvar, neighbour = 0, predictor.vars,
   out$upper <- lapply(upper,
                       function(up) leadlagMat(up, 1:h) |>
                         window(start = time(up)[nfirst + 1L]))
+  out$possible_futures <- possibleFutures_mat
   
   return(structure(out, class = "cb_cvforecast"))
 }

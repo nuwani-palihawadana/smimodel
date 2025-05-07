@@ -490,6 +490,8 @@ cb_cvforecast <- function(object, data, yvar, neighbour = 0, predictor.vars,
         print(paste0("Skipping generation of PIs due to too many missing values in test set!"))
         # Update skip_cal
         skip_cal[[count]] <- 1
+        # possibleFutures_mat with NAs
+        possibleFutures_mat <- matrix( , h, num.futures)
         next
       }
       # recursive_colRange
@@ -500,6 +502,8 @@ cb_cvforecast <- function(object, data, yvar, neighbour = 0, predictor.vars,
         print(paste0("Skipping generation of PIs; no forecast model available!"))
         # Update skip_cal
         skip_cal[[count]] <- 1
+        # possibleFutures_mat with NAs
+        possibleFutures_mat <- matrix( , h, num.futures)
         next
       }
       # Objects of class "smimodel" do not occur here. Hence, using
@@ -1048,6 +1052,8 @@ cb_cvforecast_v2 <- function(object, data, yvar, neighbour = 0, predictor.vars,
         print(paste0("Skipping generation of PIs due to too many missing values in test set!"))
         # Update skip_cal
         skip_cal[[count]] <- 1
+        # possibleFutures_mat with NAs
+        possibleFutures_mat <- matrix( , h, num.futures)
         next
       }
       # recursive_colRange
@@ -1058,6 +1064,8 @@ cb_cvforecast_v2 <- function(object, data, yvar, neighbour = 0, predictor.vars,
         print(paste0("Skipping generation of PIs; no forecast model available!"))
         # Update skip_cal
         skip_cal[[count]] <- 1
+        # possibleFutures_mat with NAs
+        possibleFutures_mat <- matrix( , h, num.futures)
         next
       }
       # Objects of class "smimodel" do not occur here. Hence, using

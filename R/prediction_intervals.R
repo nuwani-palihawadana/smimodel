@@ -1594,6 +1594,8 @@ bb_cvforecast <- function(object, data,
   if(NROW(out$res) == length(seq(nfirst, nlast, by = 1))){
     row.names(out$res) <- seq(nfirst, nlast, by = 1)
   }
+  out$modelFit <- modelFit
+  out$possibleFutures <- pFutures
   out$level <- level
   out$lower <- lapply(lower,
                       function(low) leadlagMat(low, 1:h) |>

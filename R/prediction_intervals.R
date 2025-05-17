@@ -1076,7 +1076,7 @@ cb_cvforecast_smi <- function(object, data, yvar, neighbour = 0, predictor.vars,
   out$mean <- leadlagMat(pf, 1:h) |> window(start = time(pf)[nfirst + 1L])
   out$error <- leadlagMat(err, 1:h) |> window(start = time(err)[nfirst + 1L], end = time(err)[n])
   out$res <- res
-  out$modelFit <- modelFit
+  #out$modelFit <- modelFit
   out$level <- level
   out$cal_times <- cal_times
   out$num_cal <- num_cal

@@ -1,3 +1,48 @@
+#' Forecasting using SMI models
+#'
+#' Returns forecasts and other information for SMI models.
+#'
+#'
+#' @param object An object of class \code{smimodel}. Usually the result of a call
+#'   to \code{\link{model_smimodel}}.
+#' @param h Forecast horizon.
+#' @param level Confidence level for prediction intervals.
+#' @param newdata The set of new data on for which the forecasts are required
+#'   (i.e. test set; should be a \code{tsibble}).
+#' @param exclude.trunc The names of the predictor variables that should not be
+#'   truncated for stable predictions as a character string.
+#' @param recursive Whether to obtain recursive forecasts or not (default -
+#'   \code{FALSE}).
+#' @param recursive_colRange If \code{recursive = TRUE}, the range of column
+#'   numbers in \code{newdata} to be filled with forecasts.
+#' @param ... Other arguments not currently used.
+#' @return An object of class \code{forecast}. Here, it is a list containing the
+#' following elements: \item{method}{The name of the forecasting method as a
+#' character string.} \item{model}{The fitted model.} \item{mean}{Point
+#' forecasts as a time series.} \item{residuals}{Residuals from the fitted
+#' model.} \item{fitted}{Fitted values (one-step forecasts).}
+#'
+#' @method forecast smimodel
+#'
+#' @export
+forecast.smimodel <- function(object, h = 1, level = c(80, 95), newdata, 
+                             exclude.trunc = NULL,
+                             recursive = FALSE, recursive_colRange = NULL, ...){
+  method <- "Sparse Multiple Index Model"
+  pred <- predict(object = object, newdata = newdata, 
+                  exclude.trunc = exclude.trunc, recursive = recursive,
+                  recursive_colRange = recursive_colRange)$.predict
+  fitted <- augment(object)$.fitted
+  residuals <- augment(object)$.resid
+  return(structure(list(method = method, 
+                        model = object, 
+                        mean = ts(pred), 
+                        fitted = ts(fitted), 
+                        residuals = ts(residuals)), 
+                   class = "forecast"))
+}
+
+
 #' Forecasting using GAIMs
 #'
 #' Returns forecasts and other information for GAIMs.

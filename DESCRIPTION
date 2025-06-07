@@ -44,7 +44,6 @@ Suggests:
     rmarkdown,
     testthat (>= 3.0.0)
 Remotes:
-  cran::limSolve@1.5.7.1,
   github::PierreMasselot/cgaim,
   github::xqnwang/conformalForecast
 Roxygen: list(markdown = TRUE)

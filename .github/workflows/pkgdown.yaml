@@ -32,14 +32,14 @@ jobs:
         with:
           use-public-rspm: true
           
-      - name: Install limSolve from CRAN archive
-        run: |
-          install.packages(
-            "https://cran.r-project.org/src/contrib/Archive/limSolve/limSolve_1.5.7.1.tar.gz",
-            repos = NULL,
-            type = "source"
-          )
-        shell: Rscript {0}
+      # - name: Install limSolve from CRAN archive
+      #   run: |
+      #     install.packages(
+      #       "https://cran.r-project.org/src/contrib/Archive/limSolve/limSolve_1.5.7.1.tar.gz",
+      #       repos = NULL,
+      #       type = "source"
+      #     )
+      #   shell: Rscript {0}
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:

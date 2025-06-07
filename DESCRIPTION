@@ -44,7 +44,7 @@ Suggests:
     rmarkdown,
     testthat (>= 3.0.0)
 Remotes:
-  url::https://cran.r-project.org/src/contrib/Archive/limSolve/limSolve_1.5.7.1.tar.gz,
+  url::https://cran.r-project.org/src/contrib/Archive/limSolve/limSolve_1.5.7.2.tar.gz,
   github::PierreMasselot/cgaim,
   github::xqnwang/conformalForecast
 Roxygen: list(markdown = TRUE)

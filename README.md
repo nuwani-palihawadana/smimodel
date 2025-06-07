@@ -10,10 +10,7 @@ The R package *smimodel* provides functions to estimate Sparse Multiple
 Index (SMI) Models for nonparametric forecasting/prediction. The SMI
 Modelling algorithm simultaneously performs optimal predictor selection
 (hence “sparse”) and predictor grouping, enabling parsimonious
-forecasting/prediction models in a high-dimensional context. For
-detailed information regarding the SMI Modelling algorithm refer the
-related working paper at
-<https://www.monash.edu/business/ebs/research/publications/ebs/2024/wp16-2024.pdf>.
+forecasting/prediction models in a high-dimensional context.
 
 The package also includes functions to fit some benchmark comparison
 methods namely nonparametric additive model with backward elimination,
@@ -21,15 +18,14 @@ group-wise additive index model and projection pursuit regression. These
 functions are designed to have a similar syntax and output format for
 convenient usage and interchangeability.
 
-#### Additional Functionalities (experimental):
+#### Additional Functionalities:
 
 Furthermore, the smimodel package provides functions to generate
 prediction intervals to estimate uncertainty of the point forecasts
 produced by the SMI model and given benchmark models in time series
 forecasting problems. The classical *Block Bootstrap* method and a novel
 method named *Conformal Bootstrap*, which is a natural integration of
-bootstrap and classical split conformal prediction (the link to a
-reference working paper will be added here in due course), are
+block bootstrap and classical split conformal prediction, are
 implemented as prediction interval generation methods through a general
 online updating procedure as introduced by Wang and Hyndman (2024)
 (<https://arxiv.org/pdf/2410.13115>).
@@ -183,4 +179,4 @@ predict(object = smimodel_ppr, newdata = sim_test)$.predict
 
 ## License
 
-This package is free and open source software, licensed under GPL-3.
+This package is free and open-source software, licensed under GPL-3.

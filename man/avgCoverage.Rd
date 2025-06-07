@@ -7,7 +7,8 @@
 avgCoverage(object, level = 95, window = NULL, na.rm = FALSE)
 }
 \arguments{
-\item{object}{An object of class \code{bb_cvforecast}.}
+\item{object}{An object of class \code{bb_cvforecast} or
+\code{cb_cvforecast}.}
 
 \item{level}{Target confidence level for prediction intervals.}
 

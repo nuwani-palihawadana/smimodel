@@ -108,14 +108,16 @@ The time index corresponds to the period for which the forecast is produced.}
 \item{res}{The matrix of in-sample residuals produced in cross-validation.
 The number of rows corresponds to \code{fit_times}, and the row names
 corresponds the time index of the forecast origin of the corresponding
-cross-validation iteration.} \item{level}{The confidence values
+cross-validation iteration.} \item{model_fit}{Models fitted in
+cross-validation.} \item{level}{The confidence values
 associated with the prediction intervals.} \item{lower}{A list containing
 lower bounds for prediction intervals for each level. Each element within
 the list will be a multivariate time series with the same dimensional
 characteristics as \code{mean}.} \item{upper}{A list containing upper bounds
 for prediction intervals for each level. Each element within the list will
 be a multivariate time series with the same dimensional characteristics as
-\code{mean}.}
+\code{mean}.} \item{possible_futures}{A list of matrices containing future
+sample paths generated at each cross-validation step.}
 }
 \description{
 Compute prediction intervals by applying the single season block bootstrap

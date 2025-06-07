@@ -113,7 +113,8 @@ series, where the \eqn{h^{th}} column holds the point forecasts for
 forecast horizon \eqn{h}. The time index corresponds to the period for
 which the forecast is produced.}
 \item{error}{Forecast errors given by \eqn{e_{t+h|t} = y_{t+h} -
-  \hat{y}_{t+h|t}}.} \item{level}{The confidence values associated with the
+  \hat{y}_{t+h|t}}.} \item{res}{The matrix of in-sample residuals produced in
+cross-validation.} \item{level}{The confidence levels associated with the
 prediction intervals.} \item{cal_times}{The number of calibration windows
 considered in cross-validation.} \item{num_cal}{The number of non-missing
 multi-step forecast errors in each calibration window.} \item{skip_cal}{An
@@ -125,7 +126,8 @@ multivariate time series with the same dimensional characteristics as
 \code{mean}.} \item{upper}{A list containing upper bounds for prediction
 intervals for each level. Each element within the list will be a
 multivariate time series with the same dimensional characteristics as
-\code{mean}.}
+\code{mean}.} \item{possible_futures}{A list of matrices containing future
+sample paths generated at each calibration step.}
 }
 \description{
 Compute prediction intervals by applying the conformal bootstrap method to

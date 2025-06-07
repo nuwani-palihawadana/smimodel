@@ -69,6 +69,7 @@ reference:
   - print.backward
   - print.gaimFit
   - print.pprFit
+  - forecast.smimodel
   - forecast.backward
   - forecast.gaimFit
   - forecast.pprFit

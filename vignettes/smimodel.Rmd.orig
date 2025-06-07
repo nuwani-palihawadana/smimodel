@@ -18,10 +18,9 @@ knitr::opts_chunk$set(
 
 ## What is smimodel?
 
-The *smimodel* package provides functions to estimate **Sparse Multiple Index (SMI) Models** for nonparametric forecasting or prediction. To support time series forecasting, the package functions are mainly build upon tidy temporal data in the `tsibble` format. However, the SMI model formulation is very general and does not exclusively depend on any temporal features. Hence, the model can be used more widely -- even with non-temporal cross-sectional data. (In such case, a numeric `index` (instead of a date or time related variable) can be used when constructing the `tsibble`.)
+The *smimodel* package provides functions to estimate **Sparse Multiple Index (SMI) Models** for nonparametric forecasting or prediction. To support time series forecasting, the package functions are mainly build upon tidy temporal data in the `tsibble` format. However, the SMI model formulation is very general and does not exclusively depend on any temporal features. Hence, the model can be used more widely---even with non-temporal cross-sectional data. (In such case, a numeric `index` (instead of a date or time related variable) can be used when constructing the `tsibble`.)
 
-The SMI Modelling algorithm (i.e. the estimation algorithm of SMI model) that we implement here, simultaneously performs automatic predictor selection ("sparse") and predictor grouping, which is especially useful in obtaining a parsimonious model in high-dimensional contexts. For detailed information regarding the SMI model and the estimation algorithm refer the related working paper at https://www.monash.edu/business/ebs/research/publications/ebs/2024/wp16-2024.pdf.
-
+The SMI Modelling algorithm (i.e. the estimation algorithm of SMI model) that we implement here, simultaneously performs automatic predictor selection ("sparse") and predictor grouping, which is especially useful in obtaining a parsimonious model in high-dimensional contexts. 
 ## How to use smimodel?
 
 Here we present a simple example to illustrate *smimodel* functionalities. We use randomly simualted data, which we treat as time series data for the purpose of this illustration. 
@@ -156,7 +155,7 @@ smimodel_linear$fit[[1]]$best$alpha
 ```
 
 
-In this case, the SMI models fitted with "ppr" and "additive" initialisation options have correctly identified the index structure of the response $y$ by estimating two linear combinations (i.e. indices), while dropping out the irrelevant predictor $x\_004$. While correctly identifying $x\_004$ as an irrelevant predictor variable, the SMI model estimated with "linear" initialisation however, has not correctly identified the index structure of the model -- has estimated only a single index instead of the two indices. 
+In this case, the SMI models fitted with "ppr" and "additive" initialisation options have correctly identified the index structure of the response $y$ by estimating two linear combinations (i.e. indices), while dropping out the irrelevant predictor $x\_004$. While correctly identifying $x\_004$ as an irrelevant predictor variable, the SMI model estimated with "linear" initialisation however, has not correctly identified the index structure of the model---has estimated only a single index instead of the two indices. 
 
 Thus, as mentioned earlier, the final estimated model can change depending on the initialisation option chosen. Hence, the users are encouraged to experiment with different available initialisation options when choosing the best fit for the data/application of interest. (In a real-world problem (where the true model is unknown), it will be useful to fit SMI models with different initialisation options, and see which option gives the best forecasting/prediction accuracy.)
 
@@ -200,9 +199,9 @@ MAE_SMI_ppr
 
 ### Tuning for penalty parameters
 
-The estimation of a SMI model involves solving an optimaisation problem, where the sum of squared errors of the model plus two penalty terms (an L0 penalty and an L2 (ridge) penalty) is minimised subject to a set of constraints (please refer the working paper for details). Thus, two penalty parameters $\lambda_{0}$ and $\lambda_{2}$ corresponding to the L0 and L2 penalties respectively should be chosen when estimating a SMI model. 
+The estimation of a SMI model involves solving an optimaisation problem, where the sum of squared errors of the model plus two penalty terms (an L0 penalty and an L2 (ridge) penalty) is minimised subject to a set of constraints. Thus, two penalty parameters $\lambda_{0}$ and $\lambda_{2}$ corresponding to the L0 and L2 penalties respectively should be chosen when estimating a SMI model. 
 
-In the previous example, all the SMI models were fitted using the default penalty parameter values provided in the function: $\lambda_{0} = 1$ and $\lambda_{2} = 1$. To fit a SMI model with simultaneous parameter tuning, we can use the function `greedy_smimodel()`, which performs a greedy search over a given grid of penalty parameter combinations ($\lambda_{0}$, $\lambda_{2}$), and fits the SMI model using the best (lowest validation set MSE) penalty parameter combination. In this case, we need to provide a validation set, which is separate from the training data set. 
+In the previous example, all the SMI models were fitted using the default penalty parameter values provided in the function: $\lambda_{0} = 1$ and $\lambda_{2} = 1$. To fit a SMI model with simultaneous parameter tuning, we can use the function `greedy_smimodel()`, which performs a greedy search over a partially data-derived grid of possible penalty parameter combinations ($\lambda_{0}$, $\lambda_{2}$), and fits the SMI model using the best (lowest validation set MSE) penalty parameter combination. In this case, we need to provide a validation set, which is separate from the training data set. 
 
 Therefore, let's split our original training set in the above example into two parts again to obtain a validation set. 
 

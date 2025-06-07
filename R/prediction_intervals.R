@@ -67,7 +67,8 @@
 #'   forecast horizon \eqn{h}. The time index corresponds to the period for
 #'   which the forecast is produced.}
 #'   \item{error}{Forecast errors given by \eqn{e_{t+h|t} = y_{t+h} -
-#'   \hat{y}_{t+h|t}}.} \item{level}{The confidence values associated with the
+#'   \hat{y}_{t+h|t}}.} \item{res}{The matrix of in-sample residuals produced in
+#'    cross-validation.} \item{level}{The confidence levels associated with the
 #'   prediction intervals.} \item{cal_times}{The number of calibration windows
 #'   considered in cross-validation.} \item{num_cal}{The number of non-missing
 #'   multi-step forecast errors in each calibration window.} \item{skip_cal}{An
@@ -79,7 +80,8 @@
 #'   \code{mean}.} \item{upper}{A list containing upper bounds for prediction
 #'   intervals for each level. Each element within the list will be a
 #'   multivariate time series with the same dimensional characteristics as
-#'   \code{mean}.}
+#'   \code{mean}.} \item{possible_futures}{A list of matrices containing future
+#'   sample paths generated at each calibration step.}
 #'
 #' @seealso \code{\link{bb_cvforecast}}
 #'
@@ -591,14 +593,16 @@ cb_cvforecast <- function(object, data, yvar, neighbour = 0, predictor.vars,
 #' \item{res}{The matrix of in-sample residuals produced in cross-validation.
 #' The number of rows corresponds to \code{fit_times}, and the row names
 #' corresponds the time index of the forecast origin of the corresponding
-#' cross-validation iteration.} \item{level}{The confidence values
+#' cross-validation iteration.} \item{model_fit}{Models fitted in
+#' cross-validation.} \item{level}{The confidence values
 #'  associated with the prediction intervals.} \item{lower}{A list containing
 #'  lower bounds for prediction intervals for each level. Each element within
 #'  the list will be a multivariate time series with the same dimensional
 #'  characteristics as \code{mean}.} \item{upper}{A list containing upper bounds
 #'   for prediction intervals for each level. Each element within the list will
 #'   be a multivariate time series with the same dimensional characteristics as
-#'   \code{mean}.}
+#'   \code{mean}.} \item{possible_futures}{A list of matrices containing future
+#'   sample paths generated at each cross-validation step.}
 #'
 #' @seealso \code{\link{cb_cvforecast}}
 #'
@@ -932,8 +936,7 @@ bb_cvforecast <- function(object, data,
   # if(NROW(out$res) == length(seq(nfirst, nlast, by = 1))){
   #   row.names(out$res) <- seq(nfirst, nlast, by = 1)
   # }
-  out$modelFit <- modelFit
-  out$possibleFutures <- pFutures
+  out$model_fit <- modelFit
   out$level <- level
   out$lower <- lapply(lower,
                       function(low) leadlagMat(low, 1:h) |>
@@ -941,6 +944,7 @@ bb_cvforecast <- function(object, data,
   out$upper <- lapply(upper,
                       function(up) leadlagMat(up, 1:h) |>
                         window(start = time(up)[nfirst + 1L]))
+  out$possible_futures <- pFutures
 
   return(structure(out, class = "bb_cvforecast"))
 }
@@ -1651,13 +1655,13 @@ possibleFutures_benchmark <- function(object, newdata, bootstraps,
 #' validation set. If \code{window} is not \code{NULL}, a matrix of the rolling
 #' means of interval forecast coverage is also returned.
 #'
-#' @param object An object of class \code{bb_cvforecast}.
+#' @param object An object of class \code{bb_cvforecast} or
+#'   \code{cb_cvforecast}.
 #' @param level Target confidence level for prediction intervals.
 #' @param window If not \code{NULL}, the rolling mean matrix for coverage is
 #'   also returned.
 #' @param na.rm A \code{logical} indicating whether \code{NA} values should be
 #'   stripped before the rolling mean computation proceeds.
-#'
 #' @return A list of class \code{coverage} with the following components:
 #'   \item{mean}{Mean coverage across the validation set.}
 #' \item{ifinn}{A indicator matrix as a multivariate time series, where the
@@ -1684,7 +1688,8 @@ avgCoverage <- function(object, level = 95, window = NULL, na.rm = FALSE) {
 #' width is also returned. If \code{includemedian} is \code{TRUE}, the
 #' information of the median interval width will be returned.
 #'
-#' @param object An object of class  \code{bb_cvforecast}.
+#' @param object An object of class \code{bb_cvforecast} or
+#'   \code{cb_cvforecast}.
 #' @param level Target confidence level for prediction intervals.
 #' @param includemedian If \code{TRUE}, the median interval width will also be
 #'   returned.
@@ -1692,7 +1697,6 @@ avgCoverage <- function(object, level = 95, window = NULL, na.rm = FALSE) {
 #'   applicable) matrix for interval width will also be returned.
 #' @param na.rm A logical indicating whether \code{NA} values should be stripped
 #'   before the rolling mean and rolling median computation proceeds.
-#'
 #' @return A list of class \code{width} with the following components:
 #' \item{width}{Forecast interval width as a multivariate time series, where the
 #'  \eqn{h}th column holds the interval width for the forecast horizon \eqn{h}.
@@ -1725,7 +1729,6 @@ avgWidth <- function(object, level = 95, includemedian = FALSE, window = NULL,
 #' @param x A matrix or multivariate time series.
 #' @param lag A vector of lags (positive values) or leads (negative values) with
 #'   a length equal to the number of columns of \code{x}.
-#'
 #' @return A matrix with the same class and size as \code{x}.
 #'
 #' @examples

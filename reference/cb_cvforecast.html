@@ -205,8 +205,11 @@ which the forecast is produced.</p></dd>
 <dt>error</dt>
 <dd><p>Forecast errors given by \(e_{t+h|t} = y_{t+h} -
   \hat{y}_{t+h|t}\).</p></dd>
+ <dt>res</dt>
+<dd><p>The matrix of in-sample residuals produced in
+cross-validation.</p></dd>
  <dt>level</dt>
-<dd><p>The confidence values associated with the
+<dd><p>The confidence levels associated with the
 prediction intervals.</p></dd>
  <dt>cal_times</dt>
 <dd><p>The number of calibration windows
@@ -229,6 +232,9 @@ multivariate time series with the same dimensional characteristics as
 intervals for each level. Each element within the list will be a
 multivariate time series with the same dimensional characteristics as
 <code>mean</code>.</p></dd>
+ <dt>possible_futures</dt>
+<dd><p>A list of matrices containing future
+sample paths generated at each calibration step.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -301,7 +307,7 @@ multivariate time series with the same dimensional characteristics as
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.2.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
 </div>
 
     </footer></div>

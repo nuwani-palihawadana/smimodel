@@ -198,6 +198,9 @@ The time index corresponds to the period for which the forecast is produced.</p>
 The number of rows corresponds to <code>fit_times</code>, and the row names
 corresponds the time index of the forecast origin of the corresponding
 cross-validation iteration.</p></dd>
+ <dt>model_fit</dt>
+<dd><p>Models fitted in
+cross-validation.</p></dd>
  <dt>level</dt>
 <dd><p>The confidence values
 associated with the prediction intervals.</p></dd>
@@ -211,6 +214,9 @@ characteristics as <code>mean</code>.</p></dd>
 for prediction intervals for each level. Each element within the list will
 be a multivariate time series with the same dimensional characteristics as
 <code>mean</code>.</p></dd>
+ <dt>possible_futures</dt>
+<dd><p>A list of matrices containing future
+sample paths generated at each cross-validation step.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -282,7 +288,7 @@ be a multivariate time series with the same dimensional characteristics as
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.2.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
 </div>
 
     </footer></div>

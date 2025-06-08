@@ -14,6 +14,7 @@ vignette: >
 The *smimodel* package provides functions to estimate **Sparse Multiple Index (SMI) Models** for nonparametric forecasting or prediction. To support time series forecasting, the package functions are mainly build upon tidy temporal data in the `tsibble` format. However, the SMI model formulation is very general and does not exclusively depend on any temporal features. Hence, the model can be used more widely---even with non-temporal cross-sectional data. (In such case, a numeric `index` (instead of a date or time related variable) can be used when constructing the `tsibble`.)
 
 The SMI Modelling algorithm (i.e. the estimation algorithm of SMI model) that we implement here, simultaneously performs automatic predictor selection ("sparse") and predictor grouping, which is especially useful in obtaining a parsimonious model in high-dimensional contexts. 
+
 ## How to use smimodel?
 
 Here we present a simple example to illustrate *smimodel* functionalities. We use randomly simualted data, which we treat as time series data for the purpose of this illustration. 

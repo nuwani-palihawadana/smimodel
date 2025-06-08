@@ -29,6 +29,7 @@ Imports:
     ggplot2,
     gratia,
     gtools,
+    limSolve,
     Matrix,
     methods,
     mgcv, 
@@ -44,7 +45,7 @@ Suggests:
     rmarkdown,
     testthat (>= 3.0.0)
 Remotes:
-  github::nuwani-palihawadana/limSolve,
+  github::karlines/limSolve,
   github::PierreMasselot/cgaim,
   github::xqnwang/conformalForecast
 Roxygen: list(markdown = TRUE)

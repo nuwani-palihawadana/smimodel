@@ -36,8 +36,8 @@ You can install the the development version of smimodel from
 [GitHub](https://github.com/) with:
 
 ``` r
-# install.packages("remotes")
-remotes::install_github("nuwani-palihawadana/smimodel")
+# install.packages("pak")
+pak::pak("nuwani-palihawadana/smimodel")
 ```
 
 ## Other Required Software

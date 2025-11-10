@@ -507,19 +507,18 @@ cb_cvforecast <- function(object, data, yvar, neighbour = 0, predictor.vars,
   out <- list(x = y)
   out$method <- paste("cb_cvforecast")
   out$fit_times <- fit_times
-  out$mean <- leadlagMat(pf, 1:h) |> window(start = time(pf)[nfirst + 1L])
-  out$error <- leadlagMat(err, 1:h) |> window(start = time(err)[nfirst + 1L], end = time(err)[n])
+  out$mean <- lagmatrix(pf, 1:h) |> window(start = time(pf)[nfirst + 1L])
+  out$error <- lagmatrix(err, 1:h) |> window(start = time(err)[nfirst + 1L], end = time(err)[n])
   out$res <- res
-  #out$modelFit <- modelFit
   out$level <- level
   out$cal_times <- cal_times
   out$num_cal <- num_cal
   out$skip_cal <- skip_cal
   out$lower <- lapply(lower,
-                      function(low) leadlagMat(low, 1:h) |>
+                      function(low) lagmatrix(low, 1:h) |>
                         window(start = time(low)[nfirst + 1L]))
   out$upper <- lapply(upper,
-                      function(up) leadlagMat(up, 1:h) |>
+                      function(up) lagmatrix(up, 1:h) |>
                         window(start = time(up)[nfirst + 1L]))
   out$possible_futures <- possiblefutures_list
   
@@ -930,7 +929,7 @@ bb_cvforecast <- function(object, data,
   out <- list(x = y)
   out$method <- paste("bb_cvforecast")
   out$fit_times <- fit_times
-  out$mean <- leadlagMat(pf, 1:h) |> window(start = time(pf)[nfirst + 1L])
+  out$mean <- lagmatrix(pf, 1:h) |> window(start = time(pf)[nfirst + 1L])
   out$res <- res
   # out$res <- res[rowSums(is.na(res)) != ncol(res), ]
   # if(NROW(out$res) == length(seq(nfirst, nlast, by = 1))){
@@ -939,10 +938,10 @@ bb_cvforecast <- function(object, data,
   out$model_fit <- modelFit
   out$level <- level
   out$lower <- lapply(lower,
-                      function(low) leadlagMat(low, 1:h) |>
+                      function(low) lagmatrix(low, 1:h) |>
                         window(start = time(low)[nfirst + 1L]))
   out$upper <- lapply(upper,
-                      function(up) leadlagMat(up, 1:h) |>
+                      function(up) lagmatrix(up, 1:h) |>
                         window(start = time(up)[nfirst + 1L]))
   out$possible_futures <- pFutures
 
@@ -1717,31 +1716,4 @@ avgWidth <- function(object, level = 95, includemedian = FALSE, window = NULL,
                      includemedian = includemedian,
                      window = window, na.rm = na.rm)
   return(output)
-}
-
-
-#' Create lags or leads of a matrix
-#'
-#' This is a wrapper for the function \code{conformalForecast::lagmatrix}.Find a
-#' shifted version of a matrix, adjusting the time base backward (lagged) or
-#' forward (leading) by a specified number of observations for each column.
-#'
-#' @param x A matrix or multivariate time series.
-#' @param lag A vector of lags (positive values) or leads (negative values) with
-#'   a length equal to the number of columns of \code{x}.
-#' @return A matrix with the same class and size as \code{x}.
-#'
-#' @examples
-#' x <- matrix(rnorm(20), nrow = 5, ncol = 4)
-#'
-#' # Create lags of a matrix
-#' leadlagMat(x, c(0, 1, 2, 3))
-#'
-#' # Create leads of a matrix
-#' leadlagMat(x, c(0, -1, -2, -3))
-#'
-#' @export
-leadlagMat <- function(x, lag) {
-  lmat <- lagmatrix(x = x, lag = lag)
-  return(lmat)
 }

@@ -216,6 +216,7 @@ predict.smimodel <- function(object, newdata, exclude.trunc = NULL,
 #' @return A \code{tibble} with forecasts on test set.
 #'
 #' @method predict smimodelFit
+#' 
 #' @export
 predict.smimodelFit <- function(object, newdata, exclude.trunc = NULL, 
                                 recursive = FALSE,

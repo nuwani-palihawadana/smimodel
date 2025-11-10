@@ -74,7 +74,6 @@ reference:
   - forecast.gaimFit
   - forecast.pprFit
   - forecast.gamFit
-  - leadlagMat
 - title: Other non-user-facing functions
   desc: |
     Other internal functions that are not exported.

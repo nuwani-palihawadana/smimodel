@@ -10,11 +10,11 @@ test_that("tests for model_smimodel()", {
     tidyr::unpack(x_lag, names_sep = "_") %>%
     mutate(
       # Response variable
-      y1 = (0.9*x_lag_000 + 0.6*x_lag_001 + 0.45*x_lag_003)^3 + rnorm(n, sd = 0.1),
+      y = (0.9*x_lag_000 + 0.6*x_lag_001 + 0.45*x_lag_003)^3 + rnorm(n, sd = 0.1),
       # Add an index to the data set
       inddd = seq(1, n)) %>%
     tidyr::drop_na() %>%
-    select(inddd, y1, starts_with("x_lag")) %>%
+    select(inddd, y, starts_with("x_lag")) %>%
     # Make the data set a `tsibble`
     tsibble::as_tsibble(index = inddd)
   # Predictor variables
@@ -23,7 +23,7 @@ test_that("tests for model_smimodel()", {
   linear.vars = "x_lag_005"
   output1 <- sim_data %>%
     model_smimodel(
-      yvar = "y1",
+      yvar = "y",
       index.vars = index.vars,
       initialise = "additive",
       s.vars = s.vars,

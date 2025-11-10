@@ -76,11 +76,11 @@ sim_data <- tibble(x_lag_000 = runif(n)) |>
   unpack(x_lag, names_sep = "_") |>
   mutate(
     # Response variable
-    y1 = (0.9*x_lag_000 + 0.6*x_lag_001 + 0.45*x_lag_003)^3 + rnorm(n, sd = 0.1),
+    y = (0.9*x_lag_000 + 0.6*x_lag_001 + 0.45*x_lag_003)^3 + rnorm(n, sd = 0.1),
     # Add an index to the data set
     inddd = seq(1, n)) |>
   drop_na() |>
-  select(inddd, y1, starts_with("x_lag")) |>
+  select(inddd, y, starts_with("x_lag")) |>
   # Make the data set a `tsibble`
   as_tsibble(index = inddd)
 
@@ -92,7 +92,7 @@ linear.vars <- colnames(sim_data)[7:8]
 
 # Model fitting
 gamModel <- model_gam(data = sim_data,
-                      yvar = "y1",
+                      yvar = "y",
                       s.vars = s.vars,
                       linear.vars = linear.vars)
 

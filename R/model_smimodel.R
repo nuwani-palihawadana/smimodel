@@ -129,11 +129,11 @@
 #'   unpack(x_lag, names_sep = "_") |>
 #'   mutate(
 #'     # Response variable
-#'     y1 = (0.9*x_lag_000 + 0.6*x_lag_001 + 0.45*x_lag_003)^3 + rnorm(n, sd = 0.1),
+#'     y = (0.9*x_lag_000 + 0.6*x_lag_001 + 0.45*x_lag_003)^3 + rnorm(n, sd = 0.1),
 #'     # Add an index to the data set
 #'     inddd = seq(1, n)) |>
 #'   drop_na() |>
-#'   select(inddd, y1, starts_with("x_lag")) |>
+#'   select(inddd, y, starts_with("x_lag")) |>
 #'   # Make the data set a `tsibble`
 #'   as_tsibble(index = inddd)
 #'
@@ -142,7 +142,7 @@
 #'
 #' # Model fitting
 #' smimodel_ppr <- model_smimodel(data = sim_data,
-#'                                yvar = "y1",
+#'                                yvar = "y",
 #'                                index.vars = index.vars,
 #'                                initialise = "ppr")
 #'
@@ -1424,11 +1424,6 @@ update_alpha <- function(Y, X, num_pred, num_ind, index.ind, dgz, alpha_old,
                      verbose = verbose)
     }
   )
-  # sol <- ROI::ROI_solve(init, solver = "gurobi", 
-  #                       TimeLimit = TimeLimit, 
-  #                       MIPGap = MIPGap, 
-  #                       NonConvex = NonConvex, 
-  #                       verbose = verbose)
   # Binary variables check
   coefs <- sol$solution[1:(num_ind*num_pred)]
   indicators <- sol$solution[((num_ind*num_pred)+1):(num_ind*num_pred*2)]

@@ -4,11 +4,11 @@
 \name{smimodel-package}
 \alias{smimodel}
 \alias{smimodel-package}
-\title{smimodel: Sparse Multiple Index (SMI) Models for High-dimensional Nonparametric Forecasting}
+\title{smimodel: Sparse Multiple Index (SMI) Models for Nonparametric Forecasting and Prediction}
 \description{
 \if{html}{\figure{logo.png}{options: style='float: right' alt='logo' width='120'}}
 
-A general algorithm for estimating Sparse Multiple Index Models for high-dimensional nonparametric forecasting.
+Implements a general algorithm for estimating Sparse Multiple Index (SMI) models for nonparametric forecasting and prediction. Includes functions for fitting nonparametric additive models with backward elimination, group-wise additive index models, and projection pursuit regression models as benchmark comparison methods. Provides tools for generating prediction intervals to quantify uncertainty in point forecasts produced by the SMI model and benchmark models, using either the classical Block Bootstrap method or a novel Conformal Bootstrap approach that integrates block bootstrap with split conformal prediction through an online updating procedure.
 }
 \seealso{
 Useful links:
@@ -20,11 +20,11 @@ Useful links:
 
 }
 \author{
-\strong{Maintainer}: Nuwani Palihawadana \email{Nuwani.KodikaraPalihawadana@monash.edu} (\href{https://orcid.org/0009-0008-6395-7797}{ORCID})
+\strong{Maintainer}: Nuwani Palihawadana \email{Nuwani.KodikaraPalihawadana@monash.edu} (\href{https://orcid.org/0009-0008-6395-7797}{ORCID}) [copyright holder]
 
 Other contributors:
 \itemize{
-  \item Xiaoqian Wang \email{Xiaoqian.Wang@monash.edu} (\href{https://orcid.org/0000-0003-4827-496X}{ORCID}) [contributor]
+  \item Xiaoqian Wang \email{Xiaoqian.Wang@amss.ac.cn} (\href{https://orcid.org/0000-0003-4827-496X}{ORCID}) [contributor]
 }
 
 }

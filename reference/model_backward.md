@@ -185,11 +185,11 @@ sim_data <- tibble(x_lag_000 = runif(n)) |>
   unpack(x_lag, names_sep = "_") |>
   mutate(
     # Response variable
-    y1 = (0.9*x_lag_000 + 0.6*x_lag_001 + 0.45*x_lag_003)^3 + rnorm(n, sd = 0.1),
+    y = (0.9*x_lag_000 + 0.6*x_lag_001 + 0.45*x_lag_003)^3 + rnorm(n, sd = 0.1),
     # Add an index to the data set
     inddd = seq(1, n)) |>
   drop_na() |>
-  select(inddd, y1, starts_with("x_lag")) |>
+  select(inddd, y, starts_with("x_lag")) |>
   # Make the data set a `tsibble`
   as_tsibble(index = inddd)
 
@@ -204,7 +204,7 @@ s.vars <- colnames(sim_data)[3:8]
 # Model fitting
 backwardModel <- model_backward(data = sim_train,
                                 val.data = sim_val,
-                                yvar = "y1",
+                                yvar = "y",
                                 s.vars = s.vars)
 #> [1] "Model 1 fitted!"
 # Fitted model
@@ -214,7 +214,7 @@ backwardModel$fit[[1]]
 #> Link function: identity 
 #> 
 #> Formula:
-#> y1 ~ +s(x_lag_000, bs = "cr") + s(x_lag_001, bs = "cr") + s(x_lag_002, 
+#> y ~ +s(x_lag_000, bs = "cr") + s(x_lag_001, bs = "cr") + s(x_lag_002, 
 #>     bs = "cr") + s(x_lag_003, bs = "cr") + s(x_lag_005, bs = "cr")
 #> 
 #> Estimated degrees of freedom:

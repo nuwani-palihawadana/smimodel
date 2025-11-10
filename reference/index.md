@@ -101,8 +101,8 @@ Obtain residuals and fitted values of the fitted models.
 
 Calculate point estimate accuracy measures.
 
-- [`MSE()`](https://nuwani-palihawadana.github.io/smimodel/reference/point_measures.md)
-  [`MAE()`](https://nuwani-palihawadana.github.io/smimodel/reference/point_measures.md)
+- [`MAE()`](https://nuwani-palihawadana.github.io/smimodel/reference/point_measures.md)
+  [`MSE()`](https://nuwani-palihawadana.github.io/smimodel/reference/point_measures.md)
   [`point_measures`](https://nuwani-palihawadana.github.io/smimodel/reference/point_measures.md)
   : Point estimate accuracy measures
 
@@ -179,9 +179,6 @@ Other exported functions that can be called by users.
 
 - [`forecast(`*`<gamFit>`*`)`](https://nuwani-palihawadana.github.io/smimodel/reference/forecast.gamFit.md)
   : Forecasting using GAMs
-
-- [`leadlagMat()`](https://nuwani-palihawadana.github.io/smimodel/reference/leadlagMat.md)
-  : Create lags or leads of a matrix
 
 ## Other non-user-facing functions
 

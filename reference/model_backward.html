@@ -220,11 +220,11 @@ on a Semi-Parametric Additive Model. <em>IEEE Transactions on Power Systems</em>
 <span class="r-in"><span>  <span class="fu"><a href="https://tidyr.tidyverse.org/reference/pack.html" class="external-link">unpack</a></span><span class="op">(</span><span class="va">x_lag</span>, names_sep <span class="op">=</span> <span class="st">"_"</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>    <span class="co"># Response variable</span></span></span>
-<span class="r-in"><span>    y1 <span class="op">=</span> <span class="op">(</span><span class="fl">0.9</span><span class="op">*</span><span class="va">x_lag_000</span> <span class="op">+</span> <span class="fl">0.6</span><span class="op">*</span><span class="va">x_lag_001</span> <span class="op">+</span> <span class="fl">0.45</span><span class="op">*</span><span class="va">x_lag_003</span><span class="op">)</span><span class="op">^</span><span class="fl">3</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n</span>, sd <span class="op">=</span> <span class="fl">0.1</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    y <span class="op">=</span> <span class="op">(</span><span class="fl">0.9</span><span class="op">*</span><span class="va">x_lag_000</span> <span class="op">+</span> <span class="fl">0.6</span><span class="op">*</span><span class="va">x_lag_001</span> <span class="op">+</span> <span class="fl">0.45</span><span class="op">*</span><span class="va">x_lag_003</span><span class="op">)</span><span class="op">^</span><span class="fl">3</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n</span>, sd <span class="op">=</span> <span class="fl">0.1</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>    <span class="co"># Add an index to the data set</span></span></span>
 <span class="r-in"><span>    inddd <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">1</span>, <span class="va">n</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="https://tidyr.tidyverse.org/reference/drop_na.html" class="external-link">drop_na</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
-<span class="r-in"><span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">inddd</span>, <span class="va">y1</span>, <span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">starts_with</a></span><span class="op">(</span><span class="st">"x_lag"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">inddd</span>, <span class="va">y</span>, <span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">starts_with</a></span><span class="op">(</span><span class="st">"x_lag"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="co"># Make the data set a `tsibble`</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="https://tsibble.tidyverts.org/reference/as-tsibble.html" class="external-link">as_tsibble</a></span><span class="op">(</span>index <span class="op">=</span> <span class="va">inddd</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
@@ -239,7 +239,7 @@ on a Semi-Parametric Additive Model. <em>IEEE Transactions on Power Systems</em>
 <span class="r-in"><span><span class="co"># Model fitting</span></span></span>
 <span class="r-in"><span><span class="va">backwardModel</span> <span class="op">&lt;-</span> <span class="fu">model_backward</span><span class="op">(</span>data <span class="op">=</span> <span class="va">sim_train</span>,</span></span>
 <span class="r-in"><span>                                val.data <span class="op">=</span> <span class="va">sim_val</span>,</span></span>
-<span class="r-in"><span>                                yvar <span class="op">=</span> <span class="st">"y1"</span>,</span></span>
+<span class="r-in"><span>                                yvar <span class="op">=</span> <span class="st">"y"</span>,</span></span>
 <span class="r-in"><span>                                s.vars <span class="op">=</span> <span class="va">s.vars</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Model 1 fitted!"</span>
 <span class="r-in"><span><span class="co"># Fitted model</span></span></span>
@@ -249,7 +249,7 @@ on a Semi-Parametric Additive Model. <em>IEEE Transactions on Power Systems</em>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Link function: identity </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Formula:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> y1 ~ +s(x_lag_000, bs = "cr") + s(x_lag_001, bs = "cr") + s(x_lag_002, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> y ~ +s(x_lag_000, bs = "cr") + s(x_lag_001, bs = "cr") + s(x_lag_002, </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     bs = "cr") + s(x_lag_003, bs = "cr") + s(x_lag_005, bs = "cr")</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Estimated degrees of freedom:</span>

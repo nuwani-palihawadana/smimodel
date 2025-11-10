@@ -129,11 +129,11 @@ sim_data <- tibble(x_lag_000 = runif(n)) |>
   unpack(x_lag, names_sep = "_") |>
   mutate(
     # Response variable
-    y1 = (0.9*x_lag_000 + 0.6*x_lag_001 + 0.45*x_lag_003)^3 + rnorm(n, sd = 0.1),
+    y = (0.9*x_lag_000 + 0.6*x_lag_001 + 0.45*x_lag_003)^3 + rnorm(n, sd = 0.1),
     # Add an index to the data set
     inddd = seq(1, n)) |>
   drop_na() |>
-  select(inddd, y1, starts_with("x_lag")) |>
+  select(inddd, y, starts_with("x_lag")) |>
   # Make the data set a `tsibble`
   as_tsibble(index = inddd)
 
@@ -148,7 +148,7 @@ s.vars = "x_lag_005"
 
 # Model fitting
 gaimModel <- model_gaim(data = sim_data,
-                        yvar = "y1",
+                        yvar = "y",
                         index.vars = index.vars,
                         index.ind = index.ind,
                         s.vars = s.vars)
@@ -156,7 +156,7 @@ gaimModel <- model_gaim(data = sim_data,
 # Fitted model
 gaimModel$fit[[1]]
 #> Formula:
-#> y1 ~ g(x_lag_000, x_lag_001, x_lag_002) + g(x_lag_003, x_lag_004) + 
+#> y ~ g(x_lag_000, x_lag_001, x_lag_002) + g(x_lag_003, x_lag_004) + 
 #>     s(x_lag_005)
 #> 
 #> Coefficients:

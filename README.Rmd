@@ -29,7 +29,13 @@ Furthermore, the smimodel package provides functions to generate prediction inte
 
 ## Installation
 
-You can install the the development version of smimodel from [GitHub](https://github.com/) with:
+You can install the released version of smimodel from CRAN:
+
+``` r
+install.packages("smimodel")
+```
+
+You can install the the development version of smimodel from [GitHub](https://github.com/):
 
 ``` r
 # install.packages("pak")

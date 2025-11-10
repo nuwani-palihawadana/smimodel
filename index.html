@@ -72,8 +72,11 @@
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
-<p>You can install the the development version of smimodel from <a href="https://github.com/" class="external-link">GitHub</a> with:</p>
+<p>You can install the released version of smimodel from CRAN:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"smimodel"</span><span class="op">)</span></span></code></pre></div>
+<p>You can install the the development version of smimodel from <a href="https://github.com/" class="external-link">GitHub</a>:</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># install.packages("pak")</span></span>
 <span><span class="fu">pak</span><span class="fu">::</span><span class="fu"><a href="https://pak.r-lib.org/reference/pak.html" class="external-link">pak</a></span><span class="op">(</span><span class="st">"nuwani-palihawadana/smimodel"</span><span class="op">)</span></span></code></pre></div>
 </div>
@@ -107,7 +110,7 @@
 <h2 id="example">Example<a class="anchor" aria-label="anchor" href="#example"></a>
 </h2>
 <p>This is a basic example, which shows you how to estimate a SMI model, and obtain predictions on a test set:</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/nuwani-palihawadana/smimodel" class="external-link">smimodel</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://roi.r-forge.r-project.org/" class="external-link">ROI</a></span><span class="op">)</span></span>
@@ -140,7 +143,7 @@
 <span></span>
 <span><span class="co"># Index variables</span></span>
 <span><span class="va">index.vars</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">sim_data</span><span class="op">)</span><span class="op">[</span><span class="fl">3</span><span class="op">:</span><span class="fl">8</span><span class="op">]</span></span></code></pre></div>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Estimate SMI model (with "PPR" initialisation)</span></span>
 <span><span class="va">smimodel_ppr</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/model_smimodel.html">model_smimodel</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">sim_train</span>,</span>
 <span>                               yvar <span class="op">=</span> <span class="st">"y1"</span>,</span>
@@ -149,11 +152,11 @@
 <span></span>
 <span><span class="co"># Fitted SMI model</span></span>
 <span><span class="va">smimodel_ppr</span><span class="op">$</span><span class="va">fit</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">best</span></span></code></pre></div>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Plot estimated smooths</span></span>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span>object <span class="op">=</span> <span class="va">smimodel_ppr</span><span class="op">)</span></span></code></pre></div>
 <p><img src="reference/figures/README-unnamed-chunk-3-1.png" width="100%"></p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="co"># Obtain residuals and fitted values</span></span>
 <span><span class="fu"><a href="https://generics.r-lib.org/reference/augment.html" class="external-link">augment</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">smimodel_ppr</span><span class="op">)</span></span>
@@ -171,7 +174,7 @@
 <span><span class="co">#&gt;  9    14 -0.0464   2.46 </span></span>
 <span><span class="co">#&gt; 10    15  0.0243   0.261</span></span>
 <span><span class="co">#&gt; # ℹ 990 more rows</span></span></code></pre></div>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Obtain predictions on the test set</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span>object <span class="op">=</span> <span class="va">smimodel_ppr</span>, newdata <span class="op">=</span> <span class="va">sim_test</span><span class="op">)</span><span class="op">$</span><span class="va">.predict</span></span></code></pre></div>
 </div>

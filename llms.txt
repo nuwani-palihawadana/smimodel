@@ -26,8 +26,14 @@ online updating procedure as introduced by Wang and Hyndman (2024)
 
 ## Installation
 
+You can install the released version of smimodel from CRAN:
+
+``` r
+install.packages("smimodel")
+```
+
 You can install the the development version of smimodel from
-[GitHub](https://github.com/) with:
+[GitHub](https://github.com/):
 
 ``` r
 # install.packages("pak")

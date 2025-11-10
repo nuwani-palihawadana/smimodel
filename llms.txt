@@ -479,8 +479,7 @@ Package information.
 
 - [`smimodel`](https://nuwani-palihawadana.github.io/smimodel/reference/smimodel-package.md)
   [`smimodel-package`](https://nuwani-palihawadana.github.io/smimodel/reference/smimodel-package.md)
-  : smimodel: Sparse Multiple Index (SMI) Models for Nonparametric
-  Forecasting and Prediction
+  : smimodel: Sparse Multiple Index Models for Nonparametric Forecasting
 
 # Articles
 

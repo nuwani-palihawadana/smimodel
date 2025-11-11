@@ -684,7 +684,6 @@ predict.gaimFit <- function(object, newdata, exclude.trunc = NULL,
     # Recursive forecasting
     predictions =  vector(mode = "list", length = NROW(newdata))
     for(m in 1:(NROW(newdata) - 1)){
-      #print(paste0("This is newdata", m))
       data_temp = newdata[m, ]
       key22 = data_temp[ , {{ key_n }}][[1]]
       key22_pos = which(object$key == key22)

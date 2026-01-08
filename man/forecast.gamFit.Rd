@@ -47,3 +47,47 @@ model.} \item{fitted}{Fitted values (one-step forecasts).}
 \description{
 Returns forecasts and other information for GAMs.
 }
+\examples{
+library(dplyr)
+library(tibble)
+library(tidyr)
+library(tsibble)
+
+# Simulate data
+n = 1015
+set.seed(123)
+sim_data <- tibble(x_lag_000 = runif(n)) |>
+  mutate(
+    # Add x_lags
+    x_lag = lag_matrix(x_lag_000, 5)) |>
+  unpack(x_lag, names_sep = "_") |>
+  mutate(
+    # Response variable
+    y = (0.9*x_lag_000 + 0.6*x_lag_001 + 0.45*x_lag_003)^3 + rnorm(n, sd = 0.1),
+    # Add an index to the data set
+    inddd = seq(1, n)) |>
+  drop_na() |>
+  select(inddd, y, starts_with("x_lag")) |>
+  # Make the data set a `tsibble`
+  as_tsibble(index = inddd)
+  
+# Training set
+sim_train <- sim_data[1:1000, ]
+# Test set
+sim_test <- sim_data[1001:1010, ]
+
+# Predictors taken as non-linear variables
+s.vars <- colnames(sim_data)[3:6]
+
+# Predictors taken as linear variables
+linear.vars <- colnames(sim_data)[7:8]
+
+# Model fitting
+gamModel <- model_gam(data = sim_train,
+                      yvar = "y",
+                      s.vars = s.vars,
+                      linear.vars = linear.vars)
+
+forecast(gamModel, newdata = sim_test)
+
+}

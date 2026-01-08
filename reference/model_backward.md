@@ -169,11 +169,6 @@ library(dplyr)
 library(tibble)
 library(tidyr)
 library(tsibble)
-#> 
-#> Attaching package: ‘tsibble’
-#> The following objects are masked from ‘package:base’:
-#> 
-#>     intersect, setdiff, union
 
 # Simulate data
 n = 1205

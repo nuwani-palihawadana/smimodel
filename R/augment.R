@@ -7,6 +7,45 @@
 #' @return A \code{tibble}.
 #'
 #' @method augment smimodel
+#' 
+#' @examples
+#' \dontrun{
+#' library(dplyr)
+#' library(ROI)
+#' library(tibble)
+#' library(tidyr)
+#' library(tsibble)
+#'
+#' # Simulate data
+#' n = 1005
+#' set.seed(123)
+#' sim_data <- tibble(x_lag_000 = runif(n)) |>
+#'   mutate(
+#'     # Add x_lags
+#'     x_lag = lag_matrix(x_lag_000, 5)) |>
+#'   unpack(x_lag, names_sep = "_") |>
+#'   mutate(
+#'     # Response variable
+#'     y = (0.9*x_lag_000 + 0.6*x_lag_001 + 0.45*x_lag_003)^3 + rnorm(n, sd = 0.1),
+#'     # Add an index to the data set
+#'     inddd = seq(1, n)) |>
+#'   drop_na() |>
+#'   select(inddd, y, starts_with("x_lag")) |>
+#'   # Make the data set a `tsibble`
+#'   as_tsibble(index = inddd)
+#'
+#' # Index variables
+#' index.vars <- colnames(sim_data)[3:8]
+#'
+#' # Model fitting
+#' smimodel_ppr <- model_smimodel(data = sim_data,
+#'                                yvar = "y",
+#'                                index.vars = index.vars,
+#'                                initialise = "ppr")
+#'
+#' # Obtain residuals and fitted values
+#' augment(smimodel_ppr)
+#' }
 #'
 #' @export
 augment.smimodel <- function(x, ...) {
@@ -65,6 +104,46 @@ augment.smimodelFit <- function(x, ...) {
 #' @return A \code{tibble}.
 #'
 #' @method augment backward
+#' 
+#' @examples
+#' library(dplyr)
+#' library(tibble)
+#' library(tidyr)
+#' library(tsibble)
+#'
+#' # Simulate data
+#' n = 1205
+#' set.seed(123)
+#' sim_data <- tibble(x_lag_000 = runif(n)) |>
+#'   mutate(
+#'     # Add x_lags
+#'     x_lag = lag_matrix(x_lag_000, 5)) |>
+#'   unpack(x_lag, names_sep = "_") |>
+#'   mutate(
+#'     # Response variable
+#'     y = (0.9*x_lag_000 + 0.6*x_lag_001 + 0.45*x_lag_003)^3 + rnorm(n, sd = 0.1),
+#'     # Add an index to the data set
+#'     inddd = seq(1, n)) |>
+#'   drop_na() |>
+#'   select(inddd, y, starts_with("x_lag")) |>
+#'   # Make the data set a `tsibble`
+#'   as_tsibble(index = inddd)
+#'
+#' # Training set
+#' sim_train <- sim_data[1:1000, ]
+#' # Validation set
+#' sim_val <- sim_data[1001:1200, ]
+#'
+#' # Predictors taken as non-linear variables
+#' s.vars <- colnames(sim_data)[3:8]
+#'
+#' # Model fitting
+#' backwardModel <- model_backward(data = sim_train,
+#'                                 val.data = sim_val,
+#'                                 yvar = "y",
+#'                                 s.vars = s.vars)
+#' # Obtain residuals and fitted values
+#' augment(backwardModel)
 #'
 #' @export
 augment.backward <- function(x, ...) {
@@ -102,6 +181,41 @@ augment.backward <- function(x, ...) {
 #' @return A \code{tibble}.
 #'
 #' @method augment pprFit
+#' 
+#' @examples
+#' library(dplyr)
+#' library(tibble)
+#' library(tidyr)
+#' library(tsibble)
+#'
+#' # Simulate data
+#' n = 1005
+#' set.seed(123)
+#' sim_data <- tibble(x_lag_000 = runif(n)) |>
+#'   mutate(
+#'     # Add x_lags
+#'     x_lag = lag_matrix(x_lag_000, 5)) |>
+#'   unpack(x_lag, names_sep = "_") |>
+#'   mutate(
+#'     # Response variable
+#'     y = (0.9*x_lag_000 + 0.6*x_lag_001 + 0.45*x_lag_003)^3 + rnorm(n, sd = 0.1),
+#'     # Add an index to the data set
+#'     inddd = seq(1, n)) |>
+#'   drop_na() |>
+#'   select(inddd, y, starts_with("x_lag")) |>
+#'   # Make the data set a `tsibble`
+#'   as_tsibble(index = inddd)
+#'
+#' # Index variables
+#' index.vars <- colnames(sim_data)[3:8]
+#'
+#' # Model fitting
+#' pprModel <- model_ppr(data = sim_data,
+#'                       yvar = "y",
+#'                       index.vars = index.vars)
+#'
+#' # Obtain residuals and fitted values
+#' augment(pprModel)
 #'
 #' @export
 augment.pprFit <- function(x, ...) {
@@ -139,6 +253,48 @@ augment.pprFit <- function(x, ...) {
 #' @return A \code{tibble}.
 #'
 #' @method augment gaimFit
+#' 
+#' @examples
+#' library(dplyr)
+#' library(tibble)
+#' library(tidyr)
+#' library(tsibble)
+#'
+#' # Simulate data
+#' n = 1005
+#' set.seed(123)
+#' sim_data <- tibble(x_lag_000 = runif(n)) |>
+#'   mutate(
+#'     # Add x_lags
+#'     x_lag = lag_matrix(x_lag_000, 5)) |>
+#'   unpack(x_lag, names_sep = "_") |>
+#'   mutate(
+#'     # Response variable
+#'     y = (0.9*x_lag_000 + 0.6*x_lag_001 + 0.45*x_lag_003)^3 + rnorm(n, sd = 0.1),
+#'     # Add an index to the data set
+#'     inddd = seq(1, n)) |>
+#'   drop_na() |>
+#'   select(inddd, y, starts_with("x_lag")) |>
+#'   # Make the data set a `tsibble`
+#'   as_tsibble(index = inddd)
+#'
+#' # Predictors taken as index variables
+#' index.vars <- colnames(sim_data)[3:7]
+#'
+#' # Assign group indices for each predictor
+#' index.ind = c(rep(1, 3), rep(2, 2))
+#'
+#' # Predictors taken as non-linear variables not entering indices
+#' s.vars = "x_lag_005"
+#'
+#' # Model fitting
+#' gaimModel <- model_gaim(data = sim_data,
+#'                         yvar = "y",
+#'                         index.vars = index.vars,
+#'                         index.ind = index.ind,
+#'                         s.vars = s.vars)
+#' # Obtain residuals and fitted values
+#' augment(gaimModel)
 #'
 #' @export
 augment.gaimFit <- function(x, ...) {
@@ -176,6 +332,40 @@ augment.gaimFit <- function(x, ...) {
 #' @return A \code{tibble}.
 #'
 #' @method augment lmFit
+#' 
+#' @examples
+#' library(dplyr)
+#' library(tibble)
+#' library(tidyr)
+#' library(tsibble)
+#'
+#' # Simulate data
+#' n = 1005
+#' set.seed(123)
+#' sim_data <- tibble(x_lag_000 = runif(n)) |>
+#'   mutate(
+#'     # Add x_lags
+#'     x_lag = lag_matrix(x_lag_000, 5)) |>
+#'   unpack(x_lag, names_sep = "_") |>
+#'   mutate(
+#'     # Response variable
+#'     y = (0.9*x_lag_000 + 0.6*x_lag_001 + 0.45*x_lag_003)^3 + rnorm(n, sd = 0.1),
+#'     # Add an index to the data set
+#'     inddd = seq(1, n)) |>
+#'   drop_na() |>
+#'   select(inddd, y, starts_with("x_lag")) |>
+#'   # Make the data set a `tsibble`
+#'   as_tsibble(index = inddd)
+#'
+#' # Predictor variables
+#' linear.vars <- colnames(sim_data)[3:8]
+#'
+#' # Model fitting
+#' lmModel <- model_lm(data = sim_data,
+#'                     yvar = "y",
+#'                     linear.vars = linear.vars)
+#' # Obtain residuals and fitted values
+#' augment(lmModel)
 #'
 #' @export
 augment.lmFit <- function(x, ...) {
@@ -213,6 +403,45 @@ augment.lmFit <- function(x, ...) {
 #' @return A \code{tibble}.
 #'
 #' @method augment gamFit
+#' 
+#' @examples
+#' library(dplyr)
+#' library(tibble)
+#' library(tidyr)
+#' library(tsibble)
+#'
+#' # Simulate data
+#' n = 1005
+#' set.seed(123)
+#' sim_data <- tibble(x_lag_000 = runif(n)) |>
+#'   mutate(
+#'     # Add x_lags
+#'     x_lag = lag_matrix(x_lag_000, 5)) |>
+#'   unpack(x_lag, names_sep = "_") |>
+#'   mutate(
+#'     # Response variable
+#'     y = (0.9*x_lag_000 + 0.6*x_lag_001 + 0.45*x_lag_003)^3 + rnorm(n, sd = 0.1),
+#'     # Add an index to the data set
+#'     inddd = seq(1, n)) |>
+#'   drop_na() |>
+#'   select(inddd, y, starts_with("x_lag")) |>
+#'   # Make the data set a `tsibble`
+#'   as_tsibble(index = inddd)
+#'
+#' # Predictors taken as non-linear variables
+#' s.vars <- colnames(sim_data)[3:6]
+#'
+#' # Predictors taken as linear variables
+#' linear.vars <- colnames(sim_data)[7:8]
+#'
+#' # Model fitting
+#' gamModel <- model_gam(data = sim_data,
+#'                       yvar = "y",
+#'                       s.vars = s.vars,
+#'                       linear.vars = linear.vars)
+#'
+#' # Obtain residuals and fitted values
+#' augment(gamModel)
 #'
 #' @export
 augment.gamFit <- function(x, ...) {

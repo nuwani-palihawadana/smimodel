@@ -17,3 +17,44 @@ A \code{tibble}.
 \description{
 Generates residuals and fitted values of a fitted \code{backward} object.
 }
+\examples{
+library(dplyr)
+library(tibble)
+library(tidyr)
+library(tsibble)
+
+# Simulate data
+n = 1205
+set.seed(123)
+sim_data <- tibble(x_lag_000 = runif(n)) |>
+  mutate(
+    # Add x_lags
+    x_lag = lag_matrix(x_lag_000, 5)) |>
+  unpack(x_lag, names_sep = "_") |>
+  mutate(
+    # Response variable
+    y = (0.9*x_lag_000 + 0.6*x_lag_001 + 0.45*x_lag_003)^3 + rnorm(n, sd = 0.1),
+    # Add an index to the data set
+    inddd = seq(1, n)) |>
+  drop_na() |>
+  select(inddd, y, starts_with("x_lag")) |>
+  # Make the data set a `tsibble`
+  as_tsibble(index = inddd)
+
+# Training set
+sim_train <- sim_data[1:1000, ]
+# Validation set
+sim_val <- sim_data[1001:1200, ]
+
+# Predictors taken as non-linear variables
+s.vars <- colnames(sim_data)[3:8]
+
+# Model fitting
+backwardModel <- model_backward(data = sim_train,
+                                val.data = sim_val,
+                                yvar = "y",
+                                s.vars = s.vars)
+# Obtain residuals and fitted values
+augment(backwardModel)
+
+}

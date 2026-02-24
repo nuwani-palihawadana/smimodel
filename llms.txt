@@ -276,10 +276,6 @@ Obtain residuals and fitted values of the fitted models.
 
   Obtaining forecasts on a test set from a fitted `lmFit`
 
-- [`predict(`*`<cgaim>`*`)`](https://nuwani-palihawadana.github.io/smimodel/reference/predict.cgaim.md)
-  : Predictions from a fitted CGAIM object - copied from
-  cgaim:::predict.cgaim() and modified
-
 ## Point estimate accuracy measures
 
 Calculate point estimate accuracy measures.

@@ -42,7 +42,6 @@ reference:
   - predict.pprFit
   - predict.gamFit
   - predict.lmFit
-  - predict.cgaim
 - title: Point estimate accuracy measures
   desc: |
     Calculate point estimate accuracy measures.

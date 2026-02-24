@@ -98,6 +98,66 @@ if some of the intermediate lags are not used as predictors.</p></dd>
     <p>A <code>tsibble</code> with forecasts on test set.</p>
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tibble.tidyverse.org/" class="external-link">tibble</a></span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyr.tidyverse.org" class="external-link">tidyr</a></span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tsibble.tidyverts.org" class="external-link">tsibble</a></span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Simulate data</span></span></span>
+<span class="r-in"><span><span class="va">n</span> <span class="op">=</span> <span class="fl">1215</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">sim_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span>x_lag_000 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html" class="external-link">runif</a></span><span class="op">(</span><span class="va">n</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>    <span class="co"># Add x_lags</span></span></span>
+<span class="r-in"><span>    x_lag <span class="op">=</span> <span class="fu"><a href="lag_matrix.html">lag_matrix</a></span><span class="op">(</span><span class="va">x_lag_000</span>, <span class="fl">5</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://tidyr.tidyverse.org/reference/pack.html" class="external-link">unpack</a></span><span class="op">(</span><span class="va">x_lag</span>, names_sep <span class="op">=</span> <span class="st">"_"</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>    <span class="co"># Response variable</span></span></span>
+<span class="r-in"><span>    y <span class="op">=</span> <span class="op">(</span><span class="fl">0.9</span><span class="op">*</span><span class="va">x_lag_000</span> <span class="op">+</span> <span class="fl">0.6</span><span class="op">*</span><span class="va">x_lag_001</span> <span class="op">+</span> <span class="fl">0.45</span><span class="op">*</span><span class="va">x_lag_003</span><span class="op">)</span><span class="op">^</span><span class="fl">3</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n</span>, sd <span class="op">=</span> <span class="fl">0.1</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    <span class="co"># Add an index to the data set</span></span></span>
+<span class="r-in"><span>    inddd <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">1</span>, <span class="va">n</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://tidyr.tidyverse.org/reference/drop_na.html" class="external-link">drop_na</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">inddd</span>, <span class="va">y</span>, <span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">starts_with</a></span><span class="op">(</span><span class="st">"x_lag"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>  <span class="co"># Make the data set a `tsibble`</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://tsibble.tidyverts.org/reference/as-tsibble.html" class="external-link">as_tsibble</a></span><span class="op">(</span>index <span class="op">=</span> <span class="va">inddd</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Training set</span></span></span>
+<span class="r-in"><span><span class="va">sim_train</span> <span class="op">&lt;-</span> <span class="va">sim_data</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">1000</span>, <span class="op">]</span></span></span>
+<span class="r-in"><span><span class="co"># Validation set</span></span></span>
+<span class="r-in"><span><span class="va">sim_val</span> <span class="op">&lt;-</span> <span class="va">sim_data</span><span class="op">[</span><span class="fl">1001</span><span class="op">:</span><span class="fl">1200</span>, <span class="op">]</span></span></span>
+<span class="r-in"><span><span class="co"># Test set</span></span></span>
+<span class="r-in"><span><span class="va">sim_test</span> <span class="op">&lt;-</span> <span class="va">sim_data</span><span class="op">[</span><span class="fl">1201</span><span class="op">:</span><span class="fl">1210</span>, <span class="op">]</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Predictors taken as non-linear variables</span></span></span>
+<span class="r-in"><span><span class="va">s.vars</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">sim_data</span><span class="op">)</span><span class="op">[</span><span class="fl">3</span><span class="op">:</span><span class="fl">8</span><span class="op">]</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Model fitting</span></span></span>
+<span class="r-in"><span><span class="va">backwardModel</span> <span class="op">&lt;-</span> <span class="fu"><a href="model_backward.html">model_backward</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">sim_train</span>,</span></span>
+<span class="r-in"><span>                                val.data <span class="op">=</span> <span class="va">sim_val</span>,</span></span>
+<span class="r-in"><span>                                yvar <span class="op">=</span> <span class="st">"y"</span>,</span></span>
+<span class="r-in"><span>                                s.vars <span class="op">=</span> <span class="va">s.vars</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Model 1 fitted!"</span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span>object <span class="op">=</span> <span class="va">backwardModel</span>, newdata <span class="op">=</span> <span class="va">sim_test</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tsibble: 10 x 10 [1]</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># Key:       dummy_key [1]</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    inddd      y x_lag_000 x_lag_001 x_lag_002 x_lag_003 x_lag_004 x_lag_005</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span>  <span style="text-decoration: underline;">1</span>206 2.93      0.989     0.487     0.718     0.489     0.887     0.859 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 2</span>  <span style="text-decoration: underline;">1</span>207 0.841     0.064<span style="text-decoration: underline;">8</span>    0.989     0.487     0.718     0.489     0.887 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span>  <span style="text-decoration: underline;">1</span>208 0.060<span style="text-decoration: underline;">2</span>    0.158     0.064<span style="text-decoration: underline;">8</span>    0.989     0.487     0.718     0.489 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span>  <span style="text-decoration: underline;">1</span>209 1.89      0.785     0.158     0.064<span style="text-decoration: underline;">8</span>    0.989     0.487     0.718 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span>  <span style="text-decoration: underline;">1</span>210 1.01      0.542     0.785     0.158     0.064<span style="text-decoration: underline;">8</span>    0.989     0.487 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span>  <span style="text-decoration: underline;">1</span>211 0.451     0.417     0.542     0.785     0.158     0.064<span style="text-decoration: underline;">8</span>    0.989 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 7</span>  <span style="text-decoration: underline;">1</span>212 3.39      0.999     0.417     0.542     0.785     0.158     0.064<span style="text-decoration: underline;">8</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span>  <span style="text-decoration: underline;">1</span>213 1.29      0.256     0.999     0.417     0.542     0.785     0.158 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span>  <span style="text-decoration: underline;">1</span>214 0.387     0.508     0.256     0.999     0.417     0.542     0.785 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span>  <span style="text-decoration: underline;">1</span>215 0.542     0.079<span style="text-decoration: underline;">0</span>    0.508     0.256     0.999     0.417     0.542 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 2 more variables: dummy_key &lt;dbl&gt;, .predict &lt;dbl&gt;</span></span>
+<span class="r-in"><span></span></span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 

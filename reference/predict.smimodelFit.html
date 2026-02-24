@@ -139,7 +139,7 @@ if some of the intermediate lags are not used as predictors.</p></dd>
 <span class="r-in"><span>                               index.vars <span class="op">=</span> <span class="va">index.vars</span>,</span></span>
 <span class="r-in"><span>                               initialise <span class="op">=</span> <span class="st">"ppr"</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span>object <span class="op">=</span> <span class="va">smimodel_ppr</span>, newdata <span class="op">=</span> <span class="va">sim_test</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span>object <span class="op">=</span> <span class="va">smimodel_ppr</span><span class="op">$</span><span class="va">fit</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">best</span>, newdata <span class="op">=</span> <span class="va">sim_test</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>

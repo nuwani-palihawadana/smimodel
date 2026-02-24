@@ -87,7 +87,7 @@ smimodel_ppr <- model_smimodel(data = sim_train,
                                index.vars = index.vars,
                                initialise = "ppr")
 
-predict(object = smimodel_ppr, newdata = sim_test)
+predict(object = smimodel_ppr$fit[[1]]$best, newdata = sim_test)
 }
 
 }

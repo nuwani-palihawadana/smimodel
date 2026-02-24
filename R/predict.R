@@ -300,7 +300,7 @@ predict.smimodel <- function(object, newdata, exclude.trunc = NULL,
 #'                                index.vars = index.vars,
 #'                                initialise = "ppr")
 #'
-#' predict(object = smimodel_ppr, newdata = sim_test)
+#' predict(object = smimodel_ppr$fit[[1]]$best, newdata = sim_test)
 #' }
 #'
 #' @export
@@ -488,6 +488,47 @@ predict.smimodelFit <- function(object, newdata, exclude.trunc = NULL,
 #'
 #' @method predict backward
 #'
+#' @examples
+#' library(dplyr)
+#' library(tibble)
+#' library(tidyr)
+#' library(tsibble)
+#'
+#' # Simulate data
+#' n = 1215
+#' set.seed(123)
+#' sim_data <- tibble(x_lag_000 = runif(n)) |>
+#'   mutate(
+#'     # Add x_lags
+#'     x_lag = lag_matrix(x_lag_000, 5)) |>
+#'   unpack(x_lag, names_sep = "_") |>
+#'   mutate(
+#'     # Response variable
+#'     y = (0.9*x_lag_000 + 0.6*x_lag_001 + 0.45*x_lag_003)^3 + rnorm(n, sd = 0.1),
+#'     # Add an index to the data set
+#'     inddd = seq(1, n)) |>
+#'   drop_na() |>
+#'   select(inddd, y, starts_with("x_lag")) |>
+#'   # Make the data set a `tsibble`
+#'   as_tsibble(index = inddd)
+#'
+#' # Training set
+#' sim_train <- sim_data[1:1000, ]
+#' # Validation set
+#' sim_val <- sim_data[1001:1200, ]
+#' # Test set
+#' sim_test <- sim_data[1201:1210, ]
+#'
+#' # Predictors taken as non-linear variables
+#' s.vars <- colnames(sim_data)[3:8]
+#'
+#' # Model fitting
+#' backwardModel <- model_backward(data = sim_train,
+#'                                 val.data = sim_val,
+#'                                 yvar = "y",
+#'                                 s.vars = s.vars)
+#' predict(object = backwardModel, newdata = sim_test)
+#'
 #' @export
 predict.backward <- function(object, newdata, exclude.trunc = NULL,
                              recursive = FALSE, recursive_colRange = NULL, ...){
@@ -624,6 +665,45 @@ predict.backward <- function(object, newdata, exclude.trunc = NULL,
 #'
 #' @method predict pprFit
 #'
+#' @examples
+#' library(dplyr)
+#' library(tibble)
+#' library(tidyr)
+#' library(tsibble)
+#'
+#' # Simulate data
+#' n = 1015
+#' set.seed(123)
+#' sim_data <- tibble(x_lag_000 = runif(n)) |>
+#'   mutate(
+#'     # Add x_lags
+#'     x_lag = lag_matrix(x_lag_000, 5)) |>
+#'   unpack(x_lag, names_sep = "_") |>
+#'   mutate(
+#'     # Response variable
+#'     y = (0.9*x_lag_000 + 0.6*x_lag_001 + 0.45*x_lag_003)^3 + rnorm(n, sd = 0.1),
+#'     # Add an index to the data set
+#'     inddd = seq(1, n)) |>
+#'   drop_na() |>
+#'   select(inddd, y, starts_with("x_lag")) |>
+#'   # Make the data set a `tsibble`
+#'   as_tsibble(index = inddd)
+#'   
+#' # Training set
+#' sim_train <- sim_data[1:1000, ]
+#' # Test set
+#' sim_test <- sim_data[1001:1010, ]
+#'
+#' # Index variables
+#' index.vars <- colnames(sim_data)[3:8]
+#'
+#' # Model fitting
+#' pprModel <- model_ppr(data = sim_train,
+#'                       yvar = "y",
+#'                       index.vars = index.vars)
+#'
+#' predict(object = pprModel, newdata = sim_test)
+#'
 #' @export
 predict.pprFit <- function(object, newdata, exclude.trunc = NULL,
                            recursive = FALSE, recursive_colRange = NULL, ...){
@@ -753,6 +833,53 @@ predict.pprFit <- function(object, newdata, exclude.trunc = NULL,
 #'
 #' @method predict gaimFit
 #'
+#' @examples
+#' library(dplyr)
+#' library(tibble)
+#' library(tidyr)
+#' library(tsibble)
+#'
+#' # Simulate data
+#' n = 1015
+#' set.seed(123)
+#' sim_data <- tibble(x_lag_000 = runif(n)) |>
+#'   mutate(
+#'     # Add x_lags
+#'     x_lag = lag_matrix(x_lag_000, 5)) |>
+#'   unpack(x_lag, names_sep = "_") |>
+#'   mutate(
+#'     # Response variable
+#'     y = (0.9*x_lag_000 + 0.6*x_lag_001 + 0.45*x_lag_003)^3 + rnorm(n, sd = 0.1),
+#'     # Add an index to the data set
+#'     inddd = seq(1, n)) |>
+#'   drop_na() |>
+#'   select(inddd, y, starts_with("x_lag")) |>
+#'   # Make the data set a `tsibble`
+#'   as_tsibble(index = inddd)
+#'   
+#' # Training set
+#' sim_train <- sim_data[1:1000, ]
+#' # Test set
+#' sim_test <- sim_data[1001:1010, ]
+#'
+#' # Predictors taken as index variables
+#' index.vars <- colnames(sim_data)[3:7]
+#'
+#' # Assign group indices for each predictor
+#' index.ind = c(rep(1, 3), rep(2, 2))
+#'
+#' # Predictors taken as non-linear variables not entering indices
+#' s.vars = "x_lag_005"
+#'
+#' # Model fitting
+#' gaimModel <- model_gaim(data = sim_train,
+#'                         yvar = "y",
+#'                         index.vars = index.vars,
+#'                         index.ind = index.ind,
+#'                         s.vars = s.vars)
+#'                         
+#' predict(object = gaimModel, newdata = sim_test)
+#'
 #' @export
 predict.gaimFit <- function(object, newdata, exclude.trunc = NULL,
                             recursive = FALSE, recursive_colRange = NULL, ...){
@@ -871,6 +998,45 @@ predict.gaimFit <- function(object, newdata, exclude.trunc = NULL,
 #'
 #' @method predict lmFit
 #'
+#' @examples
+#' library(dplyr)
+#' library(tibble)
+#' library(tidyr)
+#' library(tsibble)
+#'
+#' # Simulate data
+#' n = 1015
+#' set.seed(123)
+#' sim_data <- tibble(x_lag_000 = runif(n)) |>
+#'   mutate(
+#'     # Add x_lags
+#'     x_lag = lag_matrix(x_lag_000, 5)) |>
+#'   unpack(x_lag, names_sep = "_") |>
+#'   mutate(
+#'     # Response variable
+#'     y = (0.9*x_lag_000 + 0.6*x_lag_001 + 0.45*x_lag_003)^3 + rnorm(n, sd = 0.1),
+#'     # Add an index to the data set
+#'     inddd = seq(1, n)) |>
+#'   drop_na() |>
+#'   select(inddd, y, starts_with("x_lag")) |>
+#'   # Make the data set a `tsibble`
+#'   as_tsibble(index = inddd)
+#'   
+#' # Training set
+#' sim_train <- sim_data[1:1000, ]
+#' # Test set
+#' sim_test <- sim_data[1001:1010, ]
+#'
+#' # Predictor variables
+#' linear.vars <- colnames(sim_data)[3:8]
+#'
+#' # Model fitting
+#' lmModel <- model_lm(data = sim_train,
+#'                     yvar = "y",
+#'                     linear.vars = linear.vars)
+#'                     
+#' predict(object = lmModel, newdata = sim_test)
+#'
 #' @export
 predict.lmFit <- function(object, newdata,
                            recursive = FALSE, recursive_colRange = NULL, ...){
@@ -949,6 +1115,49 @@ predict.lmFit <- function(object, newdata,
 #' @return A \code{tsibble} with forecasts on test set.
 #'
 #' @method predict gamFit
+#'
+#' @examples
+#' library(dplyr)
+#' library(tibble)
+#' library(tidyr)
+#' library(tsibble)
+#'
+#' # Simulate data
+#' n = 1015
+#' set.seed(123)
+#' sim_data <- tibble(x_lag_000 = runif(n)) |>
+#'   mutate(
+#'     # Add x_lags
+#'     x_lag = lag_matrix(x_lag_000, 5)) |>
+#'   unpack(x_lag, names_sep = "_") |>
+#'   mutate(
+#'     # Response variable
+#'     y = (0.9*x_lag_000 + 0.6*x_lag_001 + 0.45*x_lag_003)^3 + rnorm(n, sd = 0.1),
+#'     # Add an index to the data set
+#'     inddd = seq(1, n)) |>
+#'   drop_na() |>
+#'   select(inddd, y, starts_with("x_lag")) |>
+#'   # Make the data set a `tsibble`
+#'   as_tsibble(index = inddd)
+#'   
+#' # Training set
+#' sim_train <- sim_data[1:1000, ]
+#' # Test set
+#' sim_test <- sim_data[1001:1010, ]
+#'
+#' # Predictors taken as non-linear variables
+#' s.vars <- colnames(sim_data)[3:6]
+#'
+#' # Predictors taken as linear variables
+#' linear.vars <- colnames(sim_data)[7:8]
+#'
+#' # Model fitting
+#' gamModel <- model_gam(data = sim_train,
+#'                       yvar = "y",
+#'                       s.vars = s.vars,
+#'                       linear.vars = linear.vars)
+#'
+#' predict(object = gamModel, newdata = sim_test)
 #'
 #' @export
 predict.gamFit <- function(object, newdata, exclude.trunc = NULL,

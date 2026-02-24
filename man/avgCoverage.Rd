@@ -33,3 +33,55 @@ Calculates the mean coverage and the ifinn matrix for prediction intervals on
 validation set. If \code{window} is not \code{NULL}, a matrix of the rolling
 means of interval forecast coverage is also returned.
 }
+\examples{
+library(dplyr)
+library(tibble)
+library(tidyr)
+library(tsibble)
+
+# Simulate data
+n = 1105
+set.seed(123)
+sim_data <- tibble(x_lag_000 = runif(n)) |>
+  mutate(
+    # Add x_lags
+    x_lag = lag_matrix(x_lag_000, 5)) |>
+  unpack(x_lag, names_sep = "_") |>
+  mutate(
+    # Response variable
+    y = (0.9*x_lag_000 + 0.6*x_lag_001 + 0.45*x_lag_003)^3 + rnorm(n, sd = 0.1),
+    # Add an index to the data set
+    inddd = seq(1, n)) |>
+  drop_na() |>
+  select(inddd, y, starts_with("x_lag")) |>
+  # Make the data set a `tsibble`
+  as_tsibble(index = inddd)
+  
+# Training set
+sim_train <- sim_data[1:1000, ]
+# Test set
+sim_test <- sim_data[1001:1100, ]
+
+# Index variables
+index.vars <- colnames(sim_data)[3:8]
+
+# Model fitting
+pprModel <- model_ppr(data = sim_train,
+                      yvar = "y",
+                      index.vars = index.vars)
+                      
+# Block bootstrap prediction intervals (3-steps-ahead interval forecasts)
+set.seed(12345)
+pprModel_bb <- bb_cvforecast(object = pprModel,
+                             data = sim_data,
+                             yvar = "y",
+                             predictor.vars = index.vars,
+                             h = 3,
+                             num.futures = 50,
+                             window = 1000)
+                             
+# Mean coverage of generated 95\% block bootstrap prediction intervals
+cov_data <- avgCoverage(object = pprModel_bb)
+cov_data$mean
+                                 
+}

@@ -1670,6 +1670,7 @@ possibleFutures_benchmark <- function(object, newdata, bootstraps,
 #' means of interval forecast coverage will be returned.}
 #'
 #' @examples
+#' \dontrun{
 #' library(dplyr)
 #' library(tibble)
 #' library(tidyr)
@@ -1720,7 +1721,8 @@ possibleFutures_benchmark <- function(object, newdata, bootstraps,
 #' # Mean coverage of generated 95% conformal bootstrap prediction intervals
 #' cov_data <- avgCoverage(object = pprModel_cb)
 #' cov_data$mean
-#'                                  
+#' }
+#'                                 
 #' @export
 avgCoverage <- function(object, level = 95, window = NULL, na.rm = FALSE) {
   object$LOWER <- object$lower

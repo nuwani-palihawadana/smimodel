@@ -34,6 +34,7 @@ validation set. If \code{window} is not \code{NULL}, a matrix of the rolling
 means of interval forecast coverage is also returned.
 }
 \examples{
+\dontrun{
 library(dplyr)
 library(tibble)
 library(tidyr)
@@ -84,5 +85,6 @@ pprModel_cb <- cb_cvforecast(object = pprModel,
 # Mean coverage of generated 95\% conformal bootstrap prediction intervals
 cov_data <- avgCoverage(object = pprModel_cb)
 cov_data$mean
-                                 
+}
+                                
 }

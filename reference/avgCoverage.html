@@ -13,7 +13,7 @@ means of interval forecast coverage is also returned."><meta property="og:image"
 
     <a class="navbar-brand me-2" href="../index.html">smimodel</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -99,7 +99,7 @@ means of interval forecast coverage will be returned.</p></dd>
 <span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tsibble.tidyverts.org" class="external-link">tsibble</a></span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Simulate data</span></span></span>
-<span class="r-in"><span><span class="va">n</span> <span class="op">=</span> <span class="fl">1105</span></span></span>
+<span class="r-in"><span><span class="va">n</span> <span class="op">=</span> <span class="fl">1055</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">sim_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span>x_lag_000 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html" class="external-link">runif</a></span><span class="op">(</span><span class="va">n</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span></span>
@@ -115,11 +115,11 @@ means of interval forecast coverage will be returned.</p></dd>
 <span class="r-in"><span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">inddd</span>, <span class="va">y</span>, <span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">starts_with</a></span><span class="op">(</span><span class="st">"x_lag"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="co"># Make the data set a `tsibble`</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="https://tsibble.tidyverts.org/reference/as-tsibble.html" class="external-link">as_tsibble</a></span><span class="op">(</span>index <span class="op">=</span> <span class="va">inddd</span><span class="op">)</span></span></span>
-<span class="r-in"><span>  </span></span>
+<span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Training set</span></span></span>
 <span class="r-in"><span><span class="va">sim_train</span> <span class="op">&lt;-</span> <span class="va">sim_data</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">1000</span>, <span class="op">]</span></span></span>
 <span class="r-in"><span><span class="co"># Test set</span></span></span>
-<span class="r-in"><span><span class="va">sim_test</span> <span class="op">&lt;-</span> <span class="va">sim_data</span><span class="op">[</span><span class="fl">1001</span><span class="op">:</span><span class="fl">1100</span>, <span class="op">]</span></span></span>
+<span class="r-in"><span><span class="va">sim_test</span> <span class="op">&lt;-</span> <span class="va">sim_data</span><span class="op">[</span><span class="fl">1001</span><span class="op">:</span><span class="fl">1050</span>, <span class="op">]</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Index variables</span></span></span>
 <span class="r-in"><span><span class="va">index.vars</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">sim_data</span><span class="op">)</span><span class="op">[</span><span class="fl">3</span><span class="op">:</span><span class="fl">8</span><span class="op">]</span></span></span>
@@ -130,14 +130,15 @@ means of interval forecast coverage will be returned.</p></dd>
 <span class="r-in"><span>                      index.vars <span class="op">=</span> <span class="va">index.vars</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "model 1"</span>
 <span class="r-in"><span>                      </span></span>
-<span class="r-in"><span><span class="co"># Block bootstrap prediction intervals (3-steps-ahead interval forecasts)</span></span></span>
+<span class="r-in"><span><span class="co"># Conformal bootstrap prediction intervals (2-steps-ahead interval forecasts)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">12345</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">pprModel_bb</span> <span class="op">&lt;-</span> <span class="fu"><a href="bb_cvforecast.html">bb_cvforecast</a></span><span class="op">(</span>object <span class="op">=</span> <span class="va">pprModel</span>,</span></span>
+<span class="r-in"><span><span class="va">pprModel_cb</span> <span class="op">&lt;-</span> <span class="fu"><a href="cb_cvforecast.html">cb_cvforecast</a></span><span class="op">(</span>object <span class="op">=</span> <span class="va">pprModel</span>,</span></span>
 <span class="r-in"><span>                             data <span class="op">=</span> <span class="va">sim_data</span>,</span></span>
 <span class="r-in"><span>                             yvar <span class="op">=</span> <span class="st">"y"</span>,</span></span>
 <span class="r-in"><span>                             predictor.vars <span class="op">=</span> <span class="va">index.vars</span>,</span></span>
-<span class="r-in"><span>                             h <span class="op">=</span> <span class="fl">3</span>,</span></span>
-<span class="r-in"><span>                             num.futures <span class="op">=</span> <span class="fl">50</span>,</span></span>
+<span class="r-in"><span>                             h <span class="op">=</span> <span class="fl">2</span>,</span></span>
+<span class="r-in"><span>                             ncal <span class="op">=</span> <span class="fl">30</span>,</span></span>
+<span class="r-in"><span>                             num.futures <span class="op">=</span> <span class="fl">100</span>,</span></span>
 <span class="r-in"><span>                             window <span class="op">=</span> <span class="fl">1000</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "This is 1000"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "This is 1001"</span>
@@ -188,61 +189,31 @@ means of interval forecast coverage will be returned.</p></dd>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "This is 1046"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "This is 1047"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "This is 1048"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "This is 1049"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "This is 1050"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "This is 1051"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "This is 1052"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "This is 1053"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "This is 1054"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "This is 1055"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "This is 1056"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "This is 1057"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "This is 1058"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "This is 1059"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "This is 1060"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "This is 1061"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "This is 1062"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "This is 1063"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "This is 1064"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "This is 1065"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "This is 1066"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "This is 1067"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "This is 1068"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "This is 1069"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "This is 1070"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "This is 1071"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "This is 1072"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "This is 1073"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "This is 1074"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "This is 1075"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "This is 1076"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "This is 1077"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "This is 1078"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "This is 1079"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "This is 1080"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "This is 1081"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "This is 1082"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "This is 1083"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "This is 1084"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "This is 1085"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "This is 1086"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "This is 1087"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "This is 1088"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "This is 1089"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "This is 1090"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "This is 1091"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "This is 1092"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "This is 1093"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "This is 1094"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "This is 1095"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "This is 1096"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "This is 1097"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "This is 30"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "This is 31"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "This is 32"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "This is 33"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "This is 34"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "This is 35"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "This is 36"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "This is 37"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "This is 38"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "This is 39"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "This is 40"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "This is 41"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "This is 42"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "This is 43"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "This is 44"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "This is 45"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "This is 46"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "This is 47"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "This is 48"</span>
 <span class="r-in"><span>                             </span></span>
-<span class="r-in"><span><span class="co"># Mean coverage of generated 95% block bootstrap prediction intervals</span></span></span>
-<span class="r-in"><span><span class="va">cov_data</span> <span class="op">&lt;-</span> <span class="fu">avgCoverage</span><span class="op">(</span>object <span class="op">=</span> <span class="va">pprModel_bb</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># Mean coverage of generated 95% conformal bootstrap prediction intervals</span></span></span>
+<span class="r-in"><span><span class="va">cov_data</span> <span class="op">&lt;-</span> <span class="fu">avgCoverage</span><span class="op">(</span>object <span class="op">=</span> <span class="va">pprModel_cb</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">cov_data</span><span class="op">$</span><span class="va">mean</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       h=1       h=2       h=3 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 0.8775510 0.9285714 0.9285714 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       h=1       h=2 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 0.9473684 0.8947368 </span>
 <span class="r-in"><span>                                 </span></span>
 </code></pre></div>
     </div>

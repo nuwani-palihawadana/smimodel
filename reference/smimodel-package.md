@@ -24,8 +24,7 @@ Useful links:
 
 ## Author
 
-**Maintainer**: Nuwani Palihawadana
-<Nuwani.KodikaraPalihawadana@monash.edu>
+**Maintainer**: Nuwani Palihawadana <nuwanipalihawadana@gmail.com>
 ([ORCID](https://orcid.org/0009-0008-6395-7797)) \[copyright holder\]
 
 Other contributors:

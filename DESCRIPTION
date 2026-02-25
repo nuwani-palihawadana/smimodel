@@ -1,6 +1,6 @@
 Package: smimodel
 Title: Sparse Multiple Index Models for Nonparametric Forecasting
-Version: 0.0.1
+Version: 0.1.0
 Authors@R: c(
     person(given = "Nuwani",
            family = "Palihawadana",

@@ -96,7 +96,7 @@ pprModel$fit[[1]]
 \references{
 Friedman, J. H. & Stuetzle, W. (1981). Projection pursuit
 regression. \emph{Journal of the American Statistical Association}, 76, 817–823.
-\href{https://www.tandfonline.com/doi/abs/10.1080/01621459.1981.10477729}{doi:10.2307/2287576}.
+\url{https://doi.org/10.2307/2287576}.
 }
 \seealso{
 \code{\link{model_smimodel}}, \code{\link{model_backward}},

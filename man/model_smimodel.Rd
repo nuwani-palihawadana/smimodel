@@ -205,7 +205,8 @@ smimodel_ppr$fit[[1]]$best
 \references{
 Palihawadana, N.K., Hyndman, R.J. & Wang, X. (2024). Sparse
 Multiple Index Models for High-Dimensional Nonparametric Forecasting.
-\url{https://www.monash.edu/business/ebs/research/publications/ebs/2024/wp16-2024.pdf}.
+(Department of Econometrics and Business Statistics Working Paper Series
+16/24).
 }
 \seealso{
 \code{\link{greedy_smimodel}}

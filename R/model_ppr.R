@@ -43,7 +43,7 @@
 #'
 #' @references Friedman, J. H. & Stuetzle, W. (1981). Projection pursuit
 #'   regression. *Journal of the American Statistical Association*, 76, 817–823.
-#'   \url{https://doi.org/10.2307/2287576}.
+#'   \doi{10.2307/2287576}.
 #'
 #' @seealso \code{\link{model_smimodel}}, \code{\link{model_backward}},
 #'   \code{\link{model_gaim}}, \code{\link{model_gam}}, \code{\link{model_lm}}

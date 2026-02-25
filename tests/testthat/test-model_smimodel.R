@@ -1,6 +1,8 @@
 # Testing model_smimodel.R
 
 test_that("tests for model_smimodel()", {
+  skip_on_cran()
+  # Test code that requires Gurobi
   n = 1005
   set.seed(123)
   sim_data <- tibble(x_lag_000 = runif(n)) %>%

@@ -40,7 +40,7 @@ library(tidyr)
 library(tsibble)
 
 # Simulate data
-n = 1105
+n = 1055
 set.seed(123)
 sim_data <- tibble(x_lag_000 = runif(n)) |>
   mutate(
@@ -56,11 +56,11 @@ sim_data <- tibble(x_lag_000 = runif(n)) |>
   select(inddd, y, starts_with("x_lag")) |>
   # Make the data set a `tsibble`
   as_tsibble(index = inddd)
-  
+
 # Training set
 sim_train <- sim_data[1:1000, ]
 # Test set
-sim_test <- sim_data[1001:1100, ]
+sim_test <- sim_data[1001:1050, ]
 
 # Index variables
 index.vars <- colnames(sim_data)[3:8]
@@ -70,18 +70,19 @@ pprModel <- model_ppr(data = sim_train,
                       yvar = "y",
                       index.vars = index.vars)
                       
-# Block bootstrap prediction intervals (3-steps-ahead interval forecasts)
+# Conformal bootstrap prediction intervals (2-steps-ahead interval forecasts)
 set.seed(12345)
-pprModel_bb <- bb_cvforecast(object = pprModel,
+pprModel_cb <- cb_cvforecast(object = pprModel,
                              data = sim_data,
                              yvar = "y",
                              predictor.vars = index.vars,
-                             h = 3,
-                             num.futures = 50,
+                             h = 2,
+                             ncal = 30,
+                             num.futures = 100,
                              window = 1000)
                              
-# Mean coverage of generated 95\% block bootstrap prediction intervals
-cov_data <- avgCoverage(object = pprModel_bb)
+# Mean coverage of generated 95\% conformal bootstrap prediction intervals
+cov_data <- avgCoverage(object = pprModel_cb)
 cov_data$mean
                                  
 }

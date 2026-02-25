@@ -1,11 +1,11 @@
 Package: smimodel
 Title: Sparse Multiple Index Models for Nonparametric Forecasting
-Version: 0.0.1
+Version: 0.1.0
 Authors@R: c(
     person(given = "Nuwani",
            family = "Palihawadana",
            role = c("aut", "cre", "cph"),
-           email = "Nuwani.KodikaraPalihawadana@monash.edu",
+           email = "nuwanipalihawadana@gmail.com",
            comment = c(ORCID = "0009-0008-6395-7797")),
     person(given = "Xiaoqian", 
            family = "Wang", 
@@ -26,7 +26,7 @@ License: GPL (>= 3)
 Encoding: UTF-8
 LazyData: true
 Depends: 
-    R (>= 2.10)
+    R (>= 4.1.0)
 Imports:
     cgaim,
     conformalForecast,

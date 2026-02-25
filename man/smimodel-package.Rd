@@ -20,7 +20,7 @@ Useful links:
 
 }
 \author{
-\strong{Maintainer}: Nuwani Palihawadana \email{Nuwani.KodikaraPalihawadana@monash.edu} (\href{https://orcid.org/0009-0008-6395-7797}{ORCID}) [copyright holder]
+\strong{Maintainer}: Nuwani Palihawadana \email{nuwanipalihawadana@gmail.com} (\href{https://orcid.org/0009-0008-6395-7797}{ORCID}) [copyright holder]
 
 Other contributors:
 \itemize{

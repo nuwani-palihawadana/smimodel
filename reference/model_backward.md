@@ -152,7 +152,7 @@ more details see reference.
 
 Fan, S. & Hyndman, R.J. (2012). Short-Term Load Forecasting Based on a
 Semi-Parametric Additive Model. *IEEE Transactions on Power Systems*,
-27(1), 134-141. <http://doi.org/10.1109/TPWRS.2011.2162082>
+27(1), 134-141. <https://doi.org/10.1109/TPWRS.2011.2162082>
 
 ## See also
 

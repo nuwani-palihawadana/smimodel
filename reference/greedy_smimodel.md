@@ -279,8 +279,8 @@ grouping variable.
 ## References
 
 Palihawadana, N.K., Hyndman, R.J. & Wang, X. (2024). Sparse Multiple
-Index Models for High-Dimensional Nonparametric Forecasting.
-<https://www.monash.edu/business/ebs/research/publications/ebs/2024/wp16-2024.pdf>.
+Index Models for High-Dimensional Nonparametric Forecasting. (Department
+of Econometrics and Business Statistics Working Paper Series 16/24).
 
 ## See also
 

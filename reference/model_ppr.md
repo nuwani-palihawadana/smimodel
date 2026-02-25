@@ -84,7 +84,7 @@ functions, and \\\varepsilon\_{i}\\ is the random error.
 
 Friedman, J. H. & Stuetzle, W. (1981). Projection pursuit regression.
 *Journal of the American Statistical Association*, 76, 817–823.
-[doi:10.2307/2287576](https://www.tandfonline.com/doi/abs/10.1080/01621459.1981.10477729).
+<https://doi.org/10.2307/2287576>.
 
 ## See also
 

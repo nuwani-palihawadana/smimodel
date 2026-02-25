@@ -3,7 +3,7 @@ pkgdown: 2.2.0
 pkgdown_sha: ~
 articles:
   smimodel: smimodel.html
-last_built: 2026-02-25T08:46Z
+last_built: 2026-02-25T08:57Z
 urls:
   reference: https://nuwani-palihawadana.github.io/smimodel/reference
   article: https://nuwani-palihawadana.github.io/smimodel/articles

@@ -47,6 +47,7 @@ width is also returned. If \code{includemedian} is \code{TRUE}, the
 information of the median interval width will be returned.
 }
 \examples{
+\donttest{
 library(dplyr)
 library(tibble)
 library(tidyr)
@@ -97,5 +98,6 @@ pprModel_cb <- cb_cvforecast(object = pprModel,
 # Mean width of generated 95\% conformal bootstrap prediction intervals
 width_data <- avgWidth(object = pprModel_cb)
 width_data$mean
+}
                                  
 }

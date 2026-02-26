@@ -24,7 +24,7 @@ The SMI Modelling algorithm (i.e. the estimation algorithm of SMI model) that we
 
 ## How to use smimodel?
 
-Here we present a simple example to illustrate *smimodel* functionalities. We use randomly simualted data, which we treat as time series data for the purpose of this illustration. 
+Here we present a simple example to illustrate *smimodel* functionalities. We use randomly simulated data, which we treat as time series data for the purpose of this illustration. 
 
 (Note: Since the SMI model estimation algorithm works with very limited amount of prior information, and handles automatic predictor selection and predictor grouping, the computational time for model estimation increases as the number of predictors and the number of indices increase. Therefore, we use a small simulated data set here as the example to reduce computational cost.)
 
@@ -200,7 +200,7 @@ MAE_SMI_ppr
 
 ### Tuning for penalty parameters
 
-The estimation of a SMI model involves solving an optimaisation problem, where the sum of squared errors of the model plus two penalty terms (an L0 penalty and an L2 (ridge) penalty) is minimised subject to a set of constraints. Thus, two penalty parameters $\lambda_{0}$ and $\lambda_{2}$ corresponding to the L0 and L2 penalties respectively should be chosen when estimating a SMI model. 
+The estimation of a SMI model involves solving an optimisation problem, where the sum of squared errors of the model plus two penalty terms (an L0 penalty and an L2 (ridge) penalty) is minimised subject to a set of constraints. Thus, two penalty parameters $\lambda_{0}$ and $\lambda_{2}$ corresponding to the L0 and L2 penalties respectively should be chosen when estimating a SMI model. 
 
 In the previous example, all the SMI models were fitted using the default penalty parameter values provided in the function: $\lambda_{0} = 1$ and $\lambda_{2} = 1$. To fit a SMI model with simultaneous parameter tuning, we can use the function `greedy_smimodel()`, which performs a greedy search over a partially data-derived grid of possible penalty parameter combinations ($\lambda_{0}$, $\lambda_{2}$), and fits the SMI model using the best (lowest validation set MSE) penalty parameter combination. In this case, we need to provide a validation set, which is separate from the training data set. 
 

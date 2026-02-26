@@ -953,10 +953,10 @@ utils::globalVariables(c("indexLag", "indexDiff", "row_idx", "grp"))
 #' Prepare a data set for recursive forecasting
 #'
 #' Prepare a test data for recursive forecasting by appropriately removing
-#' exisiting (actual) values from a specified range of columns (lagged response
+#' existing (actual) values from a specified range of columns (lagged response
 #' columns) of the data set. Handles seasonal data with gaps.
 #'
-#' @param newdata Data set to be prepared. Should be a \code{tsibble}.
+#' @param newdata Data set to be ared. Should be a \code{tsibble}.
 #' @param recursive_colRange The range of column numbers (lagged response
 #'   columns) in \code{newdata} from which existing values should be removed.
 #'   Make sure such columns are positioned together in increasing lag order
@@ -1000,8 +1000,8 @@ prep_newdata <- function(newdata, recursive_colRange){
 
 #' Remove actual values from a data set for recursive forecasting
 #'
-#' Appropriately removes exisiting (actual) values from the specified column
-#' range (lagged response columns) of a given data set (typicall a test set for
+#' Appropriately removes existing (actual) values from the specified column
+#' range (lagged response columns) of a given data set (typically a test set for
 #' which recursive forecasting is required).
 #'
 #' @param data Data set (a \code{tibble}) from which the actual lagged values
@@ -1029,7 +1029,7 @@ remove_lags <- function(data, recursive_colRange){
 
 #' Futures through single season block bootstrapping
 #'
-#' Gerenates possible future sample paths by applying the single season block
+#' Generates possible future sample paths by applying the single season block
 #' bootstrap method.
 #'
 #' @param object Fitted model object.
@@ -1670,7 +1670,7 @@ possibleFutures_benchmark <- function(object, newdata, bootstraps,
 #' means of interval forecast coverage will be returned.}
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' library(dplyr)
 #' library(tibble)
 #' library(tidyr)
@@ -1762,6 +1762,7 @@ avgCoverage <- function(object, level = 95, window = NULL, na.rm = FALSE) {
 #' returned.}
 #'
 #' @examples
+#' \donttest{
 #' library(dplyr)
 #' library(tibble)
 #' library(tidyr)
@@ -1812,6 +1813,7 @@ avgCoverage <- function(object, level = 95, window = NULL, na.rm = FALSE) {
 #' # Mean width of generated 95% conformal bootstrap prediction intervals
 #' width_data <- avgWidth(object = pprModel_cb)
 #' width_data$mean
+#' }
 #'                                  
 #' @export
 avgWidth <- function(object, level = 95, includemedian = FALSE, window = NULL,

@@ -7,7 +7,7 @@
 prep_newdata(newdata, recursive_colRange)
 }
 \arguments{
-\item{newdata}{Data set to be prepared. Should be a \code{tsibble}.}
+\item{newdata}{Data set to be ared. Should be a \code{tsibble}.}
 
 \item{recursive_colRange}{The range of column numbers (lagged response
 columns) in \code{newdata} from which existing values should be removed.
@@ -21,6 +21,6 @@ A \code{tibble}.
 }
 \description{
 Prepare a test data for recursive forecasting by appropriately removing
-exisiting (actual) values from a specified range of columns (lagged response
+existing (actual) values from a specified range of columns (lagged response
 columns) of the data set. Handles seasonal data with gaps.
 }

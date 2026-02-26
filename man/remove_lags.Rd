@@ -17,7 +17,7 @@ which lagged values should be removed.}
 A \code{tibble}.
 }
 \description{
-Appropriately removes exisiting (actual) values from the specified column
-range (lagged response columns) of a given data set (typicall a test set for
+Appropriately removes existing (actual) values from the specified column
+range (lagged response columns) of a given data set (typically a test set for
 which recursive forecasting is required).
 }

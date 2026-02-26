@@ -46,6 +46,6 @@ numbers in test data to be filled with forecasts.}
 A matrix of simulated future sample paths.
 }
 \description{
-Gerenates possible future sample paths by applying the single season block
+Generates possible future sample paths by applying the single season block
 bootstrap method.
 }

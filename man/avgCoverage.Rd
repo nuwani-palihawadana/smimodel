@@ -34,7 +34,7 @@ validation set. If \code{window} is not \code{NULL}, a matrix of the rolling
 means of interval forecast coverage is also returned.
 }
 \examples{
-\dontrun{
+\donttest{
 library(dplyr)
 library(tibble)
 library(tidyr)

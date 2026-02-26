@@ -1,7 +1,7 @@
 # Prepare a data set for recursive forecasting
 
 Prepare a test data for recursive forecasting by appropriately removing
-exisiting (actual) values from a specified range of columns (lagged
+existing (actual) values from a specified range of columns (lagged
 response columns) of the data set. Handles seasonal data with gaps.
 
 ## Usage
@@ -14,7 +14,7 @@ prep_newdata(newdata, recursive_colRange)
 
 - newdata:
 
-  Data set to be prepared. Should be a `tsibble`.
+  Data set to be ared. Should be a `tsibble`.
 
 - recursive_colRange:
 

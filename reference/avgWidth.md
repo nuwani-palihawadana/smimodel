@@ -75,6 +75,7 @@ A list of class `width` with the following components:
 ## Examples
 
 ``` r
+# \donttest{
 library(dplyr)
 library(tibble)
 library(tidyr)
@@ -196,5 +197,6 @@ width_data <- avgWidth(object = pprModel_cb)
 width_data$mean
 #>       h=1       h=2 
 #> 0.4185444 0.3772966 
+# }
                                  
 ```

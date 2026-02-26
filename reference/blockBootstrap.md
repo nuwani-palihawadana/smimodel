@@ -1,6 +1,6 @@
 # Futures through single season block bootstrapping
 
-Gerenates possible future sample paths by applying the single season
+Generates possible future sample paths by applying the single season
 block bootstrap method.
 
 ## Usage

@@ -1,8 +1,8 @@
 # Remove actual values from a data set for recursive forecasting
 
-Appropriately removes exisiting (actual) values from the specified
-column range (lagged response columns) of a given data set (typicall a
-test set for which recursive forecasting is required).
+Appropriately removes existing (actual) values from the specified column
+range (lagged response columns) of a given data set (typically a test
+set for which recursive forecasting is required).
 
 ## Usage
 

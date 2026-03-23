@@ -11,6 +11,10 @@
 
 \item{...}{Other arguments not currently used.}
 }
+\value{
+No return value; called for side effects. Prints a summary of the
+fitted model to console.
+}
 \description{
 The default print method for a \code{smimodelFit} object.
 }

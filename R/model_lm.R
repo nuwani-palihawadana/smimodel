@@ -18,6 +18,8 @@
 #'   The default is \code{neighbour = 0} (i.e. no neighbours are considered for
 #'   model fitting).
 #' @param linear.vars A character vector of names of the predictor variables.
+#' @param verbose Logical; controls whether progress messages (model indices)
+#'   are printed during fitting. Defaults to FALSE.
 #' @param ... Other arguments not currently used.
 #' @return An object of class \code{lmFit}. This is a \code{tibble} with two
 #'   columns: \item{key}{The level of the grouping variable (i.e. key of the
@@ -63,7 +65,7 @@
 #' lmModel$fit[[1]]
 #'
 #' @export
-model_lm <- function(data, yvar, neighbour = 0, linear.vars, ...){
+model_lm <- function(data, yvar, neighbour = 0, linear.vars, verbose = FALSE, ...){
   stopifnot(tsibble::is_tsibble(data))
   data1 <- data
   data_index <- index(data1)
@@ -89,7 +91,8 @@ model_lm <- function(data, yvar, neighbour = 0, linear.vars, ...){
   # Model fitting
   lm_list <- vector(mode = "list", length = NROW(ref))
   for (i in seq_along(ref$key_num)){
-    print(paste0('model ', paste0(i)))
+    if(verbose)
+      print(paste0('model ', paste0(i)))
     df_cat <- data1 |>
       dplyr::filter((abs(num_key - ref$key_num[i]) <= neighbour) |
                       (abs(num_key - ref$key_num[i] + NROW(ref)) <= neighbour) |

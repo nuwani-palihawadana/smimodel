@@ -24,6 +24,7 @@ bb_cvforecast(
   recursive = FALSE,
   recursive_colNames = NULL,
   na.rm = TRUE,
+  verbose = FALSE,
   ...
 )
 }
@@ -94,6 +95,9 @@ some of the intermediate lags are not used as predictors.}
 
 \item{na.rm}{logical; if \code{TRUE} (default), any \code{NA} and
 \code{NaN}'s are removed from the sample before the quantiles are computed.}
+
+\item{verbose}{Logical; controls whether progress messages are printed during
+the cross-validation procedure. Defaults to FALSE.}
 
 \item{...}{Other arguments not currently used.}
 }

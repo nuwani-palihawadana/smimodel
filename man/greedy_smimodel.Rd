@@ -134,7 +134,8 @@ MIP iteration.}
 \item{NonConvex}{The strategy for handling non-convex quadratic objectives or
 non-convex quadratic constraints in Gurobi solver.}
 
-\item{verbose}{The option to print detailed solver output.}
+\item{verbose}{The option to print detailed solver output and
+optimisation/greedy search progress messages. Defaults to FALSE.}
 
 \item{parallel}{The option to use parallel processing in fitting SMI models
 for different penalty parameter combinations.}
@@ -238,12 +239,6 @@ smi_greedy$fit[[1]]$best
 smi_greedy$fit[[1]]$best_lambdas
 }
 
-}
-\references{
-Palihawadana, N.K., Hyndman, R.J. & Wang, X. (2024). Sparse
-Multiple Index Models for High-Dimensional Nonparametric Forecasting.
-(Department of Econometrics and Business Statistics Working Paper Series
-16/24).
 }
 \seealso{
 \code{\link{model_smimodel}}

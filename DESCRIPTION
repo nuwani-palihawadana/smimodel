@@ -14,13 +14,13 @@ Authors@R: c(
            comment = c(ORCID = "0000-0003-4827-496X"))
   )
 Description: Implements a general algorithm for estimating Sparse Multiple Index
-    (SMI) models for nonparametric forecasting and prediction. Includes
-    functions for fitting nonparametric additive models with backward
-    elimination, group-wise additive index models, and projection pursuit
-    regression models as benchmark comparison methods. Provides tools for
-    generating prediction intervals to quantify uncertainty in point forecasts
-    produced by the SMI model and benchmark models, using the classical block
-    bootstrap method and a new method called conformal bootstrap, which
+    (SMI) models for nonparametric forecasting and prediction. Includes 
+    functions for fitting nonparametric additive models with backward 
+    elimination, group-wise additive index models, and projection pursuit 
+    regression models as benchmark comparison methods. Provides tools for 
+    generating prediction intervals to quantify uncertainty in point forecasts 
+    produced by the SMI model and benchmark models, using the classical block 
+    bootstrap method and a new method called conformal bootstrap, which 
     integrates block bootstrap with split conformal prediction.
 License: GPL (>= 3)
 Encoding: UTF-8

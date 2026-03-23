@@ -4,7 +4,15 @@
 \alias{model_ppr}
 \title{Projection Pursuit Regression (PPR) models}
 \usage{
-model_ppr(data, yvar, neighbour = 0, index.vars, num_ind = 5, ...)
+model_ppr(
+  data,
+  yvar,
+  neighbour = 0,
+  index.vars,
+  num_ind = 5,
+  verbose = FALSE,
+  ...
+)
 }
 \arguments{
 \item{data}{Training data set on which models will be trained. Must be a data
@@ -30,6 +38,9 @@ variables for which indices should be estimated.}
 \item{num_ind}{An \code{integer} that specifies the number of indices to be
 used in the model(s). (Corresponds to \code{nterms} in
 \code{stats::ppr()}.)}
+
+\item{verbose}{Logical; controls whether progress messages (model indices)
+are printed during fitting. Defaults to FALSE.}
 
 \item{...}{Other arguments not currently used. (For more information on other
 arguments that can be passed, refer \code{stats::ppr()}.)}

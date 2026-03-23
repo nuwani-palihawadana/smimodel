@@ -106,7 +106,8 @@ MIP iteration.}
 \item{NonConvex}{The strategy for handling non-convex quadratic objectives or
 non-convex quadratic constraints in Gurobi solver.}
 
-\item{verbose}{The option to print detailed solver output.}
+\item{verbose}{The option to print detailed solver output and
+optimisation progress messages. Defaults to FALSE.}
 }
 \value{
 A list with two elements: \item{initial}{A list of information of the

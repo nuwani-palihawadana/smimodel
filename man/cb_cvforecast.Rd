@@ -25,6 +25,7 @@ cb_cvforecast(
   na.rm = TRUE,
   nacheck_frac_numerator = 2,
   nacheck_frac_denominator = 3,
+  verbose = FALSE,
   ...
 )
 }
@@ -100,6 +101,9 @@ that is required in a test set.}
 
 \item{nacheck_frac_denominator}{Denominator of the fraction of non-missing
 values that is required in a test set.}
+
+\item{verbose}{Logical; controls whether progress messages are printed during
+the cross-validation procedure. Defaults to FALSE.}
 
 \item{...}{Other arguments not currently used.}
 }

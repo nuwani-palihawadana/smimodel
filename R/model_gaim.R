@@ -26,6 +26,8 @@
 #'   part of an index).
 #' @param linear.vars A \code{character} vector of names of the predictor
 #'   variables that should be included linearly into the model.
+#' @param verbose Logical; controls whether progress messages (model indices)
+#'   are printed during fitting. Defaults to FALSE.
 #' @param ... Other arguments not currently used. (Note that the arguments in
 #'   \code{cgaim::cgaim()} related to constrained GAIMs are currently not
 #'   supported. Furthermore, the argument \code{subset} is also not supported
@@ -93,7 +95,7 @@
 #'
 #' @export
 model_gaim <- function(data, yvar, neighbour = 0, index.vars, index.ind, 
-                       s.vars = NULL, linear.vars = NULL, ...){
+                       s.vars = NULL, linear.vars = NULL, verbose = FALSE, ...){
   stopifnot(tsibble::is_tsibble(data))
   data1 <- data
   data_index <- index(data1)
@@ -141,7 +143,8 @@ model_gaim <- function(data, yvar, neighbour = 0, index.vars, index.ind,
   # Model fitting
   gaim_list <- vector(mode = "list", length = NROW(ref))
   for (i in seq_along(ref$key_num)){
-    print(paste0('model ', paste0(i)))
+    if(verbose)
+      print(paste0('model ', paste0(i)))
     df_cat <- data1 |>
       dplyr::filter((abs(num_key - ref$key_num[i]) <= neighbour) |
                       (abs(num_key - ref$key_num[i] + NROW(ref)) <= neighbour) |

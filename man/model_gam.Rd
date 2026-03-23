@@ -12,6 +12,7 @@ model_gam(
   s.vars,
   s.basedim = NULL,
   linear.vars = NULL,
+  verbose = FALSE,
   ...
 )
 }
@@ -46,6 +47,9 @@ corresponding to \code{s.vars}. (For more information refer
 \item{linear.vars}{A \code{character} vector of names of the predictor
 variables that should be included linearly into the model (i.e. linear
 predictors).}
+
+\item{verbose}{Logical; controls whether progress messages (model indices)
+are printed during fitting. Defaults to FALSE.}
 
 \item{...}{Other arguments not currently used.}
 }

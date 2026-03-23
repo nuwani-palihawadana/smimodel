@@ -79,7 +79,8 @@
 #' @param MIPGap Relative MIP optimality gap.
 #' @param NonConvex The strategy for handling non-convex quadratic objectives or
 #'   non-convex quadratic constraints in Gurobi solver.
-#' @param verbose The option to print detailed solver output.
+#' @param verbose The option to print detailed solver output and
+#'   optimisation/greedy search progress messages. Defaults to FALSE.
 #' @param parallel The option to use parallel processing in fitting SMI models
 #'   for different penalty parameter combinations.
 #' @param workers If \code{parallel = TRUE}: Number of cores to use.
@@ -118,11 +119,6 @@
 #'   corresponding validation set MSEs.} The number of
 #'   rows of the \code{tibble} equals to the number of levels in the grouping
 #'   variable.
-#'
-#' @references Palihawadana, N.K., Hyndman, R.J. & Wang, X. (2024). Sparse
-#'   Multiple Index Models for High-Dimensional Nonparametric Forecasting.
-#'   (Department of Econometrics and Business Statistics Working Paper Series
-#'   16/24).
 #'
 #' @seealso \code{\link{model_smimodel}}
 #'
@@ -228,7 +224,8 @@ greedy_smimodel <- function(data, val.data, yvar, neighbour = 0,
     )
   smimodels_list <- vector(mode = "list", length = NROW(ref))
   for (i in seq_along(ref$key_num)){
-    print(paste0('model ', paste0(i)))
+    if(verbose)
+      print(paste0('model ', paste0(i)))
     df_cat <- data1 |>
       dplyr::filter((abs(num_key - ref$key_num[i]) <= neighbour) |
                       (abs(num_key - ref$key_num[i] + NROW(ref)) <= neighbour) |
@@ -343,7 +340,8 @@ utils::globalVariables(c("dummy_key", "num_key"))
 #' @param MIPGap Relative MIP optimality gap.
 #' @param NonConvex The strategy for handling non-convex quadratic objectives or
 #'   non-convex quadratic constraints in Gurobi solver.
-#' @param verbose The option to print detailed solver output.
+#' @param verbose The option to print detailed solver output and
+#'   optimisation/greedy search progress messages. Defaults to FALSE.
 #' @param parallel The option to use parallel processing in fitting SMI models
 #'   for different penalty parameter combinations.
 #' @param workers If \code{parallel = TRUE}: Number of cores to use.
@@ -451,7 +449,8 @@ greedy.fit <- function(data, val.data, yvar, neighbour = 0,
                           exclude.trunc = exclude.trunc,
                           recursive = recursive,
                           recursive_colRange = recursive_colRange))
-  print("Potential starting points completed.")
+  if(verbose)
+    print("Potential starting points completed.")
   # Updating searched combinations store
   all_comb <- bind_rows(all_comb, lambda_comb_start)
   # Updating searched combinations MSE
@@ -518,7 +517,8 @@ greedy.fit <- function(data, val.data, yvar, neighbour = 0,
         min_MSE_list[[i]] <- current_MSE
         min_lambdas_list[[i]] <- current_lambdas
       }
-      print(paste("Initial search around potential starting point", i, "completed."))
+      if(verbose)
+        print(paste("Initial search around potential starting point", i, "completed."))
       # Updating searched combinations store
       all_comb <- bind_rows(all_comb, lambda_comb)
       # Updating searched combinations MSE
@@ -530,7 +530,8 @@ greedy.fit <- function(data, val.data, yvar, neighbour = 0,
   min_lambda_pos <- which.min(unlist(min_MSE_list))
   min_MSE <- min(unlist(min_MSE_list))
   min_lambdas <- as.numeric(min_lambdas_list[[min_lambda_pos]])
-  print("Starting point for the greedy search selected.")
+  if(verbose)
+    print("Starting point for the greedy search selected.")
   # Reset current minimum MSE
   current_MSE <- Inf
   # Reset current best lambdas
@@ -588,7 +589,8 @@ greedy.fit <- function(data, val.data, yvar, neighbour = 0,
       min_lambda_pos <- which.min(unlist(MSE_list))
       min_MSE <- min(unlist(MSE_list))
       min_lambdas <- as.numeric(lambda_comb[min_lambda_pos, ])
-      print("An iteration of greedy search - step 1 is completed.")
+      if(verbose)
+        print("An iteration of greedy search - step 1 is completed.")
       # Updating searched combinations store
       all_comb <- bind_rows(all_comb, lambda_comb)
       # Updating searched combinations MSE
@@ -659,7 +661,8 @@ greedy.fit <- function(data, val.data, yvar, neighbour = 0,
         min_lambda_pos <- which.min(unlist(MSE_list))
         min_MSE <- min(unlist(MSE_list))
         min_lambdas <- as.numeric(lambda_comb[min_lambda_pos, ])
-        print("An iteration of greedy search - step 2 is completed.")
+        if(verbose)
+          print("An iteration of greedy search - step 2 is completed.")
         # Updating searched combinations store
         all_comb <- bind_rows(all_comb, lambda_comb)
         # Updating searched combinations MSE
@@ -728,7 +731,8 @@ greedy.fit <- function(data, val.data, yvar, neighbour = 0,
                                         tol = tol, tolCoefs = tolCoefs,
                                         TimeLimit = TimeLimit, MIPGap = MIPGap,
                                         NonConvex = NonConvex, verbose = verbose)
-    print("Final SMI model is fitted.")
+    if(verbose)
+      print("Final SMI model is fitted.")
   }else if(min_three_mse == 2){
     final_smimodel_list <- smimodel.fit(data = data, yvar = yvar,
                                         neighbour = neighbour,
@@ -747,7 +751,7 @@ greedy.fit <- function(data, val.data, yvar, neighbour = 0,
                                         tol = tol, tolCoefs = tolCoefs,
                                         TimeLimit = TimeLimit, MIPGap = MIPGap,
                                         NonConvex = NonConvex, verbose = verbose)
-    print("A null index model is selected as the final model. The final model consists only of s.vars and/or linear.vars.")
+    message("A null index model is selected as the final model. The final model consists only of s.vars and/or linear.vars.")
   }else if(min_three_mse == 3){
     final_smimodel_list <- smimodel.fit(data = data, yvar = yvar,
                                         neighbour = neighbour,
@@ -766,7 +770,7 @@ greedy.fit <- function(data, val.data, yvar, neighbour = 0,
                                         tol = tol, tolCoefs = tolCoefs,
                                         TimeLimit = TimeLimit, MIPGap = MIPGap,
                                         NonConvex = NonConvex, verbose = verbose)
-    print("A null model is selected as the final model. The final model includes only the intercept.")
+    message("A null model is selected as the final model. The final model includes only the intercept.")
   }
   output <- list("initial" = final_smimodel_list$initial,
                  "best" = final_smimodel_list$best,
@@ -844,7 +848,8 @@ utils::globalVariables(c("Var1", "Var2"))
 #' @param MIPGap Relative MIP optimality gap.
 #' @param NonConvex The strategy for handling non-convex quadratic objectives or
 #'   non-convex quadratic constraints in Gurobi solver.
-#' @param verbose The option to print detailed solver output.
+#' @param verbose The option to print detailed solver output and
+#'   optimisation progress messages. Defaults to FALSE.
 #' @param exclude.trunc The names of the predictor variables that should not be
 #'   truncated for stable predictions as a character string. (Since the
 #'   nonlinear functions are estimated using splines, extrapolation is not

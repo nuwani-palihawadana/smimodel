@@ -4,7 +4,7 @@
 \alias{model_lm}
 \title{Linear Regression models}
 \usage{
-model_lm(data, yvar, neighbour = 0, linear.vars, ...)
+model_lm(data, yvar, neighbour = 0, linear.vars, verbose = FALSE, ...)
 }
 \arguments{
 \item{data}{Training data set on which models will be trained. Must be a data
@@ -25,6 +25,9 @@ The default is \code{neighbour = 0} (i.e. no neighbours are considered for
 model fitting).}
 
 \item{linear.vars}{A character vector of names of the predictor variables.}
+
+\item{verbose}{Logical; controls whether progress messages (model indices)
+are printed during fitting. Defaults to FALSE.}
 
 \item{...}{Other arguments not currently used.}
 }

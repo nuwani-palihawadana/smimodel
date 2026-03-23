@@ -66,7 +66,8 @@
 #' @param MIPGap Relative MIP optimality gap.
 #' @param NonConvex The strategy for handling non-convex quadratic objectives or
 #'   non-convex quadratic constraints in Gurobi solver.
-#' @param verbose The option to print detailed solver output.
+#' @param verbose The option to print detailed solver output and
+#'   optimisation progress messages. Defaults to FALSE.
 #' @return  An object of class \code{smimodel}. This is a \code{tibble} with two
 #'   columns: \item{key}{The level of the grouping variable (i.e. key of the
 #'   training data set).} \item{fit}{Information of the fitted model
@@ -193,7 +194,8 @@ model_smimodel <- function(data, yvar, neighbour = 0, family = gaussian(),
     )
   smimodels_list <- vector(mode = "list", length = NROW(ref))
   for (i in seq_along(ref$key_num)){
-    print(paste0('model ', paste0(i)))
+    if(verbose)
+      print(paste0('model ', paste0(i)))
     df_cat <- data1 |>
       dplyr::filter((abs(num_key - ref$key_num[i]) <= neighbour) |
                       (abs(num_key - ref$key_num[i] + NROW(ref)) <= neighbour) |
@@ -286,7 +288,8 @@ model_smimodel <- function(data, yvar, neighbour = 0, family = gaussian(),
 #' @param MIPGap Relative MIP optimality gap.
 #' @param NonConvex The strategy for handling non-convex quadratic objectives or
 #'   non-convex quadratic constraints in Gurobi solver.
-#' @param verbose The option to print detailed solver output.
+#' @param verbose The option to print detailed solver output and
+#'   optimisation progress messages. Defaults to FALSE.
 #' @return A list with two elements: \item{initial}{A list of information of the
 #'   model initialisation. (For descriptions of the list elements see
 #'   \code{\link{make_smimodelFit}}).} \item{best}{A list of information of the
@@ -368,7 +371,8 @@ smimodel.fit <- function(data, yvar, neighbour = 0,
     permutes <- gtools::permutations(num_ind, num_ind)
     set.seed(seed)
     for(j in 1:num_models){
-      print(paste0("Multiple starting points: ", j))
+      if(verbose)
+        print(paste0("Multiple starting points: ", j))
       permute_ind <- sample(1:dim(permutes)[1], 1)
       rest <- sample(1:num_ind, (num_pred - num_ind), replace = TRUE)
       indexInd <- c(permutes[permute_ind, ], rest)
@@ -773,7 +777,8 @@ make_smimodelFit <- function(x, data, yvar, neighbour, index.vars, index.ind, in
 #' @param MIPGap Relative MIP optimality gap.
 #' @param NonConvex The strategy for handling non-convex quadratic objectives or
 #'   non-convex quadratic constraints in Gurobi solver.
-#' @param verbose The option to print detailed solver output.
+#' @param verbose The option to print detailed solver output and
+#'   optimisation progress messages. Defaults to FALSE.
 #' @param ... Other arguments not currently used.
 #' @return  A list of optimised model information. For descriptions of the list
 #'   elements see \code{\link{make_smimodelFit}}).
@@ -838,7 +843,8 @@ update_smimodelFit <- function(object, data, lambda0 = 1, lambda2 = 1,
                                    index = data_index,
                                    key = all_of(data_key))
     index.names <- paste0("index", 1:length(best_alpha1$ind_pos))
-    print("Final model fitted!")
+    if(verbose)
+      print("Final model fitted!")
     final_smimodel <- make_smimodelFit(x = fun1_final, data = data,
                                        yvar = object$var_y, 
                                        neighbour = object$neighbour,
@@ -1022,7 +1028,8 @@ update_smimodelFit <- function(object, data, lambda0 = 1, lambda2 = 1,
           }else{
             index.names <- paste0("index", 1:length(best_alpha2$ind_pos))
             alpha_current <- best_alpha2$best_alpha
-            print("Final model fitted!")
+            if(verbose)
+              print("Final model fitted!")
             final_smimodel <- make_smimodelFit(x = fun_null, data = data,
                                                yvar = object$var_y, 
                                                neighbour = object$neighbour,
@@ -1115,7 +1122,8 @@ update_smimodelFit <- function(object, data, lambda0 = 1, lambda2 = 1,
       fun1_final$model <- as_tsibble(fun1_final$model,
                                      index = data_index,
                                      key = all_of(data_key))
-      print("Final model fitted!")
+      if(verbose)
+        print("Final model fitted!")
       final_smimodel <- make_smimodelFit(x = fun1_final, data = data,
                                          yvar = object$var_y,
                                          neighbour = object$neighbour,
@@ -1171,7 +1179,8 @@ update_smimodelFit <- function(object, data, lambda0 = 1, lambda2 = 1,
 #' @param MIPGap Relative MIP optimality gap.
 #' @param NonConvex The strategy for handling non-convex quadratic objectives or
 #'   non-convex quadratic constraints in Gurobi solver.
-#' @param verbose The option to print detailed solver output.
+#' @param verbose The option to print detailed solver output and
+#'   optimisation progress messages. Defaults to FALSE.
 #' @return A list containing following elements: \item{best_alpha}{The vector of
 #'   best index coefficient estimates.} \item{min_loss}{Minimum value of the
 #'   objective function(loss).}
@@ -1230,7 +1239,8 @@ inner_update <- function(x, data, yvar, family = gaussian(), index.vars,
       best_index <- index
       best_ind_pos <- ind_pos
       best_X_new <- NULL
-      print("Null indices are produced!")
+      if(verbose)
+        print("Null indices are produced!")
       break
     }else{
       # Checking for all zero indices
@@ -1317,15 +1327,18 @@ inner_update <- function(x, data, yvar, family = gaussian(), index.vars,
         increase_count <- 0
       }
       if ((eps > 0) & (eps < tol)) { 
-        print("Tolerance for loss reached!")
+        if(verbose)
+          print("Tolerance for loss reached!")
         break
       }else if(increase_count >= 3){
-        print("Loss increased for 3 consecutive iterations!")
+        if(verbose)
+          print("Loss increased for 3 consecutive iterations!")
         break
       }
       maxIt <- maxIt + 1
       if (maxIt > max.iter) { 
-        print("Maximum iterations reached!")
+        if(verbose)
+          print("Maximum iterations reached!")
       }
     }
   }

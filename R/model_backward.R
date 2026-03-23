@@ -54,6 +54,8 @@
 #'   order (i.e. \code{lag_1, lag_2, ..., lag_m}, \code{lag_m =} maximum lag
 #'   used) in \code{val.data}, with no break in the lagged variable sequence
 #'   even if some of the intermediate lags are not used as predictors.
+#' @param verbose Logical; controls whether progress messages (model indices)
+#'   are printed during fitting. Defaults to FALSE.
 #' @return An object of class \code{backward}. This is a \code{tibble} with two
 #'   columns: \item{key}{The level of the grouping variable (i.e. key of the
 #'   training data set).} \item{fit}{Information of the fitted model
@@ -122,7 +124,8 @@ model_backward <- function(data, val.data, yvar,
                            linear.vars = NULL, refit = TRUE, tol = 0.001, 
                            parallel = FALSE, workers = NULL,
                            exclude.trunc = NULL,
-                           recursive = FALSE, recursive_colRange = NULL){
+                           recursive = FALSE, recursive_colRange = NULL,
+                           verbose = FALSE){
   if (!is_tsibble(data)) stop("data is not a tsibble.")
   if (!is_tsibble(val.data)) stop("val.data is not a tsibble.")
   if (is.null(c(linear.vars, s.vars))) 
@@ -276,7 +279,8 @@ model_backward <- function(data, val.data, yvar,
     models_list[[i]]$model <- as_tsibble(models_list[[i]]$model,
                                          index = index_train,
                                          key = all_of(key_train))
-    print(paste0("Model ", i, " fitted!"))
+    if(verbose)
+      print(paste0("Model ", i, " fitted!"))
   }
   data_list <- list(key_unique, models_list)
   models <- as_tibble(x = data_list, 

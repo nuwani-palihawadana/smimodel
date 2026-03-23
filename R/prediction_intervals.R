@@ -57,6 +57,8 @@
 #'   that is required in a test set.
 #' @param nacheck_frac_denominator Denominator of the fraction of non-missing
 #'   values that is required in a test set.
+#' @param verbose Logical; controls whether progress messages are printed during
+#'   the cross-validation procedure. Defaults to FALSE.
 #' @param ... Other arguments not currently used.
 #' @return An object of class \code{cb_cvforecast}, which is a list that
 #'   contains following elements: \item{x}{The original time series.}
@@ -146,7 +148,7 @@ cb_cvforecast <- function(object, data, yvar, neighbour = 0, predictor.vars,
                           exclude.trunc = NULL,
                           recursive = FALSE, recursive_colNames = NULL, 
                           na.rm = TRUE, nacheck_frac_numerator = 2, 
-                          nacheck_frac_denominator = 3, ...) {
+                          nacheck_frac_denominator = 3, verbose = FALSE, ...) {
   # Check input data
   if (!is_tsibble(data)) stop("data is not a tsibble.")
   
@@ -208,7 +210,8 @@ cb_cvforecast <- function(object, data, yvar, neighbour = 0, predictor.vars,
   
   modelFit = vector(mode = "list", length = indx[length(indx)])
   for (i in indx) {
-    print(paste("This is", i))
+    if(verbose)
+      print(paste("This is", i))
     train_start <- ifelse(is.null(window), 1L, i - window + 1L)
     suppressWarnings(train <- data1[train_start:i, ] |>
                        as_tibble() |>
@@ -222,7 +225,8 @@ cb_cvforecast <- function(object, data, yvar, neighbour = 0, predictor.vars,
                        as_tsibble(index = index_data, key = key_data1))
     
     if(any(is.na(test))){
-      print(paste0("Skipping a window due to missing values in test set!"))
+      if(verbose)
+        print(paste0("Skipping a window due to missing values in test set!"))
       next
     }
     
@@ -281,7 +285,9 @@ cb_cvforecast <- function(object, data, yvar, neighbour = 0, predictor.vars,
                                         linear.vars = object$fit[[b]]$best$vars_linear,
                                         lambda0 = 0, # Setting to zero to fix the structure
                                         # of the SMI model being re-estimated
-                                        lambda2 = object$fit[[b]]$best_lambdas[2],
+                                        lambda2 = object$fit[[b]]$best$lambda2, # Take lambda2 
+                                        # from best$lambda2 instead of object$fit[[b]]$best_lambdas
+                                        # as model_smimodel() does not return best_lambdas
                                         M = object$fit[[b]]$best$M,
                                         max.iter = object$fit[[b]]$best$max.iter,
                                         tol = object$fit[[b]]$best$tol,
@@ -386,7 +392,11 @@ cb_cvforecast <- function(object, data, yvar, neighbour = 0, predictor.vars,
   ### Bootstrapping non-conformity scores with rolling calibration sets
   #errors_temp <- na.omit(err)
   errors_temp <- ts(err[indx, ], start = indx[1], end = indx[length(indx)], frequency = frequency(err))
-  errors <- ts(errors_temp[1:NROW(errors_temp) - 1, ], start = start(errors_temp), frequency = frequency(errors_temp))
+  if(NCOL(errors_temp) == 1){ # h = 1
+    errors <- ts(errors_temp[1:NROW(errors_temp) - 1], start = start(errors_temp), frequency = frequency(errors_temp))
+  }else{ # h > 1
+    errors <- ts(errors_temp[1:NROW(errors_temp) - 1, ], start = start(errors_temp), frequency = frequency(errors_temp))
+  }
   if (ncal > NROW(errors))
     stop("`ncal` is larger than the number of rows in the matrix of non-conformity scores.")
   
@@ -397,7 +407,8 @@ cb_cvforecast <- function(object, data, yvar, neighbour = 0, predictor.vars,
   possiblefutures_list <- vector(mode = "list", length = cal_times)
   count <- 0
   for(j in indx_cal){
-    print(paste("This is", j))
+    if(verbose)
+      print(paste("This is", j))
     count <- count + 1
     # Calibration set
     errors_subset <- subset(errors,
@@ -439,7 +450,8 @@ cb_cvforecast <- function(object, data, yvar, neighbour = 0, predictor.vars,
         as_tsibble(index = index_data, key = key_data1)
       nacheck_rows <- NROW(newdata)*(nacheck_frac_numerator/nacheck_frac_denominator)
       if(any(is.na(newdata[1:nacheck_rows, ]))){
-        print(paste0("Skipping generation of PIs due to too many missing values in test set!"))
+        if(verbose)
+          print(paste0("Skipping generation of PIs due to too many missing values in test set!"))
         # Update skip_cal
         skip_cal[[count]] <- 1
         # possibleFutures_mat with NAs
@@ -452,7 +464,8 @@ cb_cvforecast <- function(object, data, yvar, neighbour = 0, predictor.vars,
       # Forecasting model estimated on the most recent training window
       forecastModel <- modelFit[[end(errors_subset)[1] + 1]]
       if(is.null(forecastModel)){
-        print(paste0("Skipping generation of PIs; no forecast model available!"))
+        if(verbose)
+          print(paste0("Skipping generation of PIs; no forecast model available!"))
         # Update skip_cal
         skip_cal[[count]] <- 1
         # possibleFutures_mat with NAs
@@ -581,6 +594,8 @@ cb_cvforecast <- function(object, data, yvar, neighbour = 0, predictor.vars,
 #'   some of the intermediate lags are not used as predictors.
 #' @param na.rm logical; if \code{TRUE} (default), any \code{NA} and
 #'   \code{NaN}'s are removed from the sample before the quantiles are computed.
+#' @param verbose Logical; controls whether progress messages are printed during
+#'   the cross-validation procedure. Defaults to FALSE.
 #' @param ... Other arguments not currently used.
 #' @return An object of class \code{bb_cvforecast}, which is a list that
 #'   contains following elements: \item{x}{The original time series.}
@@ -665,7 +680,7 @@ bb_cvforecast <- function(object, data,
                           initial = 1, window = NULL, roll.length = 1,
                           exclude.trunc = NULL,
                           recursive = FALSE, recursive_colNames = NULL, 
-                          na.rm = TRUE, ...) {
+                          na.rm = TRUE, verbose = FALSE, ...) {
   # Check input data
   if (!is_tsibble(data)) stop("data is not a tsibble.")
 
@@ -729,7 +744,8 @@ bb_cvforecast <- function(object, data,
   modelFit = vector(mode = "list", length = length(indx))
   pFutures = vector(mode = "list", length = length(indx))
   for (i in indx) {
-    print(paste("This is", i))
+    if(verbose)
+      print(paste("This is", i))
     train_start <- ifelse(is.null(window), 1L, i - window + 1L)
     suppressWarnings(train <- data1[train_start:i, ] |>
                        as_tibble() |>
@@ -743,7 +759,8 @@ bb_cvforecast <- function(object, data,
                        as_tsibble(index = index_data, key = key_data1))
     
     if(any(is.na(test))){
-      print(paste0("Skipping a window due to missing values in test set!"))
+      if(verbose)
+        print(paste0("Skipping a window due to missing values in test set!"))
       next
     }
     
@@ -802,7 +819,9 @@ bb_cvforecast <- function(object, data,
                                         linear.vars = object$fit[[b]]$best$vars_linear,
                                         lambda0 = 0, # Setting to zero to fix the structure
                                         # of the SMI model being re-estimated
-                                        lambda2 = object$fit[[b]]$best_lambdas[2],
+                                        lambda2 = object$fit[[b]]$best$lambda2, # Take lambda2 
+                                        # from best$lambda2 instead of object$fit[[b]]$best_lambdas
+                                        # as model_smimodel() does not return best_lambdas
                                         M = object$fit[[b]]$best$M,
                                         max.iter = object$fit[[b]]$best$max.iter,
                                         tol = object$fit[[b]]$best$tol,

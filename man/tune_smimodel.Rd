@@ -114,7 +114,8 @@ MIP iteration.}
 \item{NonConvex}{The strategy for handling non-convex quadratic objectives or
 non-convex quadratic constraints in Gurobi solver.}
 
-\item{verbose}{The option to print detailed solver output.}
+\item{verbose}{The option to print detailed solver output and
+optimisation progress messages. Defaults to FALSE.}
 
 \item{exclude.trunc}{The names of the predictor variables that should not be
 truncated for stable predictions as a character string. (Since the

@@ -22,6 +22,8 @@
 #' @param num_ind An \code{integer} that specifies the number of indices to be
 #'   used in the model(s). (Corresponds to \code{nterms} in
 #'   \code{stats::ppr()}.)
+#' @param verbose Logical; controls whether progress messages (model indices)
+#'   are printed during fitting. Defaults to FALSE.
 #' @param ... Other arguments not currently used. (For more information on other
 #'   arguments that can be passed, refer \code{stats::ppr()}.)
 #' @return An object of class \code{pprFit}. This is a \code{tibble} with two
@@ -84,7 +86,7 @@
 #' pprModel$fit[[1]]
 #'
 #' @export
-model_ppr <- function(data, yvar, neighbour = 0, index.vars, num_ind = 5, ...){
+model_ppr <- function(data, yvar, neighbour = 0, index.vars, num_ind = 5, verbose = FALSE, ...){
   stopifnot(tsibble::is_tsibble(data))
   data1 <- data
   data_index <- index(data1)
@@ -110,7 +112,8 @@ model_ppr <- function(data, yvar, neighbour = 0, index.vars, num_ind = 5, ...){
   # Model fitting
   ppr_list <- vector(mode = "list", length = NROW(ref))
   for (i in seq_along(ref$key_num)){
-    print(paste0('model ', paste0(i)))
+    if(verbose)
+      print(paste0('model ', paste0(i)))
     df_cat <- data1 |>
       dplyr::filter((abs(num_key - ref$key_num[i]) <= neighbour) |
                       (abs(num_key - ref$key_num[i] + NROW(ref)) <= neighbour) |

@@ -19,7 +19,8 @@ model_backward(
   workers = NULL,
   exclude.trunc = NULL,
   recursive = FALSE,
-  recursive_colRange = NULL
+  recursive_colRange = NULL,
+  verbose = FALSE
 )
 }
 \arguments{
@@ -87,6 +88,9 @@ Make sure such lagged variables are positioned together in increasing lag
 order (i.e. \code{lag_1, lag_2, ..., lag_m}, \code{lag_m =} maximum lag
 used) in \code{val.data}, with no break in the lagged variable sequence
 even if some of the intermediate lags are not used as predictors.}
+
+\item{verbose}{Logical; controls whether progress messages (model indices)
+are printed during fitting. Defaults to FALSE.}
 }
 \value{
 An object of class \code{backward}. This is a \code{tibble} with two

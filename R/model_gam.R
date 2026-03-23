@@ -27,6 +27,8 @@
 #' @param linear.vars A \code{character} vector of names of the predictor
 #'   variables that should be included linearly into the model (i.e. linear
 #'   predictors).
+#' @param verbose Logical; controls whether progress messages (model indices)
+#'   are printed during fitting. Defaults to FALSE.
 #' @param ... Other arguments not currently used.
 #' @return An object of class \code{gamFit}. This is a \code{tibble} with two
 #'   columns: \item{key}{The level of the grouping variable (i.e. key of the
@@ -78,7 +80,7 @@
 #'
 #' @export
 model_gam <- function(data, yvar, family = gaussian(), neighbour = 0, s.vars, 
-                      s.basedim = NULL, linear.vars = NULL, ...){
+                      s.basedim = NULL, linear.vars = NULL, verbose = FALSE, ...){
   stopifnot(tsibble::is_tsibble(data))
   if (is.null(c(linear.vars, s.vars))) 
     stop("No predictor variables specified; s.vars = NULL, linear.vars = NULL.")
@@ -117,7 +119,8 @@ model_gam <- function(data, yvar, family = gaussian(), neighbour = 0, s.vars,
   # Model fitting
   gam_list <- vector(mode = "list", length = NROW(ref))
   for (i in seq_along(ref$key_num)){
-    print(paste0('model ', paste0(i)))
+    if(verbose)
+      print(paste0('model ', paste0(i)))
     df_cat <- data1 |>
       dplyr::filter((abs(num_key - ref$key_num[i]) <= neighbour) |
                       (abs(num_key - ref$key_num[i] + NROW(ref)) <= neighbour) |

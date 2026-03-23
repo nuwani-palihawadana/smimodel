@@ -4,6 +4,8 @@
 #'
 #' @param x An object of class \code{smimodel}.
 #' @param ... Other arguments not currently used.
+#' @return No return value; called for side effects. Prints a summary of the
+#'   fitted model(s) to console.
 #'
 #' @method print smimodel
 #'
@@ -20,6 +22,8 @@ print.smimodel <- function(x, ...) {
 #'
 #' @param x An object of class \code{smimodelFit}.
 #' @param ... Other arguments not currently used.
+#' @return No return value; called for side effects. Prints a summary of the
+#'   fitted model to console.
 #'
 #' @method print smimodelFit
 #'
@@ -54,6 +58,8 @@ print.smimodelFit <- function(x, ...) {
 #' @param x A model object of class \code{backward} as produced by
 #'   \code{model_backward()} function.
 #' @param ... Other arguments not currently used.
+#' @return No return value; called for side effects. Prints a summary of the
+#'   fitted model(s) to console.
 #'
 #' @method print backward
 #'
@@ -71,6 +77,8 @@ print.backward <- function(x, ...) {
 #' @param x A model object of class \code{pprFit} as produced by
 #'   \code{model_ppr()} function.
 #' @param ... Other arguments not currently used.
+#' @return No return value; called for side effects. Prints a summary of the
+#'   fitted model(s) to console.
 #'
 #' @method print pprFit
 #'
@@ -88,6 +96,8 @@ print.pprFit <- function(x, ...) {
 #' @param x A model object of class \code{gaimFit} as produced by
 #'   \code{model_gaim()} function.
 #' @param ... Other arguments not currently used.
+#' @return No return value; called for side effects. Prints a summary of the
+#'   fitted model(s) to console.
 #'
 #' @method print gaimFit
 #'

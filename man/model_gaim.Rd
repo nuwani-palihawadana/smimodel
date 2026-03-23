@@ -12,6 +12,7 @@ model_gaim(
   index.ind,
   s.vars = NULL,
   linear.vars = NULL,
+  verbose = FALSE,
   ...
 )
 }
@@ -45,6 +46,9 @@ part of an index).}
 
 \item{linear.vars}{A \code{character} vector of names of the predictor
 variables that should be included linearly into the model.}
+
+\item{verbose}{Logical; controls whether progress messages (model indices)
+are printed during fitting. Defaults to FALSE.}
 
 \item{...}{Other arguments not currently used. (Note that the arguments in
 \code{cgaim::cgaim()} related to constrained GAIMs are currently not

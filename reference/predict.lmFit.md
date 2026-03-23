@@ -81,7 +81,6 @@ linear.vars <- colnames(sim_data)[3:8]
 lmModel <- model_lm(data = sim_train,
                     yvar = "y",
                     linear.vars = linear.vars)
-#> [1] "model 1"
                     
 predict(object = lmModel, newdata = sim_test)
 #> # A tsibble: 10 x 10 [1]

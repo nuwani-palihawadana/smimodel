@@ -60,7 +60,6 @@ gamModel <- model_gam(data = sim_data,
                       yvar = "y",
                       s.vars = s.vars,
                       linear.vars = linear.vars)
-#> [1] "model 1"
 
 # Obtain residuals and fitted values
 augment(gamModel)

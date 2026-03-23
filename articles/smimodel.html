@@ -195,12 +195,7 @@ algorithm, as predictors which are entering indices.</p>
 <span><span class="va">smimodel_ppr</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/model_smimodel.html">model_smimodel</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">sim_train</span>,</span>
 <span>                               yvar <span class="op">=</span> <span class="st">"y"</span>,</span>
 <span>                               index.vars <span class="op">=</span> <span class="va">index.vars</span>,</span>
-<span>                               initialise <span class="op">=</span> <span class="st">"ppr"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "model 1"</span></span>
-<span><span class="co">#&gt; [1] "Tolerance for loss reached!"</span></span>
-<span><span class="co">#&gt; [1] "Loss increased for 3 consecutive iterations!"</span></span>
-<span><span class="co">#&gt; [1] "Loss increased for 3 consecutive iterations!"</span></span>
-<span><span class="co">#&gt; [1] "Final model fitted!"</span></span></code></pre></div>
+<span>                               initialise <span class="op">=</span> <span class="st">"ppr"</span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Fitted optimal SMI model</span></span>
 <span><span class="va">smimodel_ppr</span><span class="op">$</span><span class="va">fit</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">best</span></span>
@@ -258,11 +253,7 @@ algorithm, as predictors which are entering indices.</p>
 <span><span class="va">smimodel_additive</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/model_smimodel.html">model_smimodel</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">sim_train</span>,</span>
 <span>                                    yvar <span class="op">=</span> <span class="st">"y"</span>,</span>
 <span>                                    index.vars <span class="op">=</span> <span class="va">index.vars</span>,</span>
-<span>                                    initialise <span class="op">=</span> <span class="st">"additive"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "model 1"</span></span>
-<span><span class="co">#&gt; [1] "Loss increased for 3 consecutive iterations!"</span></span>
-<span><span class="co">#&gt; [1] "Loss increased for 3 consecutive iterations!"</span></span>
-<span><span class="co">#&gt; [1] "Final model fitted!"</span></span></code></pre></div>
+<span>                                    initialise <span class="op">=</span> <span class="st">"additive"</span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Fitted optimal SMI model</span></span>
 <span><span class="va">smimodel_additive</span><span class="op">$</span><span class="va">fit</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">best</span></span>
@@ -320,11 +311,7 @@ algorithm, as predictors which are entering indices.</p>
 <span><span class="va">smimodel_linear</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/model_smimodel.html">model_smimodel</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">sim_train</span>,</span>
 <span>                                  yvar <span class="op">=</span> <span class="st">"y"</span>,</span>
 <span>                                  index.vars <span class="op">=</span> <span class="va">index.vars</span>,</span>
-<span>                                  initialise <span class="op">=</span> <span class="st">"linear"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "model 1"</span></span>
-<span><span class="co">#&gt; [1] "Tolerance for loss reached!"</span></span>
-<span><span class="co">#&gt; [1] "Loss increased for 3 consecutive iterations!"</span></span>
-<span><span class="co">#&gt; [1] "Final model fitted!"</span></span></code></pre></div>
+<span>                                  initialise <span class="op">=</span> <span class="st">"linear"</span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Fitted optimal SMI model</span></span>
 <span><span class="va">smimodel_linear</span><span class="op">$</span><span class="va">fit</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">best</span></span>
@@ -541,169 +528,7 @@ parameter tuning as follows. Here, we use the initialisation option
 <span>                                     val.data <span class="op">=</span> <span class="va">sim_val_new</span>,</span>
 <span>                                     yvar <span class="op">=</span> <span class="st">"y"</span>,</span>
 <span>                                     index.vars <span class="op">=</span> <span class="va">index.vars</span>,</span>
-<span>                                     initialise <span class="op">=</span> <span class="st">"ppr"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "model 1"</span></span>
-<span><span class="co">#&gt; [1] "model 1"</span></span>
-<span><span class="co">#&gt; [1] "Tolerance for loss reached!"</span></span>
-<span><span class="co">#&gt; [1] "Final model fitted!"</span></span>
-<span><span class="co">#&gt; [1] "Tolerance for loss reached!"</span></span>
-<span><span class="co">#&gt; [1] "Tolerance for loss reached!"</span></span>
-<span><span class="co">#&gt; [1] "Final model fitted!"</span></span>
-<span><span class="co">#&gt; [1] "Tolerance for loss reached!"</span></span>
-<span><span class="co">#&gt; [1] "Tolerance for loss reached!"</span></span>
-<span><span class="co">#&gt; [1] "Final model fitted!"</span></span>
-<span><span class="co">#&gt; [1] "Tolerance for loss reached!"</span></span>
-<span><span class="co">#&gt; [1] "Final model fitted!"</span></span>
-<span><span class="co">#&gt; [1] "Tolerance for loss reached!"</span></span>
-<span><span class="co">#&gt; [1] "Tolerance for loss reached!"</span></span>
-<span><span class="co">#&gt; [1] "Final model fitted!"</span></span>
-<span><span class="co">#&gt; [1] "Tolerance for loss reached!"</span></span>
-<span><span class="co">#&gt; [1] "Tolerance for loss reached!"</span></span>
-<span><span class="co">#&gt; [1] "Final model fitted!"</span></span>
-<span><span class="co">#&gt; [1] "Loss increased for 3 consecutive iterations!"</span></span>
-<span><span class="co">#&gt; [1] "Final model fitted!"</span></span>
-<span><span class="co">#&gt; [1] "Loss increased for 3 consecutive iterations!"</span></span>
-<span><span class="co">#&gt; [1] "Final model fitted!"</span></span>
-<span><span class="co">#&gt; [1] "Tolerance for loss reached!"</span></span>
-<span><span class="co">#&gt; [1] "Tolerance for loss reached!"</span></span>
-<span><span class="co">#&gt; [1] "Final model fitted!"</span></span>
-<span><span class="co">#&gt; [1] "Potential starting points completed."</span></span>
-<span><span class="co">#&gt; [1] "Tolerance for loss reached!"</span></span>
-<span><span class="co">#&gt; [1] "Tolerance for loss reached!"</span></span>
-<span><span class="co">#&gt; [1] "Final model fitted!"</span></span>
-<span><span class="co">#&gt; [1] "Tolerance for loss reached!"</span></span>
-<span><span class="co">#&gt; [1] "Final model fitted!"</span></span>
-<span><span class="co">#&gt; [1] "Tolerance for loss reached!"</span></span>
-<span><span class="co">#&gt; [1] "Loss increased for 3 consecutive iterations!"</span></span>
-<span><span class="co">#&gt; [1] "Tolerance for loss reached!"</span></span>
-<span><span class="co">#&gt; [1] "Loss increased for 3 consecutive iterations!"</span></span>
-<span><span class="co">#&gt; [1] "Final model fitted!"</span></span>
-<span><span class="co">#&gt; [1] "Initial search around potential starting point 1 completed."</span></span>
-<span><span class="co">#&gt; [1] "Tolerance for loss reached!"</span></span>
-<span><span class="co">#&gt; [1] "Tolerance for loss reached!"</span></span>
-<span><span class="co">#&gt; [1] "Final model fitted!"</span></span>
-<span><span class="co">#&gt; [1] "Tolerance for loss reached!"</span></span>
-<span><span class="co">#&gt; [1] "Tolerance for loss reached!"</span></span>
-<span><span class="co">#&gt; [1] "Final model fitted!"</span></span>
-<span><span class="co">#&gt; [1] "Tolerance for loss reached!"</span></span>
-<span><span class="co">#&gt; [1] "Tolerance for loss reached!"</span></span>
-<span><span class="co">#&gt; [1] "Final model fitted!"</span></span>
-<span><span class="co">#&gt; [1] "Tolerance for loss reached!"</span></span>
-<span><span class="co">#&gt; [1] "Tolerance for loss reached!"</span></span>
-<span><span class="co">#&gt; [1] "Final model fitted!"</span></span>
-<span><span class="co">#&gt; [1] "Tolerance for loss reached!"</span></span>
-<span><span class="co">#&gt; [1] "Tolerance for loss reached!"</span></span>
-<span><span class="co">#&gt; [1] "Final model fitted!"</span></span>
-<span><span class="co">#&gt; [1] "Initial search around potential starting point 2 completed."</span></span>
-<span><span class="co">#&gt; [1] "Tolerance for loss reached!"</span></span>
-<span><span class="co">#&gt; [1] "Tolerance for loss reached!"</span></span>
-<span><span class="co">#&gt; [1] "Final model fitted!"</span></span>
-<span><span class="co">#&gt; [1] "Tolerance for loss reached!"</span></span>
-<span><span class="co">#&gt; [1] "Tolerance for loss reached!"</span></span>
-<span><span class="co">#&gt; [1] "Final model fitted!"</span></span>
-<span><span class="co">#&gt; [1] "Tolerance for loss reached!"</span></span>
-<span><span class="co">#&gt; [1] "Tolerance for loss reached!"</span></span>
-<span><span class="co">#&gt; [1] "Final model fitted!"</span></span>
-<span><span class="co">#&gt; [1] "Initial search around potential starting point 3 completed."</span></span>
-<span><span class="co">#&gt; [1] "Tolerance for loss reached!"</span></span>
-<span><span class="co">#&gt; [1] "Loss increased for 3 consecutive iterations!"</span></span>
-<span><span class="co">#&gt; [1] "Loss increased for 3 consecutive iterations!"</span></span>
-<span><span class="co">#&gt; [1] "Final model fitted!"</span></span>
-<span><span class="co">#&gt; [1] "Loss increased for 3 consecutive iterations!"</span></span>
-<span><span class="co">#&gt; [1] "Final model fitted!"</span></span>
-<span><span class="co">#&gt; [1] "Maximum iterations reached!"</span></span>
-<span><span class="co">#&gt; [1] "Final model fitted!"</span></span>
-<span><span class="co">#&gt; [1] "Initial search around potential starting point 4 completed."</span></span>
-<span><span class="co">#&gt; [1] "Tolerance for loss reached!"</span></span>
-<span><span class="co">#&gt; [1] "Tolerance for loss reached!"</span></span>
-<span><span class="co">#&gt; [1] "Final model fitted!"</span></span>
-<span><span class="co">#&gt; [1] "Tolerance for loss reached!"</span></span>
-<span><span class="co">#&gt; [1] "Tolerance for loss reached!"</span></span>
-<span><span class="co">#&gt; [1] "Final model fitted!"</span></span>
-<span><span class="co">#&gt; [1] "Loss increased for 3 consecutive iterations!"</span></span>
-<span><span class="co">#&gt; [1] "Loss increased for 3 consecutive iterations!"</span></span>
-<span><span class="co">#&gt; [1] "Final model fitted!"</span></span>
-<span><span class="co">#&gt; [1] "Loss increased for 3 consecutive iterations!"</span></span>
-<span><span class="co">#&gt; [1] "Loss increased for 3 consecutive iterations!"</span></span>
-<span><span class="co">#&gt; [1] "Final model fitted!"</span></span>
-<span><span class="co">#&gt; [1] "Loss increased for 3 consecutive iterations!"</span></span>
-<span><span class="co">#&gt; [1] "Loss increased for 3 consecutive iterations!"</span></span>
-<span><span class="co">#&gt; [1] "Final model fitted!"</span></span>
-<span><span class="co">#&gt; [1] "Initial search around potential starting point 5 completed."</span></span>
-<span><span class="co">#&gt; [1] "Tolerance for loss reached!"</span></span>
-<span><span class="co">#&gt; [1] "Tolerance for loss reached!"</span></span>
-<span><span class="co">#&gt; [1] "Final model fitted!"</span></span>
-<span><span class="co">#&gt; [1] "Tolerance for loss reached!"</span></span>
-<span><span class="co">#&gt; [1] "Tolerance for loss reached!"</span></span>
-<span><span class="co">#&gt; [1] "Final model fitted!"</span></span>
-<span><span class="co">#&gt; [1] "Tolerance for loss reached!"</span></span>
-<span><span class="co">#&gt; [1] "Tolerance for loss reached!"</span></span>
-<span><span class="co">#&gt; [1] "Final model fitted!"</span></span>
-<span><span class="co">#&gt; [1] "Initial search around potential starting point 6 completed."</span></span>
-<span><span class="co">#&gt; [1] "Tolerance for loss reached!"</span></span>
-<span><span class="co">#&gt; [1] "Final model fitted!"</span></span>
-<span><span class="co">#&gt; [1] "Tolerance for loss reached!"</span></span>
-<span><span class="co">#&gt; [1] "Final model fitted!"</span></span>
-<span><span class="co">#&gt; [1] "Tolerance for loss reached!"</span></span>
-<span><span class="co">#&gt; [1] "Final model fitted!"</span></span>
-<span><span class="co">#&gt; [1] "Initial search around potential starting point 7 completed."</span></span>
-<span><span class="co">#&gt; [1] "Tolerance for loss reached!"</span></span>
-<span><span class="co">#&gt; [1] "Tolerance for loss reached!"</span></span>
-<span><span class="co">#&gt; [1] "Tolerance for loss reached!"</span></span>
-<span><span class="co">#&gt; [1] "Final model fitted!"</span></span>
-<span><span class="co">#&gt; [1] "Tolerance for loss reached!"</span></span>
-<span><span class="co">#&gt; [1] "Tolerance for loss reached!"</span></span>
-<span><span class="co">#&gt; [1] "Tolerance for loss reached!"</span></span>
-<span><span class="co">#&gt; [1] "Final model fitted!"</span></span>
-<span><span class="co">#&gt; [1] "Tolerance for loss reached!"</span></span>
-<span><span class="co">#&gt; [1] "Tolerance for loss reached!"</span></span>
-<span><span class="co">#&gt; [1] "Tolerance for loss reached!"</span></span>
-<span><span class="co">#&gt; [1] "Final model fitted!"</span></span>
-<span><span class="co">#&gt; [1] "Loss increased for 3 consecutive iterations!"</span></span>
-<span><span class="co">#&gt; [1] "Final model fitted!"</span></span>
-<span><span class="co">#&gt; [1] "Loss increased for 3 consecutive iterations!"</span></span>
-<span><span class="co">#&gt; [1] "Final model fitted!"</span></span>
-<span><span class="co">#&gt; [1] "Initial search around potential starting point 8 completed."</span></span>
-<span><span class="co">#&gt; [1] "Tolerance for loss reached!"</span></span>
-<span><span class="co">#&gt; [1] "Tolerance for loss reached!"</span></span>
-<span><span class="co">#&gt; [1] "Final model fitted!"</span></span>
-<span><span class="co">#&gt; [1] "Tolerance for loss reached!"</span></span>
-<span><span class="co">#&gt; [1] "Tolerance for loss reached!"</span></span>
-<span><span class="co">#&gt; [1] "Final model fitted!"</span></span>
-<span><span class="co">#&gt; [1] "Tolerance for loss reached!"</span></span>
-<span><span class="co">#&gt; [1] "Tolerance for loss reached!"</span></span>
-<span><span class="co">#&gt; [1] "Final model fitted!"</span></span>
-<span><span class="co">#&gt; [1] "Initial search around potential starting point 9 completed."</span></span>
-<span><span class="co">#&gt; [1] "Starting point for the greedy search selected."</span></span>
-<span><span class="co">#&gt; [1] "Tolerance for loss reached!"</span></span>
-<span><span class="co">#&gt; [1] "Tolerance for loss reached!"</span></span>
-<span><span class="co">#&gt; [1] "Final model fitted!"</span></span>
-<span><span class="co">#&gt; [1] "Tolerance for loss reached!"</span></span>
-<span><span class="co">#&gt; [1] "Loss increased for 3 consecutive iterations!"</span></span>
-<span><span class="co">#&gt; [1] "Tolerance for loss reached!"</span></span>
-<span><span class="co">#&gt; [1] "Loss increased for 3 consecutive iterations!"</span></span>
-<span><span class="co">#&gt; [1] "Final model fitted!"</span></span>
-<span><span class="co">#&gt; [1] "Tolerance for loss reached!"</span></span>
-<span><span class="co">#&gt; [1] "Loss increased for 3 consecutive iterations!"</span></span>
-<span><span class="co">#&gt; [1] "Loss increased for 3 consecutive iterations!"</span></span>
-<span><span class="co">#&gt; [1] "Final model fitted!"</span></span>
-<span><span class="co">#&gt; [1] "An iteration of greedy search - step 1 is completed."</span></span>
-<span><span class="co">#&gt; [1] "Tolerance for loss reached!"</span></span>
-<span><span class="co">#&gt; [1] "Tolerance for loss reached!"</span></span>
-<span><span class="co">#&gt; [1] "Final model fitted!"</span></span>
-<span><span class="co">#&gt; [1] "Tolerance for loss reached!"</span></span>
-<span><span class="co">#&gt; [1] "Loss increased for 3 consecutive iterations!"</span></span>
-<span><span class="co">#&gt; [1] "Loss increased for 3 consecutive iterations!"</span></span>
-<span><span class="co">#&gt; [1] "Final model fitted!"</span></span>
-<span><span class="co">#&gt; [1] "Tolerance for loss reached!"</span></span>
-<span><span class="co">#&gt; [1] "Loss increased for 3 consecutive iterations!"</span></span>
-<span><span class="co">#&gt; [1] "Loss increased for 3 consecutive iterations!"</span></span>
-<span><span class="co">#&gt; [1] "Final model fitted!"</span></span>
-<span><span class="co">#&gt; [1] "An iteration of greedy search - step 1 is completed."</span></span>
-<span><span class="co">#&gt; [1] "Maximum iterations reached!"</span></span>
-<span><span class="co">#&gt; [1] "Maximum iterations reached!"</span></span>
-<span><span class="co">#&gt; [1] "Final model fitted!"</span></span>
-<span><span class="co">#&gt; [1] "Final SMI model is fitted."</span></span></code></pre></div>
+<span>                                     initialise <span class="op">=</span> <span class="st">"ppr"</span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Fitted optimal SMI model</span></span>
 <span><span class="va">smimodel_ppr_tune</span><span class="op">$</span><span class="va">fit</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">best</span></span>

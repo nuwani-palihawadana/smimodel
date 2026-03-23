@@ -166,7 +166,8 @@ model_smimodel(
 
 - verbose:
 
-  The option to print detailed solver output.
+  The option to print detailed solver output and optimisation progress
+  messages. Defaults to FALSE.
 
 ## Value
 

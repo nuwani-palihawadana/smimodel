@@ -56,7 +56,6 @@ linear.vars <- colnames(sim_data)[3:8]
 lmModel <- model_lm(data = sim_data,
                     yvar = "y",
                     linear.vars = linear.vars)
-#> [1] "model 1"
 # Obtain residuals and fitted values
 augment(lmModel)
 #> # A tibble: 1,000 × 3

@@ -102,7 +102,6 @@ gamModel <- model_gam(data = sim_train,
                       yvar = "y",
                       s.vars = s.vars,
                       linear.vars = linear.vars)
-#> [1] "model 1"
 
 predict(object = gamModel, newdata = sim_test)
 #> # A tsibble: 10 x 10 [1]

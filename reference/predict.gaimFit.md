@@ -106,7 +106,6 @@ gaimModel <- model_gaim(data = sim_train,
                         index.vars = index.vars,
                         index.ind = index.ind,
                         s.vars = s.vars)
-#> [1] "model 1"
                         
 predict(object = gaimModel, newdata = sim_test)
 #> # A tsibble: 10 x 10 [1]

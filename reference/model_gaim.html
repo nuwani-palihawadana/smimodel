@@ -50,6 +50,7 @@ grouping variable. Currently does not support Constrained GAIM (CGAIM)s.</p>
 <span>  <span class="va">index.ind</span>,</span>
 <span>  s.vars <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  linear.vars <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  verbose <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -100,6 +101,11 @@ part of an index).</p></dd>
 <dt id="arg-linear-vars">linear.vars<a class="anchor" aria-label="anchor" href="#arg-linear-vars"></a></dt>
 <dd><p>A <code>character</code> vector of names of the predictor
 variables that should be included linearly into the model.</p></dd>
+
+
+<dt id="arg-verbose">verbose<a class="anchor" aria-label="anchor" href="#arg-verbose"></a></dt>
+<dd><p>Logical; controls whether progress messages (model indices)
+are printed during fitting. Defaults to FALSE.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
@@ -180,7 +186,6 @@ error, which is independent of \(\boldsymbol{x}_{i}\).</p>
 <span class="r-in"><span>                        index.vars <span class="op">=</span> <span class="va">index.vars</span>,</span></span>
 <span class="r-in"><span>                        index.ind <span class="op">=</span> <span class="va">index.ind</span>,</span></span>
 <span class="r-in"><span>                        s.vars <span class="op">=</span> <span class="va">s.vars</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "model 1"</span>
 <span class="r-in"><span><span class="co"># Fitted model</span></span></span>
 <span class="r-in"><span><span class="va">gaimModel</span><span class="op">$</span><span class="va">fit</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Formula:</span>

@@ -16,6 +16,7 @@ model_gaim(
   index.ind,
   s.vars = NULL,
   linear.vars = NULL,
+  verbose = FALSE,
   ...
 )
 ```
@@ -65,6 +66,11 @@ model_gaim(
 
   A `character` vector of names of the predictor variables that should
   be included linearly into the model.
+
+- verbose:
+
+  Logical; controls whether progress messages (model indices) are
+  printed during fitting. Defaults to FALSE.
 
 - ...:
 
@@ -152,7 +158,6 @@ gaimModel <- model_gaim(data = sim_data,
                         index.vars = index.vars,
                         index.ind = index.ind,
                         s.vars = s.vars)
-#> [1] "model 1"
 # Fitted model
 gaimModel$fit[[1]]
 #> Formula:

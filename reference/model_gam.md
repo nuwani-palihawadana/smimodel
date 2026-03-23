@@ -14,6 +14,7 @@ model_gam(
   s.vars,
   s.basedim = NULL,
   linear.vars = NULL,
+  verbose = FALSE,
   ...
 )
 ```
@@ -64,6 +65,11 @@ model_gam(
 
   A `character` vector of names of the predictor variables that should
   be included linearly into the model (i.e. linear predictors).
+
+- verbose:
+
+  Logical; controls whether progress messages (model indices) are
+  printed during fitting. Defaults to FALSE.
 
 - ...:
 
@@ -130,7 +136,6 @@ gamModel <- model_gam(data = sim_data,
                       yvar = "y",
                       s.vars = s.vars,
                       linear.vars = linear.vars)
-#> [1] "model 1"
 
 # Fitted model
 gamModel$fit[[1]]

@@ -192,7 +192,8 @@ greedy_smimodel(
 
 - verbose:
 
-  The option to print detailed solver output.
+  The option to print detailed solver output and optimisation/greedy
+  search progress messages. Defaults to FALSE.
 
 - parallel:
 
@@ -275,12 +276,6 @@ Each row of the column `fit` contains a list with six elements:
 
 The number of rows of the `tibble` equals to the number of levels in the
 grouping variable.
-
-## References
-
-Palihawadana, N.K., Hyndman, R.J. & Wang, X. (2024). Sparse Multiple
-Index Models for High-Dimensional Nonparametric Forecasting. (Department
-of Econometrics and Business Statistics Working Paper Series 16/24).
 
 ## See also
 

@@ -50,6 +50,7 @@ variable.</p>
 <span>  <span class="va">s.vars</span>,</span>
 <span>  s.basedim <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  linear.vars <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  verbose <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -101,6 +102,11 @@ corresponding to <code>s.vars</code>. (For more information refer
 <dd><p>A <code>character</code> vector of names of the predictor
 variables that should be included linearly into the model (i.e. linear
 predictors).</p></dd>
+
+
+<dt id="arg-verbose">verbose<a class="anchor" aria-label="anchor" href="#arg-verbose"></a></dt>
+<dd><p>Logical; controls whether progress messages (model indices)
+are printed during fitting. Defaults to FALSE.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
@@ -162,7 +168,6 @@ object of class <code>gam</code>. For details refer <code><a href="https://rdrr.
 <span class="r-in"><span>                      yvar <span class="op">=</span> <span class="st">"y"</span>,</span></span>
 <span class="r-in"><span>                      s.vars <span class="op">=</span> <span class="va">s.vars</span>,</span></span>
 <span class="r-in"><span>                      linear.vars <span class="op">=</span> <span class="va">linear.vars</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "model 1"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Fitted model</span></span></span>
 <span class="r-in"><span><span class="va">gamModel</span><span class="op">$</span><span class="va">fit</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span></span>

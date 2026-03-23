@@ -6,7 +6,7 @@ linear models based on a grouping variable.
 ## Usage
 
 ``` r
-model_lm(data, yvar, neighbour = 0, linear.vars, ...)
+model_lm(data, yvar, neighbour = 0, linear.vars, verbose = FALSE, ...)
 ```
 
 ## Arguments
@@ -37,6 +37,11 @@ model_lm(data, yvar, neighbour = 0, linear.vars, ...)
 - linear.vars:
 
   A character vector of names of the predictor variables.
+
+- verbose:
+
+  Logical; controls whether progress messages (model indices) are
+  printed during fitting. Defaults to FALSE.
 
 - ...:
 
@@ -99,7 +104,6 @@ linear.vars <- colnames(sim_data)[3:8]
 lmModel <- model_lm(data = sim_data,
                     yvar = "y",
                     linear.vars = linear.vars)
-#> [1] "model 1"
 # Fitted model
 lmModel$fit[[1]]
 #> 

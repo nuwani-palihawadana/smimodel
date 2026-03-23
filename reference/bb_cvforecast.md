@@ -26,6 +26,7 @@ bb_cvforecast(
   recursive = FALSE,
   recursive_colNames = NULL,
   na.rm = TRUE,
+  verbose = FALSE,
   ...
 )
 ```
@@ -133,6 +134,11 @@ bb_cvforecast(
 
   logical; if `TRUE` (default), any `NA` and `NaN`'s are removed from
   the sample before the quantiles are computed.
+
+- verbose:
+
+  Logical; controls whether progress messages are printed during the
+  cross-validation procedure. Defaults to FALSE.
 
 - ...:
 

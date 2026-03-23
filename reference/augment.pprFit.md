@@ -56,7 +56,6 @@ index.vars <- colnames(sim_data)[3:8]
 pprModel <- model_ppr(data = sim_data,
                       yvar = "y",
                       index.vars = index.vars)
-#> [1] "model 1"
 
 # Obtain residuals and fitted values
 augment(pprModel)

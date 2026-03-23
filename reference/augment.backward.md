@@ -75,7 +75,6 @@ backwardModel <- model_backward(data = sim_train,
                                 val.data = sim_val,
                                 yvar = "y",
                                 s.vars = s.vars)
-#> [1] "Model 1 fitted!"
 # Obtain residuals and fitted values
 augment(backwardModel)
 #> # A tibble: 1,200 × 3

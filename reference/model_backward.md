@@ -22,7 +22,8 @@ model_backward(
   workers = NULL,
   exclude.trunc = NULL,
   recursive = FALSE,
-  recursive_colRange = NULL
+  recursive_colRange = NULL,
+  verbose = FALSE
 )
 ```
 
@@ -122,6 +123,11 @@ model_backward(
   with no break in the lagged variable sequence even if some of the
   intermediate lags are not used as predictors.
 
+- verbose:
+
+  Logical; controls whether progress messages (model indices) are
+  printed during fitting. Defaults to FALSE.
+
 ## Value
 
 An object of class `backward`. This is a `tibble` with two columns:
@@ -203,7 +209,6 @@ backwardModel <- model_backward(data = sim_train,
                                 val.data = sim_val,
                                 yvar = "y",
                                 s.vars = s.vars)
-#> [1] "Model 1 fitted!"
 # Fitted model
 backwardModel$fit[[1]]
 #> 

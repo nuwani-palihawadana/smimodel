@@ -6,7 +6,15 @@ enabling multiple PPR models based on a grouping variable.
 ## Usage
 
 ``` r
-model_ppr(data, yvar, neighbour = 0, index.vars, num_ind = 5, ...)
+model_ppr(
+  data,
+  yvar,
+  neighbour = 0,
+  index.vars,
+  num_ind = 5,
+  verbose = FALSE,
+  ...
+)
 ```
 
 ## Arguments
@@ -44,6 +52,11 @@ model_ppr(data, yvar, neighbour = 0, index.vars, num_ind = 5, ...)
   An `integer` that specifies the number of indices to be used in the
   model(s). (Corresponds to `nterms` in
   [`stats::ppr()`](https://rdrr.io/r/stats/ppr.html).)
+
+- verbose:
+
+  Logical; controls whether progress messages (model indices) are
+  printed during fitting. Defaults to FALSE.
 
 - ...:
 
@@ -127,7 +140,6 @@ index.vars <- colnames(sim_data)[3:8]
 pprModel <- model_ppr(data = sim_data,
                       yvar = "y",
                       index.vars = index.vars)
-#> [1] "model 1"
 
 # Fitted model
 pprModel$fit[[1]]

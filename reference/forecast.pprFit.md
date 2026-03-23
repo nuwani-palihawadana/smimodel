@@ -119,7 +119,6 @@ index.vars <- colnames(sim_data)[3:8]
 pprModel <- model_ppr(data = sim_train,
                       yvar = "y",
                       index.vars = index.vars)
-#> [1] "model 1"
 
 forecast(pprModel, newdata = sim_test)
 #>    Point Forecast

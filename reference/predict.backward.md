@@ -101,7 +101,6 @@ backwardModel <- model_backward(data = sim_train,
                                 val.data = sim_val,
                                 yvar = "y",
                                 s.vars = s.vars)
-#> [1] "Model 1 fitted!"
 predict(object = backwardModel, newdata = sim_test)
 #> # A tsibble: 10 x 10 [1]
 #> # Key:       dummy_key [1]

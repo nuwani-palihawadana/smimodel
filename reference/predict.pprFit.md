@@ -98,7 +98,6 @@ index.vars <- colnames(sim_data)[3:8]
 pprModel <- model_ppr(data = sim_train,
                       yvar = "y",
                       index.vars = index.vars)
-#> [1] "model 1"
 
 predict(object = pprModel, newdata = sim_test)
 #> # A tsibble: 10 x 10 [1]

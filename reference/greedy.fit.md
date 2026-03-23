@@ -183,7 +183,8 @@ greedy.fit(
 
 - verbose:
 
-  The option to print detailed solver output.
+  The option to print detailed solver output and optimisation/greedy
+  search progress messages. Defaults to FALSE.
 
 - parallel:
 

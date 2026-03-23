@@ -64,7 +64,6 @@ gaimModel <- model_gaim(data = sim_data,
                         index.vars = index.vars,
                         index.ind = index.ind,
                         s.vars = s.vars)
-#> [1] "model 1"
 # Obtain residuals and fitted values
 augment(gaimModel)
 #> # A tibble: 1,000 × 3

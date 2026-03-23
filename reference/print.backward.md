@@ -20,3 +20,8 @@ print(x, ...)
 - ...:
 
   Other arguments not currently used.
+
+## Value
+
+No return value; called for side effects. Prints a summary of the fitted
+model(s) to console.

@@ -123,7 +123,6 @@ backwardModel <- model_backward(data = sim_train,
                                 val.data = sim_val,
                                 yvar = "y",
                                 s.vars = s.vars)
-#> [1] "Model 1 fitted!"
 forecast(backwardModel, newdata = sim_test)
 #>    Point Forecast
 #> 1       2.8363732

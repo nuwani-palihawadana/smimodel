@@ -127,7 +127,6 @@ gaimModel <- model_gaim(data = sim_train,
                         index.vars = index.vars,
                         index.ind = index.ind,
                         s.vars = s.vars)
-#> [1] "model 1"
                         
 forecast(gaimModel, newdata = sim_test)
 #>    Point Forecast

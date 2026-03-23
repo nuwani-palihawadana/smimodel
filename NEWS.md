@@ -1,6 +1,11 @@
+# smimodel 0.1.2
+
+* Minor fixes following CRAN feedback.
+* Added GitHub Actions workflows for multi-platform R CMD check. Thanks to @mitchelloharawild.
+
 # smimodel 0.1.1
 
-* This is a resubmission with minor fixes.
+* Minor fixes following automatic incoming checks. 
 
 # smimodel 0.1.0
 

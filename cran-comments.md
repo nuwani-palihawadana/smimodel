@@ -1,11 +1,13 @@
 ## Resubmission
 
-This is a resubmission following the automatic incoming checks.
+This is a resubmission following feedback from CRAN.
 
-* Wrapped the long-running example `avgWidth()` in \donttest{} to address the CPU time NOTE.
-* The NOTE about "SMI" in DESCRIPTION refers to the acronym for "Sparse Multiple Index" and is intended spelling.
+* No published references are currently available for the methods; therefore none were added to DESCRIPTION.
+* Added @return tags for exported print S3 methods.
+* The vignette is pre-computed due to dependency on the Gurobi commercial MIP solver; therefore, the code in vignette is non-executable. 
+* Examples requiring Gurobi are wrapped in \dontrun{} as they depend on the external Gurobi Optimization solver and cannot be run without a valid license.
+* Made informational console messages suppressible.
 
-### R CMD check results
-
-0 errors | 0 warnings | 1 note
-
+Additionally, while revising the package, I identified and fixed two minor bugs:
+* Fixed compatibility of output from model_smimodel() as input to cb_cvforecast() and bb_cvforecast().
+* Fixed an error when using h = 1 in cb_cvforecast().

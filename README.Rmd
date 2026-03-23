@@ -70,7 +70,7 @@ Once Gurobi solver is installed in your local machine, next you need to install 
 
 This is a basic example, which shows you how to estimate a SMI model, and obtain predictions on a test set:
 
-```{r example, message=FALSE}
+```{r example, message=FALSE, warning=FALSE}
 library(smimodel)
 library(dplyr)
 library(ROI)

@@ -2,6 +2,7 @@
 
 test_that("tests for greedy_smimodel()", {
   skip_on_cran()
+  skip_on_ci()
   # Test code that requires Gurobi
   n = 1205
   set.seed(123)

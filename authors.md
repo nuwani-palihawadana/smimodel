@@ -14,13 +14,13 @@ Source:
 [`DESCRIPTION`](https://github.com/nuwani-palihawadana/smimodel/blob/main/DESCRIPTION)
 
 Palihawadana N (2026). *smimodel: Sparse Multiple Index Models for
-Nonparametric Forecasting*. R package version 0.1.1,
+Nonparametric Forecasting*. R package version 0.1.2,
 <https://github.com/nuwani-palihawadana/smimodel>.
 
     @Manual{,
       title = {smimodel: Sparse Multiple Index Models for Nonparametric Forecasting},
       author = {Nuwani Palihawadana},
       year = {2026},
-      note = {R package version 0.1.1},
+      note = {R package version 0.1.2},
       url = {https://github.com/nuwani-palihawadana/smimodel},
     }

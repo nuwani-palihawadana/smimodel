@@ -4,7 +4,7 @@
 # smimodel <img src="man/figures/logo.png" align="right" height="138" alt="" />
 
 <!-- badges: start -->
-
+[![R-CMD-check](https://github.com/nuwani-palihawadana/smimodel/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/nuwani-palihawadana/smimodel/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
 The R package *smimodel* provides functions to estimate Sparse Multiple

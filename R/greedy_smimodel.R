@@ -123,52 +123,54 @@
 #' @seealso \code{\link{model_smimodel}}
 #'
 #' @examples
-#' \dontrun{
-#' library(dplyr)
-#' library(ROI)
-#' library(tibble)
-#' library(tidyr)
-#' library(tsibble)
+#' \donttest{
+#' if(requireNamespace("gurobi", quietly = TRUE)){
+#'   library(dplyr)
+#'   library(ROI)
+#'   library(tibble)
+#'   library(tidyr)
+#'   library(tsibble)
 #'
-#' # Simulate data
-#' n = 1205
-#' set.seed(123)
-#' sim_data <- tibble(x_lag_000 = runif(n)) |>
-#'   mutate(
-#'     # Add x_lags
-#'     x_lag = lag_matrix(x_lag_000, 5)) |>
-#'   unpack(x_lag, names_sep = "_") |>
-#'   mutate(
-#'     # Response variable
-#'     y = (0.9*x_lag_000 + 0.6*x_lag_001 + 0.45*x_lag_003)^3 + rnorm(n, sd = 0.1),
-#'     # Add an index to the data set
-#'     inddd = seq(1, n)) |>
-#'   drop_na() |>
-#'   select(inddd, y, starts_with("x_lag")) |>
-#'   # Make the data set a `tsibble`
-#'   as_tsibble(index = inddd)
+#'   # Simulate data
+#'   n = 1205
+#'   set.seed(123)
+#'   sim_data <- tibble(x_lag_000 = runif(n)) |>
+#'     mutate(
+#'       # Add x_lags
+#'       x_lag = lag_matrix(x_lag_000, 5)) |>
+#'     unpack(x_lag, names_sep = "_") |>
+#'     mutate(
+#'       # Response variable
+#'       y = (0.9*x_lag_000 + 0.6*x_lag_001 + 0.45*x_lag_003)^3 + rnorm(n, sd = 0.1),
+#'       # Add an index to the data set
+#'       inddd = seq(1, n)) |>
+#'     drop_na() |>
+#'     select(inddd, y, starts_with("x_lag")) |>
+#'     # Make the data set a `tsibble`
+#'     as_tsibble(index = inddd)
 #'
-#' # Training set
-#' sim_train <- sim_data[1:1000, ]
-#' # Validation set
-#' sim_val <- sim_data[1001:1200, ]
+#'   # Training set
+#'   sim_train <- sim_data[1:1000, ]
+#'   # Validation set
+#'   sim_val <- sim_data[1001:1200, ]
 #'
-#' # Index variables
-#' index.vars <- colnames(sim_data)[3:8]
+#'   # Index variables
+#'   index.vars <- colnames(sim_data)[3:8]
 #'
-#' # Model fitting
-#' smi_greedy <- greedy_smimodel(data = sim_train,
-#'                               val.data = sim_val,
-#'                               yvar = "y",
-#'                               index.vars = index.vars,
-#'                               initialise = "ppr",
-#'                               lambda.min.ratio = 0.1)
+#'   # Model fitting
+#'   smi_greedy <- greedy_smimodel(data = sim_train,
+#'                                 val.data = sim_val,
+#'                                 yvar = "y",
+#'                                 index.vars = index.vars,
+#'                                 initialise = "ppr",
+#'                                 lambda.min.ratio = 0.1)
 #'
-#' # Best (optimised) fitted model
-#' smi_greedy$fit[[1]]$best
+#'   # Best (optimised) fitted model
+#'   smi_greedy$fit[[1]]$best
 #'
-#' # Selected penalty parameter combination
-#' smi_greedy$fit[[1]]$best_lambdas
+#'   # Selected penalty parameter combination
+#'   smi_greedy$fit[[1]]$best_lambdas
+#'  }
 #' }
 #'
 #' @export

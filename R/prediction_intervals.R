@@ -57,8 +57,15 @@
 #'   that is required in a test set.
 #' @param nacheck_frac_denominator Denominator of the fraction of non-missing
 #'   values that is required in a test set.
-#' @param verbose Logical; controls whether progress messages are printed during
-#'   the cross-validation procedure. Defaults to FALSE.
+#' @param verbose A named list controlling verbosity options. Defaults to
+#'   \code{list(solver = FALSE, progress = FALSE)}.
+#'   \describe{
+#'     \item{solver}{Logical. If TRUE, prints detailed solver output when the
+#'       SMI model is used.}
+#'     \item{progress}{Logical. If TRUE, prints cross-validation progress
+#'       messages (all models) and optimisation algorithm progress messages
+#'       (SMI model only).}
+#'   }
 #' @param ... Other arguments not currently used.
 #' @return An object of class \code{cb_cvforecast}, which is a list that
 #'   contains following elements: \item{x}{The original time series.}
@@ -106,7 +113,7 @@
 #'     unpack(x_lag, names_sep = "_") |>
 #'     mutate(
 #'       # Response variable
-#'       y = (0.9*x_lag_000 + 0.6*x_lag_001 + 0.45*x_lag_003)^3 + 
+#'       y = (0.9*x_lag_000 + 0.6*x_lag_001 + 0.45*x_lag_003)^3 +
 #'       (0.35*x_lag_002 + 0.7*x_lag_005)^2 + rnorm(n, sd = 0.1),
 #'       # Add an index to the data set
 #'       inddd = seq(1, n)) |>
@@ -150,7 +157,12 @@ cb_cvforecast <- function(object, data, yvar, neighbour = 0, predictor.vars,
                           exclude.trunc = NULL,
                           recursive = FALSE, recursive_colNames = NULL, 
                           na.rm = TRUE, nacheck_frac_numerator = 2, 
-                          nacheck_frac_denominator = 3, verbose = FALSE, ...) {
+                          nacheck_frac_denominator = 3, 
+                          verbose = list(solver = FALSE, progress = FALSE), ...) {
+  
+  verbose_default <- list(solver = FALSE, progress = FALSE)
+  verbose <- modifyList(verbose_default, verbose)
+  
   # Check input data
   if (!is_tsibble(data)) stop("data is not a tsibble.")
   
@@ -212,7 +224,7 @@ cb_cvforecast <- function(object, data, yvar, neighbour = 0, predictor.vars,
   
   modelFit = vector(mode = "list", length = indx[length(indx)])
   for (i in indx) {
-    if(verbose)
+    if(verbose$progress)
       print(paste("This is", i))
     train_start <- ifelse(is.null(window), 1L, i - window + 1L)
     suppressWarnings(train <- data1[train_start:i, ] |>
@@ -227,7 +239,7 @@ cb_cvforecast <- function(object, data, yvar, neighbour = 0, predictor.vars,
                        as_tsibble(index = index_data, key = key_data1))
     
     if(any(is.na(test))){
-      if(verbose)
+      if(verbose$progress)
         print(paste0("Skipping a window due to missing values in test set!"))
       next
     }
@@ -296,7 +308,8 @@ cb_cvforecast <- function(object, data, yvar, neighbour = 0, predictor.vars,
                                         tolCoefs = object$fit[[b]]$best$tolCoefs,
                                         TimeLimit = object$fit[[b]]$best$TimeLimit,
                                         MIPGap = object$fit[[b]]$best$MIPGap,
-                                        NonConvex = object$fit[[b]]$best$Nonconvex)
+                                        NonConvex = object$fit[[b]]$best$Nonconvex,
+                                        verbose = verbose)
       }else if("backward" %in% class(object)){
         # Model fitting
         model_list[[b]] <- mgcv::gam(formula = object$fit[[b]]$formula,
@@ -409,7 +422,7 @@ cb_cvforecast <- function(object, data, yvar, neighbour = 0, predictor.vars,
   possiblefutures_list <- vector(mode = "list", length = cal_times)
   count <- 0
   for(j in indx_cal){
-    if(verbose)
+    if(verbose$progress)
       print(paste("This is", j))
     count <- count + 1
     # Calibration set
@@ -452,7 +465,7 @@ cb_cvforecast <- function(object, data, yvar, neighbour = 0, predictor.vars,
         as_tsibble(index = index_data, key = key_data1)
       nacheck_rows <- NROW(newdata)*(nacheck_frac_numerator/nacheck_frac_denominator)
       if(any(is.na(newdata[1:nacheck_rows, ]))){
-        if(verbose)
+        if(verbose$progress)
           print(paste0("Skipping generation of PIs due to too many missing values in test set!"))
         # Update skip_cal
         skip_cal[[count]] <- 1
@@ -466,7 +479,7 @@ cb_cvforecast <- function(object, data, yvar, neighbour = 0, predictor.vars,
       # Forecasting model estimated on the most recent training window
       forecastModel <- modelFit[[end(errors_subset)[1] + 1]]
       if(is.null(forecastModel)){
-        if(verbose)
+        if(verbose$progress)
           print(paste0("Skipping generation of PIs; no forecast model available!"))
         # Update skip_cal
         skip_cal[[count]] <- 1
@@ -596,8 +609,15 @@ cb_cvforecast <- function(object, data, yvar, neighbour = 0, predictor.vars,
 #'   some of the intermediate lags are not used as predictors.
 #' @param na.rm logical; if \code{TRUE} (default), any \code{NA} and
 #'   \code{NaN}'s are removed from the sample before the quantiles are computed.
-#' @param verbose Logical; controls whether progress messages are printed during
-#'   the cross-validation procedure. Defaults to FALSE.
+#' @param verbose A named list controlling verbosity options. Defaults to
+#'   \code{list(solver = FALSE, progress = FALSE)}.
+#'   \describe{
+#'     \item{solver}{Logical. If TRUE, prints detailed solver output when the
+#'       SMI model is used.}
+#'     \item{progress}{Logical. If TRUE, prints cross-validation progress
+#'       messages (all models) and optimisation algorithm progress messages
+#'       (SMI model only).}
+#'   }
 #' @param ... Other arguments not currently used.
 #' @return An object of class \code{bb_cvforecast}, which is a list that
 #'   contains following elements: \item{x}{The original time series.}
@@ -684,7 +704,12 @@ bb_cvforecast <- function(object, data,
                           initial = 1, window = NULL, roll.length = 1,
                           exclude.trunc = NULL,
                           recursive = FALSE, recursive_colNames = NULL, 
-                          na.rm = TRUE, verbose = FALSE, ...) {
+                          na.rm = TRUE, 
+                          verbose = list(solver = FALSE, progress = FALSE), ...) {
+  
+  verbose_default <- list(solver = FALSE, progress = FALSE)
+  verbose <- modifyList(verbose_default, verbose)
+  
   # Check input data
   if (!is_tsibble(data)) stop("data is not a tsibble.")
 
@@ -748,7 +773,7 @@ bb_cvforecast <- function(object, data,
   modelFit = vector(mode = "list", length = length(indx))
   pFutures = vector(mode = "list", length = length(indx))
   for (i in indx) {
-    if(verbose)
+    if(verbose$progress)
       print(paste("This is", i))
     train_start <- ifelse(is.null(window), 1L, i - window + 1L)
     suppressWarnings(train <- data1[train_start:i, ] |>
@@ -763,7 +788,7 @@ bb_cvforecast <- function(object, data,
                        as_tsibble(index = index_data, key = key_data1))
     
     if(any(is.na(test))){
-      if(verbose)
+      if(verbose$progress)
         print(paste0("Skipping a window due to missing values in test set!"))
       next
     }
@@ -832,7 +857,8 @@ bb_cvforecast <- function(object, data,
                                         tolCoefs = object$fit[[b]]$best$tolCoefs,
                                         TimeLimit = object$fit[[b]]$best$TimeLimit,
                                         MIPGap = object$fit[[b]]$best$MIPGap,
-                                        NonConvex = object$fit[[b]]$best$Nonconvex)
+                                        NonConvex = object$fit[[b]]$best$Nonconvex,
+                                        verbose = verbose)
       }else if("backward" %in% class(object)){
         # Model fitting
         model_list[[b]] <- mgcv::gam(formula = object$fit[[b]]$formula,

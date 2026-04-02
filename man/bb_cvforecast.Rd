@@ -24,7 +24,7 @@ bb_cvforecast(
   recursive = FALSE,
   recursive_colNames = NULL,
   na.rm = TRUE,
-  verbose = FALSE,
+  verbose = list(solver = FALSE, progress = FALSE),
   ...
 )
 }
@@ -96,8 +96,15 @@ some of the intermediate lags are not used as predictors.}
 \item{na.rm}{logical; if \code{TRUE} (default), any \code{NA} and
 \code{NaN}'s are removed from the sample before the quantiles are computed.}
 
-\item{verbose}{Logical; controls whether progress messages are printed during
-the cross-validation procedure. Defaults to FALSE.}
+\item{verbose}{A named list controlling verbosity options. Defaults to
+\code{list(solver = FALSE, progress = FALSE)}.
+\describe{
+\item{solver}{Logical. If TRUE, prints detailed solver output when the
+SMI model is used.}
+\item{progress}{Logical. If TRUE, prints cross-validation progress
+messages (all models) and optimisation algorithm progress messages
+(SMI model only).}
+}}
 
 \item{...}{Other arguments not currently used.}
 }

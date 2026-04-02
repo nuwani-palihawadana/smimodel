@@ -1,3 +1,7 @@
+# smimodel 0.1.3
+
+* Minor fixes following CRAN feedback (conditional execution of examples and Description updates).
+
 # smimodel 0.1.2
 
 * Minor fixes following CRAN feedback.

@@ -27,7 +27,7 @@ model_smimodel(
   TimeLimit = Inf,
   MIPGap = 1e-04,
   NonConvex = -1,
-  verbose = FALSE
+  verbose = list(solver = FALSE, progress = FALSE)
 )
 }
 \arguments{
@@ -115,8 +115,13 @@ MIP iteration.}
 \item{NonConvex}{The strategy for handling non-convex quadratic objectives or
 non-convex quadratic constraints in Gurobi solver.}
 
-\item{verbose}{The option to print detailed solver output and optimisation
-progress messages. Defaults to FALSE.}
+\item{verbose}{A named list controlling verbosity options. Defaults to
+\code{list(solver = FALSE, progress = FALSE)}.
+\describe{
+\item{solver}{Logical. If TRUE, print detailed solver output.}
+\item{progress}{Logical. If TRUE, print optimisation algorithm progress
+messages.}
+}}
 }
 \value{
 An object of class \code{smimodel}. This is a \code{tibble} with two
@@ -164,7 +169,6 @@ assumed (i.e. no predictor enters more than one index). For algorithmic
 details see reference.
 }
 \examples{
-\donttest{
 if(requireNamespace("gurobi", quietly = TRUE)){
   library(dplyr)
   library(ROI)
@@ -202,7 +206,6 @@ if(requireNamespace("gurobi", quietly = TRUE)){
   # Best (optimised) fitted model
   smimodel_ppr$fit[[1]]$best
  }
-}
 
 }
 \references{

@@ -66,8 +66,13 @@
 #' @param MIPGap Relative MIP optimality gap.
 #' @param NonConvex The strategy for handling non-convex quadratic objectives or
 #'   non-convex quadratic constraints in Gurobi solver.
-#' @param verbose The option to print detailed solver output and optimisation
-#'   progress messages. Defaults to FALSE.
+#' @param verbose A named list controlling verbosity options. Defaults to
+#'   \code{list(solver = FALSE, progress = FALSE)}.
+#'   \describe{
+#'     \item{solver}{Logical. If TRUE, print detailed solver output.}
+#'     \item{progress}{Logical. If TRUE, print optimisation algorithm progress
+#'     messages.}
+#'   }
 #' @return  An object of class \code{smimodel}. This is a \code{tibble} with two
 #'   columns: \item{key}{The level of the grouping variable (i.e. key of the
 #'   training data set).} \item{fit}{Information of the fitted model
@@ -114,7 +119,6 @@
 #' @seealso \code{\link{greedy_smimodel}}
 #'
 #' @examples
-#' \donttest{
 #' if(requireNamespace("gurobi", quietly = TRUE)){
 #'   library(dplyr)
 #'   library(ROI)
@@ -152,7 +156,6 @@
 #'   # Best (optimised) fitted model
 #'   smimodel_ppr$fit[[1]]$best
 #'  }
-#' }
 #'
 #' @export
 model_smimodel <- function(data, yvar, neighbour = 0, family = gaussian(), 
@@ -165,13 +168,17 @@ model_smimodel <- function(data, yvar, neighbour = 0, family = gaussian(),
                            lambda0 = 1, lambda2 = 1, 
                            M = 10, max.iter = 50, tol = 0.001, tolCoefs = 0.001,
                            TimeLimit = Inf, MIPGap = 1e-4, 
-                           NonConvex = -1, verbose = FALSE){
+                           NonConvex = -1, 
+                           verbose = list(solver = FALSE, progress = FALSE)){
   
   # Message for gurobi installation
   message("Do you have Gurobi solver installed? 
   Make sure you have an active installation of Gurobi solver (https://www.gurobi.com/) 
   in your local machine before using this function. 
   Refer the section 'Other Required Software' in the README for installation help.")
+  
+  verbose_default <- list(solver = FALSE, progress = FALSE)
+  verbose <- modifyList(verbose_default, verbose)
   
   # Check for `tsibble`
   stopifnot(tsibble::is_tsibble(data))
@@ -196,7 +203,7 @@ model_smimodel <- function(data, yvar, neighbour = 0, family = gaussian(),
     )
   smimodels_list <- vector(mode = "list", length = NROW(ref))
   for (i in seq_along(ref$key_num)){
-    if(verbose)
+    if(verbose$progress)
       print(paste0('model ', paste0(i)))
     df_cat <- data1 |>
       dplyr::filter((abs(num_key - ref$key_num[i]) <= neighbour) |
@@ -290,8 +297,13 @@ model_smimodel <- function(data, yvar, neighbour = 0, family = gaussian(),
 #' @param MIPGap Relative MIP optimality gap.
 #' @param NonConvex The strategy for handling non-convex quadratic objectives or
 #'   non-convex quadratic constraints in Gurobi solver.
-#' @param verbose The option to print detailed solver output and
-#'   optimisation progress messages. Defaults to FALSE.
+#' @param verbose A named list controlling verbosity options. Defaults to
+#'   \code{list(solver = FALSE, progress = FALSE)}.
+#'   \describe{
+#'     \item{solver}{Logical. If TRUE, print detailed solver output.}
+#'     \item{progress}{Logical. If TRUE, print optimisation algorithm progress
+#'     messages.}
+#'   }
 #' @return A list with two elements: \item{initial}{A list of information of the
 #'   model initialisation. (For descriptions of the list elements see
 #'   \code{\link{make_smimodelFit}}).} \item{best}{A list of information of the
@@ -306,7 +318,10 @@ smimodel.fit <- function(data, yvar, neighbour = 0,
                          lambda0 = 1, lambda2 = 1, 
                          M = 10, max.iter = 50, tol = 0.001, tolCoefs = 0.001,
                          TimeLimit = Inf, MIPGap = 1e-4, 
-                         NonConvex = -1, verbose = FALSE){
+                         NonConvex = -1, 
+                         verbose = list(solver = FALSE, progress = FALSE)){
+  verbose_default <- list(solver = FALSE, progress = FALSE)
+  verbose <- modifyList(verbose_default, verbose)
   stopifnot(tsibble::is_tsibble(data))
   data_index <- index(data)
   data_key <- key(data)[[1]]
@@ -373,7 +388,7 @@ smimodel.fit <- function(data, yvar, neighbour = 0,
     permutes <- gtools::permutations(num_ind, num_ind)
     set.seed(seed)
     for(j in 1:num_models){
-      if(verbose)
+      if(verbose$progress)
         print(paste0("Multiple starting points: ", j))
       permute_ind <- sample(1:dim(permutes)[1], 1)
       rest <- sample(1:num_ind, (num_pred - num_ind), replace = TRUE)
@@ -779,8 +794,13 @@ make_smimodelFit <- function(x, data, yvar, neighbour, index.vars, index.ind, in
 #' @param MIPGap Relative MIP optimality gap.
 #' @param NonConvex The strategy for handling non-convex quadratic objectives or
 #'   non-convex quadratic constraints in Gurobi solver.
-#' @param verbose The option to print detailed solver output and
-#'   optimisation progress messages. Defaults to FALSE.
+#' @param verbose A named list controlling verbosity options. Defaults to
+#'   \code{list(solver = FALSE, progress = FALSE)}.
+#'   \describe{
+#'     \item{solver}{Logical. If TRUE, print detailed solver output.}
+#'     \item{progress}{Logical. If TRUE, print optimisation algorithm progress
+#'     messages.}
+#'   }
 #' @param ... Other arguments not currently used.
 #' @return  A list of optimised model information. For descriptions of the list
 #'   elements see \code{\link{make_smimodelFit}}).
@@ -788,7 +808,11 @@ update_smimodelFit <- function(object, data, lambda0 = 1, lambda2 = 1,
                                M = 10, max.iter = 50, 
                                tol = 0.001, tolCoefs = 0.001,
                                TimeLimit = Inf, MIPGap = 1e-4, 
-                               NonConvex = -1, verbose = FALSE, ...){
+                               NonConvex = -1, 
+                               verbose = list(solver = FALSE, progress = FALSE),
+                               ...){
+  verbose_default <- list(solver = FALSE, progress = FALSE)
+  verbose <- modifyList(verbose_default, verbose)
   if (!tsibble::is_tsibble(data)) stop("data is not a tsibble.")
   data_index <- index(data)
   data_key <- key(data)[[1]]
@@ -845,7 +869,7 @@ update_smimodelFit <- function(object, data, lambda0 = 1, lambda2 = 1,
                                    index = data_index,
                                    key = all_of(data_key))
     index.names <- paste0("index", 1:length(best_alpha1$ind_pos))
-    if(verbose)
+    if(verbose$progress)
       print("Final model fitted!")
     final_smimodel <- make_smimodelFit(x = fun1_final, data = data,
                                        yvar = object$var_y, 
@@ -1030,7 +1054,7 @@ update_smimodelFit <- function(object, data, lambda0 = 1, lambda2 = 1,
           }else{
             index.names <- paste0("index", 1:length(best_alpha2$ind_pos))
             alpha_current <- best_alpha2$best_alpha
-            if(verbose)
+            if(verbose$progress)
               print("Final model fitted!")
             final_smimodel <- make_smimodelFit(x = fun_null, data = data,
                                                yvar = object$var_y, 
@@ -1124,7 +1148,7 @@ update_smimodelFit <- function(object, data, lambda0 = 1, lambda2 = 1,
       fun1_final$model <- as_tsibble(fun1_final$model,
                                      index = data_index,
                                      key = all_of(data_key))
-      if(verbose)
+      if(verbose$progress)
         print("Final model fitted!")
       final_smimodel <- make_smimodelFit(x = fun1_final, data = data,
                                          yvar = object$var_y,
@@ -1181,8 +1205,13 @@ update_smimodelFit <- function(object, data, lambda0 = 1, lambda2 = 1,
 #' @param MIPGap Relative MIP optimality gap.
 #' @param NonConvex The strategy for handling non-convex quadratic objectives or
 #'   non-convex quadratic constraints in Gurobi solver.
-#' @param verbose The option to print detailed solver output and
-#'   optimisation progress messages. Defaults to FALSE.
+#' @param verbose A named list controlling verbosity options. Defaults to
+#'   \code{list(solver = FALSE, progress = FALSE)}.
+#'   \describe{
+#'     \item{solver}{Logical. If TRUE, print detailed solver output.}
+#'     \item{progress}{Logical. If TRUE, print optimisation algorithm progress
+#'     messages.}
+#'   }
 #' @return A list containing following elements: \item{best_alpha}{The vector of
 #'   best index coefficient estimates.} \item{min_loss}{Minimum value of the
 #'   objective function(loss).}
@@ -1196,7 +1225,10 @@ inner_update <- function(x, data, yvar, family = gaussian(), index.vars,
                          s.vars, linear.vars, num_ind, dgz, alpha_old, 
                          lambda0 = 1, lambda2 = 1, M = 10, max.iter = 50, 
                          tol = 0.001, TimeLimit = Inf,
-                         MIPGap = 1e-4, NonConvex = -1, verbose = FALSE){
+                         MIPGap = 1e-4, NonConvex = -1, 
+                         verbose = list(solver = FALSE, progress = FALSE)){
+  verbose_default <- list(solver = FALSE, progress = FALSE)
+  verbose <- modifyList(verbose_default, verbose)
   data <- data |>
     drop_na()
   data.Y <- as.matrix(data[ , yvar])
@@ -1234,14 +1266,14 @@ inner_update <- function(x, data, yvar, family = gaussian(), index.vars,
                               alpha_old = alpha_old, lambda0 = lambda0, 
                               lambda2 = lambda2, M = M, TimeLimit = TimeLimit,
                               MIPGap = MIPGap, NonConvex = NonConvex, 
-                              verbose = verbose)
+                              verbose = verbose$solver)
     if(all(alpha_new == 0)){
       best_l2 <- NULL
       best_alpha <- alpha_new
       best_index <- index
       best_ind_pos <- ind_pos
       best_X_new <- NULL
-      if(verbose)
+      if(verbose$progress)
         print("Null indices are produced!")
       break
     }else{
@@ -1252,7 +1284,8 @@ inner_update <- function(x, data, yvar, family = gaussian(), index.vars,
         if(all(alpha_new[ind_pos[[i]]] == 0)){
           ind_rm_id <- c(ind_rm_id, i)
           ind_rm_pos <- c(ind_rm_pos, ind_pos[[i]])
-          message(paste0('Iteration ', maxIt, ': All coefficients of index', i,
+          if(verbose$progress)
+            print(paste0('Iteration ', maxIt, ': All coefficients of index', i,
                          ' are zero. Removing index', i, ' from subsequent iterations.')) 
         }
       }
@@ -1329,17 +1362,17 @@ inner_update <- function(x, data, yvar, family = gaussian(), index.vars,
         increase_count <- 0
       }
       if ((eps > 0) & (eps < tol)) { 
-        if(verbose)
+        if(verbose$progress)
           print("Tolerance for loss reached!")
         break
       }else if(increase_count >= 3){
-        if(verbose)
+        if(verbose$progress)
           print("Loss increased for 3 consecutive iterations!")
         break
       }
       maxIt <- maxIt + 1
       if (maxIt > max.iter) { 
-        if(verbose)
+        if(verbose$progress)
           print("Maximum iterations reached!")
       }
     }

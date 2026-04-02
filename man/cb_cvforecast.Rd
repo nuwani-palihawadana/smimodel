@@ -25,7 +25,7 @@ cb_cvforecast(
   na.rm = TRUE,
   nacheck_frac_numerator = 2,
   nacheck_frac_denominator = 3,
-  verbose = FALSE,
+  verbose = list(solver = FALSE, progress = FALSE),
   ...
 )
 }
@@ -102,8 +102,15 @@ that is required in a test set.}
 \item{nacheck_frac_denominator}{Denominator of the fraction of non-missing
 values that is required in a test set.}
 
-\item{verbose}{Logical; controls whether progress messages are printed during
-the cross-validation procedure. Defaults to FALSE.}
+\item{verbose}{A named list controlling verbosity options. Defaults to
+\code{list(solver = FALSE, progress = FALSE)}.
+\describe{
+\item{solver}{Logical. If TRUE, prints detailed solver output when the
+SMI model is used.}
+\item{progress}{Logical. If TRUE, prints cross-validation progress
+messages (all models) and optimisation algorithm progress messages
+(SMI model only).}
+}}
 
 \item{...}{Other arguments not currently used.}
 }
@@ -156,7 +163,7 @@ if(requireNamespace("gurobi", quietly = TRUE)){
     unpack(x_lag, names_sep = "_") |>
     mutate(
       # Response variable
-      y = (0.9*x_lag_000 + 0.6*x_lag_001 + 0.45*x_lag_003)^3 + 
+      y = (0.9*x_lag_000 + 0.6*x_lag_001 + 0.45*x_lag_003)^3 +
       (0.35*x_lag_002 + 0.7*x_lag_005)^2 + rnorm(n, sd = 0.1),
       # Add an index to the data set
       inddd = seq(1, n)) |>

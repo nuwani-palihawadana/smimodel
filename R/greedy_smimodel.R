@@ -79,8 +79,13 @@
 #' @param MIPGap Relative MIP optimality gap.
 #' @param NonConvex The strategy for handling non-convex quadratic objectives or
 #'   non-convex quadratic constraints in Gurobi solver.
-#' @param verbose The option to print detailed solver output and
-#'   optimisation/greedy search progress messages. Defaults to FALSE.
+#' @param verbose A named list controlling verbosity options. Defaults to
+#'   \code{list(solver = FALSE, progress = FALSE)}.
+#'   \describe{
+#'     \item{solver}{Logical. If TRUE, print detailed solver output.}
+#'     \item{progress}{Logical. If TRUE, print optimisation algorithm progress
+#'     messages.}
+#'   }
 #' @param parallel The option to use parallel processing in fitting SMI models
 #'   for different penalty parameter combinations.
 #' @param workers If \code{parallel = TRUE}: Number of cores to use.
@@ -185,7 +190,8 @@ greedy_smimodel <- function(data, val.data, yvar, neighbour = 0,
                             refit = TRUE, M = 10, max.iter = 50,
                             tol = 0.001, tolCoefs = 0.001,
                             TimeLimit = Inf, MIPGap = 1e-4, NonConvex = -1,
-                            verbose = FALSE, parallel = FALSE, workers = NULL,
+                            verbose = list(solver = FALSE, progress = FALSE), 
+                            parallel = FALSE, workers = NULL,
                             exclude.trunc = NULL,
                             recursive = FALSE, recursive_colRange = NULL){
 
@@ -194,6 +200,9 @@ greedy_smimodel <- function(data, val.data, yvar, neighbour = 0,
   Make sure you have an active installation of Gurobi solver (https://www.gurobi.com/)
   in your local machine before using this function.
   Refer the section 'Other Required Software' in the README for installation help.")
+  
+  verbose_default <- list(solver = FALSE, progress = FALSE)
+  verbose <- modifyList(verbose_default, verbose)
 
   # Check for `tsibble`
   stopifnot(tsibble::is_tsibble(data))
@@ -226,7 +235,7 @@ greedy_smimodel <- function(data, val.data, yvar, neighbour = 0,
     )
   smimodels_list <- vector(mode = "list", length = NROW(ref))
   for (i in seq_along(ref$key_num)){
-    if(verbose)
+    if(verbose$progress)
       print(paste0('model ', paste0(i)))
     df_cat <- data1 |>
       dplyr::filter((abs(num_key - ref$key_num[i]) <= neighbour) |
@@ -342,8 +351,13 @@ utils::globalVariables(c("dummy_key", "num_key"))
 #' @param MIPGap Relative MIP optimality gap.
 #' @param NonConvex The strategy for handling non-convex quadratic objectives or
 #'   non-convex quadratic constraints in Gurobi solver.
-#' @param verbose The option to print detailed solver output and
-#'   optimisation/greedy search progress messages. Defaults to FALSE.
+#' @param verbose A named list controlling verbosity options. Defaults to
+#'   \code{list(solver = FALSE, progress = FALSE)}.
+#'   \describe{
+#'     \item{solver}{Logical. If TRUE, print detailed solver output.}
+#'     \item{progress}{Logical. If TRUE, print optimisation algorithm progress
+#'     messages.}
+#'   }
 #' @param parallel The option to use parallel processing in fitting SMI models
 #'   for different penalty parameter combinations.
 #' @param workers If \code{parallel = TRUE}: Number of cores to use.
@@ -385,9 +399,13 @@ greedy.fit <- function(data, val.data, yvar, neighbour = 0,
                        refit = TRUE, M = 10, max.iter = 50,
                        tol = 0.001, tolCoefs = 0.001,
                        TimeLimit = Inf, MIPGap = 1e-4, NonConvex = -1,
-                       verbose = FALSE, parallel = FALSE, workers = NULL,
+                       verbose = list(solver = FALSE, progress = FALSE), 
+                       parallel = FALSE, workers = NULL,
                        exclude.trunc = NULL,
                        recursive = FALSE, recursive_colRange = NULL){
+  
+  verbose_default <- list(solver = FALSE, progress = FALSE)
+  verbose <- modifyList(verbose_default, verbose)
 
   ## Calculating lambda0.max based on the scale of the first term in the
   ## SMI modelling objective function
@@ -451,7 +469,7 @@ greedy.fit <- function(data, val.data, yvar, neighbour = 0,
                           exclude.trunc = exclude.trunc,
                           recursive = recursive,
                           recursive_colRange = recursive_colRange))
-  if(verbose)
+  if(verbose$progress)
     print("Potential starting points completed.")
   # Updating searched combinations store
   all_comb <- bind_rows(all_comb, lambda_comb_start)
@@ -519,7 +537,7 @@ greedy.fit <- function(data, val.data, yvar, neighbour = 0,
         min_MSE_list[[i]] <- current_MSE
         min_lambdas_list[[i]] <- current_lambdas
       }
-      if(verbose)
+      if(verbose$progress)
         print(paste("Initial search around potential starting point", i, "completed."))
       # Updating searched combinations store
       all_comb <- bind_rows(all_comb, lambda_comb)
@@ -532,7 +550,7 @@ greedy.fit <- function(data, val.data, yvar, neighbour = 0,
   min_lambda_pos <- which.min(unlist(min_MSE_list))
   min_MSE <- min(unlist(min_MSE_list))
   min_lambdas <- as.numeric(min_lambdas_list[[min_lambda_pos]])
-  if(verbose)
+  if(verbose$progress)
     print("Starting point for the greedy search selected.")
   # Reset current minimum MSE
   current_MSE <- Inf
@@ -591,7 +609,7 @@ greedy.fit <- function(data, val.data, yvar, neighbour = 0,
       min_lambda_pos <- which.min(unlist(MSE_list))
       min_MSE <- min(unlist(MSE_list))
       min_lambdas <- as.numeric(lambda_comb[min_lambda_pos, ])
-      if(verbose)
+      if(verbose$progress)
         print("An iteration of greedy search - step 1 is completed.")
       # Updating searched combinations store
       all_comb <- bind_rows(all_comb, lambda_comb)
@@ -663,7 +681,7 @@ greedy.fit <- function(data, val.data, yvar, neighbour = 0,
         min_lambda_pos <- which.min(unlist(MSE_list))
         min_MSE <- min(unlist(MSE_list))
         min_lambdas <- as.numeric(lambda_comb[min_lambda_pos, ])
-        if(verbose)
+        if(verbose$progress)
           print("An iteration of greedy search - step 2 is completed.")
         # Updating searched combinations store
         all_comb <- bind_rows(all_comb, lambda_comb)
@@ -733,7 +751,7 @@ greedy.fit <- function(data, val.data, yvar, neighbour = 0,
                                         tol = tol, tolCoefs = tolCoefs,
                                         TimeLimit = TimeLimit, MIPGap = MIPGap,
                                         NonConvex = NonConvex, verbose = verbose)
-    if(verbose)
+    if(verbose$progress)
       print("Final SMI model is fitted.")
   }else if(min_three_mse == 2){
     final_smimodel_list <- smimodel.fit(data = data, yvar = yvar,
@@ -850,8 +868,13 @@ utils::globalVariables(c("Var1", "Var2"))
 #' @param MIPGap Relative MIP optimality gap.
 #' @param NonConvex The strategy for handling non-convex quadratic objectives or
 #'   non-convex quadratic constraints in Gurobi solver.
-#' @param verbose The option to print detailed solver output and
-#'   optimisation progress messages. Defaults to FALSE.
+#' @param verbose A named list controlling verbosity options. Defaults to
+#'   \code{list(solver = FALSE, progress = FALSE)}.
+#'   \describe{
+#'     \item{solver}{Logical. If TRUE, print detailed solver output.}
+#'     \item{progress}{Logical. If TRUE, print optimisation algorithm progress
+#'     messages.}
+#'   }
 #' @param exclude.trunc The names of the predictor variables that should not be
 #'   truncated for stable predictions as a character string. (Since the
 #'   nonlinear functions are estimated using splines, extrapolation is not
@@ -879,9 +902,12 @@ tune_smimodel <- function(data, val.data, yvar, neighbour = 0,
                           s.vars = NULL, linear.vars = NULL, lambda.comb = c(1, 1),
                           M = 10, max.iter = 50, tol = 0.001, tolCoefs = 0.001,
                           TimeLimit = Inf, MIPGap = 1e-4,
-                          NonConvex = -1, verbose = FALSE, 
+                          NonConvex = -1, 
+                          verbose = list(solver = FALSE, progress = FALSE), 
                           exclude.trunc = NULL,
                           recursive = FALSE, recursive_colRange = NULL){
+  verbose_default <- list(solver = FALSE, progress = FALSE)
+  verbose <- modifyList(verbose_default, verbose)
   # Estimating smimodel
   smimodel <- smimodel.fit(data = data, yvar = yvar,
                            neighbour = neighbour,

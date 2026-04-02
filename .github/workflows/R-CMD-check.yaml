@@ -17,6 +17,10 @@ jobs:
       R_KEEP_PKG_SOURCE: yes
     steps:
       - uses: actions/checkout@v4
+      
+      - name: Remove unavailable suggests from DESCRIPTION for CI
+        run: sed -i '/gurobi/Id' DESCRIPTION
+        shell: bash
 
       - uses: r-lib/actions/setup-r@v2
         with:
@@ -26,7 +30,6 @@ jobs:
         with:
           extra-packages: any::rcmdcheck
           needs: check
-          dependencies: '"hard"'
 
       - uses: r-lib/actions/check-r-package@v2
         with:

@@ -9,7 +9,7 @@ subsets of time series data using a rolling forecast origin."><meta property="og
 
     <a class="navbar-brand me-2" href="../index.html">smimodel</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.3</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -62,7 +62,7 @@ subsets of time series data using a rolling forecast origin.</p>
 <span>  na.rm <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  nacheck_frac_numerator <span class="op">=</span> <span class="fl">2</span>,</span>
 <span>  nacheck_frac_denominator <span class="op">=</span> <span class="fl">3</span>,</span>
-<span>  verbose <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  verbose <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>solver <span class="op">=</span> <span class="cn">FALSE</span>, progress <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -182,8 +182,18 @@ values that is required in a test set.</p></dd>
 
 
 <dt id="arg-verbose">verbose<a class="anchor" aria-label="anchor" href="#arg-verbose"></a></dt>
-<dd><p>Logical; controls whether progress messages are printed during
-the cross-validation procedure. Defaults to FALSE.</p></dd>
+<dd><p>A named list controlling verbosity options. Defaults to
+<code>list(solver = FALSE, progress = FALSE)</code>.</p><dl><dt>solver</dt>
+<dd><p>Logical. If TRUE, prints detailed solver output when the
+SMI model is used.</p></dd>
+
+<dt>progress</dt>
+<dd><p>Logical. If TRUE, prints cross-validation progress
+messages (all models) and optimisation algorithm progress messages
+(SMI model only).</p></dd>
+
+
+</dl></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
@@ -251,57 +261,59 @@ sample paths generated at each calibration step.</p></dd>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
-<span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://roi.r-forge.r-project.org/" class="external-link">ROI</a></span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tibble.tidyverse.org/" class="external-link">tibble</a></span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyr.tidyverse.org" class="external-link">tidyr</a></span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tsibble.tidyverts.org" class="external-link">tsibble</a></span><span class="op">)</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
+<span class="r-in"><span><span class="kw">if</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"gurobi"</span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span><span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://roi.r-forge.r-project.org/" class="external-link">ROI</a></span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tibble.tidyverse.org/" class="external-link">tibble</a></span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyr.tidyverse.org" class="external-link">tidyr</a></span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tsibble.tidyverts.org" class="external-link">tsibble</a></span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Simulate data</span></span></span>
-<span class="r-in"><span><span class="va">n</span> <span class="op">=</span> <span class="fl">1105</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">sim_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span>x_lag_000 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html" class="external-link">runif</a></span><span class="op">(</span><span class="va">n</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
-<span class="r-in"><span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>    <span class="co"># Add x_lags</span></span></span>
-<span class="r-in"><span>    x_lag <span class="op">=</span> <span class="fu"><a href="lag_matrix.html">lag_matrix</a></span><span class="op">(</span><span class="va">x_lag_000</span>, <span class="fl">5</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
-<span class="r-in"><span>  <span class="fu"><a href="https://tidyr.tidyverse.org/reference/pack.html" class="external-link">unpack</a></span><span class="op">(</span><span class="va">x_lag</span>, names_sep <span class="op">=</span> <span class="st">"_"</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
-<span class="r-in"><span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>    <span class="co"># Response variable</span></span></span>
-<span class="r-in"><span>    y <span class="op">=</span> <span class="op">(</span><span class="fl">0.9</span><span class="op">*</span><span class="va">x_lag_000</span> <span class="op">+</span> <span class="fl">0.6</span><span class="op">*</span><span class="va">x_lag_001</span> <span class="op">+</span> <span class="fl">0.45</span><span class="op">*</span><span class="va">x_lag_003</span><span class="op">)</span><span class="op">^</span><span class="fl">3</span> <span class="op">+</span></span></span>
-<span class="r-in"><span>    <span class="op">(</span><span class="fl">0.35</span><span class="op">*</span><span class="va">x_lag_002</span> <span class="op">+</span> <span class="fl">0.7</span><span class="op">*</span><span class="va">x_lag_005</span><span class="op">)</span><span class="op">^</span><span class="fl">2</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n</span>, sd <span class="op">=</span> <span class="fl">0.1</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>    <span class="co"># Add an index to the data set</span></span></span>
-<span class="r-in"><span>    inddd <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">1</span>, <span class="va">n</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
-<span class="r-in"><span>  <span class="fu"><a href="https://tidyr.tidyverse.org/reference/drop_na.html" class="external-link">drop_na</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
-<span class="r-in"><span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">inddd</span>, <span class="va">y</span>, <span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">starts_with</a></span><span class="op">(</span><span class="st">"x_lag"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
-<span class="r-in"><span>  <span class="co"># Make the data set a `tsibble`</span></span></span>
-<span class="r-in"><span>  <span class="fu"><a href="https://tsibble.tidyverts.org/reference/as-tsibble.html" class="external-link">as_tsibble</a></span><span class="op">(</span>index <span class="op">=</span> <span class="va">inddd</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="co"># Simulate data</span></span></span>
+<span class="r-in"><span>  <span class="va">n</span> <span class="op">=</span> <span class="fl">1105</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="va">sim_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span>x_lag_000 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html" class="external-link">runif</a></span><span class="op">(</span><span class="va">n</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>      <span class="co"># Add x_lags</span></span></span>
+<span class="r-in"><span>      x_lag <span class="op">=</span> <span class="fu"><a href="lag_matrix.html">lag_matrix</a></span><span class="op">(</span><span class="va">x_lag_000</span>, <span class="fl">5</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="https://tidyr.tidyverse.org/reference/pack.html" class="external-link">unpack</a></span><span class="op">(</span><span class="va">x_lag</span>, names_sep <span class="op">=</span> <span class="st">"_"</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>      <span class="co"># Response variable</span></span></span>
+<span class="r-in"><span>      y <span class="op">=</span> <span class="op">(</span><span class="fl">0.9</span><span class="op">*</span><span class="va">x_lag_000</span> <span class="op">+</span> <span class="fl">0.6</span><span class="op">*</span><span class="va">x_lag_001</span> <span class="op">+</span> <span class="fl">0.45</span><span class="op">*</span><span class="va">x_lag_003</span><span class="op">)</span><span class="op">^</span><span class="fl">3</span> <span class="op">+</span></span></span>
+<span class="r-in"><span>      <span class="op">(</span><span class="fl">0.35</span><span class="op">*</span><span class="va">x_lag_002</span> <span class="op">+</span> <span class="fl">0.7</span><span class="op">*</span><span class="va">x_lag_005</span><span class="op">)</span><span class="op">^</span><span class="fl">2</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n</span>, sd <span class="op">=</span> <span class="fl">0.1</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>      <span class="co"># Add an index to the data set</span></span></span>
+<span class="r-in"><span>      inddd <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">1</span>, <span class="va">n</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="https://tidyr.tidyverse.org/reference/drop_na.html" class="external-link">drop_na</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">inddd</span>, <span class="va">y</span>, <span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">starts_with</a></span><span class="op">(</span><span class="st">"x_lag"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>    <span class="co"># Make the data set a `tsibble`</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="https://tsibble.tidyverts.org/reference/as-tsibble.html" class="external-link">as_tsibble</a></span><span class="op">(</span>index <span class="op">=</span> <span class="va">inddd</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Index variables</span></span></span>
-<span class="r-in"><span><span class="va">index.vars</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">sim_data</span><span class="op">)</span><span class="op">[</span><span class="fl">3</span><span class="op">:</span><span class="fl">8</span><span class="op">]</span></span></span>
+<span class="r-in"><span>  <span class="co"># Index variables</span></span></span>
+<span class="r-in"><span>  <span class="va">index.vars</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">sim_data</span><span class="op">)</span><span class="op">[</span><span class="fl">3</span><span class="op">:</span><span class="fl">8</span><span class="op">]</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Training set</span></span></span>
-<span class="r-in"><span><span class="va">sim_train</span> <span class="op">&lt;-</span> <span class="va">sim_data</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">1000</span>, <span class="op">]</span></span></span>
-<span class="r-in"><span><span class="co"># Test set</span></span></span>
-<span class="r-in"><span><span class="va">sim_test</span> <span class="op">&lt;-</span> <span class="va">sim_data</span><span class="op">[</span><span class="fl">1001</span><span class="op">:</span><span class="fl">1100</span>, <span class="op">]</span></span></span>
+<span class="r-in"><span>  <span class="co"># Training set</span></span></span>
+<span class="r-in"><span>  <span class="va">sim_train</span> <span class="op">&lt;-</span> <span class="va">sim_data</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">1000</span>, <span class="op">]</span></span></span>
+<span class="r-in"><span>  <span class="co"># Test set</span></span></span>
+<span class="r-in"><span>  <span class="va">sim_test</span> <span class="op">&lt;-</span> <span class="va">sim_data</span><span class="op">[</span><span class="fl">1001</span><span class="op">:</span><span class="fl">1100</span>, <span class="op">]</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Model fitting</span></span></span>
-<span class="r-in"><span><span class="va">smimodel_ppr</span> <span class="op">&lt;-</span> <span class="fu"><a href="model_smimodel.html">model_smimodel</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">sim_train</span>,</span></span>
-<span class="r-in"><span>                               yvar <span class="op">=</span> <span class="st">"y"</span>,</span></span>
-<span class="r-in"><span>                               index.vars <span class="op">=</span> <span class="va">index.vars</span>,</span></span>
-<span class="r-in"><span>                               initialise <span class="op">=</span> <span class="st">"ppr"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="co"># Model fitting</span></span></span>
+<span class="r-in"><span>  <span class="va">smimodel_ppr</span> <span class="op">&lt;-</span> <span class="fu"><a href="model_smimodel.html">model_smimodel</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">sim_train</span>,</span></span>
+<span class="r-in"><span>                                yvar <span class="op">=</span> <span class="st">"y"</span>,</span></span>
+<span class="r-in"><span>                                index.vars <span class="op">=</span> <span class="va">index.vars</span>,</span></span>
+<span class="r-in"><span>                                initialise <span class="op">=</span> <span class="st">"ppr"</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Conformal bootstrap prediction intervals (3-steps-ahead interval forecasts)</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">12345</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">smimodel_ppr_cb</span> <span class="op">&lt;-</span> <span class="fu">cb_cvforecast</span><span class="op">(</span>object <span class="op">=</span> <span class="va">smimodel_ppr</span>,</span></span>
-<span class="r-in"><span>                                 data <span class="op">=</span> <span class="va">sim_data</span>,</span></span>
-<span class="r-in"><span>                                 yvar <span class="op">=</span> <span class="st">"y"</span>,</span></span>
-<span class="r-in"><span>                                 predictor.vars <span class="op">=</span> <span class="va">index.vars</span>,</span></span>
-<span class="r-in"><span>                                 h <span class="op">=</span> <span class="fl">3</span>,</span></span>
-<span class="r-in"><span>                                 ncal <span class="op">=</span> <span class="fl">30</span>,</span></span>
-<span class="r-in"><span>                                 num.futures <span class="op">=</span> <span class="fl">100</span>,</span></span>
-<span class="r-in"><span>                                 window <span class="op">=</span> <span class="fl">1000</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
+<span class="r-in"><span>  <span class="co"># Conformal bootstrap prediction intervals (3-steps-ahead interval forecasts)</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">12345</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="va">smimodel_ppr_cb</span> <span class="op">&lt;-</span> <span class="fu">cb_cvforecast</span><span class="op">(</span>object <span class="op">=</span> <span class="va">smimodel_ppr</span>,</span></span>
+<span class="r-in"><span>                                  data <span class="op">=</span> <span class="va">sim_data</span>,</span></span>
+<span class="r-in"><span>                                  yvar <span class="op">=</span> <span class="st">"y"</span>,</span></span>
+<span class="r-in"><span>                                  predictor.vars <span class="op">=</span> <span class="va">index.vars</span>,</span></span>
+<span class="r-in"><span>                                  h <span class="op">=</span> <span class="fl">3</span>,</span></span>
+<span class="r-in"><span>                                  ncal <span class="op">=</span> <span class="fl">30</span>,</span></span>
+<span class="r-in"><span>                                  num.futures <span class="op">=</span> <span class="fl">100</span>,</span></span>
+<span class="r-in"><span>                                  window <span class="op">=</span> <span class="fl">1000</span><span class="op">)</span></span></span>
+<span class="r-in"><span> <span class="op">}</span></span></span>
+<span class="r-in"><span><span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

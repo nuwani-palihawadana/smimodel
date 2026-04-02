@@ -32,7 +32,7 @@ tune_smimodel(
   TimeLimit = Inf,
   MIPGap = 1e-04,
   NonConvex = -1,
-  verbose = FALSE,
+  verbose = list(solver = FALSE, progress = FALSE),
   exclude.trunc = NULL,
   recursive = FALSE,
   recursive_colRange = NULL
@@ -166,8 +166,16 @@ tune_smimodel(
 
 - verbose:
 
-  The option to print detailed solver output and optimisation progress
-  messages. Defaults to FALSE.
+  A named list controlling verbosity options. Defaults to
+  `list(solver = FALSE, progress = FALSE)`.
+
+  solver
+
+  :   Logical. If TRUE, print detailed solver output.
+
+  progress
+
+  :   Logical. If TRUE, print optimisation algorithm progress messages.
 
 - exclude.trunc:
 

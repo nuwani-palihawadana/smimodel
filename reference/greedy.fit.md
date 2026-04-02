@@ -36,7 +36,7 @@ greedy.fit(
   TimeLimit = Inf,
   MIPGap = 1e-04,
   NonConvex = -1,
-  verbose = FALSE,
+  verbose = list(solver = FALSE, progress = FALSE),
   parallel = FALSE,
   workers = NULL,
   exclude.trunc = NULL,
@@ -183,8 +183,16 @@ greedy.fit(
 
 - verbose:
 
-  The option to print detailed solver output and optimisation/greedy
-  search progress messages. Defaults to FALSE.
+  A named list controlling verbosity options. Defaults to
+  `list(solver = FALSE, progress = FALSE)`.
+
+  solver
+
+  :   Logical. If TRUE, print detailed solver output.
+
+  progress
+
+  :   Logical. If TRUE, print optimisation algorithm progress messages.
 
 - parallel:
 
